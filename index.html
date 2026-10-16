@@ -259,7 +259,7 @@ function renderStatus(){
     stepsHtml(o,r))+
     '<div>'+(o.items||[]).map(function(l){return '<div class="line"><div class="info"><b>'+l.qty+' × '+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'</div><span class="num">'+baht(l.unit*l.qty)+'</span></div>'}).join('')+'</div>'+
     '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(o.total)+'</span></div>'+
-    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):payInfo('warn','กรุณาชำระเงินที่เคาน์เตอร์ ร้านจะเริ่มทำหลังชำระ','แจ้งพนักงานว่า <b style="display:inline;font-size:inherit" class="num">'+esc(o.no||'')+'</b>'+(o.type==='dine'&&o.table?' (โต๊ะ '+esc(o.table)+')':'')+' ยอดสุดท้ายอาจรวมค่าบริการหรือภาษีตามที่ร้านกำหนด'))+
+    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):'')+
     '<div class="row"><button class="ghost" data-act="back" style="flex:1">'+(S.type?'สั่งเพิ่ม':'กลับไปที่เมนู')+'</button></div></div>';
 }
 function render(){renderHeader();if(S.view==='status')renderStatus();else renderMenu();renderCartBar();renderSheet()}
