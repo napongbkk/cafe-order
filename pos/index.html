@@ -320,6 +320,7 @@ td.r,th.r{text-align:right}
 .kt.warn .kt-h{background:var(--warn-soft);color:var(--warn-ink)}
 .kt.bad .kt-h{background:var(--bad-soft);color:var(--bad-ink)}
 .kt-h b{font-size:22px;font-family:var(--f-num)}
+.kt-h > span:not(.kt-age){font-weight:700;font-size:16px}
 .kt-age{margin-left:auto;font-weight:700;white-space:nowrap}
 .kt-meta{padding:8px 14px 0;font-size:13px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .kt ul{list-style:none;margin:0;padding:6px 8px;display:flex;flex-direction:column}
@@ -1098,7 +1099,7 @@ function kdsView(){
       :s==='making'?`<button class="btn primary" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสร็จ · พร้อมเสิร์ฟ</button>`
       :s==='ready'?`<button class="btn dark" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสิร์ฟแล้ว</button>`
       :`<button class="btn" data-act="krecall" data-id="${esc(o.id)}" data-st="${esc(st)}">เรียกคืน</button>`;
-    return `<article class="kt${cls}${lock?' locked':''}"><header class="kt-h"><b>${esc(o.table?o.table.name:o.no)}</b><span>${esc(o.table?o.no:(tl?tl.l:''))}</span><span class="kt-age">${a} นาที</span></header>
+    return `<article class="kt${cls}${lock?' locked':''}"><header class="kt-h"><b>${esc(o.no||'')}</b><span>(${esc(o.table?'โต๊ะ '+o.table.name:(tl?tl.l:''))})</span><span class="kt-age">${a} นาที</span></header>
       <div class="kt-meta"><span>สั่ง ${hm(o.createdAt)}</span>${nb>1?`<span class="pill warn">สั่งเพิ่มครั้งที่ ${nb-1}</span>`:''}${s==='making'?'<span class="pill ok">กำลังทำ</span>':''}${o.source==='app'||(o.appIds||[]).length?'<span class="pill ok">สั่งผ่านแอป</span>':''}${o.custName?`<span>${esc(o.custName)}</span>`:''}${o.state==='open'?`<span class="pill${lock?' bad':''}">ยังไม่ชำระ${lock?' · ห้ามเริ่มทำ':''}</span>`:''}${o.guests?`<span>${o.guests} ท่าน</span>`:''}</div>
       <ul>${itemsOf(o).map(({i,idx})=>`<li><button${lock?' disabled':''} class="ki${idone[idx]?' done':''}${nb>1&&i.batch===nb?' new':''}" data-act="kitem" data-id="${esc(o.id)}" data-i="${idx}" aria-pressed="${!!idone[idx]}">${i.qty} × ${esc(i.name)}${st==='all'&&stations().length>1?`<span class="st">${esc(stName(itemSt(i)))}</span>`:''}${nb>1&&i.batch===nb?' <span class="st">ใหม่</span>':''}${i.opts?`<small>${esc(i.opts)}</small>`:''}</button></li>`).join('')}</ul>
       <footer>${btn}<button class="btn icon" data-act="kprint" data-id="${esc(o.id)}" data-st="${esc(st)}" aria-label="พิมพ์ใบสั่ง ${esc(o.no)}">${ic('print',18)}</button></footer></article>`};
