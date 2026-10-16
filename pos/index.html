@@ -836,6 +836,7 @@ function renderTop(){
   const st=$('#status');
   if(S.mode==='live'){st.className='pillx';st.innerHTML='<i></i><span>ออนไลน์</span>'}
   else if(S.mode==='demo'){st.className='pillx warn';st.innerHTML='<i></i><span>โหมดทดลอง · ไม่บันทึก</span>'}
+  if(sh.movedTo&&!window.POS_STANDALONE){const ab=$('#abar');if(ab&&!ab.dataset.moved){ab.dataset.moved='1'}$('#appPill').innerHTML=`<a class="pillx warn" href="${esc(sh.movedTo)}" target="_blank" rel="noopener"><i></i><span>ย้ายไปใช้ POS บนเว็บแล้ว · เปิด ${esc(sh.movedTo.replace(/^https?:\/\//,''))}</span></a>`}else
   if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();$('#acct').innerHTML=a.email?`<span>${esc(a.email)} · ${({owner:'เจ้าของ',manager:'ผู้จัดการ',staff:'พนักงาน'})[a.role]||''}</span><button class="btn sm" data-act="logout">ออกจากระบบ</button>`:''}
   $('#appPill').innerHTML=S.view==='sell'&&S.mode==='live'?`<button class="pillx${sh.appOpen?'':' warn'}" data-act="apptoggle" aria-pressed="${!!sh.appOpen}"${S.canEdit?'':' disabled title="เปิด/ปิดได้เฉพาะเจ้าของร้าน"'}><i></i><span>รับออเดอร์มือถือ: ${sh.appOpen?'เปิด':'ปิด'}</span></button>`:'';
   $('#roundPill').innerHTML=sh.roundOn?(S.round?`<button class="pillx" data-act="view" data-v="round"><i></i><span>รอบการขาย เปิดตั้งแต่ ${hm(S.round.openedAt)}</span></button>`:'<button class="pillx warn" data-act="view" data-v="round"><i></i><span>ยังไม่เปิดรอบการขาย</span></button>'):'';
@@ -1521,6 +1522,7 @@ async function bridgeTickSB(){
 async function bridgeTick(){
   if(window.POS_STANDALONE){bridgeT=null;if(!PR.bridge||!S.db||S.mode!=='live')return;return bridgeTickSB()}
   bridgeT=null;if(!PR.bridge||!S.db||S.mode!=='live')return;
+  if(shop().movedTo){S.app.state='other';S.app.msg='ย้ายไปใช้ POS บนเว็บแล้ว ออเดอร์จากแอปจะเข้าที่ '+shop().movedTo;renderAppStatus();return}
   if(!S.mcp){S.app.state='err';S.app.msg='หน้านี้เชื่อม Supabase ไม่ได้บนอุปกรณ์นี้';renderAppStatus();scheduleBridge(60000);return}
   let wait=10000;
   try{
