@@ -92,6 +92,8 @@ h1{margin:0;font-size:24px}
 .auth .box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px}
 .zoom{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.85);display:grid;place-items:center;padding:16px;cursor:zoom-out;border:0;width:100%}
 .zoom img{max-width:100%;max-height:100%}
+.acct{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}.acct:last-child{border-bottom:0}.acct .who{flex:1;min-width:200px;display:flex;flex-direction:column}.acct .acts{display:flex;gap:6px}
+.pwbox{display:flex;gap:8px;align-items:center;padding:12px;border-radius:12px;background:var(--ok-soft);color:var(--ok-ink)}.pwbox code{font-family:var(--fn);font-size:20px;font-weight:600;flex:1;user-select:all;color:var(--ink)}
 .search{min-height:40px;padding:6px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);min-width:220px}
 @media (max-width:860px){.app{flex-direction:column}.rail{width:auto;height:auto;position:static;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);padding:10px}.brand{padding:4px 8px;width:100%}.nav{width:auto}.rail .sp,.me{display:none}.grid2{grid-template-columns:minmax(0,1fr)}main{padding:16px}.form .two,.form .three{grid-template-columns:minmax(0,1fr)}}
 </style>
@@ -111,6 +113,7 @@ h1{margin:0;font-size:24px}
     <button class="nav" data-go="home">ภาพรวม</button>
     <button class="nav" data-go="apps">คำขอเปิดร้าน<span class="badge" id="appBadge" hidden></span></button>
     <button class="nav" data-go="shops">ร้านค้า</button>
+    <button class="nav" data-go="users">บัญชีผู้ใช้</button>
     <button class="nav" data-go="pays">การชำระเงิน<span class="badge" id="payBadge" hidden></span></button>
     <button class="nav" data-go="settings">ตั้งค่าระบบ</button>
     <span class="sp"></span>
@@ -130,7 +133,7 @@ var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-var S={apps:[],appTab:'pending',view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
+var S={accts:null,uq:'',apps:[],appTab:'pending',view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{maximumFractionDigits:2})}
 function dTh(iso){return iso?new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'-'}
@@ -150,7 +153,7 @@ $('#lgOut').addEventListener('click',out);$('#logoutBtn').addEventListener('clic
 function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showLogin('');return}
   sb.rpc('pos_session',{p_slug:null}).then(function(x){if(x.error||!x.data||!x.data.admin){showLogin('บัญชีนี้ไม่ใช่ผู้ดูแลระบบ');$('#lgOut').hidden=false;return}
     S.me=x.data.email;$('#meBox').textContent=S.me;$('#authView').hidden=true;$('#appView').hidden=false;
-    var h=location.hash.slice(1);if(['home','apps','shops','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
+    var h=location.hash.slice(1);if(['home','apps','shops','users','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
 
 /* ---------- data ---------- */
 function loadAll(){return Promise.all([
@@ -167,7 +170,8 @@ function render(){
   document.querySelectorAll('.nav[data-go]').forEach(function(b){b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false')});
   var pend=S.pays.filter(function(p){return p.status==='pending'}).length;var pb=$('#payBadge');pb.hidden=!pend;pb.textContent=pend;
   var pa=S.apps.filter(function(a){return a.status==='pending'}).length;var ab=$('#appBadge');ab.hidden=!pa;ab.textContent=pa;
-  $('#main').innerHTML=({home:homeView,apps:appsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
+  if(S.view==='users'&&S.accts==null)loadAccts();
+  $('#main').innerHTML=({home:homeView,apps:appsView,users:usersView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
   if(S.view==='pays'||S.view==='apps')loadSlips();
   if(S.view==='settings')drawPpPrev();
 }
@@ -286,8 +290,21 @@ function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expire
   '<section class="panel"><h2>บัญชีในร้าน</h2><div id="memList" class="small muted">กำลังโหลด…</div></section>'+
   '<section class="panel"><h2>ประวัติชำระเงิน</h2>'+(S.pays.filter(function(p){return p.shop_id===id}).map(function(p){return '<div class="small" style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span>'+p.months+' เดือน</span><span style="flex:1"></span><span class="chip '+(p.status==='approved'?'':p.status==='pending'?'warn':'bad')+'">'+({pending:'รอตรวจ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ'})[p.status]+'</span></div>'}).join('')||'<div class="muted small">ยังไม่มี</div>')+'</section>');
   loadMembers(id)}
-function loadMembers(id){sb.from('pos_members').select('*').eq('shop_id',id).order('created_at').then(function(r){var el=$('#memList');if(!el)return;if(r.error){el.textContent='โหลดไม่สำเร็จ';return}
-  el.innerHTML=r.data.length?r.data.map(function(m){return '<div style="display:flex;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line);color:var(--ink)"><span style="flex:1">'+esc(m.name||'')+' <span class="muted">'+esc(m.email)+'</span></span><span class="chip '+(m.role==='manager'?'':'mute')+'">'+(m.role==='manager'?'ผู้จัดการ':'พนักงาน')+'</span>'+(m.active?'':'<span class="chip bad">ปิด</span>')+(m.role==='staff'?'<button class="btn sm" data-act="memtoggle" data-shop="'+id+'" data-id="'+esc(m.email)+'" data-v="'+(m.active?'0':'1')+'">'+(m.active?'ปิด':'เปิด')+'</button>':'')+'</div>'}).join(''):'ยังไม่มีบัญชี'})}
+function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.email)+'</b><span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
+  '<span class="chip '+(m.role==='manager'?'':'mute')+'">'+(m.role==='manager'?'ผู้จัดการ':'พนักงาน')+'</span>'+(m.active?'':'<span class="chip bad">ปิดใช้งาน</span>')+
+  '<span class="small muted">'+(m.has_login?(m.last_sign_in?'เข้าล่าสุด '+dtTh(m.last_sign_in):'ยังไม่เคยเข้า'):'ยังไม่มีรหัสผ่าน')+'</span>'+
+  '<span class="acts"><button class="btn sm" data-act="setpw" data-id="'+esc(m.email)+'">'+(m.has_login?'ตั้งรหัสผ่านใหม่':'สร้างรหัสผ่าน')+'</button>'+(m.role==='staff'?'<button class="btn sm" data-act="memtoggle" data-shop="'+m.shop_id+'" data-id="'+esc(m.email)+'" data-v="'+(m.active?'0':'1')+'">'+(m.active?'ปิด':'เปิด')+'</button>':'')+'</span></div>'}
+function loadMembers(id){sb.rpc('pos_admin_accounts',{p_sid:id}).then(function(r){var el=$('#memList');if(!el)return;if(r.error){el.textContent='โหลดไม่สำเร็จ';return}
+  el.innerHTML=(r.data||[]).length?r.data.map(function(m){return acctRow(m,false)}).join(''):'ยังไม่มีบัญชี'})}
+function loadAccts(){S.accts=[];sb.rpc('pos_admin_accounts',{p_sid:null}).then(function(r){S.accts=r.data||[];if(S.view==='users')render()})}
+function usersView(){var q=S.uq.trim().toLowerCase();var list=(S.accts||[]).filter(function(m){var sh=shopBy(m.shop_id);return !q||(m.email+' '+(m.name||'')+' '+(sh.name||'')).toLowerCase().indexOf(q)>=0});
+  return '<div class="head"><h1>บัญชีผู้ใช้</h1><span class="sp"></span><input class="search" id="userQ" type="search" placeholder="ค้นหาอีเมล ชื่อ หรือร้าน" value="'+esc(S.uq)+'" aria-label="ค้นหาบัญชี"></div>'+
+  '<div class="note">ชื่อผู้ใช้คืออีเมล · รหัสผ่านถูกเข้ารหัสไว้ ไม่มีใครเปิดดูได้ รวมถึงผู้ดูแลระบบ ถ้าร้านลืมรหัสผ่าน ให้กด “ตั้งรหัสผ่านใหม่” แล้วแจ้งรหัสใหม่ให้ร้าน</div>'+
+  '<section class="panel">'+(list.length?list.map(function(m){return acctRow(m,true)}).join(''):'<div class="empty">'+(S.accts&&S.accts.length?'ไม่พบบัญชี':'กำลังโหลด…')+'</div>')+'</section>'}
+function setPw(email){drawer('ตั้งรหัสผ่านใหม่','<div class="small">บัญชี <b>'+esc(email)+'</b></div><form class="form" id="pwForm" data-email="'+esc(email)+'">'+
+  '<label for="pw_new">รหัสผ่านใหม่ (เว้นว่างให้ระบบสุ่มให้)<input id="pw_new" type="text" minlength="8" autocomplete="off" placeholder="อย่างน้อย 8 ตัวอักษร"></label>'+
+  '<span class="hint">รหัสเดิมจะใช้ไม่ได้ทันที ผู้ใช้เปลี่ยนรหัสเองภายหลังได้ด้วย “ลืมรหัสผ่าน” ที่หน้าเข้าสู่ระบบ</span>'+
+  '<button class="btn primary" type="submit">ตั้งรหัสผ่าน</button></form><div id="pwOut"></div>')}
 
 /* ---------- events ---------- */
 document.addEventListener('click',function(e){var go=e.target.closest('[data-go]');if(go){S.view=go.dataset.go;history.replaceState(null,'','#'+S.view);render();return}
@@ -310,12 +327,14 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='addm'){var inp=$('#es_exp');var base=new Date(Math.max(Date.now(),new Date(inp.value+'T23:59:00').getTime()||Date.now()));base.setMonth(base.getMonth()+(+d.n));inp.value=base.toISOString().slice(0,10);return}
   if(a==='approve'||a==='reject'){b.disabled=true;var note=($('#pn_'+d.id)||{}).value||null;
     sb.rpc('pos_pay_review',{p_id:d.id,p_approve:a==='approve',p_note:note}).then(function(r){if(r.error){b.disabled=false;toast(err(r.error));return}toast(a==='approve'?'อนุมัติแล้ว ใช้งานได้ถึง '+dTh(r.data.expiresAt):'ไม่อนุมัติแล้ว');loadAll()});return}
-  if(a==='memtoggle'){sb.from('pos_members').update({active:d.v==='1'}).eq('email',d.id).then(function(r){toast(r.error?err(r.error):'บันทึกแล้ว');loadMembers(d.shop);loadAll()});return}
+  if(a==='memtoggle'){S.accts=null;sb.from('pos_members').update({active:d.v==='1'}).eq('email',d.id).then(function(r){toast(r.error?err(r.error):'บันทึกแล้ว');loadMembers(d.shop);loadAll()});return}
   if(a==='pkadd'){$('#pkRows').insertAdjacentHTML('beforeend',pkRow({}));return}
   if(a==='pkdel'){b.closest('.pkrow').remove();return}
+  if(a==='setpw'){setPw(d.id);return}
+  if(a==='copypw'){var t=$('#pwVal').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกรหัสผ่านแล้ว')},function(){toast('เลือกข้อความแล้วคัดลอกเอง')});return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
-document.addEventListener('input',function(e){if(e.target.id==='pf_promptpay'||(e.target.dataset&&e.target.dataset.k==='price'))drawPpPrev();if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
+document.addEventListener('input',function(e){if(e.target.id==='userQ'){S.uq=e.target.value;var ps=e.target.selectionStart;render();var u=$('#userQ');u.focus();u.setSelectionRange(ps,ps);return}if(e.target.id==='pf_promptpay'||(e.target.dataset&&e.target.dataset.k==='price'))drawPpPrev();if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var z=document.querySelector('.zoom');if(z){z.remove();return}closeDrawer()}});
 document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.preventDefault();var btn=f.querySelector('[type=submit]');
   function done(){if(btn)btn.disabled=false}if(btn)btn.disabled=true;
@@ -330,6 +349,11 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
   if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0))}}).filter(function(p){return p.name}),price:+$('#pf_price').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0))};
     if(data.promptpay&&[10,13,15].indexOf(data.promptpay.length)<0){done();toast('พร้อมเพย์ต้องเป็นเบอร์ 10 หลัก หรือเลข 13/15 หลัก');return}
     sb.from('pos_platform').upsert({key:'billing',data:data,updated_at:new Date().toISOString()}).then(function(r){done();toast(r.error?err(r.error):'บันทึกแล้ว');loadAll()});return}
+  if(f.id==='pwForm'){var em=f.dataset.email,pw=$('#pw_new').value.trim();if(pw&&pw.length<8){done();toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}
+    sb.auth.getSession().then(function(r){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(r.data.session&&r.data.session.access_token),'Content-Type':'application/json'},body:JSON.stringify({action:'setpw',email:em,password:pw||null})}).then(function(x){return x.json()})})
+    .then(function(r){done();if(!r||r.error){toast('ตั้งรหัสผ่านไม่สำเร็จ'+(r&&r.error?' ('+r.error+')':''));return}
+      f.remove();$('#pwOut').innerHTML='<div class="pwbox"><code id="pwVal">'+esc(r.password)+'</code><button class="btn sm" data-act="copypw">คัดลอก</button></div><div class="hint" style="margin-top:8px">ชื่อผู้ใช้: <b>'+esc(em)+'</b> · แจ้งรหัสนี้ให้เจ้าของบัญชี ระบบจะไม่แสดงรหัสนี้อีกหลังปิดหน้าต่าง</div>';S.accts=null})
+    .catch(function(){done();toast('เชื่อมต่อไม่สำเร็จ')});return}
   if(f.id==='adminForm'){sb.from('pos_admins').insert({email:$('#ad_email').value.trim().toLowerCase()}).then(function(r){done();toast(r.error?err(r.error):'เพิ่มผู้ดูแลระบบแล้ว');loadAll()});return}
   done();
 });

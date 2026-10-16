@@ -129,6 +129,39 @@ async function notify(req: Request, b: Record<string, string>) {
   return json({ sent, mail: !!RESEND });
 }
 
+// Admin sets a new password for a shop account (passwords are stored hashed and cannot be read back).
+async function setPassword(req: Request, b: Record<string, string>) {
+  const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data: u } = await db.auth.getUser(jwt);
+  const admin = u?.user?.email?.toLowerCase();
+  if (!admin) return fail("unauthorized", 401);
+  const { data: isAdm } = await db.from("pos_admins").select("email").ilike("email", admin).maybeSingle();
+  if (!isAdm) return fail("forbidden", 403);
+  const email = String(b.email || "").trim().toLowerCase();
+  if (!EMAIL.test(email)) return fail("bad_email");
+  const { data: mem } = await db.from("pos_members").select("email").eq("email", email).maybeSingle();
+  if (!mem) return fail("not_member");
+  let pw = String(b.password || "");
+  if (!pw) {
+    const abc = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+    const r = crypto.getRandomValues(new Uint32Array(10));
+    pw = Array.from(r, (x) => abc[x % abc.length]).join("");
+  }
+  if (pw.length < 8) return fail("weak_password");
+  const { data: uid } = await db.rpc("pos_auth_user_id", { p_email: email });
+  let created = false;
+  if (uid) {
+    const up = await db.auth.admin.updateUserById(uid as string, { password: pw });
+    if (up.error) { console.log("updateUser", up.error.message); return fail("auth_failed", 500); }
+  } else {
+    const cu = await db.auth.admin.createUser({ email, password: pw, email_confirm: true });
+    if (cu.error) { console.log("createUser", cu.error.message); return fail("auth_failed", 500); }
+    created = true;
+  }
+  console.log("password set by admin for a shop account");
+  return json({ ok: true, password: pw, created });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method", 405);
@@ -138,6 +171,7 @@ Deno.serve(async (req) => {
     if (b.action === "apply") return await apply(req, b);
     if (b.action === "slip") return await slip(b);
     if (b.action === "notify") return await notify(req, b);
+    if (b.action === "setpw") return await setPassword(req, b);
     return fail("bad_action");
   } catch (e) {
     console.error(e);
