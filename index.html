@@ -211,7 +211,7 @@ function renderMenu(){
   if(!S.shop.open){m.innerHTML='<div class="empty"><b>ปิดรับออเดอร์ออนไลน์</b>ร้านยังไม่เปิดรับสั่งผ่านแอปในขณะนี้ สั่งที่เคาน์เตอร์ได้เลย</div>'+myOrdersHtml();return}
   if(!S.type){m.innerHTML='<h2 class="cat" style="font-size:20px;margin-top:8px">วันนี้รับแบบไหนดี</h2><div class="ways">'+
       '<button class="way" data-act="choose" data-v="dine">'+ic('table')+'ทานที่ร้าน<small>เลือกโต๊ะที่นั่ง</small></button>'+
-      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div><div style="margin-top:14px">'+payInfo('','ชำระเงินที่เคาน์เตอร์','สั่งผ่านมือถือได้เลย แล้วมาชำระเงินที่เคาน์เตอร์ แจ้งหมายเลขออเดอร์หรือโต๊ะกับพนักงาน')+'</div>'+myOrdersHtml();return}
+      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div><div style="margin-top:14px">'+payInfo('','ชำระเงินที่เคาน์เตอร์ก่อน แล้วร้านจะเริ่มทำ','สั่งผ่านมือถือได้เลย แล้วมาชำระเงินที่เคาน์เตอร์ แจ้งหมายเลขออเดอร์หรือโต๊ะกับพนักงาน ร้านจะส่งเข้าครัวเมื่อชำระเงินแล้ว')+'</div>'+myOrdersHtml();return}
   if(S.type==='dine'&&!tableName()){
     var zones=[];S.tables.forEach(function(t){var z=t.zone||'';if(zones.indexOf(z)<0)zones.push(z)});
     m.innerHTML=(S.tableId?'<div class="note bad">ไม่พบโต๊ะนี้ เลือกโต๊ะใหม่ได้เลย</div>':'')+'<h2 class="cat" style="font-size:20px;margin-top:8px">นั่งโต๊ะไหน</h2>'+
@@ -233,6 +233,14 @@ function payInfo(cls,title,body,icon){return '<div class="payinfo '+(cls||'')+'"
 function myOrdersHtml(){var l=myOrders().filter(function(x){return Date.now()-x.at<12*3600*1000});if(!l.length)return '';
   return '<h2 class="cat">ออเดอร์ของฉัน</h2><div class="items">'+l.map(function(x,i){return '<button class="item" data-act="track" data-v="'+esc(x.t)+'"><span class="info"><b>ออเดอร์ที่ '+(l.length-i)+'</b><small>สั่งเมื่อ '+new Date(x.at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' · แตะเพื่อดูสถานะ</small></span></button>'}).join('')+'</div>'}
 
+function stepsHtml(o,r){var paid=!!o.paid||r>=2;
+  var list=[['ส่งออเดอร์แล้ว','ร้านได้รับออเดอร์ของคุณ',r>=1||paid?'done':'cur'],
+    ['ชำระเงินที่เคาน์เตอร์','ร้านจะเริ่มทำเมื่อชำระเงินแล้ว',paid?'done':'cur'],
+    ['ส่งเข้าครัวแล้ว','รอคิวทำ',!paid?'':r>=2?'done':'cur'],
+    ['กำลังทำ','บาริสต้ากำลังเตรียม',!paid?'':r>2?'done':r===2?'cur':''],
+    ['พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ',!paid?'':r>3?'done':r===3?'cur':''],
+    ['เสร็จแล้ว','ขอให้อร่อย',r>=4&&paid?'done':'']];
+  return '<div class="steps">'+list.map(function(s,i){return '<div class="step '+s[2]+'"><i>'+(s[2]==='done'?'✓':i+1)+'</i><div><b>'+s[0]+'</b><small>'+s[1]+'</small></div></div>'}).join('')+'</div>'}
 var STEPS=[['accepted','ร้านรับออเดอร์แล้ว','ส่งเข้าครัวเรียบร้อย'],['making','กำลังทำ','บาริสต้ากำลังเตรียม'],['ready','พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ'],['done','เสร็จแล้ว','ขอให้อร่อย']];
 function renderStatus(){
   var o=S.order;var m=$('#main');
@@ -241,10 +249,10 @@ function renderStatus(){
   var stop=o.status==='cancelled'||o.status==='rejected';
   m.innerHTML='<div class="status"><div class="row"><div><div class="hint">หมายเลขออเดอร์</div><div class="big-no">'+esc(o.no||'—')+'</div></div><div style="text-align:right"><div class="hint">'+(o.type==='dine'?'โต๊ะ':'สั่งกลับบ้าน')+'</div><b style="font-size:22px">'+esc(o.table||'')+'</b></div></div>'+
     (stop?'<div class="note bad">ร้านยกเลิกออเดอร์นี้ '+esc(o.reason||'')+' กรุณาติดต่อพนักงาน</div>':
-    '<div class="steps"><div class="step done"><i>✓</i><div><b>ส่งออเดอร์แล้ว</b><small>รอร้านยืนยัน</small></div></div>'+STEPS.map(function(s,i){var cls=r>i+1||(o.status==='done'&&i===3)?'done':r===i+1?'cur':'';return '<div class="step '+cls+'"><i>'+(cls==='done'?'✓':i+2)+'</i><div><b>'+s[1]+'</b><small>'+s[2]+'</small></div></div>'}).join('')+'</div>')+
+    stepsHtml(o,r))+
     '<div>'+(o.items||[]).map(function(l){return '<div class="line"><div class="info"><b>'+l.qty+' × '+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'</div><span class="num">'+baht(l.unit*l.qty)+'</span></div>'}).join('')+'</div>'+
     '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(o.total)+'</span></div>'+
-    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):payInfo('warn','กรุณาชำระเงินที่เคาน์เตอร์','แจ้งพนักงานว่า <b style="display:inline;font-size:inherit" class="num">'+esc(o.no||'')+'</b>'+(o.type==='dine'&&o.table?' (โต๊ะ '+esc(o.table)+')':'')+' ยอดสุดท้ายอาจรวมค่าบริการหรือภาษีตามที่ร้านกำหนด'))+
+    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):payInfo('warn','กรุณาชำระเงินที่เคาน์เตอร์ ร้านจะเริ่มทำหลังชำระ','แจ้งพนักงานว่า <b style="display:inline;font-size:inherit" class="num">'+esc(o.no||'')+'</b>'+(o.type==='dine'&&o.table?' (โต๊ะ '+esc(o.table)+')':'')+' ยอดสุดท้ายอาจรวมค่าบริการหรือภาษีตามที่ร้านกำหนด'))+
     '<div class="row"><button class="ghost" data-act="back" style="flex:1">'+(S.type?'สั่งเพิ่ม':'กลับไปที่เมนู')+'</button></div></div>';
 }
 function render(){renderHeader();if(S.view==='status')renderStatus();else renderMenu();renderCartBar();renderSheet()}
@@ -268,7 +276,7 @@ function renderSheet(){
       (S.cart.length?S.cart.map(function(l,i){return '<div class="line"><div class="info"><b>'+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'<div class="stepper" style="margin-top:6px"><button data-act="cqty" data-i="'+i+'" data-d="-1" aria-label="ลดจำนวน">−</button><span>'+l.qty+'</span><button data-act="cqty" data-i="'+i+'" data-d="1" aria-label="เพิ่มจำนวน">+</button></div></div><span class="num" style="font-weight:600">'+baht(l.unit*l.qty)+'</span></div>'}).join(''):'<div class="empty">ตะกร้าว่าง</div>')+
       '<label class="field" for="cname">ชื่อ'+(S.type==='take'?' (สำหรับเรียกรับ)':' (ไม่บังคับ)')+'<input id="cname" maxlength="60" autocomplete="name" value="'+esc(v.name||'')+'"'+(S.type==='take'?' required':'')+'></label>'+
       '<label class="field" for="cphone">เบอร์โทร (ไม่บังคับ · สะสมแต้มสมาชิก)<input id="cphone" inputmode="tel" maxlength="12" autocomplete="tel" value="'+esc(v.phone||'')+'"></label>'+
-      '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(t)+'</span></div>'+payInfo('warn','ต้องชำระเงินที่เคาน์เตอร์','หลังกดสั่ง ร้านจะเริ่มทำทันที กรุณามาชำระเงินที่เคาน์เตอร์ และแจ้งหมายเลขออเดอร์'+(S.type==='dine'?'หรือหมายเลขโต๊ะ':'')+' ยังไม่รับชำระผ่านมือถือ')+
+      '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(t)+'</span></div>'+payInfo('warn','ต้องชำระเงินที่เคาน์เตอร์','หลังกดสั่ง กรุณามาชำระเงินที่เคาน์เตอร์ และแจ้งหมายเลขออเดอร์'+(S.type==='dine'?'หรือหมายเลขโต๊ะ':'')+' ร้านจะเริ่มทำเมื่อชำระเงินแล้ว ยังไม่รับชำระผ่านมือถือ')+
       '<button class="big" data-act="order"'+(S.cart.length&&!S.busy?'':' disabled')+'>'+(S.busy?'กำลังส่ง…':'ยืนยันสั่ง · ชำระที่เคาน์เตอร์')+'</button></div></div>';
   }
 }

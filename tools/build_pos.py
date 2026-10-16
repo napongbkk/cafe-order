@@ -63,7 +63,7 @@ R("async function bridgeTick(){",
       const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
       acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
-      toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
+      toast('Mobile Order ใหม่ (รอชำระ): '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(rows.length===20)wait=1500;
     }
     S.app.state='ok';S.app.msg='';S.app.last=Date.now();

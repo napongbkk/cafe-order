@@ -731,7 +731,7 @@ function openBills(){return allOrders().filter(o=>o.state==='open')}
 function findOrder(id){return ordersMap()[id]||(S.hist.list||[]).find(o=>o.id===id)||null}
 function nextNo(){const sh=shop();return (sh.qPrefix||'')+pad(todayOrders().length+(+sh.qStart||1),3)}
 function nextRno(){const s=startToday();return 'R'+ymd(Date.now())+'-'+pad(Object.values(S.oToday).filter(o=>o.rno&&(o.paidAt||o.createdAt)>=s).length+1,4)}
-function tableBill(tid){return openBills().find(o=>o.table&&o.table.id===tid)}
+function tableBill(tid){return openBills().find(o=>!o.hold&&o.table&&o.table.id===tid)}
 
 /* ===== pricing ===== */
 function priceFor(m,type){return type==='deli'&&+m.priceDeli>0?+m.priceDeli:+m.price||0}
@@ -839,7 +839,7 @@ function markSeen(o,st){if(seenK)seenK.add(kKey(o,st))}
 let actx=null;
 function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,0.22].forEach(t=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=880;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.3,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.18);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.2)})}catch(e){}}
 function kdsArrive(){
-  const keys=[];allOrders().forEach(o=>{if(o.state==='void')return;stationsOf(o).forEach(st=>{if(stStatus(o,st)==='waiting')keys.push([kKey(o,st),o,st])})});
+  const keys=[];allOrders().forEach(o=>{if(o.state==='void'||o.hold)return;stationsOf(o).forEach(st=>{if(stStatus(o,st)==='waiting')keys.push([kKey(o,st),o,st])})});
   if(seenK==null){seenK=new Set(keys.map(k=>k[0]));return}
   const fresh=keys.filter(k=>!seenK.has(k[0]));if(!fresh.length)return;
   fresh.forEach(k=>seenK.add(k[0]));
@@ -864,7 +864,7 @@ function needRound(){return shop().roundOn&&!S.round}
 
 /* ===== top & rail ===== */
 function renderRail(){
-  const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
+  const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
   $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.map(([v,l,k])=>{
     const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
     return `<button class="nav" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
@@ -931,7 +931,7 @@ function renderUnpaid(){
 }
 function renderKstrip(){renderUnpaid();
   const el=$('#kstrip');if(!el)return;
-  const list=allOrders().filter(o=>o.state!=='void'&&o.items.length);
+  const list=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length);
   const sinceOf=kSince;
   el.innerHTML=[['waiting','รอทำ'],['making','กำลังทำ'],['ready','พร้อมเสิร์ฟ']].map(([k,l])=>{
     const os=list.filter(o=>overallK(o)===k).map(o=>({o,m:ageMin(sinceOf(o,k))})).sort((a,b)=>b.m-a.m);
@@ -964,7 +964,8 @@ function renderBill(){
   const b=S.bill;const t=calc(b.items,b.promo);
   el.classList.toggle('open',S.sheet);
   const title=b.table?'โต๊ะ '+b.table.name:(b.id?'ออเดอร์ '+b.no:'ออเดอร์ใหม่');
-  const sub=b.id?(b.no+(b.guests?' · '+b.guests+' ท่าน':'')+' · บิลเปิดอยู่'):'คิวถัดไป '+nextNo();
+  const isHeld=b.id&&(ordersMap()[b.id]||{}).hold;
+  const sub=b.id?(b.no+(b.guests?' · '+b.guests+' ท่าน':'')+(isHeld?' · Mobile Order รอชำระ ยังไม่ส่งครัว':' · บิลเปิดอยู่')):'คิวถัดไป '+nextNo();
   el.innerHTML=`<div class="bill-head"><div class="bill-id"><div><b>${esc(title)}</b><small>${esc(sub)}</small></div><div style="display:flex;gap:6px">
       ${b.id?'<button class="btn sm" data-act="leavebill">ออกจากบิล</button>':`<button class="btn sm" data-act="clearbill"${b.items.length?'':' disabled'}>ล้าง</button>`}
       <button class="btn sm icon sheet-close" data-act="sheet" aria-label="ปิดบิล">${ic('x',18)}</button></div></div>
@@ -994,7 +995,8 @@ function addLine(m,choices,qty,note){
 }
 async function commitBill(pay){
   const b=S.bill;const t=calc(b.items,b.promo);const now=Date.now();
-  const hasNew=b.items.some(l=>!l.batch);
+  const prevH=b.id?(ordersMap()[b.id]||{}):{};const keepHold=!!prevH.hold&&!pay;
+  const hasNew=!keepHold&&b.items.some(l=>!l.batch);
   const batch=hasNew?(b.batch||0)+1:(b.batch||0);
   const items=b.items.map(l=>{const x=Object.assign({},l,{batch:l.batch||batch});if(!x.st)x.st=stationOfMenu(l.menuId);delete x.key;return x});
   const prevO=b.id?(ordersMap()[b.id]||{}):{};const kst=Object.assign({},prevO.kst||{});
@@ -1002,6 +1004,7 @@ async function commitBill(pay){
   if(hasNew)items.filter(i=>i.batch===batch).forEach(i=>{kst[i.st]='waiting'});
   const doc={type:b.type,table:b.table||null,guests:b.guests||0,items,promo:b.promo||null,member:b.member||'',batch,sums:t,updatedAt:now};
   doc.kst=kst;doc.kitchen=items.length?overallK({items,kst}):'done';if(hasNew)doc.batchAt=now;
+  if(keepHold){doc.kst={};doc.kitchen='hold'}else if(prevH.hold)doc.hold=false;
   if(!b.id)Object.assign(doc,{no:nextNo(),createdAt:now,day:dayKey(now),state:'open'});
   if(pay)Object.assign(doc,{state:'paid',paidAt:now,method:pay.method,received:pay.received,change:pay.change,rno:nextRno(),roundId:S.round?S.round.id:null});
   let id=b.id;
@@ -1023,7 +1026,7 @@ function kdsView(){
   const st=S.kst==='all'||stations().some(x=>x.id===S.kst)?S.kst:'all';
   const statusOf=o=>st==='all'?overallK(o):stStatus(o,st);
   const itemsOf=o=>o.items.map((i,idx)=>({i,idx})).filter(x=>st==='all'||itemSt(x.i)===st);
-  const base=allOrders().filter(o=>o.state!=='void'&&itemsOf(o).length);
+  const base=allOrders().filter(o=>o.state!=='void'&&!o.hold&&itemsOf(o).length);
   const wai=base.filter(o=>statusOf(o)==='waiting'),mak=base.filter(o=>statusOf(o)==='making'),rdy=base.filter(o=>statusOf(o)==='ready');
   const done=base.filter(o=>statusOf(o)==='done'&&(o.createdAt||0)>=startToday()).sort((a,b)=>(b.doneAt||b.updatedAt||0)-(a.doneAt||a.updatedAt||0)).slice(0,24);
   const tile=o=>{
@@ -1050,13 +1053,15 @@ function openView(){
   const all=allOrders().filter(o=>isAppOrder(o)&&o.state!=='void');
   const unpaid=all.filter(o=>o.state==='open'&&o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   const paid=all.filter(o=>o.state==='paid'&&(o.paidAt||o.createdAt)>=startToday()).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0));
-  const KL={waiting:'รอทำ',making:'กำลังทำ',ready:'พร้อมเสิร์ฟ',done:'เสิร์ฟแล้ว'};
-  const card=(o,pay)=>{const k=overallK(o);return `<article class="mcard${pay?' unpaid-c':''}"><div class="h"><b>${esc(o.table?'โต๊ะ '+o.table.name:o.no)}</b><span class="pill">${esc(o.table?o.no:'กลับบ้าน'+(o.custName?' · '+o.custName:''))}</span><span class="pill ${k==='ready'?'ok':k==='done'?'':'warn'}">${KL[k]||''}</span><span class="muted" style="margin-left:auto;font-size:13px">${hm(o.createdAt)} · ${ageMin(o.createdAt)} นาที</span></div>
+  const KL={waiting:'รอทำ',making:'กำลังทำ',ready:'พร้อมเสิร์ฟ',done:'เสิร์ฟแล้ว',hold:'ยังไม่ส่งครัว'};
+  const card=(o,pay)=>{const k=o.hold?'hold':overallK(o);return `<article class="mcard${pay?' unpaid-c':''}"><div class="h"><b>${esc(o.table?'โต๊ะ '+o.table.name:o.no)}</b><span class="pill">${esc(o.table?o.no:'กลับบ้าน'+(o.custName?' · '+o.custName:''))}</span><span class="pill ${k==='ready'?'ok':k==='done'?'':k==='hold'?'bad':'warn'}">${KL[k]||''}</span><span class="muted" style="margin-left:auto;font-size:13px">${hm(o.createdAt)} · ${ageMin(o.createdAt)} นาที</span></div>
     <ul>${o.items.map(i=>`<li>${i.qty} × ${esc(i.name)}${i.opts?` <small>· ${esc(i.opts)}</small>`:''}</li>`).join('')}</ul>
     ${o.member?`<div class="muted" style="font-size:13px">โทร ${esc(o.member)}</div>`:''}
     <div class="row total" style="margin:0"><b>${pay?'ยอดที่ต้องชำระ':'ชำระแล้ว · '+esc(MLABEL[o.method]||'')}</b><span class="num" style="font-size:22px">${baht(o.sums.total)}</span></div>
-    ${pay?`<div style="display:flex;gap:8px"><button class="btn" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">ดู / แก้บิล</button><button class="btn primary" style="flex:1.4" data-act="checkbill" data-id="${esc(o.id)}">รับชำระเงิน</button></div>`:`<button class="btn" data-act="openrv" data-id="${esc(o.id)}">ดูใบเสร็จ</button>`}</article>`};
-  return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">Mobile Order</h2><span class="muted" style="font-size:13px">ออเดอร์ที่ลูกค้าสั่งจากมือถือ ลูกค้าต้องมาชำระเงินที่เคาน์เตอร์ · ${shop().appOpen?'เปิดรับออเดอร์อยู่':'ปิดรับออเดอร์อยู่'}</span></div>
+    ${pay&&o.hold?`<div class="hint">ชำระเงินแล้วจึงส่งเข้าครัวและพิมพ์ใบสั่งอัตโนมัติ</div>`:''}
+    ${pay?`<div style="display:flex;gap:8px"><button class="btn" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">ดู / แก้บิล</button><button class="btn primary" style="flex:1.4" data-act="checkbill" data-id="${esc(o.id)}">${o.hold?'รับชำระ · ส่งครัว':'รับชำระเงิน'}</button></div>
+      ${o.hold?(S.confirm==='hcancel:'+o.id?`<div style="display:flex;gap:8px"><button class="btn danger" style="flex:1" data-act="holdcancel" data-id="${esc(o.id)}">ยืนยันยกเลิก</button><button class="btn" style="flex:1" data-act="holdundo">ไม่ยกเลิก</button></div>`:`<button class="btn" data-act="holdask" data-id="${esc(o.id)}">ลูกค้าไม่มาชำระ · ยกเลิกออเดอร์</button>`):''}`:`<button class="btn" data-act="openrv" data-id="${esc(o.id)}">ดูใบเสร็จ</button>`}</article>`};
+  return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">Mobile Order</h2><span class="muted" style="font-size:13px">ออเดอร์จากมือถือจะยังไม่เข้าครัวจนกว่าลูกค้าจะชำระเงินที่เคาน์เตอร์ · ${shop().appOpen?'เปิดรับออเดอร์อยู่':'ปิดรับออเดอร์อยู่'}</span></div>
     <button class="pillx${shop().appOpen?'':' warn'}" data-act="apptoggle"${S.canEdit?'':' disabled'}><i></i><span>รับออเดอร์มือถือ: ${shop().appOpen?'เปิด':'ปิด'}</span></button></div>
     <section class="panel"><h2>รอชำระเงินที่เคาน์เตอร์ (${unpaid.length})</h2>${unpaid.length?`<div class="mcards">${unpaid.map(o=>card(o,true)).join('')}</div>`:'<div class="empty"><b>ไม่มีออเดอร์ค้างชำระ</b>ออเดอร์ใหม่จากมือถือจะขึ้นที่นี่ทันที</div>'}</section>
     <details class="history"${paid.length?'':' '}><summary>ชำระแล้ววันนี้ (${paid.length})</summary>${paid.length?`<div class="mcards" style="padding-bottom:12px">${paid.map(o=>card(o,false)).join('')}</div>`:'<div class="empty">ยังไม่มี</div>'}</details></div>`;
@@ -1561,7 +1566,13 @@ async function importAppOrder(ao){
   const items=(Array.isArray(ao.items)?ao.items:[]).map(i=>({menuId:String(i.id||''),name:String(i.name||'').slice(0,80),choices:[],opts:String(i.opts||'').slice(0,200),note:'',unit:+i.unit||0,qty:Math.min(20,Math.max(1,+i.qty||1)),st:stationOfMenu(String(i.id||''))}));
   if(!items.length)return null;
   const tb=ao.type==='dine'&&ao.table_id?S.tables.find(t=>t.id===ao.table_id):null;
-  const bill=tb?tableBill(tb.id):null;
+  /* Mobile orders wait for payment at the counter before going to the kitchen. */
+  {const id='app-'+ao.id;const its=items.map(i=>Object.assign({},i,{batch:0}));
+   const doc={no:nextNo(),createdAt:now,day:dayKey(now),updatedAt:now,state:'open',hold:true,type:ao.type==='take'?'take':'dine',table:tb?{id:tb.id,name:tb.name}:null,guests:0,items:its,promo:null,
+     member:ao.phone?String(ao.phone):'',batch:0,kst:{},kitchen:'hold',sums:calc(its,null),source:'app',appIds:[ao.id],custName:ao.customer_name?String(ao.customer_name).slice(0,60):''};
+   await S.db.doc('orders/'+id).set(doc);const full=norm(Object.assign({id},doc));S.oToday[id]=full;S.oOpen[id]=full;
+   return {id,no:doc.no,where:tb?'โต๊ะ '+tb.name:'กลับบ้าน'+(doc.custName?' · '+doc.custName:'')}}
+  const bill=null;
   if(bill){const batch=(bill.batch||0)+1;const nitems=bill.items.map(x=>{const y=Object.assign({},x);delete y.key;return y}).concat(items.map(i=>Object.assign({},i,{batch})));
     const kst=Object.assign({},bill.kst||{});items.forEach(i=>{kst[i.st]='waiting'});
     const patch={items:nitems,batch,kst,kitchen:overallK({items:nitems,kst}),batchAt:now,updatedAt:now,sums:calc(nitems,bill.promo),appIds:(bill.appIds||[]).concat([ao.id])};
@@ -1589,7 +1600,7 @@ async function bridgeTickSB(){
       const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
       acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
-      toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
+      toast('Mobile Order ใหม่ (รอชำระ): '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(rows.length===20)wait=1500;
     }
     S.app.state='ok';S.app.msg='';S.app.last=Date.now();
@@ -1617,7 +1628,7 @@ async function bridgeTick(){
     if(acc.length){
       await sql(acc.map(([a,res])=>`update cafe.orders set status='accepted', pos_id=${dq(res.id)}, pos_no=${dq(res.no)}, updated_at=now() where id='${a}' and status='new';`).join('\n'));
       acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
-      toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
+      toast('Mobile Order ใหม่ (รอชำระ): '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(acc.length===rows.length&&rows.length===20)wait=1500;
     }
     S.app.state='ok';S.app.msg='';S.app.last=Date.now();
@@ -1770,6 +1781,10 @@ document.addEventListener('click',e=>{
     case 'print':{const o=findOrder(d.id)||(S.ov&&S.ov.order);if(o)printDoc(o,d.k,!(S.ov&&S.ov.k==='paid'));break;}
     case 'taxform':(S.docState=S.docState||{kind:'receipt'}).taxForm=true;if(S.ov)renderOverlay();else render(true);{const i=$('#tiName');i&&i.focus()}break;
     case 'canceltax':S.docState.taxForm=false;if(S.ov)renderOverlay();else render(true);break;
+    case 'holdask':S.confirm='hcancel:'+d.id;render(true);break;
+    case 'holdundo':S.confirm=null;render(true);break;
+    case 'holdcancel':S.confirm=null;{const o=findOrder(d.id);if(!o||!o.hold)return;const patch={state:'void',voidAt:Date.now(),kitchen:'done',hold:false,voidReason:'ลูกค้าไม่มาชำระ'};
+      (S.db?dbDo(db=>db.doc('orders/'+o.id).update(patch),'ยกเลิกออเดอร์แล้ว'):Promise.resolve(true)).then(ok=>{if(ok){Object.assign(o,patch);delete S.oOpen[o.id];render(true)}});break;}
     case 'askvoid':S.confirm='void:'+d.id;render(true);break;
     case 'void':S.confirm=null;{const o=findOrder(d.id);if(!o)return;const patch={state:'void',voidAt:Date.now(),kitchen:'done'};
       (S.db?dbDo(db=>db.doc('orders/'+o.id).update(patch),'ทำลายบิลแล้ว'):Promise.resolve(true)).then(ok=>{if(ok){Object.assign(o,patch);render(true)}});break;}
