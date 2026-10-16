@@ -3,3 +3,4 @@
 -- pos_app_status(id, token), pos_admin_approve_app(id, slug, note), pos_admin_reject_app(id, note).
 -- Packages live in pos_platform(key='billing').data.packages.
 -- Edge function supabase/functions/pos-signup handles account creation, slip upload and e-mails.
+-- cafe_menu(slug) takes the shop name from the POS settings (pos_data settings/shop) so the customer page matches the POS even before the first sync.
