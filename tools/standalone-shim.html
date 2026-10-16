@@ -61,7 +61,7 @@ var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,aut
 window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
 var STAFF_DOMAIN='staff.cafe-pos.app';
 function loginEmail(v){v=String(v||'').trim().toLowerCase();return v.indexOf('@')>=0?v:(v?v+'@'+STAFF_DOMAIN:'')}
-function displayLogin(e){e=String(e||'');var d='@'+STAFF_DOMAIN;return e.slice(-d.length)===d?e.slice(0,-d.length):e}
+function displayLogin(e){e=String(e||'');var d='@'+STAFF_DOMAIN;if(e.slice(-d.length)!==d)return e;e=e.slice(0,-d.length);return e.slice(0,3).toUpperCase()+e.slice(3)}
 window.POS_IMG=function(id){return sb.storage.from('pos-menu').getPublicUrl(id).data.publicUrl};
 var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
 var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();

@@ -256,7 +256,14 @@ async function authId(email: string): Promise<string | null> {
 }
 async function staffAdd(req: Request, b: Record<string, string>) {
   const ms = await managerShop(req, b); if (ms instanceof Response) return ms;
-  const username = String(b.username || "").trim().toLowerCase();
+  // Every username starts with the shop's 3-letter prefix; the manager only chooses the part after it.
+  const { data: shop } = await db.from("pos_shops").select("user_prefix").eq("id", ms.sid).maybeSingle();
+  const prefix = String(shop?.user_prefix || "").toLowerCase();
+  if (!/^[a-z]{3}$/.test(prefix)) return fail("no_prefix", 500);
+  let suffix = String(b.suffix ?? b.username ?? "").trim().toLowerCase();
+  if (suffix.startsWith(prefix) && b.suffix == null) suffix = suffix.slice(3);
+  if (!/^[a-z0-9._-]{1,27}$/.test(suffix)) return fail("bad_username");
+  const username = prefix + suffix;
   const name = String(b.name || "").trim().slice(0, 60) || null;
   const pw = String(b.password || "");
   if (!USERNAME.test(username)) return fail("bad_username");

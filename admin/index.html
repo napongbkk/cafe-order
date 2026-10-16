@@ -159,7 +159,8 @@ function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showL
 
 /* ---------- data ---------- */
 function loadAll(){return Promise.all([
-  sb.rpc('pos_admin_shops').then(function(r){if(r.error)throw r.error;S.shops=r.data||[]}),
+  sb.rpc('pos_admin_shops').then(function(r){if(r.error)throw r.error;S.shops=r.data||[];
+    return sb.from('pos_shops').select('id,user_prefix').then(function(x){var m={};(x.data||[]).forEach(function(y){m[y.id]=y.user_prefix});S.shops.forEach(function(sh){sh.user_prefix=m[sh.id]||null})})}),
   sb.from('pos_payments').select('*').order('created_at',{ascending:false}).limit(300).then(function(r){if(r.error)throw r.error;S.pays=r.data||[]}),
   sb.from('pos_platform').select('*').eq('key','billing').maybeSingle().then(function(r){S.plat=(r.data&&r.data.data)||{}}),
   sb.from('pos_admins').select('*').order('created_at').then(function(r){S.admins=r.data||[]}),
@@ -289,10 +290,10 @@ function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expire
   '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm" type="button" data-act="addm" data-n="1">+1 เดือน</button><button class="btn sm" type="button" data-act="addm" data-n="3">+3 เดือน</button><button class="btn sm" type="button" data-act="addm" data-n="12">+12 เดือน</button></div>'+
   '<button class="btn primary" type="submit">บันทึก</button></form></section>'+
   '<section class="panel"><h2>ผู้จัดการร้าน</h2><div class="small">ปัจจุบัน: <b>'+esc(s.manager?((s.manager.name||'')+' '+s.manager.email):'ยังไม่มี')+'</b></div><form class="form" id="mgrForm" data-id="'+s.id+'"><div class="two"><label for="mg_email">อีเมลผู้จัดการคนใหม่<input id="mg_email" type="email" required></label><label for="mg_name">ชื่อ<input id="mg_name" maxlength="60"></label></div><span class="hint">ผู้จัดการคนเดิมจะถูกปิดการใช้งาน</span><button class="btn" type="submit">เปลี่ยนผู้จัดการ</button></form></section>'+
-  '<section class="panel"><h2>บัญชีในร้าน</h2><div id="memList" class="small muted">กำลังโหลด…</div></section>'+
+  '<section class="panel"><h2>บัญชีในร้าน</h2>'+(s.user_prefix?'<div class="small" style="margin-bottom:6px">รหัสร้านสำหรับชื่อผู้ใช้พนักงาน: <b class="num">'+esc(s.user_prefix)+'</b></div>':'')+'<div id="memList" class="small muted">กำลังโหลด…</div></section>'+
   '<section class="panel"><h2>ประวัติชำระเงิน</h2>'+(S.pays.filter(function(p){return p.shop_id===id}).map(function(p){return '<div class="small" style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span>'+p.months+' เดือน</span><span style="flex:1"></span><span class="chip '+(p.status==='approved'?'':p.status==='pending'?'warn':'bad')+'">'+({pending:'รอตรวจ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ'})[p.status]+'</span></div>'}).join('')||'<div class="muted small">ยังไม่มี</div>')+'</section>');
   loadMembers(id)}
-function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.username||m.email)+'</b>'+(m.username?'<span class="muted small">ชื่อผู้ใช้ (ไม่มีอีเมล)</span>':'')+'<span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
+function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.username?m.username.slice(0,3).toUpperCase()+m.username.slice(3):m.email)+'</b>'+(m.username?'<span class="muted small">ชื่อผู้ใช้ (ไม่มีอีเมล)</span>':'')+'<span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
   '<span class="chip '+(m.role==='manager'?'':'mute')+'">'+(m.role==='manager'?'ผู้จัดการ':'พนักงาน')+'</span>'+(m.active?'':'<span class="chip bad">ปิดใช้งาน</span>')+
   '<span class="small muted">'+(m.has_login?(m.last_sign_in?'เข้าล่าสุด '+dtTh(m.last_sign_in):'ยังไม่เคยเข้า'):'ยังไม่มีรหัสผ่าน')+'</span>'+pwCell(m)+
   '<span class="acts"><button class="btn sm" data-act="setpw" data-id="'+esc(m.email)+'">'+(m.has_login?'ตั้งรหัสผ่านใหม่':'สร้างรหัสผ่าน')+'</button>'+(m.role==='staff'?'<button class="btn sm" data-act="memtoggle" data-shop="'+m.shop_id+'" data-id="'+esc(m.email)+'" data-v="'+(m.active?'0':'1')+'">'+(m.active?'ปิด':'เปิด')+'</button>':'')+'</span></div>'}
@@ -341,7 +342,7 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='pkdel'){b.closest('.pkrow').remove();return}
   if(a==='setpw'){setPw(d.id);return}
   if(a==='pwshow'){SHOWPW[d.id]=!SHOWPW[d.id];drawMembers();if(S.view==='users')render();return}
-  if(a==='pwcopy'){var c=CREDS[d.id];if(!c)return;var t='ชื่อผู้ใช้: '+d.id.replace('@staff.cafe-pos.app','')+'\nรหัสผ่าน: '+c.password;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกชื่อผู้ใช้และรหัสผ่านแล้ว')},function(){toast('คัดลอกไม่ได้')});return}
+  if(a==='pwcopy'){var c=CREDS[d.id];if(!c)return;var u0=d.id.replace('@staff.cafe-pos.app','');if(u0!==d.id)u0=u0.slice(0,3).toUpperCase()+u0.slice(3);var t='ชื่อผู้ใช้: '+u0+'\nรหัสผ่าน: '+c.password;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกชื่อผู้ใช้และรหัสผ่านแล้ว')},function(){toast('คัดลอกไม่ได้')});return}
   if(a==='copypw'){var t=$('#pwVal').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกรหัสผ่านแล้ว')},function(){toast('เลือกข้อความแล้วคัดลอกเอง')});return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
