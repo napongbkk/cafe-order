@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2F6FB0">
+<title>สมัครเปิดร้าน · POS คาเฟ่</title>
+<meta name="description" content="สมัครใช้ระบบ POS คาเฟ่ พร้อมหน้าสั่งอาหารผ่านมือถือสำหรับลูกค้า">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#F3F7FC;--surface:#FFFFFF;--sunk:#E9F0F8;--ink:#1F2A37;--muted:#5B6B7D;--line:#E1E8F0;--line2:#CDD8E4;
+  --accent:#2F6FB0;--accent-hover:#275E96;--on-accent:#FFFFFF;--accent-soft:#E3F0FC;--accent-soft-ink:#1E4F80;
+  --ok:#2E9D62;--ok-soft:#E5F6EE;--ok-ink:#19663F;--warn-soft:#FFF6D9;--warn-ink:#7A5600;--bad:#D9534F;--bad-soft:#FDECEC;--bad-ink:#A12020;
+  --f:'IBM Plex Sans Thai',Tahoma,sans-serif;--fn:'IBM Plex Mono',ui-monospace,monospace;color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F1620;--surface:#18212D;--sunk:#222D3B;--ink:#E6EDF5;--muted:#9DADBF;--line:#263243;--line2:#34435A;
+  --accent:#8EC5F0;--accent-hover:#A9D3F5;--on-accent:#0B1D2E;--accent-soft:#1C3045;--accent-soft-ink:#B8DBF8;
+  --ok:#5CCB8E;--ok-soft:#173326;--ok-ink:#9BE3BC;--warn-soft:#3A3014;--warn-ink:#F5D97A;--bad:#FF7B7B;--bad-soft:#3B1F1F;--bad-ink:#FFB5B5;color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.5}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--fn)}
+.wrap{max-width:720px;margin:0 auto;padding:24px 16px 48px;display:flex;flex-direction:column;gap:18px}
+.brand{display:flex;align-items:center;gap:12px}
+.brand i{width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-style:normal;font-weight:700;font-size:18px}
+.brand h1{margin:0;font-size:22px}.brand p{margin:0;color:var(--muted);font-size:14px}
+.steps{display:flex;gap:6px;align-items:center;font-size:13px;font-weight:600;color:var(--muted);flex-wrap:wrap}
+.steps span{padding:4px 10px;border-radius:999px;background:var(--sunk)}
+.steps span[aria-current="step"]{background:var(--accent);color:var(--on-accent)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.card h2{margin:0;font-size:18px}
+label{display:flex;flex-direction:column;gap:6px;font-size:14px;font-weight:600;color:var(--muted)}
+input,textarea{min-height:46px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);color:var(--ink);font-size:16px;font-weight:400;width:100%;min-width:0}
+textarea{min-height:76px;resize:vertical}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.two > *{min-width:0}
+.pk{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.pkc{border:2px solid var(--line2);border-radius:16px;padding:14px;background:var(--surface);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-height:120px}
+.pkc[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pkc b{font-size:17px}.pkc .p{font-family:var(--fn);font-size:24px;font-weight:600;color:var(--accent)}
+.pkc small{color:var(--muted);font-size:13px}
+.btn{min-height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--surface);font-weight:700;font-size:16px;padding:0 18px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}.btn.primary:hover{background:var(--accent-hover)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.msg{padding:12px 14px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:15px}
+.msg.bad{background:var(--bad-soft);color:var(--bad-ink)}.msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.pay{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;align-items:start}
+.qr{background:#fff;border-radius:14px;padding:12px;display:grid;place-items:center;min-height:220px;color:#666;font-size:13px;text-align:center}
+.total{font-size:15px}.total b{font-family:var(--fn);font-size:30px}
+.hint{font-size:13px;color:var(--muted);font-weight:400}
+.links{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:14px}
+a{color:var(--accent)}
+.done{text-align:center;align-items:center}
+.done .ic{width:64px;height:64px;border-radius:32px;background:var(--ok-soft);color:var(--ok-ink);display:grid;place-items:center;font-size:32px}
+@media (max-width:600px){.two,.pay{grid-template-columns:minmax(0,1fr)}.qr{justify-self:center;width:230px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="brand"><i>P</i><div><h1>สมัครเปิดร้าน</h1><p>ระบบ POS คาเฟ่ พร้อมหน้าสั่งอาหารผ่านมือถือ</p></div></div>
+  <div class="steps" aria-label="ขั้นตอน"><span id="st1" aria-current="step">1 ข้อมูลร้าน</span><span id="st2">2 ชำระเงิน</span><span id="st3">3 รออนุมัติ</span></div>
+  <div class="msg bad" id="msg" role="alert" hidden></div>
+
+  <form class="card" id="formView" novalidate>
+    <h2>ข้อมูลผู้สมัคร</h2>
+    <div class="two"><label for="f_first">ชื่อ<input id="f_first" autocomplete="given-name" required maxlength="60"></label><label for="f_last">นามสกุล<input id="f_last" autocomplete="family-name" required maxlength="60"></label></div>
+    <label for="f_phone">เบอร์โทร<input id="f_phone" type="tel" inputmode="tel" autocomplete="tel" required maxlength="15" placeholder="08xxxxxxxx"></label>
+    <h2 style="margin-top:6px">ข้อมูลร้าน</h2>
+    <label for="f_shop">ชื่อร้าน<input id="f_shop" required maxlength="80"></label>
+    <label for="f_addr">ที่อยู่ร้าน<textarea id="f_addr" required maxlength="300" autocomplete="street-address"></textarea></label>
+    <h2 style="margin-top:6px">บัญชีเข้าใช้งาน</h2>
+    <label for="f_email">อีเมล (ใช้เป็นชื่อผู้ใช้)<input id="f_email" type="email" autocomplete="email" required></label>
+    <div class="two"><label for="f_pass">รหัสผ่าน (อย่างน้อย 8 ตัว)<input id="f_pass" type="password" autocomplete="new-password" required minlength="8"></label><label for="f_pass2">ยืนยันรหัสผ่าน<input id="f_pass2" type="password" autocomplete="new-password" required minlength="8"></label></div>
+    <h2 style="margin-top:6px">เลือกแพ็กเกจ</h2>
+    <div class="pk" id="pkList" role="radiogroup" aria-label="แพ็กเกจ"><div class="hint">กำลังโหลดแพ็กเกจ…</div></div>
+    <button class="btn primary" type="submit" id="goBtn">ถัดไป · ชำระเงิน</button>
+    <div class="links"><span class="hint">ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบตรวจสอบการชำระเงินและอนุมัติ</span><a href="/pos">มีบัญชีแล้ว? เข้าสู่ระบบ</a></div>
+  </form>
+
+  <section class="card" id="payView" hidden>
+    <h2>ชำระเงินแพ็กเกจ <span id="payPkg"></span></h2>
+    <div class="pay"><div class="qr" id="payQr"></div><div style="display:flex;flex-direction:column;gap:12px">
+      <div class="total">ยอดที่ต้องโอน<br><b id="payAmt">฿0</b></div>
+      <div id="payBank" class="hint" style="font-size:15px;color:var(--ink)"></div>
+      <label for="f_slip">แนบสลิปการโอน<input id="f_slip" type="file" accept="image/*" required></label>
+      <button class="btn primary" type="button" id="slipBtn">ส่งสลิป</button>
+      <button class="btn" type="button" id="laterBtn">แนบสลิปภายหลัง</button>
+      <span class="hint">บันทึกลิงก์หน้านี้ไว้ หรือใช้ลิงก์ในอีเมล เพื่อกลับมาแนบสลิปภายหลัง</span>
+    </div></div>
+  </section>
+
+  <section class="card done" id="doneView" hidden>
+    <div class="ic" aria-hidden="true">✓</div>
+    <h2 id="doneTitle">ส่งคำขอเปิดร้านแล้ว</h2>
+    <p id="doneText" style="margin:0;color:var(--muted)">ผู้ดูแลระบบจะตรวจสอบการชำระเงินและอนุมัติ เมื่ออนุมัติแล้วจะแจ้งทางอีเมล จากนั้นเข้าใช้งานได้ที่หน้า POS ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>
+    <a class="btn primary" href="/pos" style="display:inline-grid;place-items:center;text-decoration:none">ไปหน้าเข้าสู่ระบบ POS</a>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+'use strict';
+var SB='https://roggqmvmgfxsxynulpvk.supabase.co';
+var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
+var $=function(s){return document.querySelector(s)};
+var sb=window.supabase.createClient(SB,KEY,{auth:{persistSession:true}});
+var S={bill:{},pkg:null,app:null};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function baht(n){return '฿'+Number(n||0).toLocaleString('en-US')}
+function msg(t,cls){var m=$('#msg');m.hidden=!t;m.textContent=t||'';m.className='msg '+(cls||'bad');if(t)m.scrollIntoView({block:'nearest'})}
+function step(n){['formView','payView','doneView'].forEach(function(id,i){$('#'+id).hidden=i!==n-1});[1,2,3].forEach(function(i){$('#st'+i).setAttribute('aria-current',i===n?'step':'false')});window.scrollTo({top:0})}
+var ERR={missing_fields:'กรอกข้อมูลให้ครบทุกช่อง',bad_email:'อีเมลไม่ถูกต้อง',weak_password:'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',bad_package:'เลือกแพ็กเกจ',already_member:'อีเมลนี้มีร้านอยู่แล้ว เข้าสู่ระบบที่หน้า POS ได้เลย',already_pending:'อีเมลนี้มีคำขอที่รออนุมัติอยู่แล้ว',busy:'มีผู้สมัครจำนวนมาก ลองใหม่อีกสักครู่',auth_failed:'สร้างบัญชีไม่สำเร็จ ลองใหม่อีกครั้ง',save_failed:'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง',
+  bad_image:'สลิปต้องเป็นไฟล์รูป JPG หรือ PNG',too_large:'ไฟล์สลิปใหญ่เกินไป',not_pending:'คำขอนี้ตรวจสอบแล้ว',not_found:'ไม่พบคำขอนี้',upload_failed:'อัปโหลดสลิปไม่สำเร็จ ลองใหม่'};
+function fn(body,token){return fetch(SB+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+(token||KEY),'Content-Type':'application/json'},body:JSON.stringify(body)})
+  .then(function(r){return r.json().catch(function(){return {error:'server_error'}})})}
+function rpc(name,args){return fetch(SB+'/rest/v1/rpc/'+name,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(args||{})}).then(function(r){return r.json()})}
+function crc16(s){var c=0xFFFF;for(var i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(var j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}}return ('0000'+c.toString(16).toUpperCase()).slice(-4)}
+function pp(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}var x=String(id||'').replace(/\D/g,'');if(!x)return '';
+  var sub=x.length===13?t('02',x):x.length===15?t('03',x):t('01',('0000000000000'+x.replace(/^0/,'66')).slice(-13));
+  var p=t('00','01')+t('01','12')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764')+t('54',Number(amount).toFixed(2))+'6304';return p+crc16(p)}
+function remember(a){try{localStorage.setItem('posApply',JSON.stringify({id:a.id,t:a.token}))}catch(e){}}
+
+/* packages */
+function renderPk(){var l=S.bill.packages||[];$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';
+  return '<button type="button" class="pkc" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+baht(p.price)+'</span><small>'+p.months+' เดือน'+per+'</small><small>พนักงานได้ '+(p.staff||0)+' บัญชี</small></button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>'}
+$('#pkList').addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b)return;S.pkg=b.dataset.pk;renderPk()});
+
+/* step 1 */
+$('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
+  var v={first_name:$('#f_first').value.trim(),last_name:$('#f_last').value.trim(),phone:$('#f_phone').value.trim(),shop_name:$('#f_shop').value.trim(),address:$('#f_addr').value.trim(),email:$('#f_email').value.trim().toLowerCase(),password:$('#f_pass').value,package:S.pkg};
+  if(!v.first_name||!v.last_name||!v.phone||!v.shop_name||!v.address||!v.email){msg('กรอกข้อมูลให้ครบทุกช่อง');return}
+  if(v.phone.replace(/\D/g,'').length<9){msg('เบอร์โทรไม่ถูกต้อง');$('#f_phone').focus();return}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)){msg('อีเมลไม่ถูกต้อง');$('#f_email').focus();return}
+  if(v.password.length<8){msg('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');$('#f_pass').focus();return}
+  if(v.password!==$('#f_pass2').value){msg('ยืนยันรหัสผ่านไม่ตรงกัน');$('#f_pass2').focus();return}
+  if(!v.package){msg('เลือกแพ็กเกจ');return}
+  var btn=$('#goBtn');btn.disabled=true;btn.textContent='กำลังส่ง…';
+  function done(r){btn.disabled=false;btn.textContent='ถัดไป · ชำระเงิน';
+    if(r.error){msg(ERR[r.error]||'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง');return}
+    S.app={id:r.id,token:r.token,amount:r.amount,package:r.package};remember(S.app);showPay()}
+  fn(Object.assign({action:'apply'},v)).then(function(r){
+    if(r.error!=='email_exists')return done(r);
+    // The e-mail already has an account: sign in with the password just typed, then apply as that account.
+    sb.auth.signInWithPassword({email:v.email,password:v.password}).then(function(s){
+      if(s.error||!s.data.session){done({error:'x'});msg('อีเมลนี้มีบัญชีอยู่แล้ว ใส่รหัสผ่านเดิมของบัญชีนี้ หรือใช้อีเมลอื่น');return}
+      fn(Object.assign({action:'apply'},v),s.data.session.access_token).then(function(r2){sb.auth.signOut();done(r2)})})
+  }).catch(function(){btn.disabled=false;btn.textContent='ถัดไป · ชำระเงิน';msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
+
+/* step 2 */
+function showPay(){var a=S.app,b=S.bill;step(2);msg('');
+  $('#payPkg').textContent=(a.package&&a.package.name)||'';$('#payAmt').textContent=baht(a.amount);
+  $('#payBank').innerHTML=(b.bankNo?esc(b.bankName||'')+' '+esc(b.bankNo)+(b.accountName?' · '+esc(b.accountName):'')+'<br>':'')+(b.promptpay?'พร้อมเพย์ '+esc(b.promptpay)+'<br>':'')+(b.note?'<span class="hint">'+esc(b.note)+'</span>':'');
+  var q=$('#payQr');q.innerHTML='';if(b.promptpay&&typeof QRCode!=='undefined'){try{new QRCode(q,{text:pp(b.promptpay,a.amount),width:200,height:200,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}else q.textContent=b.promptpay?'':'โอนตามบัญชีด้านข้าง'}
+function shrink(file){return new Promise(function(res,rej){var img=new Image();img.onload=function(){var max=1600,r=Math.min(1,max/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);res(c.toDataURL('image/jpeg',0.85))};img.onerror=rej;img.src=URL.createObjectURL(file)})}
+$('#slipBtn').addEventListener('click',function(){var f=$('#f_slip').files[0];if(!f){msg('เลือกรูปสลิปก่อน');return}if(!/^image\//.test(f.type)){msg('สลิปต้องเป็นไฟล์รูปภาพ');return}
+  var b=this;b.disabled=true;b.textContent='กำลังส่ง…';
+  shrink(f).then(function(data){return fn({action:'slip',id:S.app.id,token:S.app.token,image:data})}).then(function(r){b.disabled=false;b.textContent='ส่งสลิป';
+    if(r.error){msg(ERR[r.error]||'ส่งสลิปไม่สำเร็จ');return}try{localStorage.removeItem('posApply')}catch(e){}step(3)})
+  .catch(function(){b.disabled=false;b.textContent='ส่งสลิป';msg('อ่านไฟล์รูปไม่ได้ ลองไฟล์อื่น')})});
+$('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textContent='บันทึกคำขอแล้ว';$('#doneText').textContent='ยังไม่ได้แนบสลิป กลับมาที่หน้านี้ (หรือใช้ลิงก์ในอีเมล) เพื่อแนบสลิป ผู้ดูแลระบบจะอนุมัติเมื่อตรวจสอบการชำระเงินแล้ว';});
+
+/* start: resume an application from a link or this browser */
+rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];if(l.length&&!S.pkg)S.pkg=l[0].id;renderPk();
+  var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');
+  if(!id){try{var s=JSON.parse(localStorage.getItem('posApply')||'null');if(s){id=s.id;t=s.t}}catch(e){}}
+  if(id&&t)rpc('pos_app_status',{p_id:id,p_token:t}).then(function(a){if(!a||!a.status)return;
+    S.app={id:id,token:t,amount:a.amount,package:a.package};
+    if(a.status==='pending'&&!a.has_slip){showPay();msg('คำขอเปิดร้าน “'+a.shop_name+'” ยังไม่ได้แนบสลิป','warn')}
+    else{step(3);$('#doneTitle').textContent=a.status==='approved'?'อนุมัติแล้ว':a.status==='rejected'?'คำขอยังไม่ได้รับการอนุมัติ':'รอผู้ดูแลระบบอนุมัติ';
+      $('#doneText').textContent=a.status==='approved'?'ร้าน '+a.shop_name+' เปิดใช้งานแล้ว เข้าสู่ระบบ POS ด้วย '+a.email:a.status==='rejected'?(a.admin_note||'ติดต่อผู้ดูแลระบบ'):'ได้รับคำขอและสลิปของร้าน '+a.shop_name+' แล้ว จะแจ้งทางอีเมลเมื่ออนุมัติ'}})
+}).catch(function(){msg('โหลดแพ็กเกจไม่สำเร็จ ลองรีเฟรช')});
+})();
+</script>
+</body>
+</html>

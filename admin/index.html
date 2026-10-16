@@ -109,6 +109,7 @@ h1{margin:0;font-size:24px}
   <nav class="rail" aria-label="เมนูผู้ดูแลระบบ">
     <div class="brand"><i>A</i><div><b>ผู้ดูแลระบบ</b><small>POS คาเฟ่</small></div></div>
     <button class="nav" data-go="home">ภาพรวม</button>
+    <button class="nav" data-go="apps">คำขอเปิดร้าน<span class="badge" id="appBadge" hidden></span></button>
     <button class="nav" data-go="shops">ร้านค้า</button>
     <button class="nav" data-go="pays">การชำระเงิน<span class="badge" id="payBadge" hidden></span></button>
     <button class="nav" data-go="settings">ตั้งค่าระบบ</button>
@@ -128,7 +129,7 @@ var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-var S={view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
+var S={apps:[],appTab:'pending',view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{maximumFractionDigits:2})}
 function dTh(iso){return iso?new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'-'}
@@ -148,14 +149,15 @@ $('#lgOut').addEventListener('click',out);$('#logoutBtn').addEventListener('clic
 function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showLogin('');return}
   sb.rpc('pos_session',{p_slug:null}).then(function(x){if(x.error||!x.data||!x.data.admin){showLogin('บัญชีนี้ไม่ใช่ผู้ดูแลระบบ');$('#lgOut').hidden=false;return}
     S.me=x.data.email;$('#meBox').textContent=S.me;$('#authView').hidden=true;$('#appView').hidden=false;
-    var h=location.hash.slice(1);if(['home','shops','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
+    var h=location.hash.slice(1);if(['home','apps','shops','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
 
 /* ---------- data ---------- */
 function loadAll(){return Promise.all([
   sb.rpc('pos_admin_shops').then(function(r){if(r.error)throw r.error;S.shops=r.data||[]}),
   sb.from('pos_payments').select('*').order('created_at',{ascending:false}).limit(300).then(function(r){if(r.error)throw r.error;S.pays=r.data||[]}),
   sb.from('pos_platform').select('*').eq('key','billing').maybeSingle().then(function(r){S.plat=(r.data&&r.data.data)||{}}),
-  sb.from('pos_admins').select('*').order('created_at').then(function(r){S.admins=r.data||[]})
+  sb.from('pos_admins').select('*').order('created_at').then(function(r){S.admins=r.data||[]}),
+  sb.from('pos_applications').select('*').order('created_at',{ascending:false}).limit(300).then(function(r){S.apps=r.data||[]})
 ]).then(render).catch(function(e){toast('โหลดข้อมูลไม่สำเร็จ: '+err(e))})}
 setInterval(function(){if(!document.hidden&&!$('#drawer').innerHTML)loadAll()},60000);
 
@@ -163,8 +165,9 @@ setInterval(function(){if(!document.hidden&&!$('#drawer').innerHTML)loadAll()},6
 function render(){
   document.querySelectorAll('.nav[data-go]').forEach(function(b){b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false')});
   var pend=S.pays.filter(function(p){return p.status==='pending'}).length;var pb=$('#payBadge');pb.hidden=!pend;pb.textContent=pend;
-  $('#main').innerHTML=({home:homeView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
-  if(S.view==='pays')loadSlips();
+  var pa=S.apps.filter(function(a){return a.status==='pending'}).length;var ab=$('#appBadge');ab.hidden=!pa;ab.textContent=pa;
+  $('#main').innerHTML=({home:homeView,apps:appsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
+  if(S.view==='pays'||S.view==='apps')loadSlips();
 }
 function homeView(){
   var sh=S.shops,act=sh.filter(function(s){return !s.locked&&s.status==='active'}),soon=sh.filter(function(s){var d=days(s.expires_at);return !s.locked&&d>=0&&d<=7}),
@@ -172,12 +175,14 @@ function homeView(){
   var m0=new Date();m0.setDate(1);m0.setHours(0,0,0,0);
   var rev=S.pays.filter(function(p){return p.status==='approved'&&new Date(p.reviewed_at||p.created_at)>=m0}).reduce(function(a,p){return a+Number(p.amount)},0);
   var mrr=act.reduce(function(a,s){return a+Number(s.price)},0);
-  var todo=pend.map(function(p){return {t:'slip',p:p}}).concat(soon.concat(late).map(function(s){return {t:'shop',s:s}}));
+  var papps=S.apps.filter(function(a){return a.status==='pending'});
+  var todo=papps.map(function(a){return {t:'app',a:a}}).concat(pend.map(function(p){return {t:'slip',p:p}})).concat(soon.concat(late).map(function(s){return {t:'shop',s:s}}));
   return '<div class="head"><h1>ภาพรวม</h1><span class="sp"></span><button class="btn primary" data-act="newshop">+ สร้างร้านใหม่</button></div>'+
   '<div class="kpis"><div class="kpi"><small>ร้านทั้งหมด</small><b>'+sh.length+'</b></div><div class="kpi"><small>ใช้งานได้</small><b>'+act.length+'</b></div>'+
   '<div class="kpi'+(soon.length?' warn':'')+'"><small>ใกล้หมดอายุ (7 วัน)</small><b>'+soon.length+'</b></div><div class="kpi'+(late.length?' bad':'')+'"><small>เลยกำหนด / ล็อก / ระงับ</small><b>'+late.length+'</b></div>'+
-  '<div class="kpi'+(pend.length?' warn':'')+'"><small>สลิปรอตรวจ</small><b>'+pend.length+'</b></div><div class="kpi"><small>รับชำระเดือนนี้</small><b>'+baht(rev)+'</b></div><div class="kpi"><small>รายได้ต่อเดือน (ร้านที่ใช้งาน)</small><b>'+baht(mrr)+'</b></div></div>'+
+  '<div class="kpi'+(papps.length?' warn':'')+'"><small>คำขอเปิดร้าน</small><b>'+papps.length+'</b></div><div class="kpi'+(pend.length?' warn':'')+'"><small>สลิปต่ออายุรอตรวจ</small><b>'+pend.length+'</b></div><div class="kpi"><small>รับชำระเดือนนี้</small><b>'+baht(rev)+'</b></div><div class="kpi"><small>รายได้ต่อเดือน (ร้านที่ใช้งาน)</small><b>'+baht(mrr)+'</b></div></div>'+
   '<section class="panel"><h2>ต้องดำเนินการ</h2>'+(todo.length?'<div class="scroll"><table class="tbl"><tbody>'+todo.map(function(x){
+    if(x.t==='app')return '<tr><td><span class="chip warn">ขอเปิดร้าน</span></td><td><b>'+esc(x.a.shop_name)+'</b><div class="muted small">'+esc(x.a.first_name+' '+x.a.last_name)+' · '+dtTh(x.a.created_at)+(x.a.slip?'':' · ยังไม่แนบสลิป')+'</div></td><td class="num">'+baht(x.a.amount)+' · '+esc((x.a.package||{}).name||'')+'</td><td><div class="acts"><button class="btn sm primary" data-go="apps">ตรวจคำขอ</button></div></td></tr>';
     if(x.t==='slip'){var s=shopBy(x.p.shop_id);return '<tr><td><span class="chip warn">สลิปรอตรวจ</span></td><td><b>'+esc(s.name||'-')+'</b><div class="muted small">'+dtTh(x.p.created_at)+'</div></td><td class="num">'+baht(x.p.amount)+' · '+x.p.months+' เดือน</td><td><div class="acts"><button class="btn sm primary" data-act="gopays">ตรวจสลิป</button></div></td></tr>'}
     var c=st(x.s);return '<tr><td><span class="chip '+c[1]+'">'+c[0]+'</span></td><td><b>'+esc(x.s.name)+'</b><div class="muted small">หมดอายุ '+dTh(x.s.expires_at)+' · '+esc(x.s.manager?x.s.manager.email:'')+'</div></td><td class="num">'+baht(x.s.price)+'/เดือน</td><td><div class="acts"><button class="btn sm" data-act="extend" data-id="'+x.s.id+'">+1 เดือน</button><button class="btn sm" data-act="editshop" data-id="'+x.s.id+'">จัดการ</button></div></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ไม่มีอะไรต้องทำตอนนี้</div>')+'</section>';
 }
@@ -192,6 +197,24 @@ function shopsView(){
     '<td><div class="acts"><a class="btn sm" href="/pos?shop='+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">เปิด POS</a><button class="btn sm" data-act="editshop" data-id="'+s.id+'">จัดการ</button></div></td></tr>'}).join(''):'<tr><td colspan="8"><div class="empty">ไม่พบร้าน</div></td></tr>')+
   '</tbody></table></div></section>';
 }
+function appsView(){
+  var list=S.apps.filter(function(a){return S.appTab==='all'||a.status===S.appTab});
+  return '<div class="head"><h1>คำขอเปิดร้าน</h1><span class="sp"></span><div class="seg" role="group" aria-label="สถานะ">'+[['pending','รออนุมัติ'],['approved','อนุมัติแล้ว'],['rejected','ไม่อนุมัติ'],['all','ทั้งหมด']].map(function(f){return '<button data-act="apptab" data-v="'+f[0]+'" aria-pressed="'+(S.appTab===f[0])+'">'+f[1]+'</button>'}).join('')+'</div></div>'+
+  '<div class="hint">ลิงก์หน้าสมัครสำหรับร้านใหม่: <a href="/signup" target="_blank" rel="noopener">'+esc(location.origin)+'/signup</a></div>'+
+  (list.length?'<div class="pays">'+list.map(function(a){var c={pending:['รออนุมัติ','warn'],approved:['อนุมัติแล้ว',''],rejected:['ไม่อนุมัติ','bad']}[a.status];var pk=a.package||{};
+    var sl=slugify(a.shop_name)||('shop-'+a.id.slice(0,6));
+    return '<article class="pay"><div class="row"><b style="font-size:17px">'+esc(a.shop_name)+'</b><span class="chip '+c[1]+'">'+c[0]+'</span></div>'+
+    '<div class="small"><b>'+esc(a.first_name+' '+a.last_name)+'</b> · <a href="tel:'+esc(a.phone)+'">'+esc(a.phone)+'</a><br>'+esc(a.email)+'<br><span class="muted">'+esc(a.address)+'</span></div>'+
+    '<div class="row"><span>'+esc(pk.name||'')+' · '+(pk.months||1)+' เดือน · พนักงาน '+(pk.staff||0)+'</span><b class="num" style="font-size:20px">'+baht(a.amount)+'</b></div>'+
+    '<button class="slip" data-act="zoom" aria-label="ดูสลิปขนาดใหญ่" data-slip="'+esc(a.slip||'')+'">'+(a.slip?'กำลังโหลดสลิป…':'ยังไม่แนบสลิป')+'</button>'+
+    '<div class="muted small">สมัครเมื่อ '+dtTh(a.created_at)+(a.reviewed_at?' · ตรวจเมื่อ '+dtTh(a.reviewed_at):'')+'</div>'+
+    (a.status==='pending'?'<div class="form" style="gap:8px"><label for="as_'+a.id+'">รหัสร้าน (ใช้ในลิงก์ลูกค้า)<input id="as_'+a.id+'" value="'+esc(sl)+'" pattern="[a-z0-9][a-z0-9-]{1,30}" maxlength="31"></label><input id="an_'+a.id+'" placeholder="หมายเหตุถึงผู้สมัคร (ไม่บังคับ)" maxlength="200" aria-label="หมายเหตุถึงผู้สมัคร">'+
+      '<div style="display:flex;gap:8px"><button class="btn danger" style="flex:1" data-act="appno" data-id="'+a.id+'">ไม่อนุมัติ</button><button class="btn ok" style="flex:1.4" data-act="appok" data-id="'+a.id+'">อนุมัติ · เปิดร้าน</button></div></div>'
+      :(a.admin_note?'<div class="small">หมายเหตุ: '+esc(a.admin_note)+'</div>':'')+(a.shop_id?'<button class="btn sm" data-act="editshop" data-id="'+a.shop_id+'">จัดการร้าน</button>':''))+
+    '</article>'}).join('')+'</div>':'<section class="panel"><div class="empty">ไม่มีคำขอ</div></section>');
+}
+function notifyApp(id){return sb.auth.getSession().then(function(r){var tok=r.data.session&&r.data.session.access_token;
+  return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({action:'notify',id:id})}).then(function(x){return x.json()})}).catch(function(){return {sent:false}})}
 function paysView(){
   var list=S.pays.filter(function(p){return S.payTab==='all'||p.status===S.payTab});
   return '<div class="head"><h1>การชำระเงิน</h1><span class="sp"></span><div class="seg" role="group" aria-label="สถานะ">'+[['pending','รอตรวจ'],['approved','อนุมัติแล้ว'],['rejected','ไม่อนุมัติ'],['all','ทั้งหมด']].map(function(f){return '<button data-act="paytab" data-v="'+f[0]+'" aria-pressed="'+(S.payTab===f[0])+'">'+f[1]+'</button>'}).join('')+'</div></div>'+
@@ -209,6 +232,7 @@ function loadSlips(){document.querySelectorAll('[data-slip]').forEach(function(e
   var show=function(u){el.innerHTML='<img src="'+esc(u)+'" alt="สลิปการโอน">';el.dataset.url=u};
   if(S.slips[p]){show(S.slips[p]);return}
   sb.storage.from('pos-slips').createSignedUrl(p,3600).then(function(r){if(r.data&&r.data.signedUrl){S.slips[p]=r.data.signedUrl;show(r.data.signedUrl)}else el.textContent='เปิดสลิปไม่ได้'})})}
+function pkRow(p){p=p||{};return '<div class="pkrow" style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr auto;gap:6px;margin-bottom:6px" data-id="'+esc(p.id||('p'+Date.now().toString(36)))+'"><input aria-label="ชื่อแพ็กเกจ" placeholder="ชื่อ" value="'+esc(p.name||'')+'" data-k="name"><input aria-label="จำนวนเดือน" type="number" min="1" max="24" placeholder="เดือน" value="'+esc(p.months||1)+'" data-k="months"><input aria-label="ราคา" type="number" min="0" placeholder="ราคา" value="'+esc(p.price==null?'':p.price)+'" data-k="price"><input aria-label="บัญชีพนักงาน" type="number" min="0" max="200" placeholder="พนักงาน" value="'+esc(p.staff==null?5:p.staff)+'" data-k="staff"><button class="btn sm danger" type="button" data-act="pkdel" aria-label="ลบแพ็กเกจ">ลบ</button></div>'}
 function settingsView(){var b=S.plat;
   return '<div class="head"><h1>ตั้งค่าระบบ</h1></div><div class="grid2">'+
   '<section class="panel"><h2>บัญชีรับค่าบริการ</h2><form class="form" id="platForm">'+
@@ -216,6 +240,7 @@ function settingsView(){var b=S.plat;
     '<div class="two"><label for="pf_bankName">ธนาคาร<input id="pf_bankName" value="'+esc(b.bankName||'')+'"></label><label for="pf_bankNo">เลขบัญชี<input id="pf_bankNo" value="'+esc(b.bankNo||'')+'"></label></div>'+
     '<label for="pf_accountName">ชื่อบัญชี<input id="pf_accountName" value="'+esc(b.accountName||'')+'"></label>'+
     '<label for="pf_note">ข้อความถึงร้าน (แสดงในหน้าชำระเงิน)<input id="pf_note" maxlength="200" value="'+esc(b.note||'')+'"></label>'+
+    '<div class="grp"><span class="small" style="font-weight:600;color:var(--muted)">แพ็กเกจในหน้าสมัคร</span><div class="hint" style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr 52px;gap:6px"><span>ชื่อแพ็กเกจ</span><span>เดือน</span><span>ราคา (บาท)</span><span>พนักงาน</span><span></span></div><div id="pkRows">'+(b.packages||[]).map(pkRow).join('')+'</div><button class="btn sm" type="button" data-act="pkadd" style="align-self:flex-start">+ เพิ่มแพ็กเกจ</button></div>'+
     '<div class="two"><label for="pf_price">ราคาเริ่มต้นร้านใหม่ (บาท/เดือน)<input id="pf_price" type="number" min="0" value="'+esc(b.price||299)+'"></label><label for="pf_grace">ผ่อนผันหลังหมดอายุ (วัน)<input id="pf_grace" type="number" min="0" max="60" value="'+esc(b.graceDays==null?7:b.graceDays)+'"></label></div>'+
     '<button class="btn primary" type="submit">บันทึก</button></form></section>'+
   '<section class="panel"><h2>ผู้ดูแลระบบ</h2><div>'+S.admins.map(function(a){return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)"><span style="flex:1">'+esc(a.email)+'</span>'+(a.email.toLowerCase()===S.me?'<span class="chip mute">คุณ</span>':'<button class="btn sm danger" data-act="rmadmin" data-id="'+esc(a.email)+'">นำออก</button>')+'</div>'}).join('')+'</div>'+
@@ -262,6 +287,11 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='gopays'){S.view='pays';S.payTab='pending';render();return}
   if(a==='filter'){S.filter=d.v;render();return}
   if(a==='paytab'){S.payTab=d.v;render();return}
+  if(a==='apptab'){S.appTab=d.v;render();return}
+  if(a==='appok'||a==='appno'){var note=($('#an_'+d.id)||{}).value||null;b.disabled=true;
+    var job=a==='appok'?sb.rpc('pos_admin_approve_app',{p_id:d.id,p_slug:(($('#as_'+d.id)||{}).value||'').trim().toLowerCase(),p_note:note}):sb.rpc('pos_admin_reject_app',{p_id:d.id,p_note:note});
+    job.then(function(r){if(r.error){b.disabled=false;toast(err(r.error));return}
+      notifyApp(d.id).then(function(m){toast((a==='appok'?'เปิดร้านแล้ว':'ไม่อนุมัติแล้ว')+(m&&m.sent?' · ส่งอีเมลแจ้งผู้สมัครแล้ว':' · ยังไม่ได้ส่งอีเมล (ยังไม่ได้ตั้งค่าการส่งอีเมล)'));loadAll()})});return}
   if(a==='zoom'){if(b.dataset.url){var z=document.createElement('button');z.className='zoom';z.setAttribute('aria-label','ปิด');z.innerHTML='<img src="'+esc(b.dataset.url)+'" alt="สลิปการโอน">';z.onclick=function(){z.remove()};document.body.appendChild(z)}return}
   if(a==='extend'){var s=shopBy(d.id);var n=new Date(Math.max(Date.now(),new Date(s.expires_at).getTime()));n.setMonth(n.getMonth()+1);
     sb.from('pos_shops').update({expires_at:n.toISOString()}).eq('id',s.id).then(function(r){toast(r.error?err(r.error):'ต่ออายุ '+s.name+' ถึง '+dTh(n.toISOString()));loadAll()});return}
@@ -269,6 +299,8 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='approve'||a==='reject'){b.disabled=true;var note=($('#pn_'+d.id)||{}).value||null;
     sb.rpc('pos_pay_review',{p_id:d.id,p_approve:a==='approve',p_note:note}).then(function(r){if(r.error){b.disabled=false;toast(err(r.error));return}toast(a==='approve'?'อนุมัติแล้ว ใช้งานได้ถึง '+dTh(r.data.expiresAt):'ไม่อนุมัติแล้ว');loadAll()});return}
   if(a==='memtoggle'){sb.from('pos_members').update({active:d.v==='1'}).eq('email',d.id).then(function(r){toast(r.error?err(r.error):'บันทึกแล้ว');loadMembers(d.shop);loadAll()});return}
+  if(a==='pkadd'){$('#pkRows').insertAdjacentHTML('beforeend',pkRow({}));return}
+  if(a==='pkdel'){b.closest('.pkrow').remove();return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
 document.addEventListener('input',function(e){if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
@@ -283,7 +315,7 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('บันทึกแล้ว');loadAll().then(function(){editShop(id)})});return}
   if(f.id==='mgrForm'){var sid=f.dataset.id;sb.rpc('pos_admin_set_manager',{p_sid:sid,p_email:$('#mg_email').value.trim(),p_name:$('#mg_name').value.trim()||null})
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('เปลี่ยนผู้จัดการแล้ว');loadAll().then(function(){editShop(sid)})});return}
-  if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),price:+$('#pf_price').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0))};
+  if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0))}}).filter(function(p){return p.name}),price:+$('#pf_price').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0))};
     if(data.promptpay&&[10,13,15].indexOf(data.promptpay.length)<0){done();toast('พร้อมเพย์ต้องเป็นเบอร์ 10 หลัก หรือเลข 13/15 หลัก');return}
     sb.from('pos_platform').upsert({key:'billing',data:data,updated_at:new Date().toISOString()}).then(function(r){done();toast(r.error?err(r.error):'บันทึกแล้ว');loadAll()});return}
   if(f.id==='adminForm'){sb.from('pos_admins').insert({email:$('#ad_email').value.trim().toLowerCase()}).then(function(r){done();toast(r.error?err(r.error):'เพิ่มผู้ดูแลระบบแล้ว');loadAll()});return}
