@@ -63,6 +63,16 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:max
 .note.bad{background:var(--bad-soft);color:var(--bad-ink)}
 h2.cat{font-size:17px;margin:18px 0 8px}
 .items{display:flex;flex-direction:column;gap:10px}
+.items.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.items.grid .item{flex-direction:column;align-items:stretch;gap:8px}
+.items.grid .item .pic{width:100%;height:auto;aspect-ratio:4/3}
+.items.grid .item .pr{align-self:flex-start}
+.item .pic{overflow:hidden}
+.item .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.logo{overflow:hidden}.logo img{width:100%;height:100%;object-fit:cover;display:block}
+.cover{margin:12px 0 4px;border-radius:18px;overflow:hidden;aspect-ratio:21/9;background:var(--sunk,#E9EEF4)}
+.cover img{width:100%;height:100%;object-fit:cover;display:block}
+.notice{margin:10px 0 10px;padding:10px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-soft-ink);font-weight:700;font-size:15px;line-height:1.45}
 .item{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
 .item .pic{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
 .item .pic svg{width:30px;height:30px}
@@ -122,6 +132,7 @@ h2.cat{font-size:17px;margin:18px 0 8px}
 <body>
 <header class="top"><div class="wrap" style="padding-bottom:0">
   <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button></div>
+  <div class="cover" id="cover" hidden></div><div class="notice" id="notice" role="note" hidden></div>
   <nav class="chips" id="cats" aria-label="หมวดหมู่"></nav>
 </div></header>
 <main class="wrap" id="main"><div class="empty">กำลังโหลดเมนู…</div></main>
@@ -160,10 +171,27 @@ function tableName(){var t=S.tables.find(function(x){return x.id===S.tableId});r
 function catIdx(id){var i=S.cats.findIndex(function(c){return c.id===id});return (i<0?0:i)%6}
 function optsOf(m){return (m.optionIds||[]).map(function(id){return S.opts.find(function(o){return o.id===id})}).filter(Boolean)}
 
-function renderHeader(){
+function safeUrl(u){return typeof u==='string'&&/^https:\/\/[^\s"'<>()]+$/.test(u)?u:''}
+function hexRgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function mix(a,b,t){return '#'+a.map(function(v,i){var x=Math.round(v+(b[i]-v)*t);return ('0'+x.toString(16)).slice(-2)}).join('')}
+function lum(c){var ch=c.map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2]}
+var lastLook='';
+function applyLook(){var L=look();var key=JSON.stringify(L);if(key===lastLook)return;lastLook=key;var st=document.getElementById('lookCss');
+  if(!st){st=document.createElement('style');st.id='lookCss';document.head.appendChild(st)}
+  if(!/^#[0-9a-f]{6}$/i.test(L.color||'')||L.color.toLowerCase()==='#2f6fb0'){st.textContent='';}
+  else{var c=hexRgb(L.color),w=[255,255,255],k=[0,0,0],dk=mix(c,k,.25);var on=lum(c)>0.36?'#111111':'#FFFFFF';
+    var light=mix(c,w,.45),lightOn=lum(hexRgb(light))>0.36?'#0B1620':'#FFFFFF';
+    st.textContent=':root{--accent:'+L.color+';--accent-hover:'+mix(c,k,.12)+';--on-accent:'+on+';--accent-soft:'+mix(c,w,.88)+';--accent-soft-ink:'+dk+'}'+
+      '@media (prefers-color-scheme:dark){:root{--accent:'+light+';--accent-hover:'+mix(c,w,.6)+';--on-accent:'+lightOn+';--accent-soft:'+mix(c,k,.7)+';--accent-soft-ink:'+mix(c,w,.7)+'}}';
+    var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',L.color)}
+}
+function look(){return (S.shop&&S.shop.look)||{}}
+function renderHeader(){applyLook();var L=look();
+  var cv=$('#cover'),cu=safeUrl(L.cover);cv.hidden=!cu||S.view==='status';if(cu&&cv.dataset.u!==cu){cv.dataset.u=cu;cv.innerHTML='<img src="'+esc(cu)+'" alt="">'}
+  var nt=$('#notice');nt.hidden=!L.notice||S.view==='status';nt.textContent=L.notice||'';
   $('#shopName').textContent=S.shop.name||'ร้านกาแฟ';
-  $('#shopSub').textContent=S.shop.open?(S.shop.branch||'สั่งอาหารออนไลน์'):'ปิดรับออเดอร์ออนไลน์';
-  $('#logo').textContent=(S.shop.name||'C').trim().charAt(0).toUpperCase();
+  $('#shopSub').textContent=S.shop.open?(L.tagline||S.shop.branch||'สั่งอาหารออนไลน์'):'ปิดรับออเดอร์ออนไลน์';
+  var lu=safeUrl(L.logo),lg=$('#logo');if(lu){if(lg.dataset.u!==lu){lg.dataset.u=lu;lg.innerHTML='<img src="'+esc(lu)+'" alt="">'}}else{lg.dataset.u='';lg.textContent=(S.shop.name||'C').trim().charAt(0).toUpperCase()}
   document.title='สั่งอาหาร · '+(S.shop.name||'');
   var w=$('#where');
   if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()+' · เปลี่ยน';w.setAttribute('aria-label','โต๊ะ '+tableName()+' แตะเพื่อเปลี่ยน')}
@@ -195,8 +223,9 @@ function renderMenu(){
     if(S.cat!=='all'&&S.cat!==c.id)return;
     var items=S.menu.filter(function(x){return c.id==='_o'?!S.cats.some(function(cc){return cc.id===x.catId}):x.catId===c.id});
     if(!items.length)return;
-    html+='<h2 class="cat">'+esc(c.name)+'</h2><div class="items">'+items.map(function(x){var ci=catIdx(x.catId);var has=optsOf(x).length;
-      return '<button class="item" data-act="item" data-id="'+esc(x.id)+'"'+(x.soldOut?' disabled':'')+'><span class="pic" style="background:var(--t-'+ci+');color:var(--i-'+ci+')">'+ic(has?'cup':'bread')+'</span><span class="info"><b>'+esc(x.name)+(x.best?'<span class="tag">ขายดี</span>':'')+(x.soldOut?'<span class="tag out">หมด</span>':'')+'</b>'+(x.en?'<small>'+esc(x.en)+'</small>':'')+'</span><span class="pr">'+baht(x.price)+(has?'+':'')+'</span></button>'}).join('')+'</div>';
+    var L=look(),grid=L.layout==='grid';
+    html+='<h2 class="cat">'+esc(c.name)+'</h2><div class="items'+(grid?' grid':'')+'">'+items.map(function(x){var ci=catIdx(x.catId);var has=optsOf(x).length;var iu=L.showImg!==false?safeUrl(x.img):'';
+      return '<button class="item" data-act="item" data-id="'+esc(x.id)+'"'+(x.soldOut?' disabled':'')+'><span class="pic" style="background:var(--t-'+ci+');color:var(--i-'+ci+')">'+(iu?'<img src="'+esc(iu)+'" alt="" loading="lazy">':ic(has?'cup':'bread'))+'</span><span class="info"><b>'+esc(x.name)+(x.best?'<span class="tag">ขายดี</span>':'')+(x.soldOut?'<span class="tag out">หมด</span>':'')+'</b>'+(x.en?'<small>'+esc(x.en)+'</small>':'')+'</span><span class="pr">'+baht(x.price)+(has?'+':'')+'</span></button>'}).join('')+'</div>';
   });
   m.innerHTML=(html||'<div class="empty"><b>ยังไม่มีเมนู</b></div>')+myOrdersHtml();
 }
@@ -304,7 +333,7 @@ function loadMenu(){
   }).catch(function(){$('#main').innerHTML='<div class="note bad">โหลดเมนูไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่</div>'});
 }
 loadMenu().then(function(){var o=qs.get('o');if(o&&/^[0-9a-f-]{36}$/i.test(o))openStatus(o)});
-setInterval(function(){if(S.view==='menu'&&!S.sheet&&!document.hidden)loadMenu()},60000);
+setInterval(function(){if(S.view==='menu'&&!S.sheet&&!document.hidden)loadMenu()},30000);
 })();
 </script>
 </body>

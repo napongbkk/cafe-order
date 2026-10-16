@@ -396,6 +396,28 @@ td.r,th.r{text-align:right}
 .mcard .h b{font-size:20px;font-family:var(--f-num)}
 .mcard ul{margin:0;padding:0;list-style:none;font-size:14px;display:flex;flex-direction:column;gap:2px}
 .mcard ul small{color:var(--muted)}
+.lookwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.swatch{width:40px;height:40px;border-radius:12px;border:3px solid var(--surface);box-shadow:0 0 0 1px var(--line2)}
+.swatch[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.imgrow{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.imgrow .ph{width:88px;height:56px;border-radius:10px;background:var(--sunk);display:grid;place-items:center;color:var(--muted);overflow:hidden;flex-shrink:0}
+.imgrow .ph img{width:100%;height:100%;object-fit:cover}
+.imgrow label.btn{cursor:pointer}
+.phone{width:280px;max-width:100%;border:10px solid #1F2A37;border-radius:34px;overflow:hidden;background:#F3F7FC;color:#1F2A37;font-size:12px;box-shadow:var(--shadow)}
+.phone .ph-top{display:flex;align-items:center;gap:8px;padding:12px}
+.phone .ph-logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;font-weight:700;overflow:hidden;flex-shrink:0}
+.phone .ph-logo img{width:100%;height:100%;object-fit:cover}
+.phone .ph-cover{height:90px;margin:0 12px;border-radius:12px;background-size:cover;background-position:center}
+.phone .ph-notice{margin:8px 12px 0;padding:6px 8px;border-radius:8px;font-weight:600}
+.phone .ph-items{padding:10px 12px 14px;display:grid;gap:8px}
+.phone .ph-items.grid{grid-template-columns:1fr 1fr}
+.phone .ph-it{background:#fff;border:1px solid #E1E8F0;border-radius:10px;padding:6px;display:flex;gap:6px;align-items:center}
+.phone .ph-items.grid .ph-it{flex-direction:column;align-items:stretch}
+.phone .ph-pic{width:36px;height:36px;border-radius:8px;flex-shrink:0;background-size:cover;background-position:center}
+.phone .ph-items.grid .ph-pic{width:100%;height:56px}
+.phone .ph-btn{margin:0 12px 12px;padding:9px;border-radius:12px;text-align:center;font-weight:700}
+@media (max-width:900px){.lookwrap{grid-template-columns:minmax(0,1fr)}}
 .dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .dcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
 .dcard-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -1269,7 +1291,7 @@ function menuView(){
 /* ===== settings ===== */
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE?[['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอแสดงผลด้านหลัง']];
+  const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE?[['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอแสดงผลด้านหลัง']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2><form class="form" data-stab="shop"><label for="s_name">ชื่อร้าน<input id="s_name" maxlength="60" value="${esc(sh.name)}"${dis}></label><label for="s_branch">สาขา<input id="s_branch" maxlength="60" value="${esc(sh.branch)}"${dis}></label><label for="s_address">ที่อยู่<input id="s_address" maxlength="160" value="${esc(sh.address)}"${dis}></label><div class="two"><label for="s_phone">เบอร์โทร<input id="s_phone" maxlength="20" value="${esc(sh.phone)}"${dis}></label><label for="s_taxId">เลขประจำตัวผู้เสียภาษี<input id="s_taxId" inputmode="numeric" maxlength="17" value="${esc(sh.taxId)}"${dis}></label></div>${save}</form>`;
@@ -1300,6 +1322,18 @@ function settingsView(){
     <label class="check" for="p_auto"><input id="p_auto" type="checkbox"${PR.auto?' checked':''}> พิมพ์ใบเสร็จทันทีหลังชำระเงิน</label><span class="hint">ใบสั่งครัว/บาร์ตั้งค่าที่ “เครื่องพิมพ์ครัว”</span>
     <button class="btn primary" data-act="testprint" type="button" style="align-self:flex-start">${ic('print',18)}ทดสอบพิมพ์</button>
     <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” หน้าเว็บส่งคำสั่งตรงถึงเครื่องพิมพ์ไม่ได้ จึงต้องเปิดไฟล์ที่บันทึกเพื่อพิมพ์</div></div>`;
+  else if(tab==='look'){const L=lookOf(sh);
+    const imgField=(k,label,hint)=>{const id=sh[k];return `<div class="grp"><span class="grp-t">${label}</span><div class="imgrow"><div class="ph">${id&&lookImg(id)?`<img src="${esc(lookImg(id))}" alt="">`:ic('cup',22)}</div>${S.assets&&!ro?`<label class="btn" for="lk_${k}">${id?'เปลี่ยนรูป':'เลือกรูป'}<input id="lk_${k}" data-lookimg="${k}" type="file" accept="image/*" class="sr"></label>${id?`<button class="btn danger" type="button" data-act="lookimgdel" data-k="${k}">ลบ</button>`:''}`:`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดรูปได้บน POS เว็บ'}</span>`}<span class="hint">${hint}</span></div></div>`};
+    body=`<h2>หน้าตา Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>
+    <div class="lookwrap"><form class="form" data-stab="look" id="lookForm">
+      <div class="grp"><span class="grp-t">สีหลัก</span><div class="swatches">${LOOK_COLORS.map(([c,n])=>`<button type="button" class="swatch" data-act="lookswatch" data-v="${c}" aria-pressed="${L.color.toLowerCase()===c.toLowerCase()}" aria-label="${n}" title="${n}" style="background:${c}"></button>`).join('')}<label for="s_lookColor" class="check" style="min-height:40px">กำหนดเอง <input id="s_lookColor" type="color" value="${esc(L.color)}"${dis} style="width:44px;height:40px;padding:0;border:0;background:none"></label></div></div>
+      ${imgField('lookLogo','โลโก้ร้าน','สี่เหลี่ยมจัตุรัส')}
+      ${imgField('lookCover','รูปปก','แนวนอน เช่น หน้าร้านหรือเครื่องดื่มเด่น')}
+      <label for="s_lookTagline">ข้อความใต้ชื่อร้าน<input id="s_lookTagline" maxlength="60" placeholder="เช่น กาแฟคั่วสดทุกวัน" value="${esc(sh.lookTagline||'')}"${dis}></label>
+      <label for="s_lookNotice">ประกาศ (แสดงเด่นด้านบน เว้นว่างถ้าไม่มี)<input id="s_lookNotice" maxlength="120" placeholder="เช่น วันนี้ลด 10% ทุกเมนูเย็น" value="${esc(sh.lookNotice||'')}"${dis}></label>
+      <label for="s_lookLayout">รูปแบบเมนู<select id="s_lookLayout"${dis}><option value="list"${L.layout==='list'?' selected':''}>รายการ (แถวละ 1 เมนู)</option><option value="grid"${L.layout==='grid'?' selected':''}>การ์ด (แถวละ 2 เมนู)</option></select></label>
+      <label class="check" for="s_lookShowImg"><input id="s_lookShowImg" type="checkbox"${L.showImg?' checked':''}${dis}> แสดงรูปเมนู (ใช้รูปที่อัปโหลดใน เมนูและโปรโมชั่น)</label>
+      ${save}</form><div><span class="grp-t" style="margin-bottom:8px">ตัวอย่างบนมือถือ</span><div id="lookPreview">${lookPreview(L)}</div></div></div>`}
   else if(tab==='staff'){const isOwner=window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='owner';
     body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · ผู้จัดการแก้เมนูและตั้งค่าได้ · พนักงานขายและใช้จอครัวได้</span>
     ${isOwner?`<form class="form" id="staffForm"><div class="three"><label for="st_email">อีเมล<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label><label for="st_role">ตำแหน่ง<select id="st_role"><option value="staff">พนักงาน</option><option value="manager">ผู้จัดการ</option><option value="owner">เจ้าของ</option></select></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่ม / แก้ไขพนักงาน</button></form>`:'<div class="note">จัดการพนักงานได้เฉพาะเจ้าของร้าน</div>'}
@@ -1340,7 +1374,7 @@ function settingsView(){
   else body=`<h2>จอแสดงผลด้านหลัง</h2><form class="form" data-stab="display"><label for="s_idleText">ข้อความตอนไม่มีออเดอร์<input id="s_idleText" maxlength="80" placeholder="สมัครสมาชิกด้วยเบอร์โทร สะสมแต้มทุกครั้งที่ซื้อ" value="${esc(sh.idleText)}"${dis}></label><span class="hint">เปิดเมนู “จอลูกค้า” บนแท็บเล็ตอีกเครื่องที่หันให้ลูกค้า รายการและ QR จะแสดงตามเครื่องแคชเชียร์</span>${save}</form>`;
   return `<div class="settings"><nav class="subnav" aria-label="หมวดตั้งค่า">${tabs.map(([v,l])=>`<button data-act="stab" data-v="${v}" aria-current="${tab===v}">${l}</button>`).join('')}</nav><section class="panel">${ro&&!['printer','drawer','devices','kprinter'].includes(tab)?'<div class="note">ตั้งค่าร้านได้เฉพาะเจ้าของหรือผู้มีสิทธิ์แก้ไข</div>':''}${body}</section></div>`;
 }
-const SFIELDS={app:['appOpen','appTake','appUrl'],shop:['name','branch','address','phone','taxId'],payment:['vatMode','scOn','scRate','rounding'],round:['roundOn','roundStart'],receipt:['footer'],queue:['qPrefix','qStart'],display:['idleText']};
+const SFIELDS={look:['lookColor','lookTagline','lookNotice','lookLayout','lookShowImg'],app:['appOpen','appTake','appUrl'],shop:['name','branch','address','phone','taxId'],payment:['vatMode','scOn','scRate','rounding'],round:['roundOn','roundStart'],receipt:['footer'],queue:['qPrefix','qStart'],display:['idleText']};
 const NUMF=['scRate','roundStart','qStart'];
 
 /* ===== customer display ===== */
@@ -1500,9 +1534,21 @@ function b64Rows(r){
   const m=txt.match(/"b"\s*:\s*"([A-Za-z0-9+\/=]*)"/);if(!m)return null;
   const bin=atob(m[1]);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   try{return JSON.parse(new TextDecoder().decode(bytes))}catch(e){return null}}
-function appSnapshot(){const sh=shop();return {menu:{menu:S.menu.map(m=>({id:m.id,name:m.name,en:m.en||'',price:+m.price||0,catId:menuCat(m),optionIds:(m.optionIds||[]).filter(id=>S.opts.some(o=>o.id===id)),soldOut:!!m.soldOut,best:!!m.best})),
+const LOOK_COLORS=[['#2F6FB0','ฟ้า'],['#1E7A4B','เขียว'],['#D1450A','ส้ม'],['#B03A6B','ชมพู'],['#6A44A8','ม่วง'],['#7A4A2A','น้ำตาลกาแฟ'],['#1F2A37','ดำ']];
+function lookImg(id){return id&&window.POS_IMG?window.POS_IMG(id):''}
+function lookOf(sh){return {color:/^#[0-9a-f]{6}$/i.test(sh.lookColor||'')?sh.lookColor:'#2F6FB0',tagline:sh.lookTagline||'',notice:sh.lookNotice||'',layout:sh.lookLayout==='grid'?'grid':'list',showImg:sh.lookShowImg!==false,logo:lookImg(sh.lookLogo),cover:lookImg(sh.lookCover)}}
+function onColor(hex){const n=parseInt(hex.slice(1),16);const ch=[n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});const L=0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];return L>0.36?'#111111':'#FFFFFF'}
+function lookPreview(L){const sh=shop();const on=onColor(L.color);const items=S.menu.filter(m=>!m.soldOut).slice(0,4);
+  return `<div class="phone" aria-hidden="true"><div class="ph-top"><div class="ph-logo" style="background:${L.color};color:${on}">${L.logo?`<img src="${esc(L.logo)}" alt="">`:esc((sh.name||'C').charAt(0))}</div><div><b style="font-size:13px">${esc(sh.name||'ร้านของคุณ')}</b><div style="color:#5B6B7D">${esc(L.tagline||sh.branch||'สั่งอาหารออนไลน์')}</div></div></div>
+    ${L.cover?`<div class="ph-cover" style="background-image:url('${esc(L.cover)}')"></div>`:''}${L.notice?`<div class="ph-notice" style="background:${L.color}1F;color:${L.color}">${esc(L.notice)}</div>`:''}
+    <div class="ph-items ${L.layout}">${items.map(m=>{const img=L.showImg&&m.imgId?lookImg(m.imgId):'';return `<div class="ph-it"><div class="ph-pic" style="${img?`background-image:url('${esc(img)}')`:`background:${L.color}1F`}"></div><div><b>${esc(m.name)}</b><div style="color:${L.color};font-weight:700">${baht(m.price)}</div></div></div>`}).join('')}</div>
+    <div class="ph-btn" style="background:${L.color};color:${on}">ดูตะกร้า · ฿145</div></div>`}
+function updateLookPreview(){const el=$('#lookPreview');if(!el)return;const sh=Object.assign({},shop());const v=id=>{const x=document.getElementById(id);return x?x.value:''};
+  sh.lookColor=v('s_lookColor');sh.lookTagline=v('s_lookTagline');sh.lookNotice=v('s_lookNotice');sh.lookLayout=v('s_lookLayout');const c=document.getElementById('s_lookShowImg');if(c)sh.lookShowImg=c.checked;
+  el.innerHTML=lookPreview(lookOf(sh));document.querySelectorAll('.swatch').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v.toLowerCase()===String(sh.lookColor).toLowerCase())))}
+function appSnapshot(){const sh=shop();return {menu:{menu:S.menu.map(m=>({id:m.id,name:m.name,en:m.en||'',price:+m.price||0,catId:menuCat(m),optionIds:(m.optionIds||[]).filter(id=>S.opts.some(o=>o.id===id)),soldOut:!!m.soldOut,best:!!m.best,img:m.imgId?lookImg(m.imgId):''})),
   cats:S.cats.map(c=>({id:c.id,name:c.name})),options:S.opts.map(o=>({id:o.id,name:o.name,required:!!o.required,max:o.max||1,choices:(o.choices||[]).map(c=>({id:c.id,name:c.name,price:+c.price||0,soldOut:!!c.soldOut}))})),
-  tables:S.tables.filter(isTable).map(t=>({id:t.id,name:t.name,zone:t.zone||''}))},shop:{name:sh.name,branch:sh.branch||'',open:!!sh.appOpen,takeaway:sh.appTake!==false}}}
+  tables:S.tables.filter(isTable).map(t=>({id:t.id,name:t.name,zone:t.zone||''}))},shop:{name:sh.name,branch:sh.branch||'',open:!!sh.appOpen,takeaway:sh.appTake!==false,look:lookOf(sh)}}}
 const ARANK={accepted:1,making:2,ready:3,done:4,cancelled:9};
 function appStatuses(){const out=[];allOrders().forEach(o=>{const ids=(o.appIds||[]).filter(x=>UUIDRE.test(x));if(!ids.length)return;
   const k=overallK(o);const st=o.state==='void'?'cancelled':k==='done'?'done':k==='ready'?'ready':k==='making'?'making':'accepted';
@@ -1691,6 +1737,8 @@ document.addEventListener('click',e=>{
     case 'payqr':S.ov.qrId=d.id;renderOverlay();syncDisplay();break;
     case 'paybank':S.ov.bankId=d.id;renderOverlay();syncDisplay();break;
     case 'testprint':testPrint();break;
+    case 'lookswatch':{const c=document.getElementById('s_lookColor');if(c){c.value=d.v;updateLookPreview()}break;}
+    case 'lookimgdel':{const k=d.k,old=shop()[k];const pt={};pt[k]='';saveShop(pt,'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
     case 'staffactive':window.POS_SB.from('pos_staff').update({active:d.v==='1'}).eq('email',d.id).then(r=>{if(r.error)toast('บันทึกไม่สำเร็จ');loadStaff()});break;
     case 'staffask':S.confirm='sfdel:'+d.id;loadStaff();break;
     case 'staffundel':S.confirm=null;loadStaff();break;
@@ -1821,6 +1869,7 @@ async function closeRound(){
 }
 
 document.addEventListener('input',e=>{
+  if(e.target.closest&&e.target.closest('#lookForm')){updateLookPreview()}
   const id=e.target.id;
   if(id==='q'){S.q=e.target.value;renderGrid()}
   else if(id==='hQ'){S.hist.q=e.target.value;const pos=e.target.selectionStart;render(true);const i=$('#hQ');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
@@ -1832,6 +1881,10 @@ document.addEventListener('change',async e=>{
   if(id==='rDate'){S.rep.date=e.target.value||dayKey(Date.now());e.target.blur();loadRep();render(true);return}
   if(id==='snap'){S.snap=e.target.checked;return}
   if(id==='p_paper'){PR.paper=e.target.value;savePR();return}
+  if(e.target.dataset&&e.target.dataset.lookimg){const k=e.target.dataset.lookimg,file=e.target.files&&e.target.files[0];if(!file||!S.assets)return;
+    if(!/^image\//.test(file.type)){toast('เลือกไฟล์รูปภาพ');return}toast('กำลังอัปโหลด…');
+    try{const blob=await shrinkImage(file);const r=await S.assets.upload(blob);const old=shop()[k];const pt={};pt[k]=r.id;const ok=await saveShop(pt,'อัปโหลดรูปแล้ว');if(ok&&old)S.assets.delete(old).catch(()=>{})}catch(err){toast('อัปโหลดรูปไม่สำเร็จ')}return}
+  if(e.target.closest&&e.target.closest('#lookForm')){updateLookPreview()}
   if(id==='m_img'&&S.ov&&S.ov.k==='editmenu'){const file=e.target.files&&e.target.files[0];if(!file)return;if(!S.assets){toast('อุปกรณ์นี้อัปโหลดรูปไม่ได้');return}
     if(!/^image\//.test(file.type)){toast('เลือกไฟล์รูปภาพ');return}
     const v=S.ov;v.uploading=true;renderImgPick();
