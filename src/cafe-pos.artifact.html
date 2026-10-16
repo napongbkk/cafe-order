@@ -832,13 +832,14 @@ function renderUnpaid(){
 }
 function heldMobile(){return openBills().filter(o=>o.hold&&o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
 function mobWhere(o){return o.table?'โต๊ะ '+o.table.name:'กลับบ้าน'+(o.custName?' · '+o.custName:'')}
+function mobLabel(o){return (o.no||'')+' ('+(o.table?'โต๊ะ '+o.table.name:'กลับบ้าน')+')'}
 function mobSummary(o){return o.items.map(i=>i.qty+'× '+i.name).join(', ')}
 function renderMobq(){
   const el=$('#mobq');if(!el)return;const list=heldMobile();
   el.hidden=!list.length;if(!list.length){el.innerHTML='';return}
   const fresh=list.some(o=>S.mobNew.includes(o.id));el.classList.toggle('fresh',fresh);
   el.innerHTML=`<button class="mobq-h" data-act="view" data-v="open" title="ดู Mobile Order ทั้งหมด · ยังไม่ส่งครัวจนกว่าจะชำระ">${ic('phone',16)}รอชำระ <span class="n num">${list.length}</span></button>`+
-    list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobWhere(o))}"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span>${n} รายการ · ${ageMin(o.createdAt)?ageMin(o.createdAt)+' นาที':'เพิ่งสั่ง'}</span><span class="num">${baht(o.sums.total)}</span></button><button class="e" data-act="openbill" data-id="${esc(o.id)}" aria-label="แก้ไขบิล ${esc(mobWhere(o))}">${ic('pen',15)}${S.bill.id===o.id?'กำลังแก้':'แก้ไข'}</button><button class="p" data-act="checkbill" data-id="${esc(o.id)}" aria-label="รับชำระ ${esc(mobWhere(o))}">${ic('cash',15)} ชำระ</button></div>`}).join('');
+    list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobLabel(o))}"><b class="num">${esc(mobLabel(o))}</b>${o.custName?`<span>${esc(o.custName)}</span>`:''}${nw?'<span class="newtag">ใหม่</span>':''}<span>${n} รายการ · ${ageMin(o.createdAt)?ageMin(o.createdAt)+' นาที':'เพิ่งสั่ง'}</span><span class="num">${baht(o.sums.total)}</span></button><button class="e" data-act="openbill" data-id="${esc(o.id)}" aria-label="แก้ไขบิล ${esc(mobWhere(o))}">${ic('pen',15)}${S.bill.id===o.id?'กำลังแก้':'แก้ไข'}</button><button class="p" data-act="checkbill" data-id="${esc(o.id)}" aria-label="รับชำระ ${esc(mobWhere(o))}">${ic('cash',15)} ชำระ</button></div>`}).join('');
 }
 let seenM=null,mobT=null;
 function mobChime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[[0,660],[0.18,880],[0.36,1175]].forEach(([t,f])=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=f;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.27)})}catch(e){}}
@@ -857,7 +858,7 @@ function renderMobAlert(){
   const el=$('#malert');if(!el)return;const list=heldMobile().filter(o=>S.mobNew.includes(o.id));
   if(!list.length||['open','kds','display'].includes(S.view)){el.hidden=true;el.innerHTML='';return}
   const o=list[list.length-1];el.hidden=false;
-  el.innerHTML=`<div class="h"><span class="ic">${ic('phone',22)}</span><div style="min-width:0"><b>Mobile Order ใหม่${list.length>1?' '+list.length+' ออเดอร์':''}</b><small>${esc(mobWhere(o))} · ${esc(o.no)} · ${baht(o.sums.total)} · รอชำระที่เคาน์เตอร์</small></div></div>
+  el.innerHTML=`<div class="h"><span class="ic">${ic('phone',22)}</span><div style="min-width:0"><b>Mobile Order ใหม่${list.length>1?' '+list.length+' ออเดอร์':''}</b><small><b class="num" style="display:inline;font-size:inherit;color:var(--ink)">${esc(mobLabel(o))}</b>${o.custName?' · '+esc(o.custName):''} · ${baht(o.sums.total)} · รอชำระที่เคาน์เตอร์</small></div></div>
     <div class="muted" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(mobSummary(o))}</div>
     <div class="acts"><button class="btn" data-act="moback">รับทราบ</button><button class="btn" data-act="openbill" data-id="${esc(o.id)}">เข้าบิล / แก้ไข</button><button class="btn primary" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ</button></div>`;
 }
@@ -989,7 +990,7 @@ function openView(){
   const unpaid=all.filter(o=>o.state==='open'&&o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
   const paid=all.filter(o=>o.state==='paid'&&(o.paidAt||o.createdAt)>=startToday()).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0));
   const KL={waiting:'รอทำ',making:'กำลังทำ',ready:'พร้อมเสิร์ฟ',done:'เสิร์ฟแล้ว',hold:'ยังไม่ส่งครัว'};
-  const card=(o,pay)=>{const k=o.hold?'hold':overallK(o);return `<article class="mcard${pay?' unpaid-c':''}"><div class="h"><b>${esc(o.table?'โต๊ะ '+o.table.name:o.no)}</b><span class="pill">${esc(o.table?o.no:'กลับบ้าน'+(o.custName?' · '+o.custName:''))}</span><span class="pill ${k==='ready'?'ok':k==='done'?'':k==='hold'?'bad':'warn'}">${KL[k]||''}</span><span class="muted" style="margin-left:auto;font-size:13px">${hm(o.createdAt)} · ${ageMin(o.createdAt)} นาที</span></div>
+  const card=(o,pay)=>{const k=o.hold?'hold':overallK(o);return `<article class="mcard${pay?' unpaid-c':''}"><div class="h"><b class="num">${esc(mobLabel(o))}</b>${o.custName?`<span class="pill">${esc(o.custName)}</span>`:''}<span class="pill ${k==='ready'?'ok':k==='done'?'':k==='hold'?'bad':'warn'}">${KL[k]||''}</span><span class="muted" style="margin-left:auto;font-size:13px">${hm(o.createdAt)} · ${ageMin(o.createdAt)} นาที</span></div>
     <ul>${o.items.map(i=>`<li>${i.qty} × ${esc(i.name)}${i.opts?` <small>· ${esc(i.opts)}</small>`:''}</li>`).join('')}</ul>
     ${o.member?`<div class="muted" style="font-size:13px">โทร ${esc(o.member)}</div>`:''}
     <div class="row total" style="margin:0"><b>${pay?'ยอดที่ต้องชำระ':'ชำระแล้ว · '+esc(MLABEL[o.method]||'')}</b><span class="num" style="font-size:22px">${baht(o.sums.total)}</span></div>
