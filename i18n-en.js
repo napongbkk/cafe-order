@@ -1,5 +1,16 @@
 /* Easy POS English dictionary: Thai text -> English. Generated; edit freely. */
 window.EP_DICT={
+"คู่มือ": "Guide",
+"ลองเดโม": "Try the demo",
+"คู่มือการใช้งาน": "User guide",
+"มีคู่มือหรือวิดีโอสอนไหม": "Is there a guide or video tutorials?",
+"มี": "Yes, there’s a",
+"คู่มือการใช้งานแบบละเอียด": "detailed user guide",
+"พร้อมวิดีโอสอนทีละขั้น และลองใช้ระบบจริงได้ที่": "with step-by-step videos, and you can try the real system in the",
+"โดยไม่ต้องสมัคร": "without signing up.",
+"เดโม": "demo",
+"หน้าแรก": "Home",
+"สมัครทดลองใช้ฟรี": "Start free trial",
 "/เดือน": "/month",
 "/ เดือน": "/ month",
 "เปิดบนเครื่องแคชเชียร์ {n} เครื่องที่เปิดหน้า POS ค้างไว้ ระบบจะส่งเมนูขึ้นแอป ดึงออเดอร์ใหม่ทุก {n} วินาที และส่งสถานะกลับให้ลูกค้าเห็น": "Keep the POS open on {n} cashier device. It publishes the menu to the app, fetches new orders every {n} seconds and sends status back to customers.",

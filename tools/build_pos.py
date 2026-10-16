@@ -9,6 +9,7 @@ import os, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 src = open(os.path.join(ROOT, 'src', 'cafe-pos.artifact.html'), encoding='utf-8').read()
+orig = src  # untouched copy for the public demo page
 shim = open(os.path.join(ROOT, 'tools', 'standalone-shim.html'), encoding='utf-8').read()
 
 
@@ -152,3 +153,17 @@ R("let PR={paper:'80',", "let PR={bridge:!!window.POS_STANDALONE,paper:'80',")
 os.makedirs(os.path.join(ROOT, 'pos'), exist_ok=True)
 open(os.path.join(ROOT, 'pos', 'index.html'), 'w', encoding='utf-8').write(src)
 print('built pos/index.html', len(src), 'bytes')
+
+# Public demo: the same app in its built-in demo mode (no login, nothing is saved).
+demo = orig.replace('<title>POS คาเฟ่</title>', '<title>เดโม Easy POS Cafe · ทดลองใช้ได้ทันที</title>', 1)
+demo = demo.replace('<span id="appPill"></span>',
+  '<span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>', 1)
+demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
+        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
+        '<meta name="theme-color" content="#2F6FB0">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
+        '<meta name="description" content="ลองใช้ Easy POS Cafe ได้ทันที ไม่ต้องสมัคร ข้อมูลในเดโมไม่ถูกบันทึก">\n'
+        '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
+        + demo + '\n<script src="/i18n-en.js"></script>\n<script src="/easypos-i18n.js"></script>\n</body>\n</html>\n')
+os.makedirs(os.path.join(ROOT, 'demo'), exist_ok=True)
+open(os.path.join(ROOT, 'demo', 'index.html'), 'w', encoding='utf-8').write(demo)
+print('built demo/index.html', len(demo), 'bytes')
