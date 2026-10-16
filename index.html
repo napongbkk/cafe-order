@@ -164,7 +164,9 @@ function renderHeader(){
   if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()+' · เปลี่ยน';w.setAttribute('aria-label','โต๊ะ '+tableName()+' แตะเพื่อเปลี่ยน')}
   else if(S.type==='take'){w.hidden=false;w.textContent='กลับบ้าน · เปลี่ยน';w.setAttribute('aria-label','สั่งกลับบ้าน แตะเพื่อเปลี่ยน')}else w.hidden=true;
   var cats=[{id:'all',name:'ทั้งหมด'}].concat(S.cats.filter(function(c){return S.menu.some(function(m){return m.catId===c.id})}));
-  $('#cats').innerHTML=S.view==='menu'?cats.map(function(c){return '<button class="chip" data-act="cat" data-v="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'}).join(''):'';
+  var ordering=S.view==='menu'&&S.shop.open&&(S.type==='take'||(S.type==='dine'&&!!tableName()));
+  $('#cats').hidden=!ordering;
+  $('#cats').innerHTML=ordering?cats.map(function(c){return '<button class="chip" data-act="cat" data-v="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'}).join(''):'';
 }
 function renderCartBar(){
   var n=0,t=0;S.cart.forEach(function(l){n+=l.qty;t+=l.unit*l.qty});
