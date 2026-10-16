@@ -99,6 +99,7 @@ a{color:var(--accent)}
     <h2 id="doneTitle">ส่งคำขอเปิดร้านแล้ว</h2>
     <p id="doneText" style="margin:0;color:var(--muted)">ผู้ดูแลระบบจะตรวจสอบการชำระเงินและอนุมัติ เมื่ออนุมัติแล้วจะแจ้งทางอีเมล จากนั้นเข้าใช้งานได้ที่หน้า POS ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>
     <a class="btn primary" href="/pos" style="display:inline-grid;place-items:center;text-decoration:none">ไปหน้าเข้าสู่ระบบ POS</a>
+    <button class="btn" type="button" id="newApply">สมัครเปิดร้านใหม่อีกร้าน</button>
   </section>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
@@ -115,7 +116,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function baht(n){return '฿'+Number(n||0).toLocaleString('en-US')}
 function msg(t,cls){var m=$('#msg');m.hidden=!t;m.textContent=t||'';m.className='msg '+(cls||'bad');if(t)m.scrollIntoView({block:'nearest'})}
 function step(n){['formView','payView','doneView'].forEach(function(id,i){$('#'+id).hidden=i!==n-1});[1,2,3].forEach(function(i){$('#st'+i).setAttribute('aria-current',i===n?'step':'false')});window.scrollTo({top:0})}
-var ERR={missing_fields:'กรอกข้อมูลให้ครบทุกช่อง',bad_email:'อีเมลไม่ถูกต้อง',weak_password:'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',bad_package:'เลือกแพ็กเกจ',already_member:'อีเมลนี้มีร้านอยู่แล้ว เข้าสู่ระบบที่หน้า POS ได้เลย',already_pending:'อีเมลนี้มีคำขอที่รออนุมัติอยู่แล้ว',busy:'มีผู้สมัครจำนวนมาก ลองใหม่อีกสักครู่',auth_failed:'สร้างบัญชีไม่สำเร็จ ลองใหม่อีกครั้ง',save_failed:'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง',
+var ERR={missing_fields:'กรอกข้อมูลให้ครบทุกช่อง',bad_email:'อีเมลไม่ถูกต้อง',weak_password:'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร',bad_package:'เลือกแพ็กเกจ',already_member:'อีเมลนี้มีร้านอยู่แล้ว (1 อีเมลต่อ 1 ร้าน) ใช้อีเมลอื่นเพื่อสมัครร้านใหม่ หรือเข้าสู่ระบบที่หน้า POS',already_pending:'อีเมลนี้มีคำขอที่รออนุมัติอยู่แล้ว',busy:'มีผู้สมัครจำนวนมาก ลองใหม่อีกสักครู่',auth_failed:'สร้างบัญชีไม่สำเร็จ ลองใหม่อีกครั้ง',save_failed:'บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง',
   bad_image:'สลิปต้องเป็นไฟล์รูป JPG หรือ PNG',too_large:'ไฟล์สลิปใหญ่เกินไป',not_pending:'คำขอนี้ตรวจสอบแล้ว',not_found:'ไม่พบคำขอนี้',upload_failed:'อัปโหลดสลิปไม่สำเร็จ ลองใหม่'};
 function fn(body,token){return fetch(SB+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+(token||KEY),'Content-Type':'application/json'},body:JSON.stringify(body)})
   .then(function(r){return r.json().catch(function(){return {error:'server_error'}})})}
@@ -171,13 +172,18 @@ $('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textC
 /* start: resume an application from a link or this browser */
 rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];if(l.length&&!S.pkg)S.pkg=l[0].id;renderPk();
   var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');
+  var fromLink=!!id;
   if(!id){try{var s=JSON.parse(localStorage.getItem('posApply')||'null');if(s){id=s.id;t=s.t}}catch(e){}}
   if(id&&t)rpc('pos_app_status',{p_id:id,p_token:t}).then(function(a){if(!a||!a.status)return;
+    // A finished application remembered in this browser should not block a new sign-up.
+    if(!fromLink&&a.status!=='pending'){try{localStorage.removeItem('posApply')}catch(e){}return}
     S.app={id:id,token:t,amount:a.amount,package:a.package};
     if(a.status==='pending'&&!a.has_slip){showPay();msg('คำขอเปิดร้าน “'+a.shop_name+'” ยังไม่ได้แนบสลิป','warn')}
     else{step(3);$('#doneTitle').textContent=a.status==='approved'?'อนุมัติแล้ว':a.status==='rejected'?'คำขอยังไม่ได้รับการอนุมัติ':'รอผู้ดูแลระบบอนุมัติ';
       $('#doneText').textContent=a.status==='approved'?'ร้าน '+a.shop_name+' เปิดใช้งานแล้ว เข้าสู่ระบบ POS ด้วย '+a.email:a.status==='rejected'?(a.admin_note||'ติดต่อผู้ดูแลระบบ'):'ได้รับคำขอและสลิปของร้าน '+a.shop_name+' แล้ว จะแจ้งทางอีเมลเมื่ออนุมัติ'}})
 }).catch(function(){msg('โหลดแพ็กเกจไม่สำเร็จ ลองรีเฟรช')});
+$('#newApply').addEventListener('click',function(){try{localStorage.removeItem('posApply')}catch(e){}S.app=null;history.replaceState(null,'',location.pathname);
+  var f=$('#formView');if(f.reset)f.reset();msg('');step(1)});
 })();
 </script>
 </body>
