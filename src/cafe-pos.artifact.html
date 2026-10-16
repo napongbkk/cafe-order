@@ -296,6 +296,7 @@ td.r,th.r{text-align:right}
 /* customer display */
 .catpick{display:flex;gap:8px;align-items:flex-end}.catpick .btn{height:46px;white-space:nowrap}
 .newcatrow{display:flex;gap:8px;align-items:center;margin-top:-4px}.newcatrow input{flex:1;min-width:0}.newcatrow[hidden]{display:none}
+.linkrow{display:flex;gap:8px;align-items:stretch}.linkrow input{flex:1;min-width:0}.linkrow .btn{white-space:nowrap;text-decoration:none}
 .adgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .adtile{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--surface)}
 .adth{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
@@ -566,6 +567,7 @@ function dbErr(e){const c=e&&e.code;
   return 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'}
 
 const ICON={
+  copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',check:'<path d="M5 12l5 5L20 7"/>',
   sell:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
   open:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
   tables:'<rect x="4" y="9" width="16" height="4" rx="1"/><path d="M7 13v6M17 13v6"/>',
@@ -1325,7 +1327,7 @@ function settingsView(){
     body=`<h2>แอปลูกค้า (สแกน QR สั่งอาหาร)</h2><div id="appStatus">${appStatusHtml()}</div>
     <form class="form" data-stab="app"><label class="check" for="s_appOpen"><input id="s_appOpen" type="checkbox"${sh.appOpen?' checked':''}${dis}> เปิดรับออเดอร์จากแอป</label>
       <label class="check" for="s_appTake"><input id="s_appTake" type="checkbox"${sh.appTake!==false?' checked':''}${dis}> รับสั่งกลับบ้านผ่านแอป</label>
-      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร<input id="s_appUrl" type="url" value="${esc(url)}"${dis}></label>${save}</form>
+      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร</label><div class="linkrow"><input id="s_appUrl" type="url" value="${esc(url)}"${dis}${window.POS_STANDALONE?' readonly':''}><button class="btn" type="button" data-act="copylink">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">เปิด</a></div>${window.POS_STANDALONE?'<span class="hint">ลิงก์นี้เป็นของร้านคุณโดยเฉพาะ ส่งให้ลูกค้าหรือพิมพ์เป็น QR ได้เลย</span>':''}${save}</form>
     <div class="form"><label class="check" for="pr_bridge"><input id="pr_bridge" type="checkbox"${PR.bridge?' checked':''}> เครื่องนี้เป็นตัวรับออเดอร์จากแอปเข้าระบบ</label>
       <span class="hint">เปิดบนเครื่องแคชเชียร์ 1 เครื่องที่เปิดหน้า POS ค้างไว้ บัญชีบนเครื่องนั้นต้องเชื่อม Supabase ไว้ ระบบจะส่งเมนูขึ้นแอป ดึงออเดอร์ใหม่ทุก 10 วินาที และส่งสถานะกลับให้ลูกค้าเห็น</span>
       ${PR.bridge?'<button class="btn" type="button" data-act="appsync" style="align-self:flex-start">ซิงก์ตอนนี้</button>':''}</div>
@@ -1786,6 +1788,9 @@ document.addEventListener('click',e=>{
     case 'newcatshow':{const r=$('#newCatRow');if(r){r.hidden=false;const i=$('#m_newcat');i&&i.focus()}break;}
     case 'newcathide':{const r=$('#newCatRow');if(r){r.hidden=true;$('#m_newcat').value=''}break;}
     case 'newcatadd':addCatInline();break;
+    case 'copylink':{const inp=$('#s_appUrl');const v=inp?inp.value:'';const ok=()=>{toast('คัดลอกลิงก์แล้ว');b.innerHTML=ic('check',18)+'คัดลอกแล้ว';setTimeout(()=>{if(b.isConnected)b.innerHTML=ic('copy',18)+'คัดลอก'},1800)};
+      if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(ok,()=>{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}});
+      else{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}}break;}
     case 'moback':mobAck();break;
     case 'mobsound':PR.mobSound=PR.mobSound===false;savePR();if(PR.mobSound)mobChime();mobRepeat();render(true);break;
     case 'holdask':S.confirm='hcancel:'+d.id;render(true);break;
