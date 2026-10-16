@@ -380,6 +380,9 @@ td.r,th.r{text-align:right}
 .mq .o{display:flex;align-items:center;gap:6px;padding:0 10px;border:0;background:none;color:var(--accent-soft-ink);white-space:nowrap;font-size:13px}
 .mq .o b{font-size:15px;color:var(--ink)}
 .mq .o .num{font-weight:700;color:var(--ink)}
+.mq .o{cursor:pointer}
+.mq .e{display:flex;align-items:center;gap:4px;border:0;border-left:1px solid var(--line2);padding:0 12px;background:var(--surface);color:var(--accent-soft-ink);font-weight:700;font-size:13px;white-space:nowrap}
+.mq .e:hover{background:var(--sunk)}
 .mq .p{border:0;padding:0 12px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:13px;white-space:nowrap}
 .newtag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--bad);color:#fff}
 .malert{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:90;width:min(460px,calc(100% - 24px));background:var(--surface);border:2px solid var(--accent);border-radius:18px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;animation:mobpulse 1s ease-in-out infinite}
@@ -835,7 +838,7 @@ function renderMobq(){
   el.hidden=!list.length;if(!list.length){el.innerHTML='';return}
   const fresh=list.some(o=>S.mobNew.includes(o.id));el.classList.toggle('fresh',fresh);
   el.innerHTML=`<button class="mobq-h" data-act="view" data-v="open" title="ดู Mobile Order ทั้งหมด · ยังไม่ส่งครัวจนกว่าจะชำระ">${ic('phone',16)}รอชำระ <span class="n num">${list.length}</span></button>`+
-    list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobWhere(o))}"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span>${n} รายการ · ${ageMin(o.createdAt)}น.</span><span class="num">${baht(o.sums.total)}</span></button><button class="p" data-act="checkbill" data-id="${esc(o.id)}">ชำระ</button></div>`}).join('');
+    list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobWhere(o))}"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span>${n} รายการ · ${ageMin(o.createdAt)?ageMin(o.createdAt)+' นาที':'เพิ่งสั่ง'}</span><span class="num">${baht(o.sums.total)}</span></button><button class="e" data-act="openbill" data-id="${esc(o.id)}" aria-label="แก้ไขบิล ${esc(mobWhere(o))}">${ic('pen',15)}${S.bill.id===o.id?'กำลังแก้':'แก้ไข'}</button><button class="p" data-act="checkbill" data-id="${esc(o.id)}" aria-label="รับชำระ ${esc(mobWhere(o))}">${ic('cash',15)} ชำระ</button></div>`}).join('');
 }
 let seenM=null,mobT=null;
 function mobChime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[[0,660],[0.18,880],[0.36,1175]].forEach(([t,f])=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=f;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.27)})}catch(e){}}
