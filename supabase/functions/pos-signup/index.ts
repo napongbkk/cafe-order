@@ -46,7 +46,8 @@ async function apply(req: Request, b: Record<string, string>) {
     shop: String(b.shop_name || "").trim().slice(0, 80), email: String(b.email || "").trim().toLowerCase(),
     password: String(b.password || ""), pkg: String(b.package || ""),
   };
-  if (!f.first || !f.last || f.phone.length < 9 || f.address.length < 5 || !f.shop) return fail("missing_fields");
+  const miss = !f.first ? "first_name" : !f.last ? "last_name" : f.phone.replace(/\D/g, "").length < 9 ? "phone" : !f.shop ? "shop_name" : f.address.length < 5 ? "address" : "";
+  if (miss) { console.log("apply missing field", miss); return json({ error: "missing_fields", field: miss }, 400); }
   if (!EMAIL.test(f.email)) return fail("bad_email");
   if (f.password.length < 8) return fail("weak_password");
   const { data: plat } = await db.from("pos_platform").select("data").eq("key", "billing").maybeSingle();
@@ -68,13 +69,13 @@ async function apply(req: Request, b: Record<string, string>) {
   }
   if (!signedIn) {
     const cu = await db.auth.admin.createUser({ email: f.email, password: f.password, email_confirm: true, user_metadata: { name: `${f.first} ${f.last}`, phone: f.phone } });
-    if (cu.error) return fail(/already|registered|exists/i.test(cu.error.message) ? "email_exists" : "auth_failed");
+    if (cu.error) { console.log("createUser", cu.error.message); return fail(/already|registered|exists/i.test(cu.error.message) ? "email_exists" : "auth_failed"); }
   }
 
   const { data: app, error } = await db.from("pos_applications").insert({
     first_name: f.first, last_name: f.last, phone: f.phone, address: f.address, shop_name: f.shop, email: f.email, package: pk, amount: Number(pk.price) || 0,
   }).select("id,token,amount,package").single();
-  if (error) return fail("save_failed", 500);
+  if (error) { console.log("insert", error.message); return fail("save_failed", 500); }
 
   await mail(f.email, `ได้รับคำขอเปิดร้าน ${f.shop} แล้ว`,
     `<p>สวัสดีคุณ ${esc(f.first)}</p><p>เราได้รับคำขอเปิดร้าน <b>${esc(f.shop)}</b> แล้ว</p>
@@ -98,7 +99,7 @@ async function slip(b: Record<string, string>) {
   if (bytes.length > 4 * 1024 * 1024) return fail("too_large");
   const path = `apply/${a.id}/${Date.now()}.${m[1] === "jpeg" ? "jpg" : m[1]}`;
   const up = await db.storage.from("pos-slips").upload(path, bytes, { contentType: `image/${m[1]}`, upsert: false });
-  if (up.error) return fail("upload_failed", 500);
+  if (up.error) { console.log("upload", up.error.message); return fail("upload_failed", 500); }
   await db.from("pos_applications").update({ slip: path }).eq("id", a.id);
   const ad = await admins();
   if (ad.length) await mail(ad, `สลิปคำขอเปิดร้าน: ${a.shop_name}`, `<p>ร้าน <b>${esc(a.shop_name)}</b> แนบสลิป ${baht(Number(a.amount))} แล้ว</p><p><a href="${APP}/admin#apps">ตรวจและอนุมัติ</a></p>`);

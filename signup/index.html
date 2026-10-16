@@ -134,7 +134,9 @@ $('#pkList').addEventListener('click',function(e){var b=e.target.closest('[data-
 /* step 1 */
 $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
   var v={first_name:$('#f_first').value.trim(),last_name:$('#f_last').value.trim(),phone:$('#f_phone').value.trim(),shop_name:$('#f_shop').value.trim(),address:$('#f_addr').value.trim(),email:$('#f_email').value.trim().toLowerCase(),password:$('#f_pass').value,package:S.pkg};
-  if(!v.first_name||!v.last_name||!v.phone||!v.shop_name||!v.address||!v.email){msg('กรอกข้อมูลให้ครบทุกช่อง');return}
+  var need=[['f_first',v.first_name,'ใส่ชื่อ'],['f_last',v.last_name,'ใส่นามสกุล'],['f_phone',v.phone,'ใส่เบอร์โทร'],['f_shop',v.shop_name,'ใส่ชื่อร้าน'],['f_addr',v.address,'ใส่ที่อยู่ร้าน'],['f_email',v.email,'ใส่อีเมล']].find(function(x){return !x[1]});
+  if(need){msg(need[2]);$('#'+need[0]).focus();return}
+  if(v.address.length<5){msg('ที่อยู่ร้านสั้นเกินไป ใส่อย่างน้อย 5 ตัวอักษร');$('#f_addr').focus();return}
   if(v.phone.replace(/\D/g,'').length<9){msg('เบอร์โทรไม่ถูกต้อง');$('#f_phone').focus();return}
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v.email)){msg('อีเมลไม่ถูกต้อง');$('#f_email').focus();return}
   if(v.password.length<8){msg('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');$('#f_pass').focus();return}
@@ -142,7 +144,8 @@ $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
   if(!v.package){msg('เลือกแพ็กเกจ');return}
   var btn=$('#goBtn');btn.disabled=true;btn.textContent='กำลังส่ง…';
   function done(r){btn.disabled=false;btn.textContent='ถัดไป · ชำระเงิน';
-    if(r.error){msg(ERR[r.error]||'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง');return}
+    if(r.error==='missing_fields'&&r.field){var F={first_name:['f_first','ใส่ชื่อ'],last_name:['f_last','ใส่นามสกุล'],phone:['f_phone','เบอร์โทรต้องมีอย่างน้อย 9 หลัก'],shop_name:['f_shop','ใส่ชื่อร้าน'],address:['f_addr','ที่อยู่ร้านสั้นเกินไป ใส่อย่างน้อย 5 ตัวอักษร']}[r.field];if(F){msg(F[1]);$('#'+F[0]).focus();return}}
+    if(r.error){msg(ERR[r.error]||'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง ('+r.error+')');return}
     S.app={id:r.id,token:r.token,amount:r.amount,package:r.package};remember(S.app);showPay()}
   fn(Object.assign({action:'apply'},v)).then(function(r){
     if(r.error!=='email_exists')return done(r);
