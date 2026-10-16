@@ -1772,7 +1772,7 @@ const APP_URL_DEFAULT='https://napongbkk.github.io/cafe-order/';
 const UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const deviceId=(()=>{try{let d=localStorage.getItem('pos.dev');if(!d){d=uid();localStorage.setItem('pos.dev',d)}return d}catch(e){return uid()}})();
 S.app={state:'off',msg:'',last:0,count:0};let bridgeT=null,lastSnap='',pushed={};
-function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug+'/';let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
+function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug;let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
 function drawQrs(){if(typeof QRCode==='undefined')return;document.querySelectorAll('[data-qr]').forEach(el=>{if(el.childNodes.length)return;try{new QRCode(el,{text:el.dataset.qr,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}})}
 function appStatusHtml(){const a=S.app;
   if(!PR.bridge)return '<div class="appst off">เครื่องนี้ไม่ได้รับออเดอร์จากแอป</div>';

@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2F6FB0">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <title>สั่งอาหาร</title>
@@ -166,13 +166,17 @@ function rpc(fn,body){
   return fetch(API+fn,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})})
     .then(function(r){return r.json().then(function(j){if(!r.ok){var e=new Error((j&&j.message)||'error');e.code=j&&j.message;throw e}return j})});
 }
+var SLUG=(function(){var m=location.pathname.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?/i);if(m)return m[1].toLowerCase();
+  var p=new URLSearchParams(location.search),q=(p.get('s')||'').toLowerCase();
+  if(/^[a-z0-9][a-z0-9-]{1,30}$/.test(q)){p.delete('s');try{history.replaceState(null,'','/s/'+q+'/'+(p.toString()?'?'+p.toString():''))}catch(e){}return q}return ''})();
+function K(k){return SLUG?k+'@'+SLUG:k}
 var qs=new URLSearchParams(location.search);
 var S={shop:{},menu:[],cats:[],opts:[],tables:[],tableId:qs.get('t'),type:qs.get('t')?'dine':(qs.get('type')==='take'?'take':null),
   cart:[],cat:'all',view:'menu',token:null,order:null,sheet:null,busy:false};
-try{S.cart=JSON.parse(sessionStorage.getItem('cart')||'[]')}catch(e){}
-function saveCart(){try{sessionStorage.setItem('cart',JSON.stringify(S.cart))}catch(e){}}
-function myOrders(){try{return JSON.parse(localStorage.getItem('orders')||'[]')}catch(e){return []}}
-function rememberOrder(tok){var l=myOrders().filter(function(x){return x.t!==tok});l.unshift({t:tok,at:Date.now()});try{localStorage.setItem('orders',JSON.stringify(l.slice(0,10)))}catch(e){}}
+try{S.cart=JSON.parse(sessionStorage.getItem(K('cart'))||'[]')}catch(e){}
+function saveCart(){try{sessionStorage.setItem(K('cart'),JSON.stringify(S.cart))}catch(e){}}
+function myOrders(){try{return JSON.parse(localStorage.getItem(K('orders'))||'[]')}catch(e){return []}}
+function rememberOrder(tok){var l=myOrders().filter(function(x){return x.t!==tok});l.unshift({t:tok,at:Date.now()});try{localStorage.setItem(K('orders'),JSON.stringify(l.slice(0,10)))}catch(e){}}
 
 function tableName(){var t=S.tables.find(function(x){return x.id===S.tableId});return t?t.name:''}
 function catIdx(id){var i=S.cats.findIndex(function(c){return c.id===id});return (i<0?0:i)%6}
@@ -326,7 +330,7 @@ function placeOrder(){
   if(S.type==='take'&&!(v.name||'').trim()){toast('ใส่ชื่อสำหรับเรียกรับก่อน');var i=$('#cname');i&&i.focus();return}
   S.busy=true;renderSheet();
   localSet('cname',v.name||'');localSet('cphone',v.phone||'');
-  rpc('cafe_place_order',{p_table:S.tableId||'',p_type:S.type,p_items:S.cart.map(function(l){return {id:l.id,qty:l.qty,choices:l.choices,note:l.note}}),p_name:v.name||null,p_phone:v.phone||null,p_note:null})
+  rpc(SLUG?'cafe_order':'cafe_place_order',Object.assign(SLUG?{p_shop:SLUG}:{},{p_table:S.tableId||'',p_type:S.type,p_items:S.cart.map(function(l){return {id:l.id,qty:l.qty,choices:l.choices,note:l.note}}),p_name:v.name||null,p_phone:v.phone||null,p_note:null}))
     .then(function(r){S.busy=false;S.cart=[];saveCart();S.sheet=null;rememberOrder(r.token);openStatus(r.token)})
     .catch(function(e){S.busy=false;renderSheet();toast(ERR[e.code]||'ส่งออเดอร์ไม่สำเร็จ ลองใหม่อีกครั้ง');if(e.code==='item_unavailable'||e.code==='choice_unavailable')loadMenu()});
 }
@@ -341,7 +345,7 @@ function poll(){
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.view==='status'&&!pollT){poll()}});
 
 function loadMenu(){
-  return rpc('cafe_get_menu',{}).then(function(r){
+  return rpc(SLUG?'cafe_menu':'cafe_get_menu',SLUG?{p_shop:SLUG}:{}).then(function(r){if(r&&r.error==='no_shop'){$('#main').innerHTML='<div class="empty"><b>ไม่พบร้านนี้</b>ตรวจสอบลิงก์หรือสแกน QR ที่ร้านอีกครั้ง</div>';$('#shopName').textContent='ไม่พบร้าน';return}
     var mm=(r&&r.menu)||{};S.shop=(r&&r.shop)||{};S.menu=mm.menu||[];S.cats=mm.cats||[];S.opts=mm.options||[];S.tables=mm.tables||[];
     S.cart=S.cart.filter(function(l){var m=S.menu.find(function(x){return x.id===l.id});return m&&!m.soldOut});saveCart();
     render();

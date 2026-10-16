@@ -125,7 +125,7 @@ R("function go(view){",
 
 # Customer-app links carry the shop.
 R("function appBase(){",
-  "function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug+'/';")
+  "function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug;")
 
 # Default: this device pulls customer-app orders (a lease keeps it to one device).
 R("let PR={paper:'80',", "let PR={bridge:!!window.POS_STANDALONE,paper:'80',")
