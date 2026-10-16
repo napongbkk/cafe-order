@@ -63,7 +63,7 @@ a{color:var(--accent)}
 </head>
 <body>
 <main class="wrap">
-  <div class="brand"><i style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Easy POS Cafe"><defs><linearGradient id="cfG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#F43F5E"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#cfG)"/><path d="M0 18A18 18 0 0 1 18 0h28a18 18 0 0 1 18 18v6C44 30 22 18 0 28z" fill="#fff" opacity=".14"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 21c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 21c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 26h26v8.5A10.5 10.5 0 0 1 32.5 45h-5A10.5 10.5 0 0 1 17 34.5z" fill="#fff"/><path d="M43 29.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/></svg></i><div><h1>สมัคร Easy POS Cafe</h1><p>ทดลองใช้ฟรี 30 วัน · จากนั้น 299 บาท/เดือน · <a href="/" style="color:inherit">กลับหน้าแรก</a></p></div></div>
+  <div class="brand"><i style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Easy POS Cafe"><defs><linearGradient id="cfG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#F43F5E"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#cfG)"/><path d="M0 18A18 18 0 0 1 18 0h28a18 18 0 0 1 18 18v6C44 30 22 18 0 28z" fill="#fff" opacity=".14"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 21c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 21c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 26h26v8.5A10.5 10.5 0 0 1 32.5 45h-5A10.5 10.5 0 0 1 17 34.5z" fill="#fff"/><path d="M43 29.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/></svg></i><div><h1>สมัคร Easy POS Cafe</h1><p>ทดลองใช้ฟรี 30 วัน · จากนั้น 299 บาท/เดือน · <a href="/" style="color:inherit">กลับหน้าแรก</a></p></div><span data-eplang style="margin-left:auto"></span></div>
   <div class="steps" aria-label="ขั้นตอน"><span id="st1" aria-current="step">1 ข้อมูลร้าน</span><span id="st2">2 ชำระเงิน (ถ้ามี)</span><span id="st3">3 รออนุมัติ</span></div>
   <div class="msg bad" id="msg" role="alert" hidden></div>
 
@@ -195,5 +195,7 @@ $('#newApply').addEventListener('click',function(){try{localStorage.removeItem('
   var f=$('#formView');if(f.reset)f.reset();msg('');step(1)});
 })();
 </script>
+<script src="/i18n-en.js"></script>
+<script src="/easypos-i18n.js"></script>
 </body>
 </html>

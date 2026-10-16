@@ -133,12 +133,13 @@ h2.cat{font-size:17px;margin:18px 0 8px}
 .empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;z-index:80;max-width:calc(100% - 32px)}
 [hidden]{display:none!important}
+.hero [data-eplang]{margin-left:auto}.hero .where:not([hidden])+[data-eplang]{margin-left:8px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap" style="padding-bottom:0">
-  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button></div>
+  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button><span data-eplang></span></div>
   <div class="cover" id="cover" hidden></div><div class="notice" id="notice" role="note" hidden></div>
   <nav class="chips" id="cats" aria-label="หมวดหมู่"></nav>
 </div></header>
@@ -355,5 +356,7 @@ loadMenu().then(function(){var o=qs.get('o');if(o&&/^[0-9a-f-]{36}$/i.test(o))op
 setInterval(function(){if(S.view==='menu'&&!S.sheet&&!document.hidden)loadMenu()},30000);
 })();
 </script>
+<script src="/i18n-en.js"></script>
+<script src="/easypos-i18n.js"></script>
 </body>
 </html>
