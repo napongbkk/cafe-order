@@ -81,11 +81,11 @@
   "rewrites": [
     {
       "source": "/s/:slug",
-      "destination": "/index.html"
+      "destination": "/"
     },
     {
       "source": "/s/:slug/",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ]
 }
