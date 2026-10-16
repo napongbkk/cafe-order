@@ -122,6 +122,7 @@ h1{margin:0;font-size:24px}
 <div id="drawer"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
 'use strict';
@@ -168,6 +169,7 @@ function render(){
   var pa=S.apps.filter(function(a){return a.status==='pending'}).length;var ab=$('#appBadge');ab.hidden=!pa;ab.textContent=pa;
   $('#main').innerHTML=({home:homeView,apps:appsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
   if(S.view==='pays'||S.view==='apps')loadSlips();
+  if(S.view==='settings')drawPpPrev();
 }
 function homeView(){
   var sh=S.shops,act=sh.filter(function(s){return !s.locked&&s.status==='active'}),soon=sh.filter(function(s){var d=days(s.expires_at);return !s.locked&&d>=0&&d<=7}),
@@ -233,10 +235,20 @@ function loadSlips(){document.querySelectorAll('[data-slip]').forEach(function(e
   if(S.slips[p]){show(S.slips[p]);return}
   sb.storage.from('pos-slips').createSignedUrl(p,3600).then(function(r){if(r.data&&r.data.signedUrl){S.slips[p]=r.data.signedUrl;show(r.data.signedUrl)}else el.textContent='เปิดสลิปไม่ได้'})})}
 function pkRow(p){p=p||{};return '<div class="pkrow" style="display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr auto;gap:6px;margin-bottom:6px" data-id="'+esc(p.id||('p'+Date.now().toString(36)))+'"><input aria-label="ชื่อแพ็กเกจ" placeholder="ชื่อ" value="'+esc(p.name||'')+'" data-k="name"><input aria-label="จำนวนเดือน" type="number" min="1" max="24" placeholder="เดือน" value="'+esc(p.months||1)+'" data-k="months"><input aria-label="ราคา" type="number" min="0" placeholder="ราคา" value="'+esc(p.price==null?'':p.price)+'" data-k="price"><input aria-label="บัญชีพนักงาน" type="number" min="0" max="200" placeholder="พนักงาน" value="'+esc(p.staff==null?5:p.staff)+'" data-k="staff"><button class="btn sm danger" type="button" data-act="pkdel" aria-label="ลบแพ็กเกจ">ลบ</button></div>'}
+function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}var x=String(id||'').replace(/\D/g,'');if([10,13,15].indexOf(x.length)<0)return '';
+  var sub=x.length===13?t('02',x):x.length===15?t('03',x):t('01',('0000000000000'+x.replace(/^0/,'66')).slice(-13));
+  var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764')+(amount?t('54',Number(amount).toFixed(2)):'')+'6304';
+  var c=0xFFFF;for(var i=0;i<p.length;i++){c^=p.charCodeAt(i)<<8;for(var j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}}return p+('0000'+c.toString(16).toUpperCase()).slice(-4)}
+function drawPpPrev(){var el=$('#ppPrev');if(!el)return;var id=($('#pf_promptpay')||{}).value||'';var r=document.querySelector('.pkrow [data-k=price]');var amt=r?+r.value||0:0;
+  el.innerHTML='';var pl=ppPayload(id,amt);$('#ppPrevAmt').textContent=pl?'ตัวอย่าง QR ยอด '+baht(amt):'';
+  if(!pl){el.textContent=id?'เบอร์/เลขไม่ถูกต้อง':'ใส่เบอร์พร้อมเพย์เพื่อดูตัวอย่าง QR';return}
+  if(typeof QRCode!=='undefined'){try{new QRCode(el,{text:pl,width:134,height:134,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}}
 function settingsView(){var b=S.plat;
   return '<div class="head"><h1>ตั้งค่าระบบ</h1></div><div class="grid2">'+
   '<section class="panel"><h2>บัญชีรับค่าบริการ</h2><form class="form" id="platForm">'+
-    '<label for="pf_promptpay">พร้อมเพย์ (เบอร์ หรือเลขบัตร/นิติบุคคล)<input id="pf_promptpay" inputmode="numeric" value="'+esc(b.promptpay||'')+'"></label>'+
+    '<div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:12px;align-items:start"><div class="form" style="gap:8px"><label for="pf_promptpay">เบอร์พร้อมเพย์ (เบอร์มือถือ 10 หลัก หรือเลขบัตร/นิติบุคคล 13 หลัก)<input id="pf_promptpay" inputmode="numeric" value="'+esc(b.promptpay||'')+'"></label>'+
+    '<span class="hint">ระบบสร้าง QR พร้อมเพย์ใส่ยอดตามแพ็กเกจให้อัตโนมัติ ทั้งในหน้าสมัครเปิดร้าน และหน้าต่ออายุค่าบริการของแต่ละร้าน (ร้านสแกนแล้วยอดขึ้นเอง)</span></div>'+
+    '<div style="display:flex;flex-direction:column;align-items:center;gap:4px"><div id="ppPrev" style="background:#fff;border-radius:12px;padding:8px;width:150px;height:150px;display:grid;place-items:center;font-size:12px;color:#666;text-align:center"></div><span class="hint" id="ppPrevAmt"></span></div></div>'+
     '<div class="two"><label for="pf_bankName">ธนาคาร<input id="pf_bankName" value="'+esc(b.bankName||'')+'"></label><label for="pf_bankNo">เลขบัญชี<input id="pf_bankNo" value="'+esc(b.bankNo||'')+'"></label></div>'+
     '<label for="pf_accountName">ชื่อบัญชี<input id="pf_accountName" value="'+esc(b.accountName||'')+'"></label>'+
     '<label for="pf_note">ข้อความถึงร้าน (แสดงในหน้าชำระเงิน)<input id="pf_note" maxlength="200" value="'+esc(b.note||'')+'"></label>'+
@@ -303,7 +315,7 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='pkdel'){b.closest('.pkrow').remove();return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
-document.addEventListener('input',function(e){if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
+document.addEventListener('input',function(e){if(e.target.id==='pf_promptpay'||(e.target.dataset&&e.target.dataset.k==='price'))drawPpPrev();if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var z=document.querySelector('.zoom');if(z){z.remove();return}closeDrawer()}});
 document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.preventDefault();var btn=f.querySelector('[type=submit]');
   function done(){if(btn)btn.disabled=false}if(btn)btn.disabled=true;
