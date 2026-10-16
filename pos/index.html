@@ -322,7 +322,9 @@ td.r,th.r{text-align:right}
 .adact{display:flex;gap:4px;align-items:center}
 .adadd{align-items:center;justify-content:center;text-align:center;min-height:120px;border:2px dashed var(--line2);color:var(--accent);font-weight:700;cursor:pointer}
 .adadd small{color:var(--muted);font-weight:400;font-size:12px}
-.dwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.dwrap{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.dprev-btn{position:absolute;right:12px;bottom:12px;z-index:5;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--line2);background:var(--surface);color:var(--muted);font-weight:600;font-size:13px;opacity:.55;cursor:pointer}
+.dprev-btn:hover,.dprev-btn:focus-visible{opacity:1;color:var(--ink)}
 .dprev{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:var(--warn-soft);color:var(--warn-ink);border-bottom:1px solid var(--line)}
 .adlink{display:flex;gap:8px;margin-top:8px}.adlink input{flex:1;min-width:0}
 .adty.yt{background:#c00}
@@ -800,6 +802,7 @@ const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" 
 function shopLogoUrl(){const id=shop().lookLogo;return id?imgUrl(id):''}
 function railLogo(){const u=shopLogoUrl();return u?`<img src="${esc(u)}" alt="${esc(shop().name||'โลโก้ร้าน')}">`:BRAND_SVG}
 const ICON={
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',check:'<path d="M5 12l5 5L20 7"/>',
   sell:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
   open:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 12h6M9 16h4"/>',
@@ -1654,7 +1657,7 @@ function runAds(){clearTimeout(adT);adT=null;ytWin=null;const box=$('#adMedia');
     if(!one)adT=setTimeout(next,Math.max(+a.sec||0,0)*1000||10*60*1000);return}
   if(a.type==='video'){box.innerHTML=`<video src="${esc(adSrc(a))}" muted autoplay playsinline${ads.length===1?' loop':''} style="object-fit:${fit}"></video>`;const v=box.querySelector('video');v.onended=next;v.onerror=()=>{adT=setTimeout(next,3000)};const p=v.play();if(p&&p.catch)p.catch(()=>{adT=setTimeout(next,sec)})}
   else{box.innerHTML=`<img src="${esc(adSrc(a))}" alt="" style="object-fit:${fit}">`;const im=box.querySelector('img');im.onerror=()=>{if(ads.length>1){clearTimeout(adT);adT=setTimeout(next,1500)}};if(ads.length>1)adT=setTimeout(next,sec)}}
-function dprevBar(){if(!S.dprev)return '';return `<div class="dprev" role="toolbar" aria-label="ดูตัวอย่างจอลูกค้า"><b>ตัวอย่าง</b>${DPREV.map(([k,l])=>`<button class="chip" data-act="dprev" data-v="${k}" aria-pressed="${S.dprev===k}">${l}</button>`).join('')}<span style="flex:1"></span><button class="btn sm" data-act="dprevoff">ปิดตัวอย่าง</button></div>`}
+function dprevBar(){if(!S.dprev)return '<button class="dprev-btn" data-act="dprevhere" title="ดูตัวอย่างจอลูกค้าแต่ละสถานะ">'+ic('eye',16)+'ดูตัวอย่าง</button>';return `<div class="dprev" role="toolbar" aria-label="ดูตัวอย่างจอลูกค้า"><b>ตัวอย่าง</b>${DPREV.map(([k,l])=>`<button class="chip" data-act="dprev" data-v="${k}" aria-pressed="${S.dprev===k}">${l}</button>`).join('')}<span style="flex:1"></span><button class="btn sm" data-act="dprevoff">ปิดตัวอย่าง</button></div>`}
 function displayView(){
   const {d,lines,recent,ads,idle}=dispState();const bar=dprevBar();
   if(idle&&ads.length){const sh=shop();const logo=sh.lookLogo?imgUrl(sh.lookLogo):'';
@@ -2062,9 +2065,10 @@ document.addEventListener('click',e=>{
     case 'taxform':(S.docState=S.docState||{kind:'receipt'}).taxForm=true;if(S.ov)renderOverlay();else render(true);{const i=$('#tiName');i&&i.focus()}break;
     case 'canceltax':S.docState.taxForm=false;if(S.ov)renderOverlay();else render(true);break;
     case 'adlink':{const inp=$('#adLink');const a=parseAdLink(inp&&inp.value);if(!a){inp&&inp.focus();return}if(a.err){toast(a.err);return}saveShop({dispAds:validAds().concat([a])},a.type==='youtube'?'เพิ่มวิดีโอ YouTube แล้ว':'เพิ่มลิงก์แล้ว');break;}
-    case 'dprevgo':S.dprev=d.v;adI=0;go('display');break;
+    case 'dprevgo':S.dprevFrom='settings';S.dprev=d.v;adI=0;go('display');break;
     case 'dprev':S.dprev=d.v;adI=0;render(true);break;
-    case 'dprevoff':S.dprev=null;go('settings');break;
+    case 'dprevhere':S.dprev='ads';S.dprevFrom='display';adI=0;render(true);break;
+    case 'dprevoff':S.dprev=null;if(S.dprevFrom==='display'){S.dprevFrom=null;adI=0;render(true)}else go('settings');break;
     case 'admove':{const ads=validAds().slice();const i=+d.i,j=i+(+d.d);if(j<0||j>=ads.length)return;[ads[i],ads[j]]=[ads[j],ads[i]];saveShop({dispAds:ads},'จัดลำดับแล้ว');break;}
     case 'addel':{const ads=validAds().slice();const x=ads.splice(+d.i,1)[0];saveShop({dispAds:ads},'ลบแล้ว').then(ok=>{if(ok&&x&&x.id&&S.assets)S.assets.delete(x.id).catch(()=>{})});break;}
     case 'dsidedel':{const old=shop().dispSide;saveShop({dispSide:''},'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
