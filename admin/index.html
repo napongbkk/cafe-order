@@ -43,6 +43,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 main{flex:1;min-width:0;padding:24px max(24px,env(safe-area-inset-right,0px)) 40px 24px;display:flex;flex-direction:column;gap:18px}
 h1{margin:0;font-size:24px}
 .head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.head .sp{flex:1}
+.ugh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--line)}.ugh h2{margin:0;font-size:17px}.ugh .sp{flex:1}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none;color:var(--ink)}
 .btn:hover{background:var(--sunk)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}.btn.primary:hover{background:var(--accent-hover)}
@@ -134,7 +135,7 @@ var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true}});
-var S={accts:null,uq:'',apps:[],appTab:'pending',view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
+var S={accts:null,uq:'',ushop:'',apps:[],appTab:'pending',view:'home',shops:[],pays:[],plat:{},admins:[],payTab:'pending',q:'',filter:'all',slips:{},me:''};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{maximumFractionDigits:2})}
 function dTh(iso){return iso?new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'-'}
@@ -307,10 +308,19 @@ function loadCreds(sid){return sb.auth.getSession().then(function(r){return fetc
 function loadMembers(id){Promise.all([sb.rpc('pos_admin_accounts',{p_sid:id}),loadCreds(id)]).then(function(x){var r=x[0];S.memRows=r.data||[];S.memShop=id;drawMembers()})}
 function drawMembers(){var el=$('#memList');if(!el)return;var rows=S.memRows||[];el.innerHTML=rows.length?rows.map(function(m){return acctRow(m,false)}).join(''):'ยังไม่มีบัญชี'}
 function loadAccts(){S.accts=[];Promise.all([sb.rpc('pos_admin_accounts',{p_sid:null}),loadCreds(null)]).then(function(x){S.accts=x[0].data||[];if(S.view==='users')render()})}
-function usersView(){var q=S.uq.trim().toLowerCase();var list=(S.accts||[]).filter(function(m){var sh=shopBy(m.shop_id);return !q||(m.email+' '+(m.username||'')+' '+(m.name||'')+' '+(sh.name||'')).toLowerCase().indexOf(q)>=0});
-  return '<div class="head"><h1>บัญชีผู้ใช้</h1><span class="sp"></span><input class="search" id="userQ" type="search" placeholder="ค้นหาอีเมล ชื่อ หรือร้าน" value="'+esc(S.uq)+'" aria-label="ค้นหาบัญชี"></div>'+
+function usersView(){var q=S.uq.trim().toLowerCase();var all=S.accts||[];
+  var list=all.filter(function(m){var sh=shopBy(m.shop_id);return (!S.ushop||m.shop_id===S.ushop)&&(!q||(m.email+' '+(m.username||'')+' '+(m.name||'')+' '+(sh.name||'')).toLowerCase().indexOf(q)>=0)});
+  var cnt={};all.forEach(function(m){cnt[m.shop_id]=(cnt[m.shop_id]||0)+1});
+  var opts='<option value="">ทุกร้าน ('+all.length+')</option>'+S.shops.map(function(sh){return '<option value="'+esc(sh.id)+'"'+(S.ushop===sh.id?' selected':'')+'>'+esc(sh.name)+' ('+(cnt[sh.id]||0)+')</option>'}).join('');
+  var groups=[];S.shops.forEach(function(sh){var g=list.filter(function(m){return m.shop_id===sh.id});if(g.length)groups.push([sh,g])});
+  var orphan=list.filter(function(m){return !S.shops.some(function(sh){return sh.id===m.shop_id})});if(orphan.length)groups.push([{name:'ไม่มีร้าน'},orphan]);
+  return '<div class="head"><h1>บัญชีผู้ใช้</h1><span class="sp"></span><select class="search" id="userShop" aria-label="กรองตามร้าน" style="min-width:200px">'+opts+'</select><input class="search" id="userQ" type="search" placeholder="ค้นหาชื่อผู้ใช้ อีเมล หรือชื่อ" value="'+esc(S.uq)+'" aria-label="ค้นหาบัญชี"></div>'+
   '<div class="note">ผู้จัดการเข้าด้วยอีเมล พนักงานเข้าด้วยชื่อผู้ใช้ · กด “ดู” เพื่อแสดงรหัสผ่าน · บัญชีที่ขึ้นว่า “ยังไม่ทราบ” จะแสดงรหัสเองหลังเจ้าของบัญชีเข้าสู่ระบบครั้งถัดไป หรือกด “ตั้งรหัสผ่านใหม่”</div>'+
-  '<section class="panel">'+(list.length?list.map(function(m){return acctRow(m,true)}).join(''):'<div class="empty">'+(S.accts&&S.accts.length?'ไม่พบบัญชี':'กำลังโหลด…')+'</div>')+'</section>'}
+  (groups.length?groups.map(function(x){var sh=x[0],g=x[1];var st=g.filter(function(m){return m.role==='staff'}).length;
+    return '<section class="panel"><div class="ugh"><h2>'+esc(sh.name||'-')+'</h2>'+(sh.slug?'<span class="muted small">'+esc(sh.slug)+'</span>':'')+(sh.user_prefix?'<span class="chip mute">รหัสร้าน '+esc(sh.user_prefix)+'</span>':'')+
+      '<span class="sp"></span><span class="small muted">ผู้จัดการ '+(g.length-st)+' · พนักงาน '+st+(sh.staff_limit!=null?' / '+sh.staff_limit:'')+'</span>'+(sh.id?'<button class="btn sm" data-act="editshop" data-id="'+esc(sh.id)+'">จัดการร้าน</button>':'')+'</div>'+
+      g.map(function(m){return acctRow(m,false)}).join('')+'</section>'}).join('')
+   :'<section class="panel"><div class="empty">'+(S.accts&&S.accts.length?(S.ushop&&!S.uq.trim()?'ร้านนี้ยังไม่มีบัญชี':'ไม่พบบัญชี'):'กำลังโหลด…')+'</div></section>')}
 function setPw(email){drawer('ตั้งรหัสผ่านใหม่','<div class="small">บัญชี <b>'+esc(email.replace('@staff.cafe-pos.app',''))+'</b></div><form class="form" id="pwForm" data-email="'+esc(email)+'">'+
   '<label for="pw_new">รหัสผ่านใหม่ (เว้นว่างให้ระบบสุ่มให้)<input id="pw_new" type="text" minlength="8" autocomplete="off" placeholder="อย่างน้อย 8 ตัวอักษร"></label>'+
   '<span class="hint">รหัสเดิมจะใช้ไม่ได้ทันที ผู้ใช้เปลี่ยนรหัสเองภายหลังได้ด้วย “ลืมรหัสผ่าน” ที่หน้าเข้าสู่ระบบ</span>'+
@@ -346,6 +356,7 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='copypw'){var t=$('#pwVal').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกรหัสผ่านแล้ว')},function(){toast('เลือกข้อความแล้วคัดลอกเอง')});return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
+document.addEventListener('change',function(e){if(e.target.id==='userShop'){S.ushop=e.target.value;render()}});
 document.addEventListener('input',function(e){if(e.target.id==='userQ'){S.uq=e.target.value;var ps=e.target.selectionStart;render();var u=$('#userQ');u.focus();u.setSelectionRange(ps,ps);return}if(e.target.id==='pf_promptpay'||(e.target.dataset&&e.target.dataset.k==='price'))drawPpPrev();if(e.target.id==='shopQ'){S.q=e.target.value;var pos=e.target.selectionStart;render();var i=$('#shopQ');i.focus();i.setSelectionRange(pos,pos)}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var z=document.querySelector('.zoom');if(z){z.remove();return}closeDrawer()}});
 document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.preventDefault();var btn=f.querySelector('[type=submit]');
