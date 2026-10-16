@@ -832,7 +832,7 @@ function renderUnpaid(){
 }
 function heldMobile(){return openBills().filter(o=>o.hold&&o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
 function mobWhere(o){return o.table?'โต๊ะ '+o.table.name:'กลับบ้าน'+(o.custName?' · '+o.custName:'')}
-function mobLabel(o){return (o.no||'')+' ('+(o.table?'โต๊ะ '+o.table.name:'กลับบ้าน')+')'}
+function mobLabel(o){return (o.no||'')+' ('+(o.table?'โต๊ะ '+o.table.name:o.type==='deli'?'เดลิเวอรี':o.type==='dine'?'ทานที่ร้าน':'กลับบ้าน')+')'}
 function mobSummary(o){return o.items.map(i=>i.qty+'× '+i.name).join(', ')}
 function renderMobq(){
   const el=$('#mobq');if(!el)return;const list=heldMobile();
@@ -872,7 +872,7 @@ function renderKstrip(){renderUnpaid();renderMobq();
     const top=os[0];
     return `<button class="kbox${top&&cls(top.m)==='bad'?' alert':''}" data-act="view" data-v="kds"><span class="kh"><b>${l}</b><span class="num">${os.length}</span></span>
       <span class="kl ${top?cls(top.m):''}">${top?`นานสุด ${top.m} นาที`:'ไม่มี'}</span>
-      ${os.length?`<span class="kc">${os.slice(0,4).map(x=>`<span class="kchip ${cls(x.m)}">${esc(x.o.table?x.o.table.name:x.o.no)} · ${x.m}น.</span>`).join('')}${os.length>4?`<span class="kchip">+${os.length-4}</span>`:''}</span>`:''}</button>`}).join('');
+      ${os.length?`<span class="kc">${os.slice(0,4).map(x=>`<span class="kchip ${cls(x.m)}">${esc(mobLabel(x.o))} · ${x.m}น.</span>`).join('')}${os.length>4?`<span class="kchip">+${os.length-4}</span>`:''}</span>`:''}</button>`}).join('');
 }
 function renderCats(){
   const el=$('#cats');if(!el)return;
