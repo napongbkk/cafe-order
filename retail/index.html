@@ -36,12 +36,17 @@ li svg{color:var(--g1);flex-shrink:0;margin-top:4px}
 .note a{color:var(--g2)}
 .brand{position:fixed;top:20px;left:20px;display:flex;align-items:center;gap:9px;color:#fff;text-decoration:none;font:700 18px/1 var(--fh)}
 .brand img{width:32px;height:32px}
+.langsw{position:fixed;top:18px;right:20px;display:flex;padding:3px;border-radius:12px;border:1px solid rgba(255,255,255,.25);gap:2px}
+.langsw button{border:0;background:none;color:rgba(255,255,255,.75);font:600 13px/1 var(--fh);padding:0 10px;min-height:32px;border-radius:9px;cursor:pointer}
+.langsw button[aria-pressed=true]{background:#fff;color:var(--ink)}
+body{padding-top:76px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
 </style>
 </head>
 <body>
 <div class="blob a"></div><div class="blob b"></div>
 <a class="brand" href="/"><img src="/easypos.svg" alt="">Easy POS</a>
+<div class="langsw" role="group" aria-label="ภาษา"><button type="button" data-lang="th" aria-pressed="true">TH</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
 <main class="card" aria-labelledby="t">
   <div class="top"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>
     <h1 id="t">Easy POS Retail<small>เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</small></h1></div>
@@ -56,5 +61,6 @@ li svg{color:var(--g1);flex-shrink:0;margin-top:4px}
   <a class="btn" href="/pos">เป็นร้านคาเฟ่? เข้าสู่ระบบ Easy POS Cafe</a>
   <div class="note">ร้านคาเฟ่และร้านอาหาร <a href="/signup">ทดลองใช้ Easy POS Cafe ฟรี 30 วัน</a></div>
 </main>
+<script src="/easypos-i18n.js"></script>
 </body>
 </html>

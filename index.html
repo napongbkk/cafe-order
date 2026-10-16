@@ -76,6 +76,12 @@ h1,h2,h3{font-family:var(--fh);line-height:1.2;margin:0;letter-spacing:-.01em}
 .mk.cafe{background:linear-gradient(135deg,var(--cafe),var(--cafe2))}
 .mk.retail{background:linear-gradient(135deg,var(--retail),var(--retail2))}
 .burger{display:none}
+.langsw{display:flex;padding:3px;border-radius:12px;border:1px solid rgba(255,255,255,.22);gap:2px}
+.langsw button{border:0;background:none;color:rgba(255,255,255,.7);font:600 13px/1 var(--fh);padding:0 10px;min-height:32px;border-radius:9px;cursor:pointer}
+.langsw button[aria-pressed=true]{background:#fff;color:var(--ink)}
+.langsw button:hover:not([aria-pressed=true]){color:#fff}
+html.en .hero h1{letter-spacing:-.025em}
+html.en .hero h1 .nw{white-space:normal;display:inline}
 
 /* hero */
 .hero{position:relative;background:var(--night);color:#fff;padding:148px 0 120px;overflow:hidden;isolation:isolate}
@@ -249,6 +255,10 @@ footer a:hover{color:#fff}
 @media (max-width:760px){
   .links{display:none}
   .nav .cta-top{display:none}
+  .nav .wrap{gap:8px}
+  .logo b{font-size:19px}
+  .login>button{padding:0 10px}
+  .langsw button{padding:0 8px}
   .hero{padding:120px 0 90px}
   section{padding:72px 0}
   .feats,.steps{grid-template-columns:1fr}
@@ -274,6 +284,7 @@ footer a:hover{color:#fff}
     <a class="logo" href="/" aria-label="Easy POS หน้าแรก"><img src="/easypos.svg" alt="" width="38" height="38"><b>Easy<span>POS</span></b></a>
     <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a></nav>
     <span class="sp"></span>
+    <div class="langsw" role="group" aria-label="ภาษา"><button type="button" data-lang="th" aria-pressed="true">TH</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
     <div class="login" id="login">
       <button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="loginMenu">เข้าสู่ระบบ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
       <div class="menu" id="loginMenu" role="menu">
@@ -445,6 +456,7 @@ footer a:hover{color:#fff}
   </div>
 </footer>
 
+<script src="/easypos-i18n.js"></script>
 <script>
 (function(){
 document.body.classList.remove('no-js');
@@ -467,11 +479,15 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 /* Show the paid packages the admin has set (falls back to the default text). */
 var SB='https://roggqmvmgfxsxynulpvk.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 function money(n){return Number(n||0).toLocaleString('th-TH')}
+var PK=null;
+function drawLongs(){if(!PK)return;var en=window.EP_LANG==='en';
+  var m=PK.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
+  document.getElementById('longs').innerHTML=PK.filter(function(p){return Number(p.months)>1}).map(function(p){var mo=Number(p.months);
+    var name=en?(mo===12?'Yearly':mo+' months'):String(p.name).replace(/[<>&]/g,'');
+    return '<span>'+name+' <b>฿'+money(p.price)+'</b> · '+(en?'avg ฿'+money(Math.round(p.price/mo))+'/mo':'เฉลี่ย ฿'+money(Math.round(p.price/mo))+'/เดือน')+'</span>'}).join('')}
+document.addEventListener('ep-lang',drawLongs);
 fetch(SB+'/rest/v1/rpc/pos_public_billing',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'})
-.then(function(r){return r.json()}).then(function(b){var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;
-  var m=l.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
-  var longs=l.filter(function(p){return Number(p.months)>1});
-  document.getElementById('longs').innerHTML=longs.map(function(p){return '<span>'+String(p.name).replace(/[<>&]/g,'')+' <b>฿'+money(p.price)+'</b> · เฉลี่ย ฿'+money(Math.round(p.price/p.months))+'/เดือน</span>'}).join('')}).catch(function(){});
+.then(function(r){return r.json()}).then(function(b){var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;PK=l;drawLongs()}).catch(function(){});
 })();
 </script>
 </body>
