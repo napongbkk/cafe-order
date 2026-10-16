@@ -381,19 +381,17 @@ td.r,th.r{text-align:right}
 .qrc a{font-size:11px;word-break:break-all;color:var(--muted)}
 .appst{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:600}
 .appst.ok{background:var(--ok-soft);color:var(--ok-ink)}.appst.err{background:var(--bad-soft);color:var(--bad-ink)}.appst.off,.appst.other{background:var(--sunk);color:var(--muted)}
-.mobq{border:2px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
-.mobq.fresh{animation:mobpulse 1s ease-in-out infinite}
-.mobq-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.mobq-h b{font-size:15px;color:var(--accent-soft-ink);display:inline-flex;align-items:center;gap:6px}
-.mobq-h .n{min-width:24px;height:24px;border-radius:12px;background:var(--accent);color:var(--on-accent);display:inline-grid;place-items:center;font-size:13px;padding:0 6px}
-.mobq-l{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
-.mq{flex-shrink:0;min-width:200px;display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:12px;background:var(--surface);border:1.5px solid var(--line2);text-align:left}
+.mobq{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 2px 4px}
+.mobq-h{flex-shrink:0;display:inline-flex;align-items:center;gap:6px;height:44px;padding:0 12px;border-radius:12px;border:0;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:14px;white-space:nowrap}
+.mobq.fresh .mobq-h{animation:mobpulse 1s ease-in-out infinite}
+.mobq-h .n{min-width:22px;height:22px;border-radius:11px;background:var(--on-accent);color:var(--accent);display:inline-grid;place-items:center;font-size:12px;padding:0 5px}
+.mq{flex-shrink:0;display:flex;align-items:stretch;height:44px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent-soft);overflow:hidden}
 .mq.new{border-color:var(--bad);animation:kpulse 1s ease-in-out infinite}
-.mq .t{display:flex;gap:6px;align-items:baseline;justify-content:space-between}
-.mq .t b{font-size:16px}
-.mq small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
-.mq .btn{min-height:38px}
 .mq.cur{outline:3px solid var(--accent);outline-offset:1px}
+.mq .o{display:flex;align-items:center;gap:6px;padding:0 10px;border:0;background:none;color:var(--accent-soft-ink);white-space:nowrap;font-size:13px}
+.mq .o b{font-size:15px;color:var(--ink)}
+.mq .o .num{font-weight:700;color:var(--ink)}
+.mq .p{border:0;padding:0 12px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:13px;white-space:nowrap}
 .newtag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--bad);color:#fff}
 .malert{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:90;width:min(460px,calc(100% - 24px));background:var(--surface);border:2px solid var(--accent);border-radius:18px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;animation:mobpulse 1s ease-in-out infinite}
 .malert .h{display:flex;gap:10px;align-items:center}
@@ -401,7 +399,7 @@ td.r,th.r{text-align:right}
 .malert .h b{font-size:17px;display:block}
 .malert .h small{color:var(--muted);font-size:13px}
 .malert .acts{display:flex;gap:8px}.malert .acts .btn{flex:1}
-.malert[hidden],.mobq[hidden]{display:none}
+.malert[hidden],.mobq[hidden],.unpaid[hidden]{display:none}
 .nav.blink .badge{animation:kchipb 1s step-end infinite}
 @keyframes mobpulse{50%{box-shadow:0 0 0 5px var(--accent-soft),var(--shadow)}}
 @media (prefers-reduced-motion:reduce){.mobq.fresh,.mq.new,.malert,.nav.blink .badge{animation:none}}
@@ -963,9 +961,8 @@ function renderMobq(){
   const el=$('#mobq');if(!el)return;const list=heldMobile();
   el.hidden=!list.length;if(!list.length){el.innerHTML='';return}
   const fresh=list.some(o=>S.mobNew.includes(o.id));el.classList.toggle('fresh',fresh);
-  el.innerHTML=`<div class="mobq-h"><b>${ic('phone',18)}Mobile Order รอชำระ <span class="n num">${list.length}</span></b><span class="muted" style="font-size:12px">ยังไม่ส่งครัว จนกว่าจะชำระเงิน</span><span style="flex:1"></span>${fresh?'<button class="btn sm" data-act="moback">รับทราบ</button>':''}<button class="btn sm" data-act="view" data-v="open">ดูทั้งหมด</button></div>
-    <div class="mobq-l">${list.map(o=>{const nw=S.mobNew.includes(o.id);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><div class="t"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span class="muted num" style="font-size:12px">${esc(o.no)} · ${ageMin(o.createdAt)} นาที</span></div>
-      <small>${esc(mobSummary(o))}</small><b class="num" style="font-size:17px">${baht(o.sums.total)}</b><div style="display:flex;gap:6px"><button class="btn sm" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">${S.bill.id===o.id?'กำลังแก้บิล':'เข้าบิล / แก้ไข'}</button><button class="btn primary sm" style="flex:1.3" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ · ส่งครัว</button></div></div>`}).join('')}</div>`;
+  el.innerHTML=`<button class="mobq-h" data-act="view" data-v="open" title="ดู Mobile Order ทั้งหมด · ยังไม่ส่งครัวจนกว่าจะชำระ">${ic('phone',16)}รอชำระ <span class="n num">${list.length}</span></button>`+
+    list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobWhere(o))}"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span>${n} รายการ · ${ageMin(o.createdAt)}น.</span><span class="num">${baht(o.sums.total)}</span></button><button class="p" data-act="checkbill" data-id="${esc(o.id)}">ชำระ</button></div>`}).join('');
 }
 let seenM=null,mobT=null;
 function mobChime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[[0,660],[0.18,880],[0.36,1175]].forEach(([t,f])=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=f;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.27)})}catch(e){}}
