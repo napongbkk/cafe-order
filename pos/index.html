@@ -124,11 +124,13 @@ th{color:var(--muted);font-weight:600;font-size:13px}
 td.r,th.r{text-align:right}
 
 /* sell */
-.sell{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 390px}
+.sell{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 390px;grid-template-rows:minmax(0,1fr)}
+.menu-pane > :not(.grid){flex-shrink:0}
+.app{overflow:hidden}
 .menu-pane{min-width:0;min-height:0;display:flex;flex-direction:column;gap:12px;padding:16px}
 .search{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;background:var(--surface);border:1px solid var(--line2);border-radius:12px;color:var(--muted)}
 .search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font-size:15px}
-.grid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;align-content:start;padding-bottom:8px}
+.grid{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-auto-rows:max-content;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;align-content:start;padding-bottom:8px}
 .item{display:flex;flex-direction:column;text-align:left;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
 .item:hover:not(:disabled){border-color:var(--accent-fill)}
 .item .pic{height:82px;display:grid;place-items:center;position:relative}
