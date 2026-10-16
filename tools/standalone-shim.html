@@ -1,17 +1,41 @@
-<!-- Standalone runtime: Supabase login, data store, realtime and image storage for POS outside Claude -->
+<!-- Standalone runtime: Supabase login, per-shop data store, realtime, storage and billing for POS outside Claude -->
 <style>
-.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
 .auth .box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
 .auth h1{margin:0;font-size:22px}
 .auth p{margin:0;color:var(--muted);font-size:14px}
 .auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.auth .msg a{color:inherit;font-weight:700}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .auth .links button{border:0;background:none;color:var(--accent);font-weight:600;padding:8px 0;min-height:44px}
+.lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 #acct{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.bill{display:flex;flex-direction:column;gap:14px}
+.bill-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bill-card h3{margin:0;font-size:16px}
+.bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bill-stat > div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.bill-stat small{color:var(--muted);font-size:12px}
+.bill-stat b{font-size:18px}
+.bchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ok-soft);color:var(--ok-ink)}
+.bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted)}
+.bill-pay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
+.bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center}
+.bill-months{display:flex;gap:6px;flex-wrap:wrap}
+.bill-hist{display:flex;flex-direction:column}
+.bill-hist .r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.bill-hist .r:last-child{border-bottom:0}
+.bill-hist .r .sp{flex:1}
+.billpill{border:0;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;background:var(--warn-soft);color:var(--warn-ink);cursor:pointer}
+.billpill.bad{background:var(--bad-soft);color:var(--bad-ink)}
+.adminbar{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;background:var(--dark);color:var(--on-dark);font-size:13px;font-weight:600}
+.adminbar a{color:inherit}
+@media (max-width:640px){.bill-pay{grid-template-columns:minmax(0,1fr)}}
 </style>
 <div class="auth" id="auth" hidden><form class="box form" id="authForm" novalidate>
-  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับพนักงาน</p></div></div>
+  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล<input id="authEmail" type="email" autocomplete="username" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -19,6 +43,10 @@
   <div class="links"><button type="button" id="authMode">ยังไม่มีบัญชี? สมัคร</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
   <button class="btn" type="button" id="authOut" hidden>ออกจากระบบ</button>
 </form></div>
+<div class="lockwrap" id="lockScreen" hidden><div class="inner">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="btn" type="button" id="lockOut">ออกจากระบบ</button></div>
+  <div id="lockBilling"></div>
+</div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
 <script>
 (function(){
@@ -31,18 +59,22 @@ if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacent
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 window.POS_SB=sb;
 window.POS_IMG=function(id){return sb.storage.from('pos-menu').getPublicUrl(id).data.publicUrl};
-var role=null,email=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
-window.POS_ACCOUNT=function(){return {email:email,role:role}};
+var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
+var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();
+window.POS_ACCOUNT=function(){return {email:email,role:role,admin:!!(SESS&&SESS.admin),shop:SESS&&SESS.shop}};
+window.POS_SESSION=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
 /* ---------- login screen ---------- */
 var signup=false;
-function msg(t,ok){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;m.textContent=t;m.className='msg'+(ok?' ok':'')}
-function showAuth(text,signedIn){$('#auth').hidden=false;msg(text||'');$('#authOut').hidden=!signedIn;}
-function setMode(s){signup=s;$('#authBtn').textContent=s?'สมัครบัญชี':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีบัญชีแล้ว? เข้าสู่ระบบ':'ยังไม่มีบัญชี? สมัคร';$('#authSub').textContent=s?'สมัครด้วยอีเมลที่เจ้าของร้านเพิ่มไว้':'เข้าสู่ระบบสำหรับพนักงาน';$('#authPass').autocomplete=s?'new-password':'current-password'}
+function msg(t,ok,html){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;if(html)m.innerHTML=t;else m.textContent=t;m.className='msg'+(ok?' ok':'')}
+function showAuth(text,signedIn,html){$('#auth').hidden=false;msg(text||'',false,html);$('#authOut').hidden=!signedIn;}
+function setMode(s){signup=s;$('#authBtn').textContent=s?'สมัครบัญชี':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีบัญชีแล้ว? เข้าสู่ระบบ':'ยังไม่มีบัญชี? สมัคร';$('#authSub').textContent=s?'สมัครด้วยอีเมลที่ผู้จัดการร้านเพิ่มไว้':'เข้าสู่ระบบสำหรับร้านค้า';$('#authPass').autocomplete=s?'new-password':'current-password'}
 $('#authMode').addEventListener('click',function(){setMode(!signup);msg('')});
 $('#authReset').addEventListener('click',function(){var e=$('#authEmail').value.trim();if(!e){msg('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');return}
   sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){msg(r.error?'ส่งอีเมลไม่สำเร็จ: '+r.error.message:'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว',!r.error)})});
-$('#authOut').addEventListener('click',function(){sb.auth.signOut().then(function(){location.reload()})});
+function out(){sb.auth.signOut().then(function(){location.reload()})}
+$('#authOut').addEventListener('click',out);$('#lockOut').addEventListener('click',out);
 $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=$('#authEmail').value.trim(),p=$('#authPass').value;
   if(!e||p.length<6){msg('ใส่อีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร');return}
   $('#authBtn').disabled=true;
@@ -52,13 +84,75 @@ $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=
     if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
     check()})});
 sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
+function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(function(x){if(x.error)throw x.error;return x.data})}
 function check(){
   sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
     email=s.user.email;
-    sb.rpc('pos_role').then(function(x){role=x.data||null;
-      if(!role){showAuth('บัญชี '+email+' ยังไม่ได้รับสิทธิ์ใช้ POS ให้เจ้าของร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน',true);return}
-      $('#auth').hidden=true;startRealtime();resolveReady()})});
+    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
+      if(!d.shop){
+        if(d.admin){location.replace('/admin');return}
+        showAuth('บัญชี '+email+' ยังไม่ได้อยู่ในร้านใด ให้ผู้จัดการร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน แล้วกดเข้าสู่ระบบอีกครั้ง',true);return}
+      SID=d.shop.id;role=d.role||'staff';
+      $('#auth').hidden=true;
+      if(d.shop.locked&&!d.admin){showLock();return}
+      startRealtime();resolveReady();setInterval(refreshSession,10*60*1000)})
+    .catch(function(e){showAuth('เชื่อมต่อระบบไม่สำเร็จ ลองรีเฟรชอีกครั้ง',true)})});
 }
+function refreshSession(){loadSession().then(function(d){if(!d||!d.shop)return;var was=SESS&&SESS.shop&&SESS.shop.locked;SESS=d;window.POS_SESSION=d;
+  if(d.shop.locked&&!d.admin&&!was){location.reload();return}
+  if(window.POS_ONSESSION)window.POS_ONSESSION(d)}).catch(function(){})}
+
+/* ---------- billing (shop side) ---------- */
+function crc16(s){var c=0xFFFF;for(var i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(var j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}}return ('0000'+c.toString(16).toUpperCase()).slice(-4)}
+function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}var target=String(id||'').replace(/\D/g,'');if(!target)return '';
+  var sub=target.length===13?t('02',target):target.length===15?t('03',target):t('01',('0000000000000'+target.replace(/^0/,'66')).slice(-13));
+  var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764');if(amount)p+=t('54',Number(amount).toFixed(2));p+='6304';return p+crc16(p)}
+function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function dTh(iso){if(!iso)return '-';return new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
+function daysLeft(iso){return Math.ceil((new Date(iso).getTime()-Date.now())/86400000)}
+function billState(sh){if(!sh)return {cls:'mute',t:'-'};if(sh.status==='suspended')return {cls:'bad',t:'ถูกระงับโดยผู้ดูแลระบบ'};
+  var d=daysLeft(sh.expiresAt);if(sh.locked)return {cls:'bad',t:'หมดอายุ · ถูกล็อก'};
+  if(d<0)return {cls:'bad',t:'เลยกำหนด · ผ่อนผันถึง '+dTh(sh.graceUntil)};if(d<=7)return {cls:'warn',t:'ใกล้หมดอายุ · เหลือ '+d+' วัน'};return {cls:'',t:'ใช้งานได้ · เหลือ '+d+' วัน'}}
+window.POS_BILLSTATE=function(){return billState(SESS&&SESS.shop)};
+var PST={pending:['รอตรวจสอบ','warn'],approved:['อนุมัติแล้ว','' ],rejected:['ไม่อนุมัติ','bad']};
+function shrink(file){return new Promise(function(res){try{var img=new Image();img.onload=function(){var max=1600,r=Math.min(1,max/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(b){res(b||file)},'image/jpeg',0.85)};img.onerror=function(){res(file)};img.src=URL.createObjectURL(file)}catch(e){res(file)}})}
+function renderBilling(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=el._m||1;
+  var amt=(+sh.price||0)*months;
+  el.innerHTML='<div class="bill">'+
+    '<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
+    '<div class="bill-stat"><div><small>ใช้งานได้ถึง</small><b>'+dTh(sh.expiresAt)+'</b></div><div><small>ค่าบริการ</small><b>'+baht(sh.price)+' / เดือน</b></div><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div><div><small>ผ่อนผันถึง</small><b>'+dTh(sh.graceUntil)+'</b></div></div>'+
+    '<span class="hint">ชำระก่อนวันหมดอายุเพื่อใช้งานต่อเนื่อง หลังหมดอายุใช้งานต่อได้อีก '+(bl.graceDays||7)+' วัน จากนั้นระบบจะล็อกการขายจนกว่าผู้ดูแลระบบจะอนุมัติการชำระเงิน ข้อมูลร้านไม่หาย</span></div>'+
+    (isMgr?'<div class="bill-card"><h3>ชำระค่าบริการ</h3><div class="bill-pay"><div class="bill-qr" id="billQr">'+(bl.promptpay?'':'ผู้ดูแลระบบยังไม่ได้ตั้ง QR รับเงิน')+'</div><div class="form" style="gap:10px">'+
+      '<div><span class="grp-t">จำนวนเดือน</span><div class="bill-months">'+[1,3,6,12].map(function(m){return '<button type="button" class="chip" data-bm="'+m+'" aria-pressed="'+(m===months)+'">'+m+' เดือน</button>'}).join('')+'</div></div>'+
+      '<div style="font-size:15px">ยอดที่ต้องโอน <b class="num" style="font-size:24px">'+baht(amt)+'</b></div>'+
+      (bl.bankNo?'<div class="hint" style="font-size:14px;color:var(--ink)">'+esc(bl.bankName||'')+' '+esc(bl.bankNo)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
+      (bl.promptpay?'<div class="hint">พร้อมเพย์ '+esc(bl.promptpay)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
+      (bl.note?'<div class="hint">'+esc(bl.note)+'</div>':'')+
+      '<label for="billSlip">แนบสลิปการโอน<input id="billSlip" type="file" accept="image/*" required></label>'+
+      '<label for="billNote">หมายเหตุ (ไม่บังคับ)<input id="billNote" maxlength="200" placeholder="เช่น โอนจากบัญชีชื่อ…"></label>'+
+      '<button class="btn primary big" type="button" id="billSend">แจ้งชำระเงิน '+baht(amt)+'</button><div id="billMsg" class="hint"></div></div></div></div>':'<div class="note">การชำระค่าบริการทำได้โดยผู้จัดการร้าน</div>')+
+    '<div class="bill-card"><h3>ประวัติการแจ้งชำระ</h3><div class="bill-hist" id="billHist"><div class="muted">กำลังโหลด…</div></div></div></div>';
+  if(bl.promptpay&&isMgr&&typeof QRCode!=='undefined'){try{new QRCode(el.querySelector('#billQr'),{text:ppPayload(bl.promptpay,amt),width:190,height:190,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
+  el.querySelectorAll('[data-bm]').forEach(function(b){b.addEventListener('click',function(){el._m=+b.dataset.bm;renderBilling(el)})});
+  var send=el.querySelector('#billSend');if(send)send.addEventListener('click',function(){submitPay(el,months)});
+  if(isMgr)sb.from('pos_payments').select('*').eq('shop_id',SID).order('created_at',{ascending:false}).limit(20).then(function(r){var h=el.querySelector('#billHist');if(!h)return;
+    if(r.error){h.innerHTML='<div class="note">โหลดประวัติไม่สำเร็จ</div>';return}
+    h.innerHTML=r.data.length?r.data.map(function(p){var s=PST[p.status]||['',''];return '<div class="r"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span class="muted">'+p.months+' เดือน</span><span class="bchip '+s[1]+'">'+s[0]+'</span><span class="sp"></span>'+(p.period_to?'<span class="muted">ต่ออายุถึง '+dTh(p.period_to)+'</span>':'')+(p.admin_note?'<span class="muted">· '+esc(p.admin_note)+'</span>':'')+'</div>'}).join(''):'<div class="muted">ยังไม่มีการแจ้งชำระ</div>'});
+  else{var h=el.querySelector('#billHist');if(h)h.parentNode.remove()}
+}
+function submitPay(el,months){var f=el.querySelector('#billSlip').files[0],m=el.querySelector('#billMsg'),b=el.querySelector('#billSend');
+  if(!f){m.textContent='แนบสลิปการโอนก่อน';return}if(!/^image\//.test(f.type)){m.textContent='สลิปต้องเป็นไฟล์รูปภาพ';return}
+  b.disabled=true;m.textContent='กำลังส่ง…';
+  shrink(f).then(function(blob){var path=SID+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.jpg';
+    return sb.storage.from('pos-slips').upload(path,blob,{contentType:'image/jpeg',upsert:false}).then(function(r){if(r.error)throw r.error;
+      return sb.rpc('pos_pay_submit',{p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null})})})
+  .then(function(r){if(r.error)throw r.error;m.textContent='';el._m=1;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
+  .catch(function(e){b.disabled=false;m.textContent=/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
+window.POS_BILLING={render:renderBilling};
+function showLock(){var sh=SESS.shop;$('#lockScreen').hidden=false;
+  $('#lockWhy').textContent=sh.status==='suspended'?'ผู้ดูแลระบบระงับการใช้งานร้าน '+sh.name+' ไว้ ติดต่อผู้ดูแลระบบ':'ค่าบริการของร้าน '+sh.name+' เลยกำหนดชำระ ชำระและแจ้งสลิปด้านล่าง เมื่อผู้ดูแลระบบอนุมัติ ร้านจะกลับมาใช้งานได้ทันที';
+  var go=function(){renderBilling($('#lockBilling'))};if(typeof QRCode==='undefined')window.addEventListener('load',go);else go();
+  setInterval(function(){loadSession().then(function(d){if(d&&d.shop&&!d.shop.locked)location.reload()}).catch(function(){})},60000)}
 
 /* ---------- data store (same API the POS uses inside Claude) ---------- */
 function E(e){var x={code:'unavailable',message:(e&&e.message)||String(e)};if(e&&(e.code==='42501'||e.code==='P0002'||/row-level|permission|policy|not_found/i.test(x.message)))x.code='invalid_argument';return x}
@@ -68,19 +162,20 @@ var subs=new Set();
 function notify(col){subs.forEach(function(s){if(!col||s.col===col)s.kick()})}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
 function cmp(a,op,b){if(typeof b==='number')a=Number(a);if(op==='==')return a===b;if(op==='!=')return a!==b;if(op==='>=')return a>=b;if(op==='>')return a>b;if(op==='<')return a<b;if(op==='<=')return a<=b;if(op==='in')return b.indexOf(a)>=0;return true}
+function T(){return sb.from('pos_data')}
 function Doc(col,id){var ref={id:id,path:col+'/'+id,
-  get:function(){return sb.from('pos_docs').select('data').eq('col',col).eq('id',id).maybeSingle().then(function(r){if(r.error)throw E(r.error);return snap(id,r.data?r.data.data:null)})},
-  set:function(d){return sb.from('pos_docs').upsert({col:col,id:id,data:d,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  update:function(p){return sb.rpc('pos_doc_update',{p_col:col,p_id:id,p_patch:p}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  delete:function(){return sb.from('pos_docs').delete().eq('col',col).eq('id',id).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  acquire:function(o){return sb.rpc('pos_acquire',{p_col:col,p_id:id,p_holder:o.holder,p_ttl_ms:o.ttlMs||30000}).then(function(r){if(r.error)throw E(r.error);return r.data})},
+  get:function(){return T().select('data').eq('shop_id',SID).eq('col',col).eq('id',id).maybeSingle().then(function(r){if(r.error)throw E(r.error);return snap(id,r.data?r.data.data:null)})},
+  set:function(d){return T().upsert({shop_id:SID,col:col,id:id,data:d,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  update:function(p){return sb.rpc('pos_data_update',{p_sid:SID,p_col:col,p_id:id,p_patch:p}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  delete:function(){return T().delete().eq('shop_id',SID).eq('col',col).eq('id',id).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  acquire:function(o){return sb.rpc('pos_data_lease',{p_sid:SID,p_col:col,p_id:id,p_holder:o.holder,p_ttl_ms:o.ttlMs||30000}).then(function(r){if(r.error)throw E(r.error);return r.data})},
   onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){ref.get().then(next).catch(function(){})},120)};subs.add(s);s.kick();return function(){subs.delete(s)}}};
   return ref}
 function Query(col,f,o,l){var q={
   where:function(a,op,v){return Query(col,f.concat([[a,op,v]]),o,l)},
   orderBy:function(a,dir){return Query(col,f,[a,dir||'asc'],l)},
   limit:function(n){return Query(col,f,o,n)},
-  get:function(){var r=sb.from('pos_docs').select('id,data').eq('col',col);
+  get:function(){var r=T().select('id,data').eq('shop_id',SID).eq('col',col);
     f.forEach(function(x){var k='data->>'+x[0],v=String(x[2]);if(x[1]==='==')r=r.eq(k,v);else if(x[1]==='>=')r=r.gte(k,v);else if(x[1]==='>')r=r.gt(k,v);else if(x[1]==='<')r=r.lt(k,v);else if(x[1]==='<=')r=r.lte(k,v)});
     return r.limit(5000).then(function(res){if(res.error)throw E(res.error);
       var rows=(res.data||[]).filter(function(d){return f.every(function(x){return cmp(d.data[x[0]],x[1],x[2])})});
@@ -95,18 +190,19 @@ function Query(col,f,o,l){var q={
 var db={doc:function(p){var a=p.split('/');return Doc(a[0],a[1])},collection:function(p){return Query(p,[],null,null)}};
 var rtStarted=false;
 function startRealtime(){if(rtStarted)return;rtStarted=true;
-  sb.channel('pos_docs_changes').on('postgres_changes',{event:'*',schema:'public',table:'pos_docs'},function(pl){var c=(pl.new&&pl.new.col)||(pl.old&&pl.old.col);notify(c||null)}).subscribe();
+  sb.channel('pos_data_'+SID).on('postgres_changes',{event:'*',schema:'public',table:'pos_data',filter:'shop_id=eq.'+SID},function(pl){var c=(pl.new&&pl.new.col)||(pl.old&&pl.old.col);notify(c||null)}).subscribe();
   setInterval(function(){if(!document.hidden)notify(null)},30000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)notify(null)});
 }
-var user={isOwner:function(){return Promise.resolve(role==='owner')},canEdit:function(){return Promise.resolve(role==='owner'||role==='manager')},
+function isMgr(){return role==='manager'}
+var user={isOwner:function(){return Promise.resolve(isMgr())},canEdit:function(){return Promise.resolve(isMgr())},
   id:function(){return Promise.resolve(email)},can:function(){return Promise.resolve(null)},
-  me:function(){return Promise.resolve({id:email,name:email||'',email:email,isOwner:role==='owner',canEdit:role==='owner'||role==='manager',avatarUrl:'',color:'#2F6FB0'})}};
-var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'})[ty]||'bin';var path=uid()+'.'+ext;return sb.storage.from('pos-menu').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000',upsert:false}).then(function(r){if(r.error){var e=E(r.error);throw e}return {id:path,url:window.POS_IMG(path),sizeBytes:blob.size,contentType:blob.type}})},
+  me:function(){return Promise.resolve({id:email,name:email||'',email:email,isOwner:isMgr(),canEdit:isMgr(),avatarUrl:'',color:'#2F6FB0'})}};
+var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'})[ty]||'bin';var path=SID+'/'+uid()+'.'+ext;return sb.storage.from('pos-menu').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000',upsert:false}).then(function(r){if(r.error){var e=E(r.error);throw e}return {id:path,url:window.POS_IMG(path),sizeBytes:blob.size,contentType:blob.type}})},
   delete:function(id){return sb.storage.from('pos-menu').remove([id]).then(function(){})},list:function(){return Promise.resolve({assets:[],usage:{}})}};
 window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
 window.claude={use:function(name){return readyP.then(function(){
-  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return (role==='owner'||role==='manager')?assets:null;return null})}};
+  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
 check();
 })();
 </script>

@@ -54,13 +54,13 @@ R("async function bridgeTick(){",
     if(!lease.acquired){S.app.state='other';S.app.msg='มีเครื่องอื่นเป็นตัวรับออเดอร์จากแอปอยู่';renderAppStatus();scheduleBridge(20000);return}
     const snap=JSON.stringify(appSnapshot());const sendSnap=snap!==lastSnap&&S.menu.length;const o=sendSnap?JSON.parse(snap):null;
     const vals=appStatuses();
-    const r=await window.POS_SB.rpc('pos_app_sync',{p_menu:o?o.menu:null,p_shop:o?o.shop:null,p_status:vals.length?vals:null});
+    const sid=window.POS_SESSION.shop.id;const r=await window.POS_SB.rpc('pos_shop_sync',{p_sid:sid,p_menu:o?o.menu:null,p_shopdata:o?o.shop:null,p_status:vals.length?vals:null});
     if(r.error)throw {code:'tool_error',message:r.error.message};
     if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd});
     const rows=Array.isArray(r.data)?r.data:[];const acc=[];
     for(const ao of rows){const res=await importAppOrder(ao);if(res)acc.push([ao.id,res])}
     if(acc.length){
-      const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
+      const a2=await window.POS_SB.rpc('pos_shop_accept',{p_sid:sid,p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
       acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
       toast('Mobile Order ใหม่ (รอชำระ): '+acc.map(([,res])=>res.where).join(', '));
@@ -81,36 +81,51 @@ R("setTimeout(()=>{if(S.mode==='loading')startDemo()},11000);",
 # Signed-in account + sign out in the top bar.
 R('      <span id="appPill"></span>', '      <span id="acct"></span>\n      <span id="appPill"></span>')
 R("  $('#appPill').innerHTML=",
-  "  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();$('#acct').innerHTML=a.email?`<span>${esc(a.email)} · ${({owner:'เจ้าของ',manager:'ผู้จัดการ',staff:'พนักงาน'})[a.role]||''}</span><button class=\"btn sm\" data-act=\"logout\">ออกจากระบบ</button>`:''}\n  $('#appPill').innerHTML=")
+  "  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();const bs=window.POS_BILLSTATE?window.POS_BILLSTATE():null;$('#acct').innerHTML=a.email?`${a.admin?`<span class=\"adminbar\">ผู้ดูแลระบบ · ${esc(a.shop?a.shop.name:'')} <a href=\"/admin\">กลับแดชบอร์ด</a></span>`:''}${bs&&bs.cls&&a.role==='manager'?`<button class=\"billpill ${bs.cls==='bad'?'bad':''}\" data-act=\"billgo\">${esc(bs.t)}</button>`:''}<span>${esc(a.email)} · ${a.admin?'ผู้ดูแลระบบ':({manager:'ผู้จัดการร้าน',staff:'พนักงาน'})[a.role]||''}</span><button class=\"btn sm\" data-act=\"logout\">ออกจากระบบ</button>`:''}\n  $('#appPill').innerHTML=")
 R("    case 'apptoggle':", "    case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;\n    case 'apptoggle':")
 
-# Staff management (owner only) in Settings.
+# Staff management (shop manager) and monthly billing in Settings.
 R("const tabs=[['devices','อุปกรณ์และการรับเงิน'],",
-  "const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE?[['staff','พนักงาน']]:[]),")
+  "const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),")
 R("  else if(tab==='app'){",
-  r"""  else if(tab==='staff'){const isOwner=window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='owner';
-    body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · ผู้จัดการแก้เมนูและตั้งค่าได้ · พนักงานขายและใช้จอครัวได้</span>
-    ${isOwner?`<form class="form" id="staffForm"><div class="three"><label for="st_email">อีเมล<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label><label for="st_role">ตำแหน่ง<select id="st_role"><option value="staff">พนักงาน</option><option value="manager">ผู้จัดการ</option><option value="owner">เจ้าของ</option></select></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่ม / แก้ไขพนักงาน</button></form>`:'<div class="note">จัดการพนักงานได้เฉพาะเจ้าของร้าน</div>'}
+  r"""  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
+  else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
+    body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่แก้เมนู ตั้งค่าร้าน และดูรายงานไม่ได้</span>
+    <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0} · ต้องการเพิ่มจำนวน ติดต่อผู้ดูแลระบบ</div>
+    <form class="form" id="staffForm"><div class="two"><label for="st_email">อีเมลพนักงาน<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>
     <div id="staffList"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(loadStaff,0)}
   else if(tab==='app'){""")
 R("/* ===== render ===== */",
-  r"""async function loadStaff(){const el=$('#staffList');if(!el||!window.POS_SB)return;
-  const r=await window.POS_SB.from('pos_staff').select('*').order('created_at');if(r.error){el.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
-  const me=window.POS_ACCOUNT().email,isOwner=window.POS_ACCOUNT().role==='owner';const RL={owner:'เจ้าของ',manager:'ผู้จัดการ',staff:'พนักงาน'};
-  el.innerHTML=r.data.length?r.data.map(x=>`<div class="mrow"><div class="info"><b>${esc(x.name||x.email)}</b><small>${esc(x.email)} · ${RL[x.role]||x.role}${x.active?'':' · ปิดใช้งาน'}</small></div>${isOwner&&x.email.toLowerCase()!==String(me).toLowerCase()?`<button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`:''}</div>`).join(''):'<div class="muted">ยังไม่มี</div>'}
+  r"""async function loadStaff(){const el=$('#staffList');if(!el||!window.POS_SB)return;const sid=window.POS_SESSION.shop.id;
+  const r=await window.POS_SB.from('pos_members').select('*').eq('shop_id',sid).order('created_at');if(r.error){el.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
+  const n=r.data.filter(x=>x.role==='staff'&&x.active).length;const q=$('#staffQuota');const lim=window.POS_SESSION.shop.staffLimit||0;window.POS_SESSION.shop.staffUsed=n;
+  if(q)q.textContent='บัญชีพนักงาน '+n+' / '+lim+(n>=lim?' · ครบจำนวนแล้ว ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':' · เพิ่มได้อีก '+(lim-n)+' บัญชี');
+  el.innerHTML=r.data.length?r.data.map(x=>`<div class="mrow"><div class="info"><b>${esc(x.name||x.email)}</b><small>${esc(x.email)} · ${x.role==='manager'?'ผู้จัดการร้าน':'พนักงาน'}${x.active?'':' · ปิดใช้งาน'}</small></div>${x.role==='staff'?`<button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`:''}</div>`).join(''):'<div class="muted">ยังไม่มี</div>'}
+function staffErr(e){const m=String(e&&e.message||'');return /staff_limit/.test(m)?'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':/duplicate|pos_members_pkey/.test(m)?'อีเมลนี้ใช้กับร้านอื่นอยู่แล้ว':/bad_email/.test(m)?'อีเมลไม่ถูกต้อง':'บันทึกไม่สำเร็จ: '+m}
 
 /* ===== render ===== */""")
 R("    case 'logout':",
-  r"""    case 'staffactive':window.POS_SB.from('pos_staff').update({active:d.v==='1'}).eq('email',d.id).then(r=>{if(r.error)toast('บันทึกไม่สำเร็จ');loadStaff()});break;
+  r"""    case 'staffactive':window.POS_SB.from('pos_members').update({active:d.v==='1'}).eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).then(r=>{if(r.error)toast(staffErr(r.error));loadStaff()});break;
     case 'staffask':S.confirm='sfdel:'+d.id;loadStaff();break;
     case 'staffundel':S.confirm=null;loadStaff();break;
-    case 'staffdel':S.confirm=null;window.POS_SB.from('pos_staff').delete().eq('email',d.id).then(r=>{toast(r.error?'ลบไม่สำเร็จ':'ลบแล้ว');loadStaff()});break;
+    case 'staffdel':S.confirm=null;window.POS_SB.from('pos_members').delete().eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).eq('role','staff').then(r=>{toast(r.error?'ลบไม่สำเร็จ':'ลบแล้ว');loadStaff()});break;
+    case 'billgo':S.stab='billing';go('settings');break;
     case 'logout':""")
 R("  if(id==='catForm'){",
   r"""  if(id==='staffForm'){const em=$('#st_email').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('ใส่อีเมลให้ถูกต้อง');return}
-    const r=await window.POS_SB.from('pos_staff').upsert({email:em,name:$('#st_name').value.trim()||null,role:$('#st_role').value,active:true});
-    if(r.error){toast('บันทึกไม่สำเร็จ: '+r.error.message);return}toast('บันทึกพนักงานแล้ว');f.reset();loadStaff();return}
+    const r=await window.POS_SB.from('pos_members').insert({email:em,name:$('#st_name').value.trim()||null,role:'staff',active:true,shop_id:window.POS_SESSION.shop.id});
+    if(r.error){toast(staffErr(r.error));return}toast('เพิ่มพนักงานแล้ว ให้พนักงานสมัครด้วยอีเมลนี้');f.reset();loadStaff();return}
   if(id==='catForm'){""")
+
+# Staff accounts do not see reports or the menu editor.
+R("NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff))",
+  "NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(v)))")
+R("function go(view){",
+  "function go(view){if(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(view))view='sell';")
+
+# Customer-app links carry the shop.
+R("function appBase(){",
+  "function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug+'/';")
 
 # Default: this device pulls customer-app orders (a lease keeps it to one device).
 R("let PR={paper:'80',", "let PR={bridge:!!window.POS_STANDALONE,paper:'80',")

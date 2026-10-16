@@ -550,20 +550,44 @@ td.r,th.r{text-align:right}
 <div id="toast" class="toast" role="status" hidden></div>
 <div id="malert" class="malert" role="alert" hidden></div>
 
-<!-- Standalone runtime: Supabase login, data store, realtime and image storage for POS outside Claude -->
+<!-- Standalone runtime: Supabase login, per-shop data store, realtime, storage and billing for POS outside Claude -->
 <style>
-.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
 .auth .box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
 .auth h1{margin:0;font-size:22px}
 .auth p{margin:0;color:var(--muted);font-size:14px}
 .auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.auth .msg a{color:inherit;font-weight:700}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .auth .links button{border:0;background:none;color:var(--accent);font-weight:600;padding:8px 0;min-height:44px}
+.lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
 #acct{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.bill{display:flex;flex-direction:column;gap:14px}
+.bill-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bill-card h3{margin:0;font-size:16px}
+.bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bill-stat > div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.bill-stat small{color:var(--muted);font-size:12px}
+.bill-stat b{font-size:18px}
+.bchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ok-soft);color:var(--ok-ink)}
+.bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted)}
+.bill-pay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
+.bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center}
+.bill-months{display:flex;gap:6px;flex-wrap:wrap}
+.bill-hist{display:flex;flex-direction:column}
+.bill-hist .r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.bill-hist .r:last-child{border-bottom:0}
+.bill-hist .r .sp{flex:1}
+.billpill{border:0;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;background:var(--warn-soft);color:var(--warn-ink);cursor:pointer}
+.billpill.bad{background:var(--bad-soft);color:var(--bad-ink)}
+.adminbar{display:inline-flex;align-items:center;gap:8px;padding:4px 10px;border-radius:999px;background:var(--dark);color:var(--on-dark);font-size:13px;font-weight:600}
+.adminbar a{color:inherit}
+@media (max-width:640px){.bill-pay{grid-template-columns:minmax(0,1fr)}}
 </style>
 <div class="auth" id="auth" hidden><form class="box form" id="authForm" novalidate>
-  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับพนักงาน</p></div></div>
+  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล<input id="authEmail" type="email" autocomplete="username" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -571,6 +595,10 @@ td.r,th.r{text-align:right}
   <div class="links"><button type="button" id="authMode">ยังไม่มีบัญชี? สมัคร</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
   <button class="btn" type="button" id="authOut" hidden>ออกจากระบบ</button>
 </form></div>
+<div class="lockwrap" id="lockScreen" hidden><div class="inner">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="btn" type="button" id="lockOut">ออกจากระบบ</button></div>
+  <div id="lockBilling"></div>
+</div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
 <script>
 (function(){
@@ -583,18 +611,22 @@ if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacent
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 window.POS_SB=sb;
 window.POS_IMG=function(id){return sb.storage.from('pos-menu').getPublicUrl(id).data.publicUrl};
-var role=null,email=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
-window.POS_ACCOUNT=function(){return {email:email,role:role}};
+var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
+var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();
+window.POS_ACCOUNT=function(){return {email:email,role:role,admin:!!(SESS&&SESS.admin),shop:SESS&&SESS.shop}};
+window.POS_SESSION=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
 /* ---------- login screen ---------- */
 var signup=false;
-function msg(t,ok){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;m.textContent=t;m.className='msg'+(ok?' ok':'')}
-function showAuth(text,signedIn){$('#auth').hidden=false;msg(text||'');$('#authOut').hidden=!signedIn;}
-function setMode(s){signup=s;$('#authBtn').textContent=s?'สมัครบัญชี':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีบัญชีแล้ว? เข้าสู่ระบบ':'ยังไม่มีบัญชี? สมัคร';$('#authSub').textContent=s?'สมัครด้วยอีเมลที่เจ้าของร้านเพิ่มไว้':'เข้าสู่ระบบสำหรับพนักงาน';$('#authPass').autocomplete=s?'new-password':'current-password'}
+function msg(t,ok,html){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;if(html)m.innerHTML=t;else m.textContent=t;m.className='msg'+(ok?' ok':'')}
+function showAuth(text,signedIn,html){$('#auth').hidden=false;msg(text||'',false,html);$('#authOut').hidden=!signedIn;}
+function setMode(s){signup=s;$('#authBtn').textContent=s?'สมัครบัญชี':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีบัญชีแล้ว? เข้าสู่ระบบ':'ยังไม่มีบัญชี? สมัคร';$('#authSub').textContent=s?'สมัครด้วยอีเมลที่ผู้จัดการร้านเพิ่มไว้':'เข้าสู่ระบบสำหรับร้านค้า';$('#authPass').autocomplete=s?'new-password':'current-password'}
 $('#authMode').addEventListener('click',function(){setMode(!signup);msg('')});
 $('#authReset').addEventListener('click',function(){var e=$('#authEmail').value.trim();if(!e){msg('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');return}
   sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){msg(r.error?'ส่งอีเมลไม่สำเร็จ: '+r.error.message:'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว',!r.error)})});
-$('#authOut').addEventListener('click',function(){sb.auth.signOut().then(function(){location.reload()})});
+function out(){sb.auth.signOut().then(function(){location.reload()})}
+$('#authOut').addEventListener('click',out);$('#lockOut').addEventListener('click',out);
 $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=$('#authEmail').value.trim(),p=$('#authPass').value;
   if(!e||p.length<6){msg('ใส่อีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร');return}
   $('#authBtn').disabled=true;
@@ -604,13 +636,75 @@ $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=
     if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
     check()})});
 sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
+function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(function(x){if(x.error)throw x.error;return x.data})}
 function check(){
   sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
     email=s.user.email;
-    sb.rpc('pos_role').then(function(x){role=x.data||null;
-      if(!role){showAuth('บัญชี '+email+' ยังไม่ได้รับสิทธิ์ใช้ POS ให้เจ้าของร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน',true);return}
-      $('#auth').hidden=true;startRealtime();resolveReady()})});
+    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
+      if(!d.shop){
+        if(d.admin){location.replace('/admin');return}
+        showAuth('บัญชี '+email+' ยังไม่ได้อยู่ในร้านใด ให้ผู้จัดการร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน แล้วกดเข้าสู่ระบบอีกครั้ง',true);return}
+      SID=d.shop.id;role=d.role||'staff';
+      $('#auth').hidden=true;
+      if(d.shop.locked&&!d.admin){showLock();return}
+      startRealtime();resolveReady();setInterval(refreshSession,10*60*1000)})
+    .catch(function(e){showAuth('เชื่อมต่อระบบไม่สำเร็จ ลองรีเฟรชอีกครั้ง',true)})});
 }
+function refreshSession(){loadSession().then(function(d){if(!d||!d.shop)return;var was=SESS&&SESS.shop&&SESS.shop.locked;SESS=d;window.POS_SESSION=d;
+  if(d.shop.locked&&!d.admin&&!was){location.reload();return}
+  if(window.POS_ONSESSION)window.POS_ONSESSION(d)}).catch(function(){})}
+
+/* ---------- billing (shop side) ---------- */
+function crc16(s){var c=0xFFFF;for(var i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(var j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF}}return ('0000'+c.toString(16).toUpperCase()).slice(-4)}
+function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}var target=String(id||'').replace(/\D/g,'');if(!target)return '';
+  var sub=target.length===13?t('02',target):target.length===15?t('03',target):t('01',('0000000000000'+target.replace(/^0/,'66')).slice(-13));
+  var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764');if(amount)p+=t('54',Number(amount).toFixed(2));p+='6304';return p+crc16(p)}
+function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2})}
+function dTh(iso){if(!iso)return '-';return new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
+function daysLeft(iso){return Math.ceil((new Date(iso).getTime()-Date.now())/86400000)}
+function billState(sh){if(!sh)return {cls:'mute',t:'-'};if(sh.status==='suspended')return {cls:'bad',t:'ถูกระงับโดยผู้ดูแลระบบ'};
+  var d=daysLeft(sh.expiresAt);if(sh.locked)return {cls:'bad',t:'หมดอายุ · ถูกล็อก'};
+  if(d<0)return {cls:'bad',t:'เลยกำหนด · ผ่อนผันถึง '+dTh(sh.graceUntil)};if(d<=7)return {cls:'warn',t:'ใกล้หมดอายุ · เหลือ '+d+' วัน'};return {cls:'',t:'ใช้งานได้ · เหลือ '+d+' วัน'}}
+window.POS_BILLSTATE=function(){return billState(SESS&&SESS.shop)};
+var PST={pending:['รอตรวจสอบ','warn'],approved:['อนุมัติแล้ว','' ],rejected:['ไม่อนุมัติ','bad']};
+function shrink(file){return new Promise(function(res){try{var img=new Image();img.onload=function(){var max=1600,r=Math.min(1,max/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(b){res(b||file)},'image/jpeg',0.85)};img.onerror=function(){res(file)};img.src=URL.createObjectURL(file)}catch(e){res(file)}})}
+function renderBilling(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=el._m||1;
+  var amt=(+sh.price||0)*months;
+  el.innerHTML='<div class="bill">'+
+    '<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
+    '<div class="bill-stat"><div><small>ใช้งานได้ถึง</small><b>'+dTh(sh.expiresAt)+'</b></div><div><small>ค่าบริการ</small><b>'+baht(sh.price)+' / เดือน</b></div><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div><div><small>ผ่อนผันถึง</small><b>'+dTh(sh.graceUntil)+'</b></div></div>'+
+    '<span class="hint">ชำระก่อนวันหมดอายุเพื่อใช้งานต่อเนื่อง หลังหมดอายุใช้งานต่อได้อีก '+(bl.graceDays||7)+' วัน จากนั้นระบบจะล็อกการขายจนกว่าผู้ดูแลระบบจะอนุมัติการชำระเงิน ข้อมูลร้านไม่หาย</span></div>'+
+    (isMgr?'<div class="bill-card"><h3>ชำระค่าบริการ</h3><div class="bill-pay"><div class="bill-qr" id="billQr">'+(bl.promptpay?'':'ผู้ดูแลระบบยังไม่ได้ตั้ง QR รับเงิน')+'</div><div class="form" style="gap:10px">'+
+      '<div><span class="grp-t">จำนวนเดือน</span><div class="bill-months">'+[1,3,6,12].map(function(m){return '<button type="button" class="chip" data-bm="'+m+'" aria-pressed="'+(m===months)+'">'+m+' เดือน</button>'}).join('')+'</div></div>'+
+      '<div style="font-size:15px">ยอดที่ต้องโอน <b class="num" style="font-size:24px">'+baht(amt)+'</b></div>'+
+      (bl.bankNo?'<div class="hint" style="font-size:14px;color:var(--ink)">'+esc(bl.bankName||'')+' '+esc(bl.bankNo)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
+      (bl.promptpay?'<div class="hint">พร้อมเพย์ '+esc(bl.promptpay)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
+      (bl.note?'<div class="hint">'+esc(bl.note)+'</div>':'')+
+      '<label for="billSlip">แนบสลิปการโอน<input id="billSlip" type="file" accept="image/*" required></label>'+
+      '<label for="billNote">หมายเหตุ (ไม่บังคับ)<input id="billNote" maxlength="200" placeholder="เช่น โอนจากบัญชีชื่อ…"></label>'+
+      '<button class="btn primary big" type="button" id="billSend">แจ้งชำระเงิน '+baht(amt)+'</button><div id="billMsg" class="hint"></div></div></div></div>':'<div class="note">การชำระค่าบริการทำได้โดยผู้จัดการร้าน</div>')+
+    '<div class="bill-card"><h3>ประวัติการแจ้งชำระ</h3><div class="bill-hist" id="billHist"><div class="muted">กำลังโหลด…</div></div></div></div>';
+  if(bl.promptpay&&isMgr&&typeof QRCode!=='undefined'){try{new QRCode(el.querySelector('#billQr'),{text:ppPayload(bl.promptpay,amt),width:190,height:190,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
+  el.querySelectorAll('[data-bm]').forEach(function(b){b.addEventListener('click',function(){el._m=+b.dataset.bm;renderBilling(el)})});
+  var send=el.querySelector('#billSend');if(send)send.addEventListener('click',function(){submitPay(el,months)});
+  if(isMgr)sb.from('pos_payments').select('*').eq('shop_id',SID).order('created_at',{ascending:false}).limit(20).then(function(r){var h=el.querySelector('#billHist');if(!h)return;
+    if(r.error){h.innerHTML='<div class="note">โหลดประวัติไม่สำเร็จ</div>';return}
+    h.innerHTML=r.data.length?r.data.map(function(p){var s=PST[p.status]||['',''];return '<div class="r"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span class="muted">'+p.months+' เดือน</span><span class="bchip '+s[1]+'">'+s[0]+'</span><span class="sp"></span>'+(p.period_to?'<span class="muted">ต่ออายุถึง '+dTh(p.period_to)+'</span>':'')+(p.admin_note?'<span class="muted">· '+esc(p.admin_note)+'</span>':'')+'</div>'}).join(''):'<div class="muted">ยังไม่มีการแจ้งชำระ</div>'});
+  else{var h=el.querySelector('#billHist');if(h)h.parentNode.remove()}
+}
+function submitPay(el,months){var f=el.querySelector('#billSlip').files[0],m=el.querySelector('#billMsg'),b=el.querySelector('#billSend');
+  if(!f){m.textContent='แนบสลิปการโอนก่อน';return}if(!/^image\//.test(f.type)){m.textContent='สลิปต้องเป็นไฟล์รูปภาพ';return}
+  b.disabled=true;m.textContent='กำลังส่ง…';
+  shrink(f).then(function(blob){var path=SID+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.jpg';
+    return sb.storage.from('pos-slips').upload(path,blob,{contentType:'image/jpeg',upsert:false}).then(function(r){if(r.error)throw r.error;
+      return sb.rpc('pos_pay_submit',{p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null})})})
+  .then(function(r){if(r.error)throw r.error;m.textContent='';el._m=1;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
+  .catch(function(e){b.disabled=false;m.textContent=/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
+window.POS_BILLING={render:renderBilling};
+function showLock(){var sh=SESS.shop;$('#lockScreen').hidden=false;
+  $('#lockWhy').textContent=sh.status==='suspended'?'ผู้ดูแลระบบระงับการใช้งานร้าน '+sh.name+' ไว้ ติดต่อผู้ดูแลระบบ':'ค่าบริการของร้าน '+sh.name+' เลยกำหนดชำระ ชำระและแจ้งสลิปด้านล่าง เมื่อผู้ดูแลระบบอนุมัติ ร้านจะกลับมาใช้งานได้ทันที';
+  var go=function(){renderBilling($('#lockBilling'))};if(typeof QRCode==='undefined')window.addEventListener('load',go);else go();
+  setInterval(function(){loadSession().then(function(d){if(d&&d.shop&&!d.shop.locked)location.reload()}).catch(function(){})},60000)}
 
 /* ---------- data store (same API the POS uses inside Claude) ---------- */
 function E(e){var x={code:'unavailable',message:(e&&e.message)||String(e)};if(e&&(e.code==='42501'||e.code==='P0002'||/row-level|permission|policy|not_found/i.test(x.message)))x.code='invalid_argument';return x}
@@ -620,19 +714,20 @@ var subs=new Set();
 function notify(col){subs.forEach(function(s){if(!col||s.col===col)s.kick()})}
 function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
 function cmp(a,op,b){if(typeof b==='number')a=Number(a);if(op==='==')return a===b;if(op==='!=')return a!==b;if(op==='>=')return a>=b;if(op==='>')return a>b;if(op==='<')return a<b;if(op==='<=')return a<=b;if(op==='in')return b.indexOf(a)>=0;return true}
+function T(){return sb.from('pos_data')}
 function Doc(col,id){var ref={id:id,path:col+'/'+id,
-  get:function(){return sb.from('pos_docs').select('data').eq('col',col).eq('id',id).maybeSingle().then(function(r){if(r.error)throw E(r.error);return snap(id,r.data?r.data.data:null)})},
-  set:function(d){return sb.from('pos_docs').upsert({col:col,id:id,data:d,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  update:function(p){return sb.rpc('pos_doc_update',{p_col:col,p_id:id,p_patch:p}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  delete:function(){return sb.from('pos_docs').delete().eq('col',col).eq('id',id).then(function(r){if(r.error)throw E(r.error);notify(col)})},
-  acquire:function(o){return sb.rpc('pos_acquire',{p_col:col,p_id:id,p_holder:o.holder,p_ttl_ms:o.ttlMs||30000}).then(function(r){if(r.error)throw E(r.error);return r.data})},
+  get:function(){return T().select('data').eq('shop_id',SID).eq('col',col).eq('id',id).maybeSingle().then(function(r){if(r.error)throw E(r.error);return snap(id,r.data?r.data.data:null)})},
+  set:function(d){return T().upsert({shop_id:SID,col:col,id:id,data:d,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  update:function(p){return sb.rpc('pos_data_update',{p_sid:SID,p_col:col,p_id:id,p_patch:p}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  delete:function(){return T().delete().eq('shop_id',SID).eq('col',col).eq('id',id).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  acquire:function(o){return sb.rpc('pos_data_lease',{p_sid:SID,p_col:col,p_id:id,p_holder:o.holder,p_ttl_ms:o.ttlMs||30000}).then(function(r){if(r.error)throw E(r.error);return r.data})},
   onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){ref.get().then(next).catch(function(){})},120)};subs.add(s);s.kick();return function(){subs.delete(s)}}};
   return ref}
 function Query(col,f,o,l){var q={
   where:function(a,op,v){return Query(col,f.concat([[a,op,v]]),o,l)},
   orderBy:function(a,dir){return Query(col,f,[a,dir||'asc'],l)},
   limit:function(n){return Query(col,f,o,n)},
-  get:function(){var r=sb.from('pos_docs').select('id,data').eq('col',col);
+  get:function(){var r=T().select('id,data').eq('shop_id',SID).eq('col',col);
     f.forEach(function(x){var k='data->>'+x[0],v=String(x[2]);if(x[1]==='==')r=r.eq(k,v);else if(x[1]==='>=')r=r.gte(k,v);else if(x[1]==='>')r=r.gt(k,v);else if(x[1]==='<')r=r.lt(k,v);else if(x[1]==='<=')r=r.lte(k,v)});
     return r.limit(5000).then(function(res){if(res.error)throw E(res.error);
       var rows=(res.data||[]).filter(function(d){return f.every(function(x){return cmp(d.data[x[0]],x[1],x[2])})});
@@ -647,18 +742,19 @@ function Query(col,f,o,l){var q={
 var db={doc:function(p){var a=p.split('/');return Doc(a[0],a[1])},collection:function(p){return Query(p,[],null,null)}};
 var rtStarted=false;
 function startRealtime(){if(rtStarted)return;rtStarted=true;
-  sb.channel('pos_docs_changes').on('postgres_changes',{event:'*',schema:'public',table:'pos_docs'},function(pl){var c=(pl.new&&pl.new.col)||(pl.old&&pl.old.col);notify(c||null)}).subscribe();
+  sb.channel('pos_data_'+SID).on('postgres_changes',{event:'*',schema:'public',table:'pos_data',filter:'shop_id=eq.'+SID},function(pl){var c=(pl.new&&pl.new.col)||(pl.old&&pl.old.col);notify(c||null)}).subscribe();
   setInterval(function(){if(!document.hidden)notify(null)},30000);
   document.addEventListener('visibilitychange',function(){if(!document.hidden)notify(null)});
 }
-var user={isOwner:function(){return Promise.resolve(role==='owner')},canEdit:function(){return Promise.resolve(role==='owner'||role==='manager')},
+function isMgr(){return role==='manager'}
+var user={isOwner:function(){return Promise.resolve(isMgr())},canEdit:function(){return Promise.resolve(isMgr())},
   id:function(){return Promise.resolve(email)},can:function(){return Promise.resolve(null)},
-  me:function(){return Promise.resolve({id:email,name:email||'',email:email,isOwner:role==='owner',canEdit:role==='owner'||role==='manager',avatarUrl:'',color:'#2F6FB0'})}};
-var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'})[ty]||'bin';var path=uid()+'.'+ext;return sb.storage.from('pos-menu').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000',upsert:false}).then(function(r){if(r.error){var e=E(r.error);throw e}return {id:path,url:window.POS_IMG(path),sizeBytes:blob.size,contentType:blob.type}})},
+  me:function(){return Promise.resolve({id:email,name:email||'',email:email,isOwner:isMgr(),canEdit:isMgr(),avatarUrl:'',color:'#2F6FB0'})}};
+var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');var ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'})[ty]||'bin';var path=SID+'/'+uid()+'.'+ext;return sb.storage.from('pos-menu').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000',upsert:false}).then(function(r){if(r.error){var e=E(r.error);throw e}return {id:path,url:window.POS_IMG(path),sizeBytes:blob.size,contentType:blob.type}})},
   delete:function(id){return sb.storage.from('pos-menu').remove([id]).then(function(){})},list:function(){return Promise.resolve({assets:[],usage:{}})}};
 window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
 window.claude={use:function(name){return readyP.then(function(){
-  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return (role==='owner'||role==='manager')?assets:null;return null})}};
+  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
 check();
 })();
 </script>
@@ -924,7 +1020,7 @@ function needRound(){return shop().roundOn&&!S.round}
 /* ===== top & rail ===== */
 function renderRail(){
   const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
-  $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)).map(([v,l,k])=>{
+  $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(v))).map(([v,l,k])=>{
     const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
     return `<button class="nav${v==='open'&&S.mobNew.length?' blink':''}" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
 }
@@ -936,7 +1032,7 @@ function renderTop(){
   if(S.mode==='live'){st.className='pillx';st.innerHTML='<i></i><span>ออนไลน์</span>'}
   else if(S.mode==='demo'){st.className='pillx warn';st.innerHTML='<i></i><span>โหมดทดลอง · ไม่บันทึก</span>'}
   if(sh.movedTo&&!window.POS_STANDALONE){const ab=$('#abar');if(ab&&!ab.dataset.moved){ab.dataset.moved='1'}$('#appPill').innerHTML=`<a class="pillx warn" href="${esc(sh.movedTo)}" target="_blank" rel="noopener"><i></i><span>ย้ายไปใช้ POS บนเว็บแล้ว · เปิด ${esc(sh.movedTo.replace(/^https?:\/\//,''))}</span></a>`}else
-  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();$('#acct').innerHTML=a.email?`<span>${esc(a.email)} · ${({owner:'เจ้าของ',manager:'ผู้จัดการ',staff:'พนักงาน'})[a.role]||''}</span><button class="btn sm" data-act="logout">ออกจากระบบ</button>`:''}
+  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();const bs=window.POS_BILLSTATE?window.POS_BILLSTATE():null;$('#acct').innerHTML=a.email?`${a.admin?`<span class="adminbar">ผู้ดูแลระบบ · ${esc(a.shop?a.shop.name:'')} <a href="/admin">กลับแดชบอร์ด</a></span>`:''}${bs&&bs.cls&&a.role==='manager'?`<button class="billpill ${bs.cls==='bad'?'bad':''}" data-act="billgo">${esc(bs.t)}</button>`:''}<span>${esc(a.email)} · ${a.admin?'ผู้ดูแลระบบ':({manager:'ผู้จัดการร้าน',staff:'พนักงาน'})[a.role]||''}</span><button class="btn sm" data-act="logout">ออกจากระบบ</button>`:''}
   $('#appPill').innerHTML=S.view==='sell'&&S.mode==='live'?`<button class="pillx${sh.appOpen?'':' warn'}" data-act="apptoggle" aria-pressed="${!!sh.appOpen}"${S.canEdit?'':' disabled title="เปิด/ปิดได้เฉพาะเจ้าของร้าน"'}><i></i><span>รับออเดอร์มือถือ: ${sh.appOpen?'เปิด':'ปิด'}</span></button>`:'';
   $('#roundPill').innerHTML=sh.roundOn?(S.round?`<button class="pillx" data-act="view" data-v="round"><i></i><span>รอบการขาย เปิดตั้งแต่ ${hm(S.round.openedAt)}</span></button>`:'<button class="pillx warn" data-act="view" data-v="round"><i></i><span>ยังไม่เปิดรอบการขาย</span></button>'):'';
   renderRail();
@@ -1404,7 +1500,7 @@ function menuView(){
 /* ===== settings ===== */
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE?[['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
+  const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2><form class="form" data-stab="shop"><label for="s_name">ชื่อร้าน<input id="s_name" maxlength="60" value="${esc(sh.name)}"${dis}></label><label for="s_branch">สาขา<input id="s_branch" maxlength="60" value="${esc(sh.branch)}"${dis}></label><label for="s_address">ที่อยู่<input id="s_address" maxlength="160" value="${esc(sh.address)}"${dis}></label><div class="two"><label for="s_phone">เบอร์โทร<input id="s_phone" maxlength="20" value="${esc(sh.phone)}"${dis}></label><label for="s_taxId">เลขประจำตัวผู้เสียภาษี<input id="s_taxId" inputmode="numeric" maxlength="17" value="${esc(sh.taxId)}"${dis}></label></div>${save}</form>`;
@@ -1448,9 +1544,11 @@ function settingsView(){
       <label for="s_lookLayout">รูปแบบเมนู<select id="s_lookLayout"${dis}><option value="list"${L.layout==='list'?' selected':''}>รายการ (แถวละ 1 เมนู)</option><option value="grid"${L.layout==='grid'?' selected':''}>การ์ด (แถวละ 2 เมนู)</option></select></label>
       <label class="check" for="s_lookShowImg"><input id="s_lookShowImg" type="checkbox"${L.showImg?' checked':''}${dis}> แสดงรูปเมนู (ใช้รูปที่อัปโหลดใน เมนูและโปรโมชั่น)</label>
       ${save}</form><div><span class="grp-t" style="margin-bottom:8px">ตัวอย่างบนมือถือ</span><div id="lookPreview">${lookPreview(L)}</div></div></div>`}
-  else if(tab==='staff'){const isOwner=window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='owner';
-    body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · ผู้จัดการแก้เมนูและตั้งค่าได้ · พนักงานขายและใช้จอครัวได้</span>
-    ${isOwner?`<form class="form" id="staffForm"><div class="three"><label for="st_email">อีเมล<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label><label for="st_role">ตำแหน่ง<select id="st_role"><option value="staff">พนักงาน</option><option value="manager">ผู้จัดการ</option><option value="owner">เจ้าของ</option></select></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่ม / แก้ไขพนักงาน</button></form>`:'<div class="note">จัดการพนักงานได้เฉพาะเจ้าของร้าน</div>'}
+  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
+  else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
+    body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่แก้เมนู ตั้งค่าร้าน และดูรายงานไม่ได้</span>
+    <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0} · ต้องการเพิ่มจำนวน ติดต่อผู้ดูแลระบบ</div>
+    <form class="form" id="staffForm"><div class="two"><label for="st_email">อีเมลพนักงาน<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>
     <div id="staffList"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(loadStaff,0)}
   else if(tab==='app'){const url=appBase();const tb=S.tables.filter(isTable);
     body=`<h2>แอปลูกค้า (สแกน QR สั่งอาหาร)</h2><div id="appStatus">${appStatusHtml()}</div>
@@ -1674,7 +1772,7 @@ const APP_URL_DEFAULT='https://napongbkk.github.io/cafe-order/';
 const UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const deviceId=(()=>{try{let d=localStorage.getItem('pos.dev');if(!d){d=uid();localStorage.setItem('pos.dev',d)}return d}catch(e){return uid()}})();
 S.app={state:'off',msg:'',last:0,count:0};let bridgeT=null,lastSnap='',pushed={};
-function appBase(){let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
+function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug+'/';let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
 function drawQrs(){if(typeof QRCode==='undefined')return;document.querySelectorAll('[data-qr]').forEach(el=>{if(el.childNodes.length)return;try{new QRCode(el,{text:el.dataset.qr,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}})}
 function appStatusHtml(){const a=S.app;
   if(!PR.bridge)return '<div class="appst off">เครื่องนี้ไม่ได้รับออเดอร์จากแอป</div>';
@@ -1751,13 +1849,13 @@ async function bridgeTickSB(){
     if(!lease.acquired){S.app.state='other';S.app.msg='มีเครื่องอื่นเป็นตัวรับออเดอร์จากแอปอยู่';renderAppStatus();scheduleBridge(20000);return}
     const snap=JSON.stringify(appSnapshot());const sendSnap=snap!==lastSnap&&S.menu.length;const o=sendSnap?JSON.parse(snap):null;
     const vals=appStatuses();
-    const r=await window.POS_SB.rpc('pos_app_sync',{p_menu:o?o.menu:null,p_shop:o?o.shop:null,p_status:vals.length?vals:null});
+    const sid=window.POS_SESSION.shop.id;const r=await window.POS_SB.rpc('pos_shop_sync',{p_sid:sid,p_menu:o?o.menu:null,p_shopdata:o?o.shop:null,p_status:vals.length?vals:null});
     if(r.error)throw {code:'tool_error',message:r.error.message};
     if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd});
     const rows=Array.isArray(r.data)?r.data:[];const acc=[];
     for(const ao of rows){const res=await importAppOrder(ao);if(res)acc.push([ao.id,res])}
     if(acc.length){
-      const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
+      const a2=await window.POS_SB.rpc('pos_shop_accept',{p_sid:sid,p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
       acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
       toast('Mobile Order ใหม่ (รอชำระ): '+acc.map(([,res])=>res.where).join(', '));
@@ -1807,10 +1905,12 @@ function saveQrSheet(){
   S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html}).then(()=>toast('บันทึกไฟล์แล้ว เปิดไฟล์เพื่อพิมพ์')).catch(e=>{if(!e||e.code!=='declined')toast('บันทึกไฟล์ไม่สำเร็จ')});
 }
 
-async function loadStaff(){const el=$('#staffList');if(!el||!window.POS_SB)return;
-  const r=await window.POS_SB.from('pos_staff').select('*').order('created_at');if(r.error){el.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
-  const me=window.POS_ACCOUNT().email,isOwner=window.POS_ACCOUNT().role==='owner';const RL={owner:'เจ้าของ',manager:'ผู้จัดการ',staff:'พนักงาน'};
-  el.innerHTML=r.data.length?r.data.map(x=>`<div class="mrow"><div class="info"><b>${esc(x.name||x.email)}</b><small>${esc(x.email)} · ${RL[x.role]||x.role}${x.active?'':' · ปิดใช้งาน'}</small></div>${isOwner&&x.email.toLowerCase()!==String(me).toLowerCase()?`<button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`:''}</div>`).join(''):'<div class="muted">ยังไม่มี</div>'}
+async function loadStaff(){const el=$('#staffList');if(!el||!window.POS_SB)return;const sid=window.POS_SESSION.shop.id;
+  const r=await window.POS_SB.from('pos_members').select('*').eq('shop_id',sid).order('created_at');if(r.error){el.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
+  const n=r.data.filter(x=>x.role==='staff'&&x.active).length;const q=$('#staffQuota');const lim=window.POS_SESSION.shop.staffLimit||0;window.POS_SESSION.shop.staffUsed=n;
+  if(q)q.textContent='บัญชีพนักงาน '+n+' / '+lim+(n>=lim?' · ครบจำนวนแล้ว ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':' · เพิ่มได้อีก '+(lim-n)+' บัญชี');
+  el.innerHTML=r.data.length?r.data.map(x=>`<div class="mrow"><div class="info"><b>${esc(x.name||x.email)}</b><small>${esc(x.email)} · ${x.role==='manager'?'ผู้จัดการร้าน':'พนักงาน'}${x.active?'':' · ปิดใช้งาน'}</small></div>${x.role==='staff'?`<button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`:''}</div>`).join(''):'<div class="muted">ยังไม่มี</div>'}
+function staffErr(e){const m=String(e&&e.message||'');return /staff_limit/.test(m)?'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':/duplicate|pos_members_pkey/.test(m)?'อีเมลนี้ใช้กับร้านอื่นอยู่แล้ว':/bad_email/.test(m)?'อีเมลไม่ถูกต้อง':'บันทึกไม่สำเร็จ: '+m}
 
 /* ===== render ===== */
 const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
@@ -1829,7 +1929,7 @@ function render(force){
   }
   renderOverlay();
 }
-function go(view){if(view!=='display')S.dprev=null;S.view=view;S.sheet=false;S.confirm=null;S.docState=null;try{localStorage.setItem('pos.view',view)}catch(e){}
+function go(view){if(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(view))view='sell';if(view!=='display')S.dprev=null;S.view=view;S.sheet=false;S.confirm=null;S.docState=null;try{localStorage.setItem('pos.view',view)}catch(e){}
   if(view==='history'&&S.hist.date!==dayKey(Date.now())&&S.hist.list==null)loadHistDate();
   if(view==='round')loadRounds();
   render(true)}
@@ -1911,10 +2011,11 @@ document.addEventListener('click',e=>{
     case 'testprint':testPrint();break;
     case 'lookswatch':{const c=document.getElementById('s_lookColor');if(c){c.value=d.v;updateLookPreview()}break;}
     case 'lookimgdel':{const k=d.k,old=shop()[k];const pt={};pt[k]='';saveShop(pt,'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
-    case 'staffactive':window.POS_SB.from('pos_staff').update({active:d.v==='1'}).eq('email',d.id).then(r=>{if(r.error)toast('บันทึกไม่สำเร็จ');loadStaff()});break;
+    case 'staffactive':window.POS_SB.from('pos_members').update({active:d.v==='1'}).eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).then(r=>{if(r.error)toast(staffErr(r.error));loadStaff()});break;
     case 'staffask':S.confirm='sfdel:'+d.id;loadStaff();break;
     case 'staffundel':S.confirm=null;loadStaff();break;
-    case 'staffdel':S.confirm=null;window.POS_SB.from('pos_staff').delete().eq('email',d.id).then(r=>{toast(r.error?'ลบไม่สำเร็จ':'ลบแล้ว');loadStaff()});break;
+    case 'staffdel':S.confirm=null;window.POS_SB.from('pos_members').delete().eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).eq('role','staff').then(r=>{toast(r.error?'ลบไม่สำเร็จ':'ลบแล้ว');loadStaff()});break;
+    case 'billgo':S.stab='billing';go('settings');break;
     case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;
     case 'apptoggle':{if(!S.canEdit){toast('เปิด/ปิดได้เฉพาะเจ้าของร้านหรือผู้มีสิทธิ์แก้ไข');return}const on=!shop().appOpen;saveShop({appOpen:on},on?'เปิดรับออเดอร์จากมือถือแล้ว':'ปิดรับออเดอร์จากมือถือแล้ว').then(ok=>{if(ok)scheduleBridge(300)});break;}
     case 'appsync':scheduleBridge(0);toast('กำลังซิงก์…');break;
@@ -2180,8 +2281,8 @@ document.addEventListener('submit',async e=>{
     const ss=base.length?base.slice():[{id:'main',name:'ครัว/บาร์',cats:S.cats.map(c=>c.id)}];ss.push({id:'st'+uid(),name:v,cats:[]});
     document.activeElement&&document.activeElement.blur();await saveShop({stations:ss},'เพิ่มสถานี '+v+' แล้ว');return}
   if(id==='staffForm'){const em=$('#st_email').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('ใส่อีเมลให้ถูกต้อง');return}
-    const r=await window.POS_SB.from('pos_staff').upsert({email:em,name:$('#st_name').value.trim()||null,role:$('#st_role').value,active:true});
-    if(r.error){toast('บันทึกไม่สำเร็จ: '+r.error.message);return}toast('บันทึกพนักงานแล้ว');f.reset();loadStaff();return}
+    const r=await window.POS_SB.from('pos_members').insert({email:em,name:$('#st_name').value.trim()||null,role:'staff',active:true,shop_id:window.POS_SESSION.shop.id});
+    if(r.error){toast(staffErr(r.error));return}toast('เพิ่มพนักงานแล้ว ให้พนักงานสมัครด้วยอีเมลนี้');f.reset();loadStaff();return}
   if(id==='catForm'){const v=$('#catName').value.trim();if(!v)return;const data={name:v,sort:S.cats.length};
     if(S.db){const ok=await dbDo(db=>db.collection('categories').add(data),'สร้างหมวดหมู่แล้ว');if(!ok)return}else{S.cats.push(Object.assign({id:'local-c'+Date.now()},data))}
     $('#catName').value='';render(true);return}
