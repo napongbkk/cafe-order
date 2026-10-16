@@ -3,356 +3,475 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#2F6FB0">
-<link rel="manifest" href="/manifest.webmanifest">
-<link rel="icon" href="/icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="/icon.svg">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<title>สั่งอาหาร</title>
+<title>Easy POS · ระบบขายหน้าร้านสำหรับคาเฟ่และร้านค้า</title>
+<meta name="description" content="Easy POS ระบบ POS ใช้ง่ายสำหรับคาเฟ่ ร้านอาหาร และร้านของชำ ขายหน้าร้าน รับออเดอร์ผ่านมือถือ จอครัว สมาชิกสะสมแต้ม เริ่มต้น 299 บาทต่อเดือน ทดลองใช้ฟรี 30 วัน">
+<meta name="theme-color" content="#0B1024">
+<meta property="og:title" content="Easy POS · ระบบ POS สำหรับคาเฟ่และร้านค้า">
+<meta property="og:description" content="ขายหน้าร้าน รับออเดอร์ผ่าน QR จอครัว สมาชิกสะสมแต้ม · 299 บาท/เดือน · ทดลองใช้ฟรี 30 วัน">
+<link rel="icon" href="/easypos.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/easypos.svg">
+<script>
+/* Old QR codes and order links pointed at the site root; send them to the customer order page. */
+(function(){var q=new URLSearchParams(location.search);if(['t','type','o','s','table'].some(function(k){return q.has(k)}))location.replace('/order'+location.search+location.hash)})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#F3F7FC;--surface:#FFFFFF;--sunk:#E9F0F8;--ink:#1F2A37;--muted:#5B6B7D;--line:#E1E8F0;--line2:#CDD8E4;
-  --accent:#2F6FB0;--accent-hover:#275E96;--on-accent:#FFFFFF;--accent-soft:#E3F0FC;--accent-soft-ink:#1E4F80;
-  --ok:#2E9D62;--ok-soft:#E5F6EE;--ok-ink:#19663F;--warn-soft:#FFF6D9;--warn-ink:#7A5600;--bad:#D9534F;--bad-soft:#FDECEC;--bad-ink:#A12020;
-  --t-0:#E3F0FC;--i-0:#2C66A3;--t-1:#E5F6EE;--i-1:#1E7A4B;--t-2:#FFF4DA;--i-2:#8A6200;--t-3:#F1E9FB;--i-3:#6A44A8;--t-4:#FDE8EE;--i-4:#A33A5B;--t-5:#E2F6F7;--i-5:#1F6E75;
-  --scrim:rgba(15,22,32,.5);--shadow:0 6px 24px rgba(31,42,55,.16);
-  --f:'IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif;--fn:'IBM Plex Mono',ui-monospace,monospace;
-  color-scheme:light;
+  --bg:#F6F7FB;--surface:#FFFFFF;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;
+  --night:#0B1024;--night2:#141A3A;
+  --v:#7C5CFF;--b:#4F7BFF;--c:#22C3EE;
+  --grad:linear-gradient(120deg,#7C5CFF 0%,#4F7BFF 50%,#22C3EE 100%);
+  --cafe:#FF7A45;--cafe2:#F43F5E;--cafe-soft:#FFF1EA;
+  --retail:#10B981;--retail2:#0EA5A4;--retail-soft:#E8FBF4;
+  --r:22px;--sh:0 1px 2px rgba(14,19,48,.04),0 12px 32px -12px rgba(14,19,48,.16);
+  --fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;
 }
-@media (prefers-color-scheme: dark){:root{
-  --bg:#0F1620;--surface:#18212D;--sunk:#222D3B;--ink:#E6EDF5;--muted:#9DADBF;--line:#263243;--line2:#34435A;
-  --accent:#8EC5F0;--accent-hover:#A9D3F5;--on-accent:#0B1D2E;--accent-soft:#1C3045;--accent-soft-ink:#B8DBF8;
-  --ok:#5CCB8E;--ok-soft:#173326;--ok-ink:#9BE3BC;--warn-soft:#3A3014;--warn-ink:#F5D97A;--bad:#FF7B7B;--bad-soft:#3B1F1F;--bad-ink:#FFB5B5;
-  --t-0:#1C3045;--i-0:#B8DBF8;--t-1:#173326;--i-1:#9BE3BC;--t-2:#3A3014;--i-2:#F5D97A;--t-3:#2A2140;--i-3:#CDB6F2;--t-4:#3A1F2A;--i-4:#F2B0C4;--t-5:#16343A;--i-5:#9EDDE3;
-  --scrim:rgba(0,0,0,.6);--shadow:0 6px 24px rgba(0,0,0,.5);color-scheme:dark}}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f);font-size:16px;line-height:1.45}
-button,input,textarea{font:inherit;color:inherit}
-button{cursor:pointer}
-button:disabled{opacity:.5;cursor:not-allowed}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.num{font-family:var(--fn);font-variant-numeric:tabular-nums}
-.wrap{max-width:640px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right)) calc(110px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
-header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:max(12px,env(safe-area-inset-top))}
-.hero{display:flex;align-items:center;gap:12px;padding:8px 0 12px}
-.logo{width:48px;height:48px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:20px;flex-shrink:0}
-.hero h1{margin:0;font-size:20px;line-height:1.2}
-.hero p{margin:2px 0 0;color:var(--muted);font-size:14px}
-.where{border:0;margin-left:auto;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-soft-ink);font-weight:700;font-size:14px;white-space:nowrap}
-.ways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}
-.way{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:1.5px solid var(--line2);border-radius:20px;background:var(--surface);font-weight:700;font-size:19px;padding:16px;text-align:center}
-.way svg{width:44px;height:44px;color:var(--accent)}
-.way small{font-weight:500;font-size:13px;color:var(--muted)}
-.way:hover{border-color:var(--accent)}
-.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
-.tbtn{min-height:72px;border:1.5px solid var(--line2);border-radius:16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:20px;font-family:var(--fn)}
-.tbtn small{font-family:var(--f);font-weight:500;font-size:12px;color:var(--muted)}
-.tbtn:hover{border-color:var(--accent)}
-.payinfo{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--accent-soft);color:var(--accent-soft-ink);font-size:15px;line-height:1.5}
-.payinfo svg{width:28px;height:28px;flex-shrink:0}
-.payinfo b{display:block;font-size:17px}
-.payinfo.warn{background:var(--warn-soft);color:var(--warn-ink);border:2px solid #F2B200}
-.payinfo.ok{background:var(--ok-soft);color:var(--ok-ink)}
-.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
-.chip{height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line2);background:var(--surface);font-weight:600;white-space:nowrap;flex-shrink:0}
-.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.note{padding:12px 14px;border-radius:14px;background:var(--warn-soft);color:var(--warn-ink);font-size:15px;margin:8px 0}
-.note.bad{background:var(--bad-soft);color:var(--bad-ink)}
-h2.cat{font-size:17px;margin:18px 0 8px}
-.items{display:flex;flex-direction:column;gap:10px}
-.items.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.items.grid .item{flex-direction:column;align-items:stretch;gap:8px}
-.items.grid .item .pic{width:100%;height:auto;aspect-ratio:4/3}
-.items.grid .item .pr{align-self:flex-start}
-.item .pic{overflow:hidden}
-.item .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.logo{overflow:hidden}.logo img{width:100%;height:100%;object-fit:cover;display:block}
-.cover{margin:12px 0 4px;border-radius:18px;overflow:hidden;aspect-ratio:21/9;background:var(--sunk,#E9EEF4)}
-.cover img{width:100%;height:100%;object-fit:cover;display:block}
-.notice{margin:10px 0 10px;padding:10px 14px;border-radius:14px;background:var(--accent-soft);color:var(--accent-soft-ink);font-weight:700;font-size:15px;line-height:1.45}
-.item{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}
-.item .pic{width:64px;height:64px;border-radius:12px;display:grid;place-items:center;flex-shrink:0}
-.item .pic svg{width:30px;height:30px}
-.item .info{flex:1;min-width:0}
-.item b{display:block;font-size:16px}
-.item small{display:block;color:var(--muted);font-size:13px}
-.item .pr{font-family:var(--fn);font-weight:600;color:var(--accent);white-space:nowrap}
-.tag{display:inline-block;font-size:11px;font-weight:700;padding:1px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent-soft-ink);margin-left:4px;vertical-align:2px}
-.tag.out{background:var(--bad-soft);color:var(--bad-ink)}
-.cartbar{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:linear-gradient(transparent,var(--bg) 30%)}
-.cartbar button{width:100%;max-width:608px;margin:0 auto;display:flex;align-items:center;gap:10px;height:58px;border:0;border-radius:16px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:17px;padding:0 18px;box-shadow:var(--shadow)}
-.cartbar .cnt{min-width:28px;height:28px;border-radius:14px;background:var(--on-accent);color:var(--accent);display:grid;place-items:center;font-size:14px}
-.cartbar .num{margin-left:auto}
-.scrim{position:fixed;inset:0;background:var(--scrim);z-index:50;display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:100%;max-width:640px;max-height:92vh;overflow-y:auto;background:var(--surface);border-radius:22px 22px 0 0;padding:18px max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));display:flex;flex-direction:column;gap:14px}
-.sheet h2{margin:0;font-size:21px}
-.sh-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.x{width:44px;height:44px;border:0;border-radius:12px;background:var(--sunk);display:grid;place-items:center;flex-shrink:0}
-.grp{display:flex;flex-direction:column;gap:8px}
-.grp-t{display:flex;gap:8px;align-items:center;font-weight:600;color:var(--muted);font-size:14px}
-.req{font-size:11px;padding:1px 7px;border-radius:6px;background:var(--warn-soft);color:var(--warn-ink)}
-.opts{display:flex;flex-wrap:wrap;gap:8px}
-.opt{min-height:44px;padding:6px 14px;border-radius:12px;border:1.5px solid var(--line2);background:var(--surface);font-weight:600}
-.opt[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
-.opt small{font-weight:500;opacity:.8}
-.field{display:flex;flex-direction:column;gap:4px;font-size:14px;font-weight:600;color:var(--muted)}
-.field input,.field textarea{min-height:46px;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);color:var(--ink);font-weight:400;font-size:16px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.stepper{display:inline-flex;align-items:center;gap:4px}
-.stepper button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--surface);font-size:20px}
-.stepper span{min-width:36px;text-align:center;font-family:var(--fn);font-weight:600;font-size:18px}
-.big{height:60px;min-height:60px;border:0;border-radius:16px;background:var(--accent);color:var(--on-accent);font-weight:700;font-size:18px;padding:0 18px;flex:1 0 auto}
-.ghost{height:48px;border:1px solid var(--line2);border-radius:14px;background:var(--surface);font-weight:600;padding:0 16px}
-.line{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
-.line .info{flex:1;min-width:0}
-.line small{display:block;color:var(--muted);font-size:13px}
-.total{display:flex;justify-content:space-between;align-items:baseline;font-weight:700;font-size:18px}
-.total .num{font-size:26px}
-.hint{font-size:13px;color:var(--muted)}
-.status{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;display:flex;flex-direction:column;gap:14px;margin-top:8px}
-.steps{display:flex;flex-direction:column;gap:0}
-.step{display:flex;gap:12px;align-items:flex-start;padding-bottom:16px;position:relative}
-.step:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line2)}
-.step i{width:28px;height:28px;border-radius:14px;border:2px solid var(--line2);background:var(--surface);flex-shrink:0;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:700}
-.step.pay{background:var(--bad-soft);border:2px solid var(--bad);border-radius:14px;padding:10px 12px;margin:2px 0 14px -14px;animation:paypulse 1.2s ease-in-out infinite}
-.step.pay::before{display:none}
-.step.pay i{background:var(--bad);border-color:var(--bad);color:#fff}
-.step.pay b{color:var(--bad-ink);font-size:17px}
-.step.pay small{color:var(--bad-ink)}
-@keyframes paypulse{50%{box-shadow:0 0 0 4px var(--bad-soft)}}
-@media (prefers-reduced-motion:reduce){.step.pay{animation:none}}
-.step.done i{background:var(--ok);border-color:var(--ok);color:#fff}
-.step.cur i{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-soft-ink)}
-.step.cur b{color:var(--accent)}
-.step small{display:block;color:var(--muted);font-size:13px}
-.big-no{font-family:var(--fn);font-size:44px;font-weight:600;color:var(--accent);line-height:1}
-.empty{text-align:center;color:var(--muted);padding:40px 16px}
-.empty b{display:block;color:var(--ink);font-size:18px;margin-bottom:6px}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;font-weight:600;z-index:80;max-width:calc(100% - 32px)}
-[hidden]{display:none!important}
-@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 var(--fb);overflow-x:hidden}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+h1,h2,h3{font-family:var(--fh);line-height:1.2;margin:0;letter-spacing:-.01em}
+.wrap{width:min(1160px,100% - 32px);margin-inline:auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:14px;border:1px solid transparent;font:600 16px/1 var(--fh);text-decoration:none;cursor:pointer;transition:transform .15s,box-shadow .2s,background .2s,border-color .2s;white-space:nowrap}
+.btn:active{transform:translateY(1px)}
+.btn.grad{background:var(--grad);color:#fff;box-shadow:0 10px 24px -10px rgba(79,123,255,.7)}
+.btn.grad:hover{box-shadow:0 14px 30px -10px rgba(79,123,255,.85);transform:translateY(-1px)}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.22)}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+.btn.line{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.btn.line:hover{border-color:#C9CEE3}
+.btn.sm{min-height:40px;padding:0 16px;font-size:15px;border-radius:12px}
+.btn[aria-disabled=true]{opacity:.55;cursor:not-allowed}
+:focus-visible{outline:3px solid #9DB4FF;outline-offset:2px}
+.gtext{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font:600 13px/1 var(--fh);letter-spacing:.06em;text-transform:uppercase;color:var(--b)}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font:600 13px/1 var(--fh)}
+
+/* nav */
+.nav{position:fixed;inset:0 0 auto;z-index:50;transition:background .25s,box-shadow .25s,backdrop-filter .25s}
+.nav .wrap{display:flex;align-items:center;gap:16px;height:72px}
+.nav.solid{background:rgba(11,16,36,.82);backdrop-filter:saturate(1.4) blur(14px);-webkit-backdrop-filter:saturate(1.4) blur(14px);box-shadow:0 1px 0 rgba(255,255,255,.06)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff}
+.logo img{width:38px;height:38px}
+.logo b{font:700 21px/1 var(--fh);letter-spacing:-.02em}
+.logo b span{background:linear-gradient(120deg,#A99BFF,#6FE3FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.links{display:flex;gap:4px;margin-left:12px}
+.links a{color:rgba(255,255,255,.78);text-decoration:none;font:500 15px/1 var(--fh);padding:10px 12px;border-radius:10px}
+.links a:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav .sp{flex:1}
+.login{position:relative}
+.login>button{background:none;border:1px solid rgba(255,255,255,.22);color:#fff;font:600 15px/1 var(--fh);min-height:40px;padding:0 14px;border-radius:12px;cursor:pointer;display:flex;align-items:center;gap:6px}
+.login>button:hover{background:rgba(255,255,255,.08)}
+.menu{position:absolute;right:0;top:calc(100% + 10px);width:330px;background:var(--surface);border-radius:18px;box-shadow:0 24px 60px -16px rgba(14,19,48,.45);padding:8px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .18s,transform .18s}
+.login.open .menu{opacity:1;transform:none;pointer-events:auto}
+.menu a{display:flex;align-items:center;gap:12px;padding:12px;border-radius:12px;text-decoration:none;color:var(--ink)}
+.menu a:hover{background:var(--bg)}
+.menu a small{display:block;color:var(--muted);font-size:13px;line-height:1.3}
+.menu a b{font:600 15px/1.3 var(--fh)}
+.menu .soon{white-space:nowrap;margin-left:auto;font:600 11px/1 var(--fh);color:var(--retail2);background:var(--retail-soft);padding:5px 8px;border-radius:99px}
+.mk{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;flex-shrink:0;color:#fff}
+.mk.cafe{background:linear-gradient(135deg,var(--cafe),var(--cafe2))}
+.mk.retail{background:linear-gradient(135deg,var(--retail),var(--retail2))}
+.burger{display:none}
+
+/* hero */
+.hero{position:relative;background:var(--night);color:#fff;padding:148px 0 120px;overflow:hidden;isolation:isolate}
+.hero::after{content:"";position:absolute;inset:auto 0 0;height:140px;background:linear-gradient(to bottom,rgba(246,247,251,0),var(--bg));z-index:-1}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;z-index:-2;animation:drift 18s ease-in-out infinite alternate}
+.blob.a{width:520px;height:520px;background:#7C5CFF;top:-160px;left:-120px}
+.blob.b{width:460px;height:460px;background:#22C3EE;top:40px;right:-140px;animation-delay:-6s;opacity:.4}
+.blob.c{width:380px;height:380px;background:#FF7A45;bottom:-40px;left:38%;opacity:.25;animation-delay:-11s}
+@keyframes drift{to{transform:translate(40px,30px) scale(1.08)}}
+.grid-bg{position:absolute;inset:0;z-index:-1;background-image:linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.05) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 30%,#000 30%,transparent 75%)}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.nw{white-space:nowrap;display:inline-block}
+.hero h1{font-size:clamp(32px,4.6vw,58px);font-weight:700;margin:18px 0 18px}
+.hero h1 .gtext{background:linear-gradient(120deg,#B3A6FF,#7FA0FF 45%,#6FE3FF);-webkit-background-clip:text;background-clip:text}
+.hero p.lead{font-size:clamp(17px,1.6vw,19px);color:rgba(255,255,255,.76);max-width:560px;margin:0 0 30px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap}
+.hero .badge{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#E3E7FF}
+.hero .badge i{width:8px;height:8px;border-radius:50%;background:#34D399;box-shadow:0 0 0 4px rgba(52,211,153,.2)}
+.trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:30px;color:rgba(255,255,255,.66);font-size:14px}
+.trust span{display:flex;align-items:center;gap:8px}
+.trust svg{color:#6FE3FF}
+
+/* hero device mock */
+.stage{position:relative;height:460px}
+.tab{position:absolute;inset:10px 40px 30px 0;background:linear-gradient(180deg,#1B2350,#121838);border-radius:26px;padding:12px;box-shadow:0 40px 80px -30px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.08);transform:perspective(1400px) rotateY(-9deg) rotateX(4deg);animation:float 7s ease-in-out infinite}
+@keyframes float{50%{transform:perspective(1400px) rotateY(-9deg) rotateX(4deg) translateY(-8px)}}
+.scr{height:100%;background:#F4F6FC;border-radius:16px;display:grid;grid-template-columns:44px 1fr 150px;overflow:hidden;color:var(--ink)}
+.scr .rail{background:#fff;border-right:1px solid #E7EAF4;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0}
+.scr .rail i{width:22px;height:22px;border-radius:7px;background:#E9ECF7}
+.scr .rail i:first-child{background:var(--grad)}
+.scr .rail i.on{background:#DDE5FF}
+.scr .main{padding:12px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.chips{display:flex;gap:5px}
+.chips span{height:18px;border-radius:9px;background:#E6EAF6;flex:0 0 46px}
+.chips span:first-child{background:var(--ink);flex-basis:38px}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.tile{background:#fff;border-radius:10px;padding:6px;box-shadow:0 1px 0 #E7EAF4}
+.tile .ph{height:44px;border-radius:7px;margin-bottom:5px}
+.tile b{display:block;height:6px;width:70%;background:#D9DEEE;border-radius:3px}
+.tile u{display:block;height:6px;width:36%;background:#BFD0FF;border-radius:3px;margin-top:4px;text-decoration:none}
+.scr .bill{background:#fff;border-left:1px solid #E7EAF4;padding:10px;display:flex;flex-direction:column;gap:7px}
+.scr .bill .ln{display:flex;justify-content:space-between;font:600 9px/1 var(--fh);color:var(--ink2)}
+.scr .bill .ln i{width:52%;height:6px;background:#E3E7F3;border-radius:3px}
+.scr .bill .tot{margin-top:auto;border-top:1px dashed #D6DBEA;padding-top:8px;display:flex;justify-content:space-between;font:700 13px/1 var(--fh)}
+.scr .bill .pay{height:30px;border-radius:9px;background:var(--grad);color:#fff;font:600 10px/30px var(--fh);text-align:center}
+.phone{position:absolute;right:0;bottom:0;width:168px;height:330px;background:#0E1330;border-radius:30px;padding:8px;box-shadow:0 30px 60px -20px rgba(0,0,0,.75),inset 0 0 0 1px rgba(255,255,255,.1);animation:float2 6s ease-in-out infinite;animation-delay:-2s}
+@keyframes float2{50%{transform:translateY(-10px)}}
+.phone .in{height:100%;background:#fff;border-radius:23px;overflow:hidden;display:flex;flex-direction:column;color:var(--ink)}
+.phone .cover{height:70px;background:linear-gradient(135deg,var(--cafe),var(--cafe2));position:relative}
+.phone .cover b{position:absolute;left:10px;bottom:-14px;width:32px;height:32px;border-radius:10px;background:#fff;box-shadow:0 4px 10px rgba(0,0,0,.15);display:grid;place-items:center;color:var(--cafe)}
+.phone .t{padding:20px 10px 6px;font:700 12px/1.2 var(--fh)}
+.phone .t small{display:block;font:500 9px/1.4 var(--fb);color:var(--muted)}
+.phone .it{display:flex;gap:7px;align-items:center;margin:4px 10px;padding:6px;border-radius:10px;background:#F6F7FB}
+.phone .it i{width:30px;height:30px;border-radius:8px;flex-shrink:0}
+.phone .it b{flex:1;height:6px;border-radius:3px;background:#DADFEE}
+.phone .it u{width:22px;height:6px;border-radius:3px;background:#FFC9B2;text-decoration:none}
+.phone .cta{margin:auto 10px 10px;height:30px;border-radius:10px;background:var(--ink);color:#fff;font:600 10px/30px var(--fh);text-align:center}
+.toast{position:absolute;left:-14px;bottom:56px;background:#fff;color:var(--ink);border-radius:16px;padding:10px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 20px 40px -14px rgba(0,0,0,.5);font-size:13px;animation:pop 6s ease-in-out infinite}
+.toast b{font:600 13px/1.2 var(--fh);display:block}
+.toast small{color:var(--muted);font-size:12px}
+.toast .mk{width:34px;height:34px;border-radius:10px}
+@keyframes pop{0%,8%{opacity:0;transform:translateY(10px)}14%,80%{opacity:1;transform:none}90%,100%{opacity:0;transform:translateY(-6px)}}
+
+/* sections */
+section{padding:96px 0}
+.shead{text-align:center;max-width:720px;margin:0 auto 52px}
+.shead h2{font-size:clamp(28px,3.6vw,42px);font-weight:700;margin:12px 0 14px}
+.shead p{color:var(--muted);margin:0;font-size:17px}
+
+/* products */
+.prods{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.prod{position:relative;background:var(--surface);border-radius:28px;padding:32px;box-shadow:var(--sh);border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;gap:18px;isolation:isolate}
+.prod::before{content:"";position:absolute;width:340px;height:340px;border-radius:50%;top:-170px;right:-120px;filter:blur(10px);opacity:.16;z-index:-1}
+.prod.cafe::before{background:radial-gradient(circle,var(--cafe),transparent 70%);opacity:.35}
+.prod.retail::before{background:radial-gradient(circle,var(--retail),transparent 70%);opacity:.3}
+.prod .top{display:flex;align-items:center;gap:14px}
+.prod .mk{width:56px;height:56px;border-radius:16px}
+.prod h3{font-size:26px;font-weight:700}
+.prod h3 small{display:block;font:500 14px/1.4 var(--fb);color:var(--muted);letter-spacing:0}
+.prod .st{margin-left:auto}
+.st.live{background:#E8FBF1;color:#047857}
+.st.live i{width:7px;height:7px;border-radius:50%;background:#10B981}
+.st.dev{background:#FFF6E0;color:#A16207}
+.prod ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.prod li{display:flex;gap:9px;align-items:flex-start;font-size:15px;color:var(--ink2)}
+.prod li svg{flex-shrink:0;margin-top:3px}
+.prod.cafe li svg{color:var(--cafe)}
+.prod.retail li svg{color:var(--retail)}
+.prod .price{display:flex;align-items:baseline;gap:8px;padding-top:6px;border-top:1px solid var(--line)}
+.prod .price b{font:700 34px/1 var(--fh)}
+.prod .price span{color:var(--muted)}
+.prod .acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.prod.cafe .btn.main{background:linear-gradient(135deg,var(--cafe),var(--cafe2));color:#fff;box-shadow:0 10px 22px -10px rgba(244,63,94,.7)}
+.prod.retail .btn.main{background:linear-gradient(135deg,var(--retail),var(--retail2));color:#fff}
+.loginbox{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;font-size:14px}
+.prod.cafe .loginbox{background:var(--cafe-soft);color:#9A3412}
+.prod.retail .loginbox{background:var(--retail-soft);color:#065F46}
+.loginbox code{font:600 13px/1 ui-monospace,Menlo,monospace;background:rgba(255,255,255,.7);padding:4px 8px;border-radius:7px}
+
+/* features */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.feat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:24px;transition:transform .25s,box-shadow .25s,border-color .25s}
+.feat:hover{transform:translateY(-4px);box-shadow:var(--sh);border-color:#D5DAEE}
+.feat .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:14px;background:linear-gradient(135deg,rgba(124,92,255,.12),rgba(34,195,238,.12));color:var(--b)}
+.feat h3{font-size:18px;font-weight:600;margin-bottom:6px}
+.feat p{margin:0;color:var(--muted);font-size:15px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.step{position:relative;padding:28px;border-radius:var(--r);background:linear-gradient(180deg,#fff,#FAFBFF);border:1px solid var(--line)}
+.step::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--grad);color:#fff;font:700 18px/1 var(--fh);margin-bottom:14px}
+.step h3{font-size:19px;margin-bottom:6px}
+.step p{margin:0;color:var(--muted);font-size:15px}
+
+/* pricing */
+.pricing{background:var(--night);color:#fff;position:relative;overflow:hidden;isolation:isolate}
+.pricing .blob.a{top:auto;bottom:-260px;left:-160px;opacity:.35}
+.pricing .blob.b{top:-200px;right:-160px;opacity:.3}
+.pricing .shead p{color:rgba(255,255,255,.7)}
+.pricing .eyebrow{color:#9DB4FF}
+.plan{max-width:560px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:36px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:center;position:relative}
+.plan .tag{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;padding:7px 16px;border-radius:99px;font:600 13px/1 var(--fh);box-shadow:0 10px 24px -10px rgba(79,123,255,.8)}
+.plan .amt{font:700 64px/1 var(--fh);margin:10px 0 4px}
+.plan .amt small{font-size:20px;font-weight:500;color:rgba(255,255,255,.7)}
+.plan .sub{color:#A7F3D0;font:600 16px/1.4 var(--fh);margin-bottom:22px}
+.plan ul{list-style:none;padding:0;margin:0 0 26px;display:grid;gap:10px;text-align:left}
+.plan li{display:flex;gap:10px;color:rgba(255,255,255,.86)}
+.plan li svg{color:#6FE3FF;flex-shrink:0;margin-top:4px}
+.plan .btn{width:100%}
+.longs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.longs span{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:9px 14px;border-radius:12px;font-size:14px;color:rgba(255,255,255,.85)}
+.longs b{font-family:var(--fh)}
+
+/* faq */
+.faq{max-width:780px;margin:0 auto;display:grid;gap:12px}
+.faq details{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:0 22px;transition:box-shadow .2s}
+.faq details[open]{box-shadow:var(--sh)}
+.faq summary{cursor:pointer;list-style:none;padding:20px 0;font:600 17px/1.4 var(--fh);display:flex;justify-content:space-between;gap:12px}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font:500 24px/1 var(--fh);color:var(--b);transition:transform .2s}
+.faq details[open] summary::after{transform:rotate(45deg)}
+.faq p{margin:0 0 20px;color:var(--muted)}
+
+/* cta + footer */
+.final{padding:0 0 96px}
+.finalbox{border-radius:32px;padding:56px 32px;text-align:center;color:#fff;background:var(--grad);position:relative;overflow:hidden;isolation:isolate}
+.finalbox::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 0%,rgba(255,255,255,.3),transparent 50%),radial-gradient(circle at 90% 100%,rgba(11,16,36,.35),transparent 55%);z-index:-1}
+.finalbox h2{font-size:clamp(28px,3.4vw,40px);margin-bottom:12px}
+.finalbox p{margin:0 0 26px;color:rgba(255,255,255,.88);font-size:17px}
+.finalbox .btn.white{background:#fff;color:var(--ink)}
+footer{background:var(--night);color:rgba(255,255,255,.62);padding:40px 0;font-size:14px}
+footer .wrap{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+footer nav{display:flex;gap:16px;flex-wrap:wrap;margin-left:auto}
+footer a{text-decoration:none}
+footer a:hover{color:#fff}
+
+/* fade-in */
+.fx{opacity:0;transform:translateY(26px);transition:opacity .8s cubic-bezier(.2,.7,.2,1),transform .8s cubic-bezier(.2,.7,.2,1)}
+.fx.in{opacity:1;transform:none}
+.fx.d1{transition-delay:.08s}.fx.d2{transition-delay:.16s}.fx.d3{transition-delay:.24s}.fx.d4{transition-delay:.32s}.fx.d5{transition-delay:.4s}
+.no-js .fx{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fx{opacity:1;transform:none}html{scroll-behavior:auto}}
+
+/* responsive */
+@media (max-width:980px){
+  .hero .wrap{grid-template-columns:1fr}
+  .stage{height:400px;max-width:560px;margin:0 auto;width:100%}
+  .prods{grid-template-columns:1fr}
+  .feats{grid-template-columns:1fr 1fr}
+}
+@media (max-width:760px){
+  .links{display:none}
+  .nav .cta-top{display:none}
+  .hero{padding:120px 0 90px}
+  section{padding:72px 0}
+  .feats,.steps{grid-template-columns:1fr}
+  .prod{padding:24px}
+  .prod ul{grid-template-columns:1fr}
+  .stage{height:340px}
+  .tab{inset:0 52px 40px 0;transform:none;animation:none}
+  .scr{grid-template-columns:34px 1fr 108px}
+  .phone{width:130px;height:256px;border-radius:24px}
+  .phone .in{border-radius:18px}
+  .toast{left:0;bottom:24px}
+  .plan{padding:28px 20px}
+  .plan .amt{font-size:52px}
+  .menu{width:min(300px,calc(100vw - 32px))}
+  footer nav{margin-left:0}
+}
 </style>
 </head>
-<body>
-<header class="top"><div class="wrap" style="padding-bottom:0">
-  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button></div>
-  <div class="cover" id="cover" hidden></div><div class="notice" id="notice" role="note" hidden></div>
-  <nav class="chips" id="cats" aria-label="หมวดหมู่"></nav>
-</div></header>
-<main class="wrap" id="main"><div class="empty">กำลังโหลดเมนู…</div></main>
-<div class="cartbar" id="cartbar" hidden><button id="cartBtn" type="button"><span class="cnt num" id="cartCnt">0</span><span>ดูตะกร้า</span><span class="num" id="cartTotal">฿0</span></button></div>
-<div id="sheet"></div>
-<div class="toast" id="toast" role="status" hidden></div>
+<body class="no-js">
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Easy POS หน้าแรก"><img src="/easypos.svg" alt="" width="38" height="38"><b>Easy<span>POS</span></b></a>
+    <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a></nav>
+    <span class="sp"></span>
+    <div class="login" id="login">
+      <button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="loginMenu">เข้าสู่ระบบ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+      <div class="menu" id="loginMenu" role="menu">
+        <a href="/pos" role="menuitem"><span class="mk cafe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5c-.8 1 .8 2 0 3.2M12 2.5c-.8 1 .8 2 0 3.2"/></svg></span><span><b>Easy POS Cafe</b><small>คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม</small></span></a>
+        <a href="/retail" role="menuitem"><span class="mk retail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><span><b>Easy POS Retail</b><small>ร้านค้า ร้านของชำ มินิมาร์ท</small></span><span class="soon">เร็ว ๆ นี้</span></a>
+      </div>
+    </div>
+    <a class="btn grad sm cta-top" href="/signup">ทดลองฟรี 30 วัน</a>
+  </div>
+</header>
+
+<main>
+<section class="hero" aria-labelledby="heroT">
+  <div class="blob a"></div><div class="blob b"></div><div class="blob c"></div><div class="grid-bg"></div>
+  <div class="wrap">
+    <div>
+      <span class="pill badge fx"><i></i>ทดลองใช้ฟรี 30 วัน · ไม่ต้องผูกบัตร</span>
+      <h1 id="heroT" class="fx d1"><span class="nw">ขายง่าย</span> <span class="nw">จบในเครื่องเดียว</span><br><span class="gtext"><span class="nw">POS สำหรับ</span><span class="nw">ร้านของคุณ</span></span></h1>
+      <p class="lead fx d2">Easy POS รวมหน้าขาย รับออเดอร์ผ่าน QR บนมือถือลูกค้า จอครัว จอลูกค้า และสมาชิกสะสมแต้มไว้ในที่เดียว ใช้บนแท็บเล็ต คอมพิวเตอร์ หรือมือถือก็ได้ เริ่มต้นเพียง <b style="color:#fff">299 บาท/เดือน</b></p>
+      <div class="ctas fx d3"><a class="btn grad" href="/signup">เริ่มทดลองใช้ฟรี <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn ghost" href="#products">ดูผลิตภัณฑ์</a></div>
+      <div class="trust fx d4">
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ไม่ต้องติดตั้งโปรแกรม</span>
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR</span>
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ยกเลิกได้ทุกเมื่อ</span>
+      </div>
+    </div>
+    <div class="stage fx d2" aria-hidden="true">
+      <div class="tab"><div class="scr">
+        <div class="rail"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+        <div class="main"><div class="chips"><span></span><span></span><span></span><span></span></div>
+          <div class="tiles">
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#FFD9C2,#FFB59A)"></div><b></b><u></u></div>
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#D9E3FF,#B3C6FF)"></div><b></b><u></u></div>
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#CFF5E7,#9BE7CB)"></div><b></b><u></u></div>
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#F3DAFF,#DDB5FF)"></div><b></b><u></u></div>
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#FFF0C2,#FFE08A)"></div><b></b><u></u></div>
+            <div class="tile"><div class="ph" style="background:linear-gradient(135deg,#C9F1FF,#93E2FA)"></div><b></b><u></u></div>
+          </div></div>
+        <div class="bill"><div class="ln"><span>ลาเต้เย็น</span><span>80</span></div><div class="ln"><span>ครัวซองต์</span><span>75</span></div><div class="ln"><i></i><span>60</span></div><div class="ln"><i></i><span>45</span></div>
+          <div class="tot"><span>รวม</span><span>฿260</span></div><div class="pay">ชำระเงิน</div></div>
+      </div></div>
+      <div class="phone"><div class="in">
+        <div class="cover"><b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/></svg></b></div>
+        <div class="t">สั่งผ่านมือถือ<small>สแกน QR ที่โต๊ะ · โต๊ะ 4</small></div>
+        <div class="it"><i style="background:#FFD9C2"></i><b></b><u></u></div>
+        <div class="it"><i style="background:#D9E3FF"></i><b></b><u></u></div>
+        <div class="it"><i style="background:#CFF5E7"></i><b></b><u></u></div>
+        <div class="cta">ยืนยันสั่งอาหาร</div>
+      </div></div>
+      <div class="toast"><span class="mk cafe"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span><span><b>Mobile Order ใหม่</b><small>A012 (โต๊ะ 4) · รอชำระ</small></span></div>
+    </div>
+  </div>
+</section>
+
+<section id="products" aria-labelledby="prodT">
+  <div class="wrap">
+    <div class="shead"><span class="eyebrow fx">ผลิตภัณฑ์</span><h2 id="prodT" class="fx d1">เลือก Easy POS ที่ใช่<br>สำหรับธุรกิจของคุณ</h2><p class="fx d2">แต่ละระบบมีหน้าเข้าสู่ระบบและบัญชีแยกกันชัดเจน ข้อมูลร้านไม่ปนกัน</p></div>
+    <div class="prods">
+      <article class="prod cafe fx">
+        <div class="top"><span class="mk cafe"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5c-.8 1 .8 2 0 3.2M12 2.5c-.8 1 .8 2 0 3.2"/></svg></span>
+          <h3>Easy POS Cafe<small>คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม เบเกอรี่</small></h3><span class="pill st live"><i></i>พร้อมใช้งาน</span></div>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>หน้าขายรวดเร็ว ตัวเลือกเมนู ร้อน/เย็น/ความหวาน</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>Mobile Order ลูกค้าสแกน QR สั่งเอง</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>จอครัว/บาร์ และเรียกคิว</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ผังโต๊ะ เปิดบิล แยกโซน</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>จอลูกค้าพร้อมโฆษณารูป/วิดีโอ</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สมาชิกสะสมแต้มด้วยเบอร์โทร</li>
+        </ul>
+        <div class="price"><b>฿299</b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div>
+        <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>เข้าสู่ระบบร้านคาเฟ่ที่ <code>/pos</code></span></div>
+        <div class="acts"><a class="btn main" href="/signup">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/pos">เข้าสู่ระบบ Cafe</a></div>
+      </article>
+      <article class="prod retail fx d2">
+        <div class="top"><span class="mk retail"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>
+          <h3>Easy POS Retail<small>ร้านค้า ร้านของชำ มินิมาร์ท</small></h3><span class="pill st dev">กำลังพัฒนา</span></div>
+        <ul>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สแกนบาร์โค้ดขายสินค้า</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สต็อกสินค้า แจ้งเตือนของใกล้หมด</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับสินค้าเข้า ต้นทุน กำไร</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ขายเงินเชื่อ ลูกค้าประจำ</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR พิมพ์ใบเสร็จ</li>
+          <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รายงานยอดขายรายวัน/สินค้าขายดี</li>
+        </ul>
+        <div class="price"><b>฿299</b><span>/ เดือน · เมื่อเปิดให้บริการ</span></div>
+        <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>ระบบเข้าสู่ระบบแยกที่ <code>/retail</code> · เปิดเร็ว ๆ นี้</span></div>
+        <div class="acts"><a class="btn main" href="/retail">ดูรายละเอียด</a><a class="btn line" href="/retail">เข้าสู่ระบบ Retail</a></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="padding-top:24px" aria-labelledby="featT">
+  <div class="wrap">
+    <div class="shead"><span class="eyebrow fx">ฟีเจอร์ Easy POS Cafe</span><h2 id="featT" class="fx d1">ครบทุกอย่างที่ร้านต้องใช้<br><span class="gtext">ในราคาเดียว</span></h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีค่าโมดูลเพิ่ม ใช้ได้ทุกฟีเจอร์ตั้งแต่วันแรก</p></div>
+    <div class="feats">
+      <div class="feat fx"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>หน้าขายใช้ง่าย</h3><p>แตะเมนู เลือกตัวเลือก รับเงินสด QR บัตร หรือโอน ทอนเงินอัตโนมัติ พิมพ์ใบเสร็จได้ทันที</p></div>
+      <div class="feat fx d1"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div><h3>Mobile Order ผ่าน QR</h3><p>ลูกค้าสแกนสั่งเองจากโต๊ะหรือสั่งกลับบ้าน ออเดอร์เข้าครัวเมื่อชำระที่เคาน์เตอร์แล้ว</p></div>
+      <div class="feat fx d2"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18M5 11V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4M6 11v8M18 11v8"/></svg></div><h3>จอครัวและคิว</h3><p>ครัวและบาร์เห็นออเดอร์แบบเรียลไทม์ แยกสถานี กดทำเสร็จแล้วเรียกคิวลูกค้า</p></div>
+      <div class="feat fx"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="m10 8 5 2-5 2z"/><path d="M8 21h8"/></svg></div><h3>จอลูกค้าและโฆษณา</h3><p>แสดงรายการและยอดชำระให้ลูกค้าเห็น พร้อม QR พร้อมเพย์ เวลาว่างเล่นรูปหรือวิดีโอโปรโมชัน</p></div>
+      <div class="feat fx d1"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="8" r="4"/><path d="M3 21c1.3-3.6 3.9-5.5 7-5.5M18 14v6M15 17h6"/></svg></div><h3>สมาชิกสะสมแต้ม</h3><p>ลูกค้าสมัครด้วยเบอร์โทร ได้แต้มทุกครั้งที่ซื้อ แลกแต้มได้ ดูยอดซื้อสะสมของแต่ละคน</p></div>
+      <div class="feat fx d2"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h3>รายงานและรอบการขาย</h3><p>ยอดขายรายวัน เมนูขายดี แยกช่องทางชำระ เปิด–ปิดรอบ นับเงินในลิ้นชัก</p></div>
+      <div class="feat fx"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 5h14v14H5z"/><path d="M5 10h14M10 5v14"/></svg></div><h3>ผังโต๊ะ</h3><p>วาดผังร้านเอง เห็นโต๊ะว่างหรือไม่ว่าง เปิดบิลตามโต๊ะ สั่งเพิ่มและย้ายโต๊ะได้</p></div>
+      <div class="feat fx d1"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5 6.5-5s5.5 1.5 6.5 5M16 4.5a3.5 3.5 0 0 1 0 7M18 15c2 .6 3.2 2.2 3.5 5"/></svg></div><h3>บัญชีพนักงาน</h3><p>ผู้จัดการสร้างชื่อผู้ใช้ให้พนักงาน กำหนดสิทธิ์ พนักงานขายได้แต่แก้เมนูและตั้งค่าไม่ได้</p></div>
+      <div class="feat fx d2"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="5"/></svg></div><h3>ใช้ได้ทุกอุปกรณ์</h3><p>เปิดผ่านเบราว์เซอร์บนแท็บเล็ต คอมพิวเตอร์ หรือมือถือ ข้อมูลซิงก์ทุกเครื่องทันที</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0" aria-labelledby="howT">
+  <div class="wrap">
+    <div class="shead"><span class="eyebrow fx">เริ่มใช้งาน</span><h2 id="howT" class="fx d1">เปิดร้านได้ใน 3 ขั้นตอน</h2></div>
+    <div class="steps">
+      <div class="step fx"><h3>สมัครทดลองใช้</h3><p>กรอกข้อมูลร้าน ชื่อ เบอร์โทร และอีเมลสำหรับเข้าสู่ระบบ เลือกทดลองฟรี 30 วัน</p></div>
+      <div class="step fx d1"><h3>รอยืนยันเปิดร้าน</h3><p>ทีมงานตรวจสอบและเปิดร้านให้ พร้อมลิงก์หน้าสั่งอาหารเฉพาะร้านของคุณ</p></div>
+      <div class="step fx d2"><h3>ใส่เมนูแล้วเริ่มขาย</h3><p>เพิ่มเมนู รูปภาพ ราคา ตั้งค่าพร้อมเพย์ เพิ่มพนักงาน แล้วเริ่มรับออเดอร์ได้เลย</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="pricing" id="pricing" aria-labelledby="priceT">
+  <div class="blob a"></div><div class="blob b"></div>
+  <div class="wrap">
+    <div class="shead"><span class="eyebrow fx">ราคา</span><h2 id="priceT" class="fx d1">ราคาเดียว ใช้ได้ทุกฟีเจอร์</h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีสัญญาผูกมัด ทดลองใช้ฟรีก่อนตัดสินใจ</p></div>
+    <div class="plan fx d2">
+      <span class="tag">ทดลองใช้ฟรี 30 วัน</span>
+      <div style="font:600 16px/1 var(--fh);color:rgba(255,255,255,.8)">Easy POS Cafe</div>
+      <div class="amt">฿<span id="pMonth">299</span><small> / เดือน</small></div>
+      <div class="sub">ใช้ฟรี 30 วันแรก ชำระผ่านพร้อมเพย์</div>
+      <ul>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ทุกฟีเจอร์: หน้าขาย Mobile Order จอครัว จอลูกค้า สมาชิก รายงาน</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ใช้ได้ไม่จำกัดอุปกรณ์และไม่จำกัดจำนวนบิล</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>บัญชีพนักงานตามแพ็กเกจ</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ดูวันหมดอายุและแจ้งชำระได้เองในระบบ</li>
+      </ul>
+      <a class="btn grad" href="/signup">เริ่มทดลองใช้ฟรี 30 วัน</a>
+      <div class="longs" id="longs"></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq" aria-labelledby="faqT">
+  <div class="wrap">
+    <div class="shead"><span class="eyebrow fx">คำถามที่พบบ่อย</span><h2 id="faqT" class="fx d1">มีคำถาม? เรามีคำตอบ</h2></div>
+    <div class="faq">
+      <details class="fx"><summary>ทดลองใช้ฟรี 30 วัน ต้องจ่ายเงินก่อนไหม</summary><p>ไม่ต้อง เลือกแพ็กเกจ “ทดลองใช้ฟรี 30 วัน” ตอนสมัคร เมื่อร้านได้รับการยืนยันก็ใช้งานได้ทุกฟีเจอร์ทันที ใกล้ครบกำหนดค่อยชำระค่าบริการผ่านพร้อมเพย์จากหน้าตั้งค่าของร้าน</p></details>
+      <details class="fx d1"><summary>ต้องใช้อุปกรณ์อะไรบ้าง</summary><p>ใช้แท็บเล็ต คอมพิวเตอร์ หรือมือถือที่มีเบราว์เซอร์และอินเทอร์เน็ตก็พอ ต่อเครื่องพิมพ์ใบเสร็จและลิ้นชักเก็บเงินเพิ่มได้ถ้าต้องการ</p></details>
+      <details class="fx d2"><summary>Easy POS Cafe กับ Easy POS Retail ต่างกันอย่างไร</summary><p>Cafe ออกแบบสำหรับร้านที่ขายเมนูมีตัวเลือก มีโต๊ะ ครัว และออเดอร์จากมือถือ ส่วน Retail สำหรับร้านค้าที่ขายสินค้าด้วยบาร์โค้ดและต้องคุมสต็อก ทั้งสองระบบมีบัญชีและหน้าเข้าสู่ระบบแยกกัน ตอนนี้ Retail กำลังพัฒนา</p></details>
+      <details class="fx d3"><summary>พนักงานเข้าใช้งานอย่างไร</summary><p>ผู้จัดการร้านสร้างบัญชีให้พนักงานในหน้าตั้งค่า ชื่อผู้ใช้ขึ้นต้นด้วยรหัสร้านของคุณ พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล</p></details>
+      <details class="fx d4"><summary>ถ้าไม่ต่ออายุ ข้อมูลจะหายไหม</summary><p>ไม่หาย หลังครบกำหนดมีช่วงผ่อนผัน 7 วัน จากนั้นการขายจะถูกล็อกไว้ชั่วคราว เมื่อชำระและได้รับการยืนยัน ร้านกลับมาใช้งานต่อได้พร้อมข้อมูลเดิม</p></details>
+    </div>
+  </div>
+</section>
+
+<div class="final">
+  <div class="wrap"><div class="finalbox fx">
+    <h2>พร้อมให้ร้านของคุณขายง่ายขึ้นหรือยัง</h2>
+    <p>ทดลองใช้ Easy POS Cafe ฟรี 30 วัน จากนั้นเพียง 299 บาทต่อเดือน</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn white" href="/signup">เริ่มทดลองใช้ฟรี</a><a class="btn ghost" href="/pos">เข้าสู่ระบบ Cafe</a></div>
+  </div></div>
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Easy POS"><img src="/easypos.svg" alt="" width="30" height="30"><b style="font-size:18px">Easy<span>POS</span></b></a>
+    <span>© <span id="yr">2026</span> Easy POS</span>
+    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a href="#pricing">ราคา</a></nav>
+  </div>
+</footer>
 
 <script>
 (function(){
-'use strict';
-var API='https://roggqmvmgfxsxynulpvk.supabase.co/rest/v1/rpc/';
-var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
-var $=function(s){return document.querySelector(s)};
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
-function baht(n){return '฿'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})}
-function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3000)}
-var ICON={cup:'<path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/>',
-  bread:'<path d="M4 12a8 5 0 0 1 16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 10l1 3M14 10l-1 3"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',table:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M6 12v7M18 12v7M9 5h6"/>',bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v4M18 10v4"/>',check:'<path d="M5 12l5 5L20 7"/>'};
-function ic(k){return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>'}
-var ERR={closed:'ร้านปิดรับออเดอร์ออนไลน์ในขณะนี้',no_menu:'ร้านยังไม่ได้เปิดเมนูออนไลน์',bad_table:'ไม่พบโต๊ะนี้ ลองสแกน QR ที่โต๊ะอีกครั้ง',item_unavailable:'มีเมนูที่หมดแล้วในตะกร้า ลบออกแล้วลองใหม่',
-  choice_unavailable:'มีตัวเลือกที่หมดแล้ว แก้ไขรายการแล้วลองใหม่',choice_required:'มีตัวเลือกที่ต้องเลือกให้ครบ',too_many_choices:'เลือกตัวเลือกเกินจำนวนที่กำหนด',bad_choice:'ตัวเลือกไม่ถูกต้อง ลองเพิ่มรายการใหม่',
-  bad_qty:'จำนวนต้องอยู่ระหว่าง 1–20',bad_items:'ตะกร้าว่างหรือมีรายการมากเกินไป',busy:'ร้านมีออเดอร์ค้างมาก ลองใหม่อีกสักครู่',bad_type:'ร้านไม่รับสั่งกลับบ้านในขณะนี้'};
-function rpc(fn,body){
-  return fetch(API+fn,{method:'POST',headers:{'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'},body:JSON.stringify(body||{})})
-    .then(function(r){return r.json().then(function(j){if(!r.ok){var e=new Error((j&&j.message)||'error');e.code=j&&j.message;throw e}return j})});
-}
-var SLUG=(function(){var m=location.pathname.match(/^\/s\/([a-z0-9][a-z0-9-]{1,30})\/?/i);if(m)return m[1].toLowerCase();
-  var p=new URLSearchParams(location.search),q=(p.get('s')||'').toLowerCase();
-  if(/^[a-z0-9][a-z0-9-]{1,30}$/.test(q)){p.delete('s');try{history.replaceState(null,'','/s/'+q+'/'+(p.toString()?'?'+p.toString():''))}catch(e){}return q}return ''})();
-function K(k){return SLUG?k+'@'+SLUG:k}
-var qs=new URLSearchParams(location.search);
-var S={shop:{},menu:[],cats:[],opts:[],tables:[],tableId:qs.get('t'),type:qs.get('t')?'dine':(qs.get('type')==='take'?'take':null),
-  cart:[],cat:'all',view:'menu',token:null,order:null,sheet:null,busy:false};
-try{S.cart=JSON.parse(sessionStorage.getItem(K('cart'))||'[]')}catch(e){}
-function saveCart(){try{sessionStorage.setItem(K('cart'),JSON.stringify(S.cart))}catch(e){}}
-function myOrders(){try{return JSON.parse(localStorage.getItem(K('orders'))||'[]')}catch(e){return []}}
-function rememberOrder(tok){var l=myOrders().filter(function(x){return x.t!==tok});l.unshift({t:tok,at:Date.now()});try{localStorage.setItem(K('orders'),JSON.stringify(l.slice(0,10)))}catch(e){}}
+document.body.classList.remove('no-js');
+var nav=document.getElementById('nav');
+function onScroll(){nav.classList.toggle('solid',window.scrollY>24)}
+onScroll();window.addEventListener('scroll',onScroll,{passive:true});
 
-function tableName(){var t=S.tables.find(function(x){return x.id===S.tableId});return t?t.name:''}
-function catIdx(id){var i=S.cats.findIndex(function(c){return c.id===id});return (i<0?0:i)%6}
-function optsOf(m){return (m.optionIds||[]).map(function(id){return S.opts.find(function(o){return o.id===id})}).filter(Boolean)}
+var lg=document.getElementById('login'),lb=lg.querySelector('button');
+function setOpen(o){lg.classList.toggle('open',o);lb.setAttribute('aria-expanded',String(o))}
+lb.addEventListener('click',function(e){e.stopPropagation();setOpen(!lg.classList.contains('open'))});
+document.addEventListener('click',function(e){if(!lg.contains(e.target))setOpen(false)});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')setOpen(false)});
 
-function safeUrl(u){return typeof u==='string'&&/^https:\/\/[^\s"'<>()]+$/.test(u)?u:''}
-function hexRgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
-function mix(a,b,t){return '#'+a.map(function(v,i){var x=Math.round(v+(b[i]-v)*t);return ('0'+x.toString(16)).slice(-2)}).join('')}
-function lum(c){var ch=c.map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2]}
-var lastLook='';
-function applyLook(){var L=look();var key=JSON.stringify(L);if(key===lastLook)return;lastLook=key;var st=document.getElementById('lookCss');
-  if(!st){st=document.createElement('style');st.id='lookCss';document.head.appendChild(st)}
-  if(!/^#[0-9a-f]{6}$/i.test(L.color||'')||L.color.toLowerCase()==='#2f6fb0'){st.textContent='';}
-  else{var c=hexRgb(L.color),w=[255,255,255],k=[0,0,0],dk=mix(c,k,.25);var on=lum(c)>0.36?'#111111':'#FFFFFF';
-    var light=mix(c,w,.45),lightOn=lum(hexRgb(light))>0.36?'#0B1620':'#FFFFFF';
-    st.textContent=':root{--accent:'+L.color+';--accent-hover:'+mix(c,k,.12)+';--on-accent:'+on+';--accent-soft:'+mix(c,w,.88)+';--accent-soft-ink:'+dk+'}'+
-      '@media (prefers-color-scheme:dark){:root{--accent:'+light+';--accent-hover:'+mix(c,w,.6)+';--on-accent:'+lightOn+';--accent-soft:'+mix(c,k,.7)+';--accent-soft-ink:'+mix(c,w,.7)+'}}';
-    var tc=document.querySelector('meta[name=theme-color]');if(tc)tc.setAttribute('content',L.color)}
-}
-function look(){return (S.shop&&S.shop.look)||{}}
-function renderHeader(){applyLook();var L=look();
-  var cv=$('#cover'),cu=safeUrl(L.cover);cv.hidden=!cu||S.view==='status';if(cu&&cv.dataset.u!==cu){cv.dataset.u=cu;cv.innerHTML='<img src="'+esc(cu)+'" alt="">'}
-  var nt=$('#notice');nt.hidden=!L.notice||S.view==='status';nt.textContent=L.notice||'';
-  $('#shopName').textContent=S.shop.name||'ร้านกาแฟ';
-  $('#shopSub').textContent=S.shop.open?(L.tagline||S.shop.branch||'สั่งอาหารออนไลน์'):'ปิดรับออเดอร์ออนไลน์';
-  var lu=safeUrl(L.logo),lg=$('#logo');if(lu){if(lg.dataset.u!==lu){lg.dataset.u=lu;lg.innerHTML='<img src="'+esc(lu)+'" alt="">'}}else{lg.dataset.u='';lg.textContent=(S.shop.name||'C').trim().charAt(0).toUpperCase()}
-  document.title='สั่งอาหาร · '+(S.shop.name||'');
-  var w=$('#where');
-  if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()+' · เปลี่ยน';w.setAttribute('aria-label','โต๊ะ '+tableName()+' แตะเพื่อเปลี่ยน')}
-  else if(S.type==='take'){w.hidden=false;w.textContent='กลับบ้าน · เปลี่ยน';w.setAttribute('aria-label','สั่งกลับบ้าน แตะเพื่อเปลี่ยน')}else w.hidden=true;
-  var cats=[{id:'all',name:'ทั้งหมด'}].concat(S.cats.filter(function(c){return S.menu.some(function(m){return m.catId===c.id})}));
-  var ordering=S.view==='menu'&&S.shop.open&&(S.type==='take'||(S.type==='dine'&&!!tableName()));
-  $('#cats').hidden=!ordering;
-  $('#cats').innerHTML=ordering?cats.map(function(c){return '<button class="chip" data-act="cat" data-v="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'}).join(''):'';
-}
-function renderCartBar(){
-  var n=0,t=0;S.cart.forEach(function(l){n+=l.qty;t+=l.unit*l.qty});
-  $('#cartbar').hidden=!(S.view==='menu'&&n>0);
-  $('#cartCnt').textContent=n;$('#cartTotal').textContent=baht(t);
-}
-function renderMenu(){
-  var m=$('#main');
-  if(!S.shop.open){m.innerHTML='<div class="empty"><b>ปิดรับออเดอร์ออนไลน์</b>ร้านยังไม่เปิดรับสั่งผ่านแอปในขณะนี้ สั่งที่เคาน์เตอร์ได้เลย</div>'+myOrdersHtml();return}
-  if(!S.type){m.innerHTML='<h2 class="cat" style="font-size:20px;margin-top:8px">วันนี้รับแบบไหนดี</h2><div class="ways">'+
-      '<button class="way" data-act="choose" data-v="dine">'+ic('table')+'ทานที่ร้าน<small>เลือกโต๊ะที่นั่ง</small></button>'+
-      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div><div style="margin-top:14px">'+payInfo('','ชำระเงินที่เคาน์เตอร์ก่อน แล้วร้านจะเริ่มทำ','สั่งผ่านมือถือได้เลย แล้วมาชำระเงินที่เคาน์เตอร์ แจ้งหมายเลขออเดอร์หรือโต๊ะกับพนักงาน ร้านจะส่งเข้าครัวเมื่อชำระเงินแล้ว')+'</div>'+myOrdersHtml();return}
-  if(S.type==='dine'&&!tableName()){
-    var zones=[];S.tables.forEach(function(t){var z=t.zone||'';if(zones.indexOf(z)<0)zones.push(z)});
-    m.innerHTML=(S.tableId?'<div class="note bad">ไม่พบโต๊ะนี้ เลือกโต๊ะใหม่ได้เลย</div>':'')+'<h2 class="cat" style="font-size:20px;margin-top:8px">นั่งโต๊ะไหน</h2>'+
-      (S.tables.length?zones.map(function(z){var ts=S.tables.filter(function(t){return (t.zone||'')===z});return (zones.length>1?'<h2 class="cat" style="font-size:15px;color:var(--muted)">'+esc(z||'ในร้าน')+'</h2>':'')+'<div class="tgrid">'+ts.map(function(t){return '<button class="tbtn" data-act="pickt" data-id="'+esc(t.id)+'">'+esc(t.name)+'<small>โต๊ะ</small></button>'}).join('')+'</div>'}).join(''):'<div class="empty">ร้านยังไม่ได้ตั้งโต๊ะ แจ้งพนักงานได้เลย</div>')+
-      '<div style="margin-top:16px"><button class="ghost" data-act="changeway">← เปลี่ยนเป็น'+(S.shop.takeaway!==false?'กลับบ้าน':'หน้าแรก')+'</button></div>';return}
-  var list=S.cats.concat(S.menu.some(function(x){return !S.cats.some(function(c){return c.id===x.catId})})?[{id:'_o',name:'อื่น ๆ'}]:[]);
-  var html='';
-  list.forEach(function(c){
-    if(S.cat!=='all'&&S.cat!==c.id)return;
-    var items=S.menu.filter(function(x){return c.id==='_o'?!S.cats.some(function(cc){return cc.id===x.catId}):x.catId===c.id});
-    if(!items.length)return;
-    var L=look(),grid=L.layout==='grid';
-    html+='<h2 class="cat">'+esc(c.name)+'</h2><div class="items'+(grid?' grid':'')+'">'+items.map(function(x){var ci=catIdx(x.catId);var has=optsOf(x).length;var iu=L.showImg!==false?safeUrl(x.img):'';
-      return '<button class="item" data-act="item" data-id="'+esc(x.id)+'"'+(x.soldOut?' disabled':'')+'><span class="pic" style="background:var(--t-'+ci+');color:var(--i-'+ci+')">'+(iu?'<img src="'+esc(iu)+'" alt="" loading="lazy">':ic(has?'cup':'bread'))+'</span><span class="info"><b>'+esc(x.name)+(x.best?'<span class="tag">ขายดี</span>':'')+(x.soldOut?'<span class="tag out">หมด</span>':'')+'</b>'+(x.en?'<small>'+esc(x.en)+'</small>':'')+'</span><span class="pr">'+baht(x.price)+(has?'+':'')+'</span></button>'}).join('')+'</div>';
-  });
-  m.innerHTML=(html||'<div class="empty"><b>ยังไม่มีเมนู</b></div>')+myOrdersHtml();
-}
-function payInfo(cls,title,body,icon){return '<div class="payinfo '+(cls||'')+'">'+ic(icon||'cash')+'<div><b>'+title+'</b>'+body+'</div></div>'}
-function myOrdersHtml(){var l=myOrders().filter(function(x){return Date.now()-x.at<12*3600*1000});if(!l.length)return '';
-  return '<h2 class="cat">ออเดอร์ของฉัน</h2><div class="items">'+l.map(function(x,i){return '<button class="item" data-act="track" data-v="'+esc(x.t)+'"><span class="info"><b>ออเดอร์ที่ '+(l.length-i)+'</b><small>สั่งเมื่อ '+new Date(x.at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' · แตะเพื่อดูสถานะ</small></span></button>'}).join('')+'</div>'}
+var els=document.querySelectorAll('.fx');
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});els.forEach(function(el){io.observe(el)})}
+else els.forEach(function(el){el.classList.add('in')});
 
-function stepsHtml(o,r){var paid=!!o.paid||r>=2;
-  var list=[['ส่งออเดอร์แล้ว','ร้านได้รับออเดอร์ของคุณ',r>=1||paid?'done':'cur'],
-    paid?['ชำระเงินแล้ว','ขอบคุณค่ะ','done']:['กรุณาไปชำระเงินที่เคาน์เตอร์','แจ้งหมายเลข '+(o.no||'')+(o.type==='dine'&&o.table?' (โต๊ะ '+o.table+')':'')+' กับพนักงาน ร้านจะเริ่มทำหลังชำระเงิน','pay'],
-    ['ส่งเข้าครัวแล้ว','รอคิวทำ',!paid?'':r>=2?'done':'cur'],
-    ['กำลังทำ','บาริสต้ากำลังเตรียม',!paid?'':r>2?'done':r===2?'cur':''],
-    ['พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ',!paid?'':r>3?'done':r===3?'cur':''],
-    ['เสร็จแล้ว','ขอให้อร่อย',r>=4&&paid?'done':'']];
-  return '<div class="steps">'+list.map(function(s,i){return '<div class="step '+s[2]+'"'+(s[2]==='pay'?' role="alert"':'')+'><i>'+(s[2]==='done'?'✓':s[2]==='pay'?'!':i+1)+'</i><div><b>'+s[0]+'</b><small>'+s[1]+'</small></div></div>'}).join('')+'</div>'}
-var STEPS=[['accepted','ร้านรับออเดอร์แล้ว','ส่งเข้าครัวเรียบร้อย'],['making','กำลังทำ','บาริสต้ากำลังเตรียม'],['ready','พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ'],['done','เสร็จแล้ว','ขอให้อร่อย']];
-function renderStatus(){
-  var o=S.order;var m=$('#main');
-  if(!o){m.innerHTML='<div class="empty">กำลังโหลดสถานะ…</div>';return}
-  var rank={'new':0,accepted:1,making:2,ready:3,done:4};var r=rank[o.status];
-  var stop=o.status==='cancelled'||o.status==='rejected';
-  m.innerHTML='<div class="status"><div class="row"><div><div class="hint">หมายเลขออเดอร์</div><div class="big-no">'+esc(o.no||'—')+'</div></div><div style="text-align:right"><div class="hint">'+(o.type==='dine'?'โต๊ะ':'สั่งกลับบ้าน')+'</div><b style="font-size:22px">'+esc(o.table||'')+'</b></div></div>'+
-    (stop?'<div class="note bad">ร้านยกเลิกออเดอร์นี้ '+esc(o.reason||'')+' กรุณาติดต่อพนักงาน</div>':
-    stepsHtml(o,r))+
-    '<div>'+(o.items||[]).map(function(l){return '<div class="line"><div class="info"><b>'+l.qty+' × '+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'</div><span class="num">'+baht(l.unit*l.qty)+'</span></div>'}).join('')+'</div>'+
-    '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(o.total)+'</span></div>'+
-    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):'')+
-    '<div class="row"><button class="ghost" data-act="back" style="flex:1">'+(S.type?'สั่งเพิ่ม':'กลับไปที่เมนู')+'</button></div></div>';
-}
-function render(){renderHeader();if(S.view==='status')renderStatus();else renderMenu();renderCartBar();renderSheet()}
+document.getElementById('yr').textContent=new Date().getFullYear();
 
-/* sheets */
-function renderSheet(){
-  var el=$('#sheet');var v=S.sheet;if(!v){el.innerHTML='';return}
-  if(v.k==='item'){
-    var m=S.menu.find(function(x){return x.id===v.id});if(!m){S.sheet=null;el.innerHTML='';return}
-    var price=m.price,ok=true;
-    var gh=optsOf(m).map(function(g){var sel=v.sel[g.id]||[];if(g.required&&!sel.length)ok=false;
-      sel.forEach(function(cid){var c=(g.choices||[]).find(function(x){return x.id===cid});if(c)price+=+c.price||0});
-      return '<div class="grp"><div class="grp-t">'+esc(g.name)+(g.required?' <span class="req">จำเป็น</span>':'')+((g.max||1)>1?' <span class="hint">เลือกได้ไม่เกิน '+g.max+'</span>':'')+'</div><div class="opts">'+
-        (g.choices||[]).map(function(c){return '<button class="opt" data-act="choice" data-g="'+esc(g.id)+'" data-c="'+esc(c.id)+'" aria-pressed="'+(sel.indexOf(c.id)>=0)+'"'+(c.soldOut?' disabled':'')+'>'+esc(c.name)+(c.soldOut?' <small>หมด</small>':c.price?' <small>+'+c.price+'</small>':'')+'</button>'}).join('')+'</div></div>'}).join('');
-    el.innerHTML='<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT"><div class="sh-head"><div><h2 id="sT">'+esc(m.name)+'</h2><div class="hint">'+esc(m.en||'')+' · '+baht(m.price)+'</div></div><button class="x" data-act="close" aria-label="ปิด">'+ic('x')+'</button></div>'+gh+
-      '<label class="field" for="note">หมายเหตุ<input id="note" maxlength="60" placeholder="เช่น น้ำแข็งน้อย" value="'+esc(v.note||'')+'"></label>'+
-      '<div class="row"><div class="stepper"><button data-act="qty" data-d="-1" aria-label="ลดจำนวน">−</button><span>'+v.qty+'</span><button data-act="qty" data-d="1" aria-label="เพิ่มจำนวน">+</button></div><button class="big" data-act="add"'+(ok?'':' disabled')+'>'+(ok?'ใส่ตะกร้า':'เลือกตัวเลือกให้ครบ')+' · <span class="num">'+baht(price*v.qty)+'</span></button></div></div></div>';
-  }else if(v.k==='cart'){
-    var t=0;S.cart.forEach(function(l){t+=l.unit*l.qty});
-    el.innerHTML='<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cT"><div class="sh-head"><h2 id="cT">ตะกร้า · '+(S.type==='dine'?'โต๊ะ '+esc(tableName()):'สั่งกลับบ้าน')+'</h2><button class="x" data-act="close" aria-label="ปิด">'+ic('x')+'</button></div>'+
-      (S.cart.length?S.cart.map(function(l,i){return '<div class="line"><div class="info"><b>'+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'<div class="stepper" style="margin-top:6px"><button data-act="cqty" data-i="'+i+'" data-d="-1" aria-label="ลดจำนวน">−</button><span>'+l.qty+'</span><button data-act="cqty" data-i="'+i+'" data-d="1" aria-label="เพิ่มจำนวน">+</button></div></div><span class="num" style="font-weight:600">'+baht(l.unit*l.qty)+'</span></div>'}).join(''):'<div class="empty">ตะกร้าว่าง</div>')+
-      '<label class="field" for="cname">ชื่อ'+(S.type==='take'?' (สำหรับเรียกรับ)':' (ไม่บังคับ)')+'<input id="cname" maxlength="60" autocomplete="name" value="'+esc(v.name||'')+'"'+(S.type==='take'?' required':'')+'></label>'+
-      '<label class="field" for="cphone">เบอร์โทร (ไม่บังคับ · สะสมแต้มสมาชิก)<input id="cphone" inputmode="tel" maxlength="12" autocomplete="tel" value="'+esc(v.phone||'')+'"></label>'+
-      '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(t)+'</span></div>'+payInfo('warn','ต้องชำระเงินที่เคาน์เตอร์','หลังกดสั่ง กรุณามาชำระเงินที่เคาน์เตอร์ และแจ้งหมายเลขออเดอร์'+(S.type==='dine'?'หรือหมายเลขโต๊ะ':'')+' ร้านจะเริ่มทำเมื่อชำระเงินแล้ว ยังไม่รับชำระผ่านมือถือ')+
-      '<button class="big" data-act="order"'+(S.cart.length&&!S.busy?'':' disabled')+'>'+(S.busy?'กำลังส่ง…':'ยืนยันสั่ง · ชำระที่เคาน์เตอร์')+'</button></div></div>';
-  }
-}
-function keepSheetInputs(){var v=S.sheet;if(!v)return;var n=$('#note');if(n)v.note=n.value;var a=$('#cname');if(a)v.name=a.value;var p=$('#cphone');if(p)v.phone=p.value}
-
-document.addEventListener('click',function(e){
-  var b=e.target.closest('[data-act]');if(!b)return;var a=b.dataset.act,d=b.dataset;
-  if(a==='close'&&b.classList.contains('scrim')&&e.target!==b)return;
-  keepSheetInputs();
-  if(a==='cat'){S.cat=d.v;render();window.scrollTo({top:0})}
-  else if(a==='take'||(a==='choose'&&d.v==='take')){S.type='take';S.tableId=null;setUrl({type:'take'});render();window.scrollTo({top:0})}
-  else if(a==='choose'){S.type='dine';S.tableId=null;render();window.scrollTo({top:0})}
-  else if(a==='pickt'){S.type='dine';S.tableId=d.id;setUrl({t:d.id});render();window.scrollTo({top:0})}
-  else if(a==='changeway'){if(S.view==='status')return;S.type=null;S.tableId=null;S.cat='all';setUrl({});render();window.scrollTo({top:0})}
-  else if(a==='item'){var m=S.menu.find(function(x){return x.id===d.id});if(!m||m.soldOut)return;var sel={};
-    optsOf(m).forEach(function(g){if(g.required&&(g.max||1)===1){var c=(g.choices||[]).find(function(x){return !x.soldOut});if(c)sel[g.id]=[c.id]}});
-    S.sheet={k:'item',id:m.id,sel:sel,qty:1,note:''};renderSheet()}
-  else if(a==='choice'){var v=S.sheet;var g=S.opts.find(function(o){return o.id===d.g});var sel=(v.sel[g.id]||[]).slice();var i=sel.indexOf(d.c);var max=g.max||1;
-    if(i>=0){if(!(g.required&&max===1))sel.splice(i,1)}else if(max===1)sel=[d.c];else if(sel.length<max)sel.push(d.c);else{toast('เลือกได้ไม่เกิน '+max);return}
-    v.sel[g.id]=sel;renderSheet()}
-  else if(a==='qty'){S.sheet.qty=Math.max(1,Math.min(20,S.sheet.qty+(+d.d)));renderSheet()}
-  else if(a==='add'){var v2=S.sheet,m2=S.menu.find(function(x){return x.id===v2.id});var ch=[],names=[],unit=m2.price;
-    optsOf(m2).forEach(function(g){(v2.sel[g.id]||[]).forEach(function(cid){var c=g.choices.find(function(x){return x.id===cid});if(c){ch.push(c.id);names.push(c.name);unit+=+c.price||0}})});
-    var note=(v2.note||'').trim();var opts=names.concat(note?[note]:[]).join(' · ');
-    var ex=S.cart.find(function(l){return l.id===m2.id&&l.opts===opts});if(ex)ex.qty=Math.min(20,ex.qty+v2.qty);else S.cart.push({id:m2.id,name:m2.name,choices:ch,note:note,opts:opts,unit:unit,qty:v2.qty});
-    saveCart();S.sheet=null;render();toast('ใส่ตะกร้าแล้ว')}
-  else if(a==='cqty'){var l=S.cart[+d.i];if(l){l.qty+=+d.d;if(l.qty<=0)S.cart.splice(+d.i,1);else if(l.qty>20)l.qty=20}saveCart();if(!S.cart.length)S.sheet=null;render()}
-  else if(a==='close'){S.sheet=null;renderSheet()}
-  else if(a==='order')placeOrder();
-  else if(a==='track'){openStatus(d.v)}
-  else if(a==='back'){stopPoll();S.view='menu';S.order=null;var p2=new URLSearchParams(location.search);p2.delete('o');history.replaceState(null,'',p2.toString()?'?'+p2.toString():location.pathname);render()}
-});
-$('#cartBtn').addEventListener('click',function(){S.sheet={k:'cart',name:localGet('cname'),phone:localGet('cphone')};renderSheet()});
-function setUrl(o){var p=new URLSearchParams();Object.keys(o).forEach(function(k){p.set(k,o[k])});history.replaceState(null,'',p.toString()?'?'+p.toString():location.pathname)}
-function localGet(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
-function localSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-
-function placeOrder(){
-  keepSheetInputs();var v=S.sheet;
-  if(S.type==='take'&&!(v.name||'').trim()){toast('ใส่ชื่อสำหรับเรียกรับก่อน');var i=$('#cname');i&&i.focus();return}
-  S.busy=true;renderSheet();
-  localSet('cname',v.name||'');localSet('cphone',v.phone||'');
-  rpc(SLUG?'cafe_order':'cafe_place_order',Object.assign(SLUG?{p_shop:SLUG}:{},{p_table:S.tableId||'',p_type:S.type,p_items:S.cart.map(function(l){return {id:l.id,qty:l.qty,choices:l.choices,note:l.note}}),p_name:v.name||null,p_phone:v.phone||null,p_note:null}))
-    .then(function(r){S.busy=false;S.cart=[];saveCart();S.sheet=null;rememberOrder(r.token);openStatus(r.token)})
-    .catch(function(e){S.busy=false;renderSheet();toast(ERR[e.code]||'ส่งออเดอร์ไม่สำเร็จ ลองใหม่อีกครั้ง');if(e.code==='item_unavailable'||e.code==='choice_unavailable')loadMenu()});
-}
-var pollT=null;
-function stopPoll(){clearTimeout(pollT);pollT=null}
-function openStatus(tok){stopPoll();S.token=tok;S.view='status';S.order=null;S.sheet=null;var p=new URLSearchParams(location.search);p.set('o',tok);history.replaceState(null,'','?'+p.toString());render();window.scrollTo({top:0});poll()}
-function poll(){
-  rpc('cafe_order_status',{p_token:S.token}).then(function(o){if(S.view!=='status')return;S.order=o||{status:'cancelled',reason:'ไม่พบออเดอร์'};renderStatus();
-    var fin=o&&(['cancelled','rejected'].indexOf(o.status)>=0||(o.status==='done'&&o.paid));if(!fin)pollT=setTimeout(poll,document.hidden?15000:5000)})
-  .catch(function(){if(S.view==='status')pollT=setTimeout(poll,10000)});
-}
-document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.view==='status'&&!pollT){poll()}});
-
-function loadMenu(){
-  return rpc(SLUG?'cafe_menu':'cafe_get_menu',SLUG?{p_shop:SLUG}:{}).then(function(r){if(r&&r.error==='no_shop'){$('#main').innerHTML='<div class="empty"><b>ไม่พบร้านนี้</b>ตรวจสอบลิงก์หรือสแกน QR ที่ร้านอีกครั้ง</div>';$('#shopName').textContent='ไม่พบร้าน';return}
-    var mm=(r&&r.menu)||{};S.shop=(r&&r.shop)||{};S.menu=mm.menu||[];S.cats=mm.cats||[];S.opts=mm.options||[];S.tables=mm.tables||[];
-    S.cart=S.cart.filter(function(l){var m=S.menu.find(function(x){return x.id===l.id});return m&&!m.soldOut});saveCart();
-    render();
-  }).catch(function(){$('#main').innerHTML='<div class="note bad">โหลดเมนูไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วลองใหม่</div>'});
-}
-loadMenu().then(function(){var o=qs.get('o');if(o&&/^[0-9a-f-]{36}$/i.test(o))openStatus(o)});
-setInterval(function(){if(S.view==='menu'&&!S.sheet&&!document.hidden)loadMenu()},30000);
+/* Show the paid packages the admin has set (falls back to the default text). */
+var SB='https://roggqmvmgfxsxynulpvk.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
+function money(n){return Number(n||0).toLocaleString('th-TH')}
+fetch(SB+'/rest/v1/rpc/pos_public_billing',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'})
+.then(function(r){return r.json()}).then(function(b){var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;
+  var m=l.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
+  var longs=l.filter(function(p){return Number(p.months)>1});
+  document.getElementById('longs').innerHTML=longs.map(function(p){return '<span>'+String(p.name).replace(/[<>&]/g,'')+' <b>฿'+money(p.price)+'</b> · เฉลี่ย ฿'+money(Math.round(p.price/p.months))+'/เดือน</span>'}).join('')}).catch(function(){});
 })();
 </script>
 </body>

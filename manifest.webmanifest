@@ -1,9 +1,17 @@
 {
   "name": "สั่งอาหาร",
   "short_name": "สั่งอาหาร",
-  "start_url": "./",
+  "start_url": "/order",
   "display": "standalone",
   "background_color": "#F3F7FC",
   "theme_color": "#2F6FB0",
-  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "scope": "/"
 }

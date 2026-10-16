@@ -25,6 +25,7 @@ src = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="theme-color" content="#2F6FB0">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n'
        '<meta name="robots" content="noindex">\n<style>[hidden]{display:none!important}:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}img{max-width:100%}.ugrp{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--surface)}.ugrp b{display:flex;align-items:center;padding:0 10px;background:var(--bg,#eef2f6);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.5px;border-right:1px solid var(--line2);user-select:none}.form .ugrp input{border:0!important;border-radius:0!important;min-width:0}</style>\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
 R('html,body{height:100%}', 'html,body{height:100%;margin:0}')
+R('<title>POS คาเฟ่</title>', '<title>Easy POS Cafe</title>')
 
 # Runtime shim (login + Supabase store) loads before the app script.
 R('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',

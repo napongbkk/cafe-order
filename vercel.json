@@ -76,16 +76,25 @@
           "value": "no-cache"
         }
       ]
+    },
+    {
+      "source": "/order(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
       "source": "/s/:slug",
-      "destination": "/"
+      "destination": "/order"
     },
     {
       "source": "/s/:slug/",
-      "destination": "/"
+      "destination": "/order"
     }
   ]
 }

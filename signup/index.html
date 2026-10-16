@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2F6FB0">
-<title>สมัครเปิดร้าน · POS คาเฟ่</title>
+<title>สมัคร Easy POS Cafe · ทดลองใช้ฟรี 30 วัน</title>
 <meta name="description" content="สมัครใช้ระบบ POS คาเฟ่ พร้อมหน้าสั่งอาหารผ่านมือถือสำหรับลูกค้า">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,6 +42,7 @@ textarea{min-height:76px;resize:vertical}
 .pk{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
 .pkc{border:2px solid var(--line2);border-radius:16px;padding:14px;background:var(--surface);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-height:120px}
 .pkc[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.pkc.free .p{color:#047857}.pkc.free{position:relative}.pkc.free::after{content:"แนะนำ";position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;background:#E8FBF1;color:#047857;padding:3px 8px;border-radius:99px}
 .pkc b{font-size:17px}.pkc .p{font-family:var(--fn);font-size:24px;font-weight:600;color:var(--accent)}
 .pkc small{color:var(--muted);font-size:13px}
 .btn{min-height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--surface);font-weight:700;font-size:16px;padding:0 18px;cursor:pointer}
@@ -62,8 +63,8 @@ a{color:var(--accent)}
 </head>
 <body>
 <main class="wrap">
-  <div class="brand"><i style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6AA8E6"/><stop offset="1" stop-color="#245C96"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG2)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#2F6FB0" stroke-width="2.2" stroke-linecap="round"/></svg></i><div><h1>สมัครเปิดร้าน</h1><p>ระบบ POS คาเฟ่ พร้อมหน้าสั่งอาหารผ่านมือถือ</p></div></div>
-  <div class="steps" aria-label="ขั้นตอน"><span id="st1" aria-current="step">1 ข้อมูลร้าน</span><span id="st2">2 ชำระเงิน</span><span id="st3">3 รออนุมัติ</span></div>
+  <div class="brand"><i style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Easy POS Cafe"><defs><linearGradient id="cfG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A4C"/><stop offset="1" stop-color="#F43F5E"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#cfG)"/><path d="M0 18A18 18 0 0 1 18 0h28a18 18 0 0 1 18 18v6C44 30 22 18 0 28z" fill="#fff" opacity=".14"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 21c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 21c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 26h26v8.5A10.5 10.5 0 0 1 32.5 45h-5A10.5 10.5 0 0 1 17 34.5z" fill="#fff"/><path d="M43 29.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/></svg></i><div><h1>สมัคร Easy POS Cafe</h1><p>ทดลองใช้ฟรี 30 วัน · จากนั้น 299 บาท/เดือน · <a href="/" style="color:inherit">กลับหน้าแรก</a></p></div></div>
+  <div class="steps" aria-label="ขั้นตอน"><span id="st1" aria-current="step">1 ข้อมูลร้าน</span><span id="st2">2 ชำระเงิน (ถ้ามี)</span><span id="st3">3 รออนุมัติ</span></div>
   <div class="msg bad" id="msg" role="alert" hidden></div>
 
   <form class="card" id="formView" novalidate>
@@ -128,8 +129,11 @@ function pp(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}v
 function remember(a){try{localStorage.setItem('posApply',JSON.stringify({id:a.id,t:a.token}))}catch(e){}}
 
 /* packages */
-function renderPk(){var l=S.bill.packages||[];$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';
-  return '<button type="button" class="pkc" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+baht(p.price)+'</span><small>'+p.months+' เดือน'+per+'</small><small>พนักงานได้ '+(p.staff||0)+' บัญชี</small></button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>'}
+function isFree(p){return p&&Number(p.price)===0}
+function curPk(){return (S.bill.packages||[]).find(function(p){return p.id===S.pkg})}
+function renderPk(){var l=S.bill.packages||[];$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';var free=isFree(p);
+  return '<button type="button" class="pkc'+(free?' free':'')+'" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+(free?'ฟรี':baht(p.price))+'</span><small>'+(p.days?p.days+' วัน · ไม่ต้องชำระเงิน':p.months+' เดือน'+per)+'</small><small>พนักงานได้ '+(p.staff||0)+' บัญชี</small></button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>';
+  var b=$('#goBtn');if(b&&!b.disabled)b.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน'}
 $('#pkList').addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b)return;S.pkg=b.dataset.pk;renderPk()});
 
 /* step 1 */
@@ -144,17 +148,20 @@ $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
   if(v.password!==$('#f_pass2').value){msg('ยืนยันรหัสผ่านไม่ตรงกัน');$('#f_pass2').focus();return}
   if(!v.package){msg('เลือกแพ็กเกจ');return}
   var btn=$('#goBtn');btn.disabled=true;btn.textContent='กำลังส่ง…';
-  function done(r){btn.disabled=false;btn.textContent='ถัดไป · ชำระเงิน';
+  function done(r){btn.disabled=false;btn.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน';
     if(r.error==='missing_fields'&&r.field){var F={first_name:['f_first','ใส่ชื่อ'],last_name:['f_last','ใส่นามสกุล'],phone:['f_phone','เบอร์โทรต้องมีอย่างน้อย 9 หลัก'],shop_name:['f_shop','ใส่ชื่อร้าน'],address:['f_addr','ที่อยู่ร้านสั้นเกินไป ใส่อย่างน้อย 5 ตัวอักษร']}[r.field];if(F){msg(F[1]);$('#'+F[0]).focus();return}}
     if(r.error){msg(ERR[r.error]||'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง ('+r.error+')');return}
-    S.app={id:r.id,token:r.token,amount:r.amount,package:r.package};remember(S.app);showPay()}
+    S.app={id:r.id,token:r.token,amount:r.amount,package:r.package};
+    if(!Number(r.amount)){showTrialDone(v.shop_name);return}
+    remember(S.app);showPay()}
   fn(Object.assign({action:'apply'},v)).then(function(r){
     if(r.error!=='email_exists')return done(r);
     // The e-mail already has an account: sign in with the password just typed, then apply as that account.
     sb.auth.signInWithPassword({email:v.email,password:v.password}).then(function(s){
       if(s.error||!s.data.session){done({error:'x'});msg('อีเมลนี้มีบัญชีอยู่แล้ว ใส่รหัสผ่านเดิมของบัญชีนี้ หรือใช้อีเมลอื่น');return}
       fn(Object.assign({action:'apply'},v),s.data.session.access_token).then(function(r2){sb.auth.signOut();done(r2)})})
-  }).catch(function(){btn.disabled=false;btn.textContent='ถัดไป · ชำระเงิน';msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
+  }).catch(function(){btn.disabled=false;btn.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน';msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
+function showTrialDone(name){step(3);$('#doneTitle').textContent='ส่งคำขอทดลองใช้ฟรีแล้ว';$('#doneText').textContent='ได้รับคำขอทดลองใช้ฟรี 30 วันของร้าน '+(name||'')+' แล้ว ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ Easy POS Cafe ด้วยอีเมลและรหัสผ่านที่ตั้งไว้'}
 
 /* step 2 */
 function showPay(){var a=S.app,b=S.bill;step(2);msg('');
@@ -170,7 +177,8 @@ $('#slipBtn').addEventListener('click',function(){var f=$('#f_slip').files[0];if
 $('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textContent='บันทึกคำขอแล้ว';$('#doneText').textContent='ยังไม่ได้แนบสลิป กลับมาที่หน้านี้ (หรือใช้ลิงก์ในอีเมล) เพื่อแนบสลิป ผู้ดูแลระบบจะอนุมัติเมื่อตรวจสอบการชำระเงินแล้ว';});
 
 /* start: resume an application from a link or this browser */
-rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];if(l.length&&!S.pkg)S.pkg=l[0].id;renderPk();
+rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];var want=new URLSearchParams(location.search).get('plan');
+  if(l.length&&!S.pkg)S.pkg=(l.find(function(p){return p.id===want})||l.find(isFree)||l[0]).id;renderPk();
   var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');
   var fromLink=!!id;
   if(!id){try{var s=JSON.parse(localStorage.getItem('posApply')||'null');if(s){id=s.id;t=s.t}}catch(e){}}
@@ -178,7 +186,8 @@ rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[
     // A finished application remembered in this browser should not block a new sign-up.
     if(!fromLink&&a.status!=='pending'){try{localStorage.removeItem('posApply')}catch(e){}return}
     S.app={id:id,token:t,amount:a.amount,package:a.package};
-    if(a.status==='pending'&&!a.has_slip){showPay();msg('คำขอเปิดร้าน “'+a.shop_name+'” ยังไม่ได้แนบสลิป','warn')}
+    if(a.status==='pending'&&!Number(a.amount)){showTrialDone(a.shop_name)}
+    else if(a.status==='pending'&&!a.has_slip){showPay();msg('คำขอเปิดร้าน “'+a.shop_name+'” ยังไม่ได้แนบสลิป','warn')}
     else{step(3);$('#doneTitle').textContent=a.status==='approved'?'อนุมัติแล้ว':a.status==='rejected'?'คำขอยังไม่ได้รับการอนุมัติ':'รอผู้ดูแลระบบอนุมัติ';
       $('#doneText').textContent=a.status==='approved'?'ร้าน '+a.shop_name+' เปิดใช้งานแล้ว เข้าสู่ระบบ POS ด้วย '+a.email:a.status==='rejected'?(a.admin_note||'ติดต่อผู้ดูแลระบบ'):'ได้รับคำขอและสลิปของร้าน '+a.shop_name+' แล้ว จะแจ้งทางอีเมลเมื่ออนุมัติ'}})
 }).catch(function(){msg('โหลดแพ็กเกจไม่สำเร็จ ลองรีเฟรช')});
