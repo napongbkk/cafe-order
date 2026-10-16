@@ -290,7 +290,7 @@ function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expire
   '<section class="panel"><h2>บัญชีในร้าน</h2><div id="memList" class="small muted">กำลังโหลด…</div></section>'+
   '<section class="panel"><h2>ประวัติชำระเงิน</h2>'+(S.pays.filter(function(p){return p.shop_id===id}).map(function(p){return '<div class="small" style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span>'+p.months+' เดือน</span><span style="flex:1"></span><span class="chip '+(p.status==='approved'?'':p.status==='pending'?'warn':'bad')+'">'+({pending:'รอตรวจ',approved:'อนุมัติ',rejected:'ไม่อนุมัติ'})[p.status]+'</span></div>'}).join('')||'<div class="muted small">ยังไม่มี</div>')+'</section>');
   loadMembers(id)}
-function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.email)+'</b><span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
+function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.username||m.email)+'</b>'+(m.username?'<span class="muted small">ชื่อผู้ใช้ (ไม่มีอีเมล)</span>':'')+'<span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
   '<span class="chip '+(m.role==='manager'?'':'mute')+'">'+(m.role==='manager'?'ผู้จัดการ':'พนักงาน')+'</span>'+(m.active?'':'<span class="chip bad">ปิดใช้งาน</span>')+
   '<span class="small muted">'+(m.has_login?(m.last_sign_in?'เข้าล่าสุด '+dtTh(m.last_sign_in):'ยังไม่เคยเข้า'):'ยังไม่มีรหัสผ่าน')+'</span>'+
   '<span class="acts"><button class="btn sm" data-act="setpw" data-id="'+esc(m.email)+'">'+(m.has_login?'ตั้งรหัสผ่านใหม่':'สร้างรหัสผ่าน')+'</button>'+(m.role==='staff'?'<button class="btn sm" data-act="memtoggle" data-shop="'+m.shop_id+'" data-id="'+esc(m.email)+'" data-v="'+(m.active?'0':'1')+'">'+(m.active?'ปิด':'เปิด')+'</button>':'')+'</span></div>'}
@@ -301,7 +301,7 @@ function usersView(){var q=S.uq.trim().toLowerCase();var list=(S.accts||[]).filt
   return '<div class="head"><h1>บัญชีผู้ใช้</h1><span class="sp"></span><input class="search" id="userQ" type="search" placeholder="ค้นหาอีเมล ชื่อ หรือร้าน" value="'+esc(S.uq)+'" aria-label="ค้นหาบัญชี"></div>'+
   '<div class="note">ชื่อผู้ใช้คืออีเมล · รหัสผ่านถูกเข้ารหัสไว้ ไม่มีใครเปิดดูได้ รวมถึงผู้ดูแลระบบ ถ้าร้านลืมรหัสผ่าน ให้กด “ตั้งรหัสผ่านใหม่” แล้วแจ้งรหัสใหม่ให้ร้าน</div>'+
   '<section class="panel">'+(list.length?list.map(function(m){return acctRow(m,true)}).join(''):'<div class="empty">'+(S.accts&&S.accts.length?'ไม่พบบัญชี':'กำลังโหลด…')+'</div>')+'</section>'}
-function setPw(email){drawer('ตั้งรหัสผ่านใหม่','<div class="small">บัญชี <b>'+esc(email)+'</b></div><form class="form" id="pwForm" data-email="'+esc(email)+'">'+
+function setPw(email){drawer('ตั้งรหัสผ่านใหม่','<div class="small">บัญชี <b>'+esc(email.replace('@staff.cafe-pos.app',''))+'</b></div><form class="form" id="pwForm" data-email="'+esc(email)+'">'+
   '<label for="pw_new">รหัสผ่านใหม่ (เว้นว่างให้ระบบสุ่มให้)<input id="pw_new" type="text" minlength="8" autocomplete="off" placeholder="อย่างน้อย 8 ตัวอักษร"></label>'+
   '<span class="hint">รหัสเดิมจะใช้ไม่ได้ทันที ผู้ใช้เปลี่ยนรหัสเองภายหลังได้ด้วย “ลืมรหัสผ่าน” ที่หน้าเข้าสู่ระบบ</span>'+
   '<button class="btn primary" type="submit">ตั้งรหัสผ่าน</button></form><div id="pwOut"></div>')}

@@ -162,6 +162,69 @@ async function setPassword(req: Request, b: Record<string, string>) {
   return json({ ok: true, password: pw, created });
 }
 
+// Shop managers create staff logins with a username + password (no e-mail); the login e-mail is internal.
+const STAFF_DOMAIN = "staff.cafe-pos.app";
+const USERNAME = /^[a-z0-9][a-z0-9._-]{2,29}$/;
+async function caller(req: Request) {
+  const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data: u } = await db.auth.getUser(jwt);
+  return u?.user?.email?.toLowerCase() || "";
+}
+async function managerShop(req: Request, b: Record<string, string>): Promise<{ sid: string } | Response> {
+  const me = await caller(req);
+  if (!me) return fail("unauthorized", 401);
+  const { data: adm } = await db.from("pos_admins").select("email").ilike("email", me).maybeSingle();
+  if (adm && b.sid) return { sid: b.sid };
+  const { data: m } = await db.from("pos_members").select("shop_id,role,active").eq("email", me).maybeSingle();
+  if (!m || !m.active || m.role !== "manager") return fail("forbidden", 403);
+  const { data: locked } = await db.rpc("pos_shop_locked", { p_sid: m.shop_id });
+  if (locked) return fail("locked", 403);
+  return { sid: m.shop_id };
+}
+async function authId(email: string): Promise<string | null> {
+  const { data } = await db.rpc("pos_auth_user_id", { p_email: email });
+  return (data as string) || null;
+}
+async function staffAdd(req: Request, b: Record<string, string>) {
+  const ms = await managerShop(req, b); if (ms instanceof Response) return ms;
+  const username = String(b.username || "").trim().toLowerCase();
+  const name = String(b.name || "").trim().slice(0, 60) || null;
+  const pw = String(b.password || "");
+  if (!USERNAME.test(username)) return fail("bad_username");
+  if (pw.length < 6) return fail("weak_password");
+  const email = `${username}@${STAFF_DOMAIN}`;
+  const { data: t1 } = await db.from("pos_members").select("email").eq("email", email).limit(1);
+  const { data: t2 } = await db.from("pos_members").select("email").ilike("username", username).limit(1);
+  if ((t1 && t1.length) || (t2 && t2.length)) return fail("username_taken");
+  if (await authId(email)) return fail("username_taken");
+  const ins = await db.from("pos_members").insert({ email, username, name, role: "staff", active: true, shop_id: ms.sid });
+  if (ins.error) return fail(/staff_limit/.test(ins.error.message) ? "staff_limit" : /duplicate|unique/.test(ins.error.message) ? "username_taken" : "save_failed");
+  const cu = await db.auth.admin.createUser({ email, password: pw, email_confirm: true, user_metadata: { name, username } });
+  if (cu.error) { console.log("createUser", cu.error.message); await db.from("pos_members").delete().eq("email", email); return fail("auth_failed", 500); }
+  return json({ ok: true, username });
+}
+async function staffTarget(req: Request, b: Record<string, string>) {
+  const ms = await managerShop(req, b); if (ms instanceof Response) return ms;
+  const { data: t } = await db.from("pos_members").select("email,role,shop_id").eq("email", String(b.email || "").toLowerCase()).maybeSingle();
+  if (!t || t.shop_id !== ms.sid || t.role !== "staff") return fail("not_found", 404);
+  return t;
+}
+async function staffPw(req: Request, b: Record<string, string>) {
+  const t = await staffTarget(req, b); if (t instanceof Response) return t;
+  const pw = String(b.password || "");
+  if (pw.length < 6) return fail("weak_password");
+  const id = await authId(t.email);
+  const r = id ? await db.auth.admin.updateUserById(id, { password: pw }) : await db.auth.admin.createUser({ email: t.email, password: pw, email_confirm: true });
+  if (r.error) { console.log("staffPw", r.error.message); return fail("auth_failed", 500); }
+  return json({ ok: true });
+}
+async function staffDel(req: Request, b: Record<string, string>) {
+  const t = await staffTarget(req, b); if (t instanceof Response) return t;
+  await db.from("pos_members").delete().eq("email", t.email);
+  if (t.email.endsWith("@" + STAFF_DOMAIN)) { const id = await authId(t.email); if (id) await db.auth.admin.deleteUser(id); }
+  return json({ ok: true });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method", 405);
@@ -172,6 +235,9 @@ Deno.serve(async (req) => {
     if (b.action === "slip") return await slip(b);
     if (b.action === "notify") return await notify(req, b);
     if (b.action === "setpw") return await setPassword(req, b);
+    if (b.action === "staff_add") return await staffAdd(req, b);
+    if (b.action === "staff_pw") return await staffPw(req, b);
+    if (b.action === "staff_del") return await staffDel(req, b);
     return fail("bad_action");
   } catch (e) {
     console.error(e);

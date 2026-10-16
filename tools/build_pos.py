@@ -81,7 +81,7 @@ R("setTimeout(()=>{if(S.mode==='loading')startDemo()},11000);",
 # Signed-in account + sign out in the top bar.
 R('      <span id="appPill"></span>', '      <span id="acct"></span>\n      <span id="appPill"></span>')
 R("  $('#appPill').innerHTML=",
-  "  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();const bs=window.POS_BILLSTATE?window.POS_BILLSTATE():null;$('#acct').innerHTML=a.email?`${a.admin?`<span class=\"adminbar\">ผู้ดูแลระบบ · ${esc(a.shop?a.shop.name:'')} <a href=\"/admin\">กลับแดชบอร์ด</a></span>`:''}${bs&&bs.cls&&a.role==='manager'?`<button class=\"billpill ${bs.cls==='bad'?'bad':''}\" data-act=\"billgo\">${esc(bs.t)}</button>`:''}<span>${esc(a.email)} · ${a.admin?'ผู้ดูแลระบบ':({manager:'ผู้จัดการร้าน',staff:'พนักงาน'})[a.role]||''}</span><button class=\"btn sm\" data-act=\"logout\">ออกจากระบบ</button>`:''}\n  $('#appPill').innerHTML=")
+  "  if(window.POS_STANDALONE&&window.POS_ACCOUNT){const a=window.POS_ACCOUNT();const bs=window.POS_BILLSTATE?window.POS_BILLSTATE():null;$('#acct').innerHTML=a.email?`${a.admin?`<span class=\"adminbar\">ผู้ดูแลระบบ · ${esc(a.shop?a.shop.name:'')} <a href=\"/admin\">กลับแดชบอร์ด</a></span>`:''}${bs&&bs.cls&&a.role==='manager'?`<button class=\"billpill ${bs.cls==='bad'?'bad':''}\" data-act=\"billgo\">${esc(bs.t)}</button>`:''}<span>${esc(a.login||a.email)} · ${a.admin?'ผู้ดูแลระบบ':({manager:'ผู้จัดการร้าน',staff:'พนักงาน'})[a.role]||''}</span><button class=\"btn sm\" data-act=\"logout\">ออกจากระบบ</button>`:''}\n  $('#appPill').innerHTML=")
 R("    case 'apptoggle':", "    case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;\n    case 'apptoggle':")
 
 # Staff management (shop manager) and monthly billing in Settings.
@@ -90,17 +90,24 @@ R("const tabs=[['devices','อุปกรณ์และการรับเ�
 R("  else if(tab==='app'){",
   r"""  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
   else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
-    body=`<h2>พนักงาน</h2><span class="hint">เพิ่มอีเมลพนักงานที่นี่ แล้วให้พนักงานกด “สมัคร” ที่หน้าเข้าสู่ระบบด้วยอีเมลนั้น · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่แก้เมนู ตั้งค่าร้าน และดูรายงานไม่ได้</span>
-    <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0} · ต้องการเพิ่มจำนวน ติดต่อผู้ดูแลระบบ</div>
-    <form class="form" id="staffForm"><div class="two"><label for="st_email">อีเมลพนักงาน<input id="st_email" type="email" required></label><label for="st_name">ชื่อ<input id="st_name" maxlength="40"></label></div><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>
-    <div id="staffList"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(loadStaff,0)}
+    body=`<h2>พนักงาน</h2><span class="hint">สร้างบัญชีพนักงานด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล · พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ตั้งให้ · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่แก้เมนู ตั้งค่าร้าน และดูรายงานไม่ได้</span>
+    <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0}</div>
+    <form class="form" id="staffForm" autocomplete="off"><div class="three"><label for="st_user">ชื่อผู้ใช้<input id="st_user" required maxlength="30" autocapitalize="none" spellcheck="false" placeholder="เช่น nok01"></label><label for="st_name">ชื่อพนักงาน<input id="st_name" maxlength="40"></label><label for="st_pw">รหัสผ่าน (อย่างน้อย 6 ตัว)<input id="st_pw" type="text" required minlength="6" autocomplete="new-password"></label></div>
+      <span class="hint">ชื่อผู้ใช้ใช้ได้ a-z 0-9 . _ - (3–30 ตัว) และต้องไม่ซ้ำกับร้านอื่น</span><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>
+    <div id="staffList"><div class="muted">กำลังโหลด…</div></div>
+    <h2 style="margin-top:18px">รหัสผ่านของฉัน</h2><form class="form" id="myPwForm" autocomplete="off"><div class="two"><label for="my_pw">รหัสผ่านใหม่<input id="my_pw" type="password" minlength="8" required autocomplete="new-password"></label><label for="my_pw2">ยืนยันรหัสผ่านใหม่<input id="my_pw2" type="password" minlength="8" required autocomplete="new-password"></label></div>
+      <span class="hint">อีเมลเข้าสู่ระบบ ${esc((window.POS_ACCOUNT&&window.POS_ACCOUNT().email)||'')} เปลี่ยนไม่ได้</span><button class="btn" type="submit" style="align-self:flex-start">เปลี่ยนรหัสผ่าน</button></form>`;setTimeout(loadStaff,0)}
   else if(tab==='app'){""")
 R("/* ===== render ===== */",
   r"""async function loadStaff(){const el=$('#staffList');if(!el||!window.POS_SB)return;const sid=window.POS_SESSION.shop.id;
   const r=await window.POS_SB.from('pos_members').select('*').eq('shop_id',sid).order('created_at');if(r.error){el.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
   const n=r.data.filter(x=>x.role==='staff'&&x.active).length;const q=$('#staffQuota');const lim=window.POS_SESSION.shop.staffLimit||0;window.POS_SESSION.shop.staffUsed=n;
   if(q)q.textContent='บัญชีพนักงาน '+n+' / '+lim+(n>=lim?' · ครบจำนวนแล้ว ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':' · เพิ่มได้อีก '+(lim-n)+' บัญชี');
-  el.innerHTML=r.data.length?r.data.map(x=>`<div class="mrow"><div class="info"><b>${esc(x.name||x.email)}</b><small>${esc(x.email)} · ${x.role==='manager'?'ผู้จัดการร้าน':'พนักงาน'}${x.active?'':' · ปิดใช้งาน'}</small></div>${x.role==='staff'?`<button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`:''}</div>`).join(''):'<div class="muted">ยังไม่มี</div>'}
+  el.innerHTML=r.data.length?r.data.map(x=>{const login=x.username||x.email;const pw=S.staffPw===x.email;return `<div class="mrow" style="flex-wrap:wrap"><div class="info"><b>${esc(x.name||login)}</b><small>${x.username?'ชื่อผู้ใช้: ':''}${esc(login)} · ${x.role==='manager'?'ผู้จัดการร้าน':'พนักงาน'}${x.active?'':' · ปิดใช้งาน'}</small></div>${x.role==='staff'?(pw?`<form class="stpw" data-email="${esc(x.email)}" style="display:flex;gap:6px;align-items:center"><input type="text" minlength="6" required placeholder="รหัสผ่านใหม่" aria-label="รหัสผ่านใหม่ของ ${esc(login)}" style="min-height:40px;max-width:180px"><button class="btn sm primary" type="submit">บันทึก</button><button class="btn sm" type="button" data-act="staffpwx">ยกเลิก</button></form>`:`<button class="btn sm" data-act="staffpw" data-id="${esc(x.email)}">เปลี่ยนรหัสผ่าน</button><button class="btn sm" data-act="staffactive" data-id="${esc(x.email)}" data-v="${x.active?'0':'1'}">${x.active?'ปิดใช้งาน':'เปิดใช้งาน'}</button>${S.confirm==='sfdel:'+x.email?`<button class="btn sm danger" data-act="staffdel" data-id="${esc(x.email)}">ยืนยันลบ</button><button class="btn sm" data-act="staffundel">ไม่ลบ</button>`:`<button class="btn sm" data-act="staffask" data-id="${esc(x.email)}">ลบ</button>`}`):''}</div>`}).join(''):'<div class="muted">ยังไม่มี</div>';
+  const pf=el.querySelector('.stpw input');if(pf)pf.focus()}
+async function staffFn(body){const s=await window.POS_SB.auth.getSession();const tok=s.data.session&&s.data.session.access_token;
+  const r=await fetch('https://roggqmvmgfxsxynulpvk.supabase.co/functions/v1/pos-signup',{method:'POST',headers:{'apikey':window.POS_SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)});return r.json().catch(()=>({error:'server_error'}))}
+const STAFF_ERR={bad_username:'ชื่อผู้ใช้ใช้ได้ a-z 0-9 . _ - ยาว 3–30 ตัว',weak_password:'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',username_taken:'ชื่อผู้ใช้นี้ถูกใช้แล้ว ลองชื่ออื่น',staff_limit:'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม',locked:'ร้านถูกล็อก ชำระค่าบริการก่อน',forbidden:'เฉพาะผู้จัดการร้าน'};
 function staffErr(e){const m=String(e&&e.message||'');return /staff_limit/.test(m)?'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':/duplicate|pos_members_pkey/.test(m)?'อีเมลนี้ใช้กับร้านอื่นอยู่แล้ว':/bad_email/.test(m)?'อีเมลไม่ถูกต้อง':'บันทึกไม่สำเร็จ: '+m}
 
 /* ===== render ===== */""")
@@ -108,13 +115,20 @@ R("    case 'logout':",
   r"""    case 'staffactive':window.POS_SB.from('pos_members').update({active:d.v==='1'}).eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).then(r=>{if(r.error)toast(staffErr(r.error));loadStaff()});break;
     case 'staffask':S.confirm='sfdel:'+d.id;loadStaff();break;
     case 'staffundel':S.confirm=null;loadStaff();break;
-    case 'staffdel':S.confirm=null;window.POS_SB.from('pos_members').delete().eq('shop_id',window.POS_SESSION.shop.id).eq('email',d.id).eq('role','staff').then(r=>{toast(r.error?'ลบไม่สำเร็จ':'ลบแล้ว');loadStaff()});break;
+    case 'staffdel':S.confirm=null;staffFn({action:'staff_del',email:d.id}).then(r=>{toast(r.error?(STAFF_ERR[r.error]||'ลบไม่สำเร็จ'):'ลบบัญชีแล้ว');loadStaff()});break;
+    case 'staffpw':S.staffPw=d.id;loadStaff();break;
+    case 'staffpwx':S.staffPw=null;loadStaff();break;
     case 'billgo':S.stab='billing';go('settings');break;
     case 'logout':""")
 R("  if(id==='catForm'){",
-  r"""  if(id==='staffForm'){const em=$('#st_email').value.trim().toLowerCase();if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){toast('ใส่อีเมลให้ถูกต้อง');return}
-    const r=await window.POS_SB.from('pos_members').insert({email:em,name:$('#st_name').value.trim()||null,role:'staff',active:true,shop_id:window.POS_SESSION.shop.id});
-    if(r.error){toast(staffErr(r.error));return}toast('เพิ่มพนักงานแล้ว ให้พนักงานสมัครด้วยอีเมลนี้');f.reset();loadStaff();return}
+  r"""  if(id==='staffForm'){const u=$('#st_user').value.trim().toLowerCase(),pw=$('#st_pw').value;
+    if(!/^[a-z0-9][a-z0-9._-]{2,29}$/.test(u)){toast(STAFF_ERR.bad_username);return}if(pw.length<6){toast(STAFF_ERR.weak_password);return}
+    const r=await staffFn({action:'staff_add',username:u,name:$('#st_name').value.trim()||null,password:pw});
+    if(r.error){toast(STAFF_ERR[r.error]||('เพิ่มไม่สำเร็จ ('+r.error+')'));return}toast('เพิ่มพนักงานแล้ว · ชื่อผู้ใช้ '+u);f.reset();loadStaff();return}
+  if(f.classList.contains('stpw')){const pw=f.querySelector('input').value;if(pw.length<6){toast(STAFF_ERR.weak_password);return}
+    const r=await staffFn({action:'staff_pw',email:f.dataset.email,password:pw});if(r.error){toast(STAFF_ERR[r.error]||'เปลี่ยนไม่สำเร็จ');return}S.staffPw=null;toast('เปลี่ยนรหัสผ่านพนักงานแล้ว');loadStaff();return}
+  if(id==='myPwForm'){const a1=$('#my_pw').value,a2=$('#my_pw2').value;if(a1.length<8){toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}if(a1!==a2){toast('ยืนยันรหัสผ่านไม่ตรงกัน');return}
+    const r=await window.POS_SB.auth.updateUser({password:a1});if(r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ: '+r.error.message);return}f.reset();toast('เปลี่ยนรหัสผ่านแล้ว');return}
   if(id==='catForm'){""")
 
 # Staff accounts do not see reports or the menu editor.
