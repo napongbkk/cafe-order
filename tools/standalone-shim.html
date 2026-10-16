@@ -1,0 +1,112 @@
+<!-- Standalone runtime: Supabase login, data store, realtime and image storage for POS outside Claude -->
+<style>
+.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.auth .box{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.auth h1{margin:0;font-size:22px}
+.auth p{margin:0;color:var(--muted);font-size:14px}
+.auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
+.auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.auth .links button{border:0;background:none;color:var(--accent);font-weight:600;padding:8px 0;min-height:44px}
+#acct{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+</style>
+<div class="auth" id="auth" hidden><form class="box form" id="authForm" novalidate>
+  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับพนักงาน</p></div></div>
+  <div class="msg" id="authMsg" hidden></div>
+  <label for="authEmail">อีเมล<input id="authEmail" type="email" autocomplete="username" required></label>
+  <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
+  <button class="btn primary big" type="submit" id="authBtn">เข้าสู่ระบบ</button>
+  <div class="links"><button type="button" id="authMode">ยังไม่มีบัญชี? สมัคร</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
+  <button class="btn" type="button" id="authOut" hidden>ออกจากระบบ</button>
+</form></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<script>
+(function(){
+'use strict';
+window.POS_STANDALONE=true;
+var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
+var $=function(s){return document.querySelector(s)};
+if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#A12020">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
+var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+window.POS_SB=sb;
+window.POS_IMG=function(id){return sb.storage.from('pos-menu').getPublicUrl(id).data.publicUrl};
+var role=null,email=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
+window.POS_ACCOUNT=function(){return {email:email,role:role}};
+
+/* ---------- login screen ---------- */
+var signup=false;
+function msg(t,ok){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;m.textContent=t;m.className='msg'+(ok?' ok':'')}
+function showAuth(text,signedIn){$('#auth').hidden=false;msg(text||'');$('#authOut').hidden=!signedIn;}
+function setMode(s){signup=s;$('#authBtn').textContent=s?'สมัครบัญชี':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีบัญชีแล้ว? เข้าสู่ระบบ':'ยังไม่มีบัญชี? สมัคร';$('#authSub').textContent=s?'สมัครด้วยอีเมลที่เจ้าของร้านเพิ่มไว้':'เข้าสู่ระบบสำหรับพนักงาน';$('#authPass').autocomplete=s?'new-password':'current-password'}
+$('#authMode').addEventListener('click',function(){setMode(!signup);msg('')});
+$('#authReset').addEventListener('click',function(){var e=$('#authEmail').value.trim();if(!e){msg('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');return}
+  sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){msg(r.error?'ส่งอีเมลไม่สำเร็จ: '+r.error.message:'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว',!r.error)})});
+$('#authOut').addEventListener('click',function(){sb.auth.signOut().then(function(){location.reload()})});
+$('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=$('#authEmail').value.trim(),p=$('#authPass').value;
+  if(!e||p.length<6){msg('ใส่อีเมล และรหัสผ่านอย่างน้อย 6 ตัวอักษร');return}
+  $('#authBtn').disabled=true;
+  var job=signup?sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname}}):sb.auth.signInWithPassword({email:e,password:p});
+  job.then(function(r){$('#authBtn').disabled=false;
+    if(r.error){msg(/Invalid login/i.test(r.error.message)?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':r.error.message);return}
+    if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
+    check()})});
+sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
+function check(){
+  sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
+    email=s.user.email;
+    sb.rpc('pos_role').then(function(x){role=x.data||null;
+      if(!role){showAuth('บัญชี '+email+' ยังไม่ได้รับสิทธิ์ใช้ POS ให้เจ้าของร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน',true);return}
+      $('#auth').hidden=true;startRealtime();resolveReady()})});
+}
+
+/* ---------- data store (same API the POS uses inside Claude) ---------- */
+function E(e){var x={code:'unavailable',message:(e&&e.message)||String(e)};if(e&&(e.code==='42501'||e.code==='P0002'||/row-level|permission|policy|not_found/i.test(x.message)))x.code='invalid_argument';return x}
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-6)}
+function snap(id,data){return {id:id,exists:data!=null,data:function(){return data==null?undefined:data},metadata:{fromCache:false,hasPendingWrites:false}}}
+var subs=new Set();
+function notify(col){subs.forEach(function(s){if(!col||s.col===col)s.kick()})}
+function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
+function cmp(a,op,b){if(typeof b==='number')a=Number(a);if(op==='==')return a===b;if(op==='!=')return a!==b;if(op==='>=')return a>=b;if(op==='>')return a>b;if(op==='<')return a<b;if(op==='<=')return a<=b;if(op==='in')return b.indexOf(a)>=0;return true}
+function Doc(col,id){var ref={id:id,path:col+'/'+id,
+  get:function(){return sb.from('pos_docs').select('data').eq('col',col).eq('id',id).maybeSingle().then(function(r){if(r.error)throw E(r.error);return snap(id,r.data?r.data.data:null)})},
+  set:function(d){return sb.from('pos_docs').upsert({col:col,id:id,data:d,updated_at:new Date().toISOString()}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  update:function(p){return sb.rpc('pos_doc_update',{p_col:col,p_id:id,p_patch:p}).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  delete:function(){return sb.from('pos_docs').delete().eq('col',col).eq('id',id).then(function(r){if(r.error)throw E(r.error);notify(col)})},
+  acquire:function(o){return sb.rpc('pos_acquire',{p_col:col,p_id:id,p_holder:o.holder,p_ttl_ms:o.ttlMs||30000}).then(function(r){if(r.error)throw E(r.error);return r.data})},
+  onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){ref.get().then(next).catch(function(){})},120)};subs.add(s);s.kick();return function(){subs.delete(s)}}};
+  return ref}
+function Query(col,f,o,l){var q={
+  where:function(a,op,v){return Query(col,f.concat([[a,op,v]]),o,l)},
+  orderBy:function(a,dir){return Query(col,f,[a,dir||'asc'],l)},
+  limit:function(n){return Query(col,f,o,n)},
+  get:function(){var r=sb.from('pos_docs').select('id,data').eq('col',col);
+    f.forEach(function(x){var k='data->>'+x[0],v=String(x[2]);if(x[1]==='==')r=r.eq(k,v);else if(x[1]==='>=')r=r.gte(k,v);else if(x[1]==='>')r=r.gt(k,v);else if(x[1]==='<')r=r.lt(k,v);else if(x[1]==='<=')r=r.lte(k,v)});
+    return r.limit(5000).then(function(res){if(res.error)throw E(res.error);
+      var rows=(res.data||[]).filter(function(d){return f.every(function(x){return cmp(d.data[x[0]],x[1],x[2])})});
+      if(o)rows.sort(function(a,b){var A=a.data[o[0]],B=b.data[o[0]];var c=A==null?1:B==null?-1:A<B?-1:A>B?1:0;return o[1]==='desc'?-c:c});
+      if(l)rows=rows.slice(0,l);
+      var docs=rows.map(function(d){return snap(d.id,d.data)});
+      return {docs:docs,size:docs.length,empty:!docs.length,docChanges:function(){return []},metadata:{fromCache:false,hasPendingWrites:false}}})},
+  onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){q.get().then(next).catch(function(){})},150)};subs.add(s);s.kick();return function(){subs.delete(s)}},
+  doc:function(id){return Doc(col,id||uid())},
+  add:function(d){var r=Doc(col,uid());return r.set(d).then(function(){return r})}};
+  return q}
+var db={doc:function(p){var a=p.split('/');return Doc(a[0],a[1])},collection:function(p){return Query(p,[],null,null)}};
+var rtStarted=false;
+function startRealtime(){if(rtStarted)return;rtStarted=true;
+  sb.channel('pos_docs_changes').on('postgres_changes',{event:'*',schema:'public',table:'pos_docs'},function(pl){var c=(pl.new&&pl.new.col)||(pl.old&&pl.old.col);notify(c||null)}).subscribe();
+  setInterval(function(){if(!document.hidden)notify(null)},30000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)notify(null)});
+}
+var user={isOwner:function(){return Promise.resolve(role==='owner')},canEdit:function(){return Promise.resolve(role==='owner'||role==='manager')},
+  id:function(){return Promise.resolve(email)},can:function(){return Promise.resolve(null)},
+  me:function(){return Promise.resolve({id:email,name:email||'',email:email,isOwner:role==='owner',canEdit:role==='owner'||role==='manager',avatarUrl:'',color:'#2F6FB0'})}};
+var assets={upload:function(blob){var path=uid()+'.jpg';return sb.storage.from('pos-menu').upload(path,blob,{contentType:blob.type||'image/jpeg',cacheControl:'31536000',upsert:false}).then(function(r){if(r.error){var e=E(r.error);throw e}return {id:path,url:window.POS_IMG(path),sizeBytes:blob.size,contentType:blob.type}})},
+  delete:function(id){return sb.storage.from('pos-menu').remove([id]).then(function(){})},list:function(){return Promise.resolve({assets:[],usage:{}})}};
+window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
+window.claude={use:function(name){return readyP.then(function(){
+  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return (role==='owner'||role==='manager')?assets:null;return null})}};
+check();
+})();
+</script>
