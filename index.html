@@ -41,7 +41,16 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:max
 .logo{width:48px;height:48px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:20px;flex-shrink:0}
 .hero h1{margin:0;font-size:20px;line-height:1.2}
 .hero p{margin:2px 0 0;color:var(--muted);font-size:14px}
-.where{margin-left:auto;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-soft-ink);font-weight:700;font-size:14px;white-space:nowrap}
+.where{border:0;margin-left:auto;padding:6px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-soft-ink);font-weight:700;font-size:14px;white-space:nowrap}
+.ways{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:8px}
+.way{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-height:150px;border:1.5px solid var(--line2);border-radius:20px;background:var(--surface);font-weight:700;font-size:19px;padding:16px;text-align:center}
+.way svg{width:44px;height:44px;color:var(--accent)}
+.way small{font-weight:500;font-size:13px;color:var(--muted)}
+.way:hover{border-color:var(--accent)}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.tbtn{min-height:72px;border:1.5px solid var(--line2);border-radius:16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:20px;font-family:var(--fn)}
+.tbtn small{font-family:var(--f);font-weight:500;font-size:12px;color:var(--muted)}
+.tbtn:hover{border-color:var(--accent)}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
 .chip{height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line2);background:var(--surface);font-weight:600;white-space:nowrap;flex-shrink:0}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -107,7 +116,7 @@ h2.cat{font-size:17px;margin:18px 0 8px}
 </head>
 <body>
 <header class="top"><div class="wrap" style="padding-bottom:0">
-  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><span class="where" id="where" hidden></span></div>
+  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName">กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button></div>
   <nav class="chips" id="cats" aria-label="หมวดหมู่"></nav>
 </div></header>
 <main class="wrap" id="main"><div class="empty">กำลังโหลดเมนู…</div></main>
@@ -125,7 +134,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function baht(n){return '฿'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})}
 function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3000)}
 var ICON={cup:'<path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/>',
-  bread:'<path d="M4 12a8 5 0 0 1 16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 10l1 3M14 10l-1 3"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>'};
+  bread:'<path d="M4 12a8 5 0 0 1 16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 10l1 3M14 10l-1 3"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',table:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M6 12v7M18 12v7M9 5h6"/>',bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'};
 function ic(k){return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>'}
 var ERR={closed:'ร้านปิดรับออเดอร์ออนไลน์ในขณะนี้',no_menu:'ร้านยังไม่ได้เปิดเมนูออนไลน์',bad_table:'ไม่พบโต๊ะนี้ ลองสแกน QR ที่โต๊ะอีกครั้ง',item_unavailable:'มีเมนูที่หมดแล้วในตะกร้า ลบออกแล้วลองใหม่',
   choice_unavailable:'มีตัวเลือกที่หมดแล้ว แก้ไขรายการแล้วลองใหม่',choice_required:'มีตัวเลือกที่ต้องเลือกให้ครบ',too_many_choices:'เลือกตัวเลือกเกินจำนวนที่กำหนด',bad_choice:'ตัวเลือกไม่ถูกต้อง ลองเพิ่มรายการใหม่',
@@ -152,8 +161,8 @@ function renderHeader(){
   $('#logo').textContent=(S.shop.name||'C').trim().charAt(0).toUpperCase();
   document.title='สั่งอาหาร · '+(S.shop.name||'');
   var w=$('#where');
-  if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()}
-  else if(S.type==='take'){w.hidden=false;w.textContent='สั่งกลับบ้าน'}else w.hidden=true;
+  if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()+' · เปลี่ยน';w.setAttribute('aria-label','โต๊ะ '+tableName()+' แตะเพื่อเปลี่ยน')}
+  else if(S.type==='take'){w.hidden=false;w.textContent='กลับบ้าน · เปลี่ยน';w.setAttribute('aria-label','สั่งกลับบ้าน แตะเพื่อเปลี่ยน')}else w.hidden=true;
   var cats=[{id:'all',name:'ทั้งหมด'}].concat(S.cats.filter(function(c){return S.menu.some(function(m){return m.catId===c.id})}));
   $('#cats').innerHTML=S.view==='menu'?cats.map(function(c){return '<button class="chip" data-act="cat" data-v="'+esc(c.id)+'" aria-pressed="'+(S.cat===c.id)+'">'+esc(c.name)+'</button>'}).join(''):'';
 }
@@ -165,8 +174,14 @@ function renderCartBar(){
 function renderMenu(){
   var m=$('#main');
   if(!S.shop.open){m.innerHTML='<div class="empty"><b>ปิดรับออเดอร์ออนไลน์</b>ร้านยังไม่เปิดรับสั่งผ่านแอปในขณะนี้ สั่งที่เคาน์เตอร์ได้เลย</div>'+myOrdersHtml();return}
-  if(!S.type){m.innerHTML='<div class="empty"><b>สแกน QR ที่โต๊ะเพื่อสั่งอาหาร</b>หรือเลือกสั่งกลับบ้าน</div>'+(S.shop.takeaway!==false?'<div style="display:flex;justify-content:center"><button class="big" style="flex:0 0 auto" data-act="take">สั่งกลับบ้าน</button></div>':'')+myOrdersHtml();return}
-  if(S.type==='dine'&&!tableName()){m.innerHTML='<div class="note bad">ไม่พบโต๊ะนี้ ลองสแกน QR ที่โต๊ะอีกครั้ง หรือแจ้งพนักงาน</div>';return}
+  if(!S.type){m.innerHTML='<h2 class="cat" style="font-size:20px;margin-top:8px">วันนี้รับแบบไหนดี</h2><div class="ways">'+
+      '<button class="way" data-act="choose" data-v="dine">'+ic('table')+'ทานที่ร้าน<small>เลือกโต๊ะที่นั่ง</small></button>'+
+      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div>'+myOrdersHtml();return}
+  if(S.type==='dine'&&!tableName()){
+    var zones=[];S.tables.forEach(function(t){var z=t.zone||'';if(zones.indexOf(z)<0)zones.push(z)});
+    m.innerHTML=(S.tableId?'<div class="note bad">ไม่พบโต๊ะนี้ เลือกโต๊ะใหม่ได้เลย</div>':'')+'<h2 class="cat" style="font-size:20px;margin-top:8px">นั่งโต๊ะไหน</h2>'+
+      (S.tables.length?zones.map(function(z){var ts=S.tables.filter(function(t){return (t.zone||'')===z});return (zones.length>1?'<h2 class="cat" style="font-size:15px;color:var(--muted)">'+esc(z||'ในร้าน')+'</h2>':'')+'<div class="tgrid">'+ts.map(function(t){return '<button class="tbtn" data-act="pickt" data-id="'+esc(t.id)+'">'+esc(t.name)+'<small>โต๊ะ</small></button>'}).join('')+'</div>'}).join(''):'<div class="empty">ร้านยังไม่ได้ตั้งโต๊ะ แจ้งพนักงานได้เลย</div>')+
+      '<div style="margin-top:16px"><button class="ghost" data-act="changeway">← เปลี่ยนเป็น'+(S.shop.takeaway!==false?'กลับบ้าน':'หน้าแรก')+'</button></div>';return}
   var list=S.cats.concat(S.menu.some(function(x){return !S.cats.some(function(c){return c.id===x.catId})})?[{id:'_o',name:'อื่น ๆ'}]:[]);
   var html='';
   list.forEach(function(c){
@@ -226,7 +241,10 @@ document.addEventListener('click',function(e){
   if(a==='close'&&b.classList.contains('scrim')&&e.target!==b)return;
   keepSheetInputs();
   if(a==='cat'){S.cat=d.v;render();window.scrollTo({top:0})}
-  else if(a==='take'){S.type='take';history.replaceState(null,'','?type=take');render()}
+  else if(a==='take'||(a==='choose'&&d.v==='take')){S.type='take';S.tableId=null;setUrl({type:'take'});render();window.scrollTo({top:0})}
+  else if(a==='choose'){S.type='dine';S.tableId=null;render();window.scrollTo({top:0})}
+  else if(a==='pickt'){S.type='dine';S.tableId=d.id;setUrl({t:d.id});render();window.scrollTo({top:0})}
+  else if(a==='changeway'){if(S.view==='status')return;S.type=null;S.tableId=null;S.cat='all';setUrl({});render();window.scrollTo({top:0})}
   else if(a==='item'){var m=S.menu.find(function(x){return x.id===d.id});if(!m||m.soldOut)return;var sel={};
     optsOf(m).forEach(function(g){if(g.required&&(g.max||1)===1){var c=(g.choices||[]).find(function(x){return !x.soldOut});if(c)sel[g.id]=[c.id]}});
     S.sheet={k:'item',id:m.id,sel:sel,qty:1,note:''};renderSheet()}
@@ -246,6 +264,7 @@ document.addEventListener('click',function(e){
   else if(a==='back'){stopPoll();S.view='menu';S.order=null;var p2=new URLSearchParams(location.search);p2.delete('o');history.replaceState(null,'',p2.toString()?'?'+p2.toString():location.pathname);render()}
 });
 $('#cartBtn').addEventListener('click',function(){S.sheet={k:'cart',name:localGet('cname'),phone:localGet('cphone')};renderSheet()});
+function setUrl(o){var p=new URLSearchParams();Object.keys(o).forEach(function(k){p.set(k,o[k])});history.replaceState(null,'',p.toString()?'?'+p.toString():location.pathname)}
 function localGet(k){try{return localStorage.getItem(k)||''}catch(e){return ''}}
 function localSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
 
