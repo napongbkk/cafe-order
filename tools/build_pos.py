@@ -90,7 +90,7 @@ R("const tabs=[['devices','อุปกรณ์และการรับเ�
 R("  else if(tab==='app'){",
   r"""  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
   else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
-    body=`<h2>พนักงาน</h2><span class="hint">สร้างบัญชีพนักงานด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล · พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ตั้งให้ · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่แก้เมนู ตั้งค่าร้าน และดูรายงานไม่ได้</span>
+    body=`<h2>พนักงาน</h2><span class="hint">สร้างบัญชีพนักงานด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล · พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ตั้งให้ · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่เข้าเมนูและโปรโมชั่น ตั้งค่า และรายงานไม่ได้</span>
     <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0}</div>
     <form class="form" id="staffForm" autocomplete="off"><div class="three"><label for="st_user">ชื่อผู้ใช้<span class="ugrp"><b title="รหัสร้าน แก้ไขไม่ได้">${esc(upfx())}</b><input id="st_user" required maxlength="27" autocapitalize="none" spellcheck="false" placeholder="เช่น user1"></span></label><label for="st_name">ชื่อพนักงาน<input id="st_name" maxlength="40"></label><label for="st_pw">รหัสผ่าน (อย่างน้อย 6 ตัว)<input id="st_pw" type="text" required minlength="6" autocomplete="new-password"></label></div>
       <span class="hint">ทุกชื่อผู้ใช้ขึ้นต้นด้วยรหัสร้าน <b>${esc(upfx())}</b> (แก้ไขไม่ได้) ต่อด้วย a-z 0-9 . _ - · พนักงานเข้าสู่ระบบด้วย เช่น <b>${esc(upfx())}user1</b> (ตัวพิมพ์เล็กหรือใหญ่ก็ได้)</span><button class="btn primary" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>
@@ -135,9 +135,10 @@ R("  if(id==='catForm'){",
 
 # Staff accounts do not see reports or the menu editor.
 R("NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff))",
-  "NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(v)))")
+  "NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu','settings'].includes(v)))")
 R("function go(view){",
-  "function go(view){if(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(view))view='sell';")
+  "function staffBlocked(v){return !!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu','settings'].includes(v))}\nfunction go(view){if(staffBlocked(view)){if(view==='settings')toast('เฉพาะผู้จัดการร้าน');view='sell'}")
+R("function render(force){","function render(force){if(staffBlocked(S.view))S.view='sell';")
 
 # Customer-app links carry the shop.
 R("function appBase(){",
