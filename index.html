@@ -51,6 +51,11 @@ header.top{position:sticky;top:0;z-index:20;background:var(--bg);padding-top:max
 .tbtn{min-height:72px;border:1.5px solid var(--line2);border-radius:16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:700;font-size:20px;font-family:var(--fn)}
 .tbtn small{font-family:var(--f);font-weight:500;font-size:12px;color:var(--muted)}
 .tbtn:hover{border-color:var(--accent)}
+.payinfo{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:16px;background:var(--accent-soft);color:var(--accent-soft-ink);font-size:15px;line-height:1.5}
+.payinfo svg{width:28px;height:28px;flex-shrink:0}
+.payinfo b{display:block;font-size:17px}
+.payinfo.warn{background:var(--warn-soft);color:var(--warn-ink);border:2px solid #F2B200}
+.payinfo.ok{background:var(--ok-soft);color:var(--ok-ink)}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;scrollbar-width:none}
 .chip{height:40px;padding:0 16px;border-radius:20px;border:1px solid var(--line2);background:var(--surface);font-weight:600;white-space:nowrap;flex-shrink:0}
 .chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
@@ -134,7 +139,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){retur
 function baht(n){return '฿'+Number(n||0).toLocaleString('en-US',{maximumFractionDigits:2})}
 function toast(m){var t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(function(){t.hidden=true},3000)}
 var ICON={cup:'<path d="M5 8h12v6a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3v2M11 3v2M14 3v2"/>',
-  bread:'<path d="M4 12a8 5 0 0 1 16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 10l1 3M14 10l-1 3"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',table:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M6 12v7M18 12v7M9 5h6"/>',bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>'};
+  bread:'<path d="M4 12a8 5 0 0 1 16 0v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M9 10l1 3M14 10l-1 3"/>',x:'<path d="M6 6l12 12M18 6 6 18"/>',table:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M6 12v7M18 12v7M9 5h6"/>',bag:'<path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',cash:'<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v4M18 10v4"/>',check:'<path d="M5 12l5 5L20 7"/>'};
 function ic(k){return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+ICON[k]+'</svg>'}
 var ERR={closed:'ร้านปิดรับออเดอร์ออนไลน์ในขณะนี้',no_menu:'ร้านยังไม่ได้เปิดเมนูออนไลน์',bad_table:'ไม่พบโต๊ะนี้ ลองสแกน QR ที่โต๊ะอีกครั้ง',item_unavailable:'มีเมนูที่หมดแล้วในตะกร้า ลบออกแล้วลองใหม่',
   choice_unavailable:'มีตัวเลือกที่หมดแล้ว แก้ไขรายการแล้วลองใหม่',choice_required:'มีตัวเลือกที่ต้องเลือกให้ครบ',too_many_choices:'เลือกตัวเลือกเกินจำนวนที่กำหนด',bad_choice:'ตัวเลือกไม่ถูกต้อง ลองเพิ่มรายการใหม่',
@@ -178,7 +183,7 @@ function renderMenu(){
   if(!S.shop.open){m.innerHTML='<div class="empty"><b>ปิดรับออเดอร์ออนไลน์</b>ร้านยังไม่เปิดรับสั่งผ่านแอปในขณะนี้ สั่งที่เคาน์เตอร์ได้เลย</div>'+myOrdersHtml();return}
   if(!S.type){m.innerHTML='<h2 class="cat" style="font-size:20px;margin-top:8px">วันนี้รับแบบไหนดี</h2><div class="ways">'+
       '<button class="way" data-act="choose" data-v="dine">'+ic('table')+'ทานที่ร้าน<small>เลือกโต๊ะที่นั่ง</small></button>'+
-      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div>'+myOrdersHtml();return}
+      (S.shop.takeaway!==false?'<button class="way" data-act="choose" data-v="take">'+ic('bag')+'กลับบ้าน<small>รับที่เคาน์เตอร์</small></button>':'')+'</div><div style="margin-top:14px">'+payInfo('','ชำระเงินที่เคาน์เตอร์','สั่งผ่านมือถือได้เลย แล้วมาชำระเงินที่เคาน์เตอร์ แจ้งหมายเลขออเดอร์หรือโต๊ะกับพนักงาน')+'</div>'+myOrdersHtml();return}
   if(S.type==='dine'&&!tableName()){
     var zones=[];S.tables.forEach(function(t){var z=t.zone||'';if(zones.indexOf(z)<0)zones.push(z)});
     m.innerHTML=(S.tableId?'<div class="note bad">ไม่พบโต๊ะนี้ เลือกโต๊ะใหม่ได้เลย</div>':'')+'<h2 class="cat" style="font-size:20px;margin-top:8px">นั่งโต๊ะไหน</h2>'+
@@ -195,6 +200,7 @@ function renderMenu(){
   });
   m.innerHTML=(html||'<div class="empty"><b>ยังไม่มีเมนู</b></div>')+myOrdersHtml();
 }
+function payInfo(cls,title,body,icon){return '<div class="payinfo '+(cls||'')+'">'+ic(icon||'cash')+'<div><b>'+title+'</b>'+body+'</div></div>'}
 function myOrdersHtml(){var l=myOrders().filter(function(x){return Date.now()-x.at<12*3600*1000});if(!l.length)return '';
   return '<h2 class="cat">ออเดอร์ของฉัน</h2><div class="items">'+l.map(function(x,i){return '<button class="item" data-act="track" data-v="'+esc(x.t)+'"><span class="info"><b>ออเดอร์ที่ '+(l.length-i)+'</b><small>สั่งเมื่อ '+new Date(x.at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' · แตะเพื่อดูสถานะ</small></span></button>'}).join('')+'</div>'}
 
@@ -208,7 +214,8 @@ function renderStatus(){
     (stop?'<div class="note bad">ร้านยกเลิกออเดอร์นี้ '+esc(o.reason||'')+' กรุณาติดต่อพนักงาน</div>':
     '<div class="steps"><div class="step done"><i>✓</i><div><b>ส่งออเดอร์แล้ว</b><small>รอร้านยืนยัน</small></div></div>'+STEPS.map(function(s,i){var cls=r>i+1||(o.status==='done'&&i===3)?'done':r===i+1?'cur':'';return '<div class="step '+cls+'"><i>'+(cls==='done'?'✓':i+2)+'</i><div><b>'+s[1]+'</b><small>'+s[2]+'</small></div></div>'}).join('')+'</div>')+
     '<div>'+(o.items||[]).map(function(l){return '<div class="line"><div class="info"><b>'+l.qty+' × '+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'</div><span class="num">'+baht(l.unit*l.qty)+'</span></div>'}).join('')+'</div>'+
-    '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(o.total)+'</span></div><div class="hint">ชำระเงินที่เคาน์เตอร์ หรือแจ้งพนักงานเช็คบิล ยอดสุดท้ายอาจรวมค่าบริการหรือภาษีตามที่ร้านกำหนด</div>'+
+    '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(o.total)+'</span></div>'+
+    (stop?'':o.paid?payInfo('ok','ชำระเงินแล้ว','ขอบคุณที่อุดหนุน','check'):payInfo('warn','กรุณาชำระเงินที่เคาน์เตอร์','แจ้งพนักงานว่า <b style="display:inline;font-size:inherit" class="num">'+esc(o.no||'')+'</b>'+(o.type==='dine'&&o.table?' (โต๊ะ '+esc(o.table)+')':'')+' ยอดสุดท้ายอาจรวมค่าบริการหรือภาษีตามที่ร้านกำหนด'))+
     '<div class="row"><button class="ghost" data-act="back" style="flex:1">'+(S.type?'สั่งเพิ่ม':'กลับไปที่เมนู')+'</button></div></div>';
 }
 function render(){renderHeader();if(S.view==='status')renderStatus();else renderMenu();renderCartBar();renderSheet()}
@@ -232,8 +239,8 @@ function renderSheet(){
       (S.cart.length?S.cart.map(function(l,i){return '<div class="line"><div class="info"><b>'+esc(l.name)+'</b>'+(l.opts?'<small>'+esc(l.opts)+'</small>':'')+'<div class="stepper" style="margin-top:6px"><button data-act="cqty" data-i="'+i+'" data-d="-1" aria-label="ลดจำนวน">−</button><span>'+l.qty+'</span><button data-act="cqty" data-i="'+i+'" data-d="1" aria-label="เพิ่มจำนวน">+</button></div></div><span class="num" style="font-weight:600">'+baht(l.unit*l.qty)+'</span></div>'}).join(''):'<div class="empty">ตะกร้าว่าง</div>')+
       '<label class="field" for="cname">ชื่อ'+(S.type==='take'?' (สำหรับเรียกรับ)':' (ไม่บังคับ)')+'<input id="cname" maxlength="60" autocomplete="name" value="'+esc(v.name||'')+'"'+(S.type==='take'?' required':'')+'></label>'+
       '<label class="field" for="cphone">เบอร์โทร (ไม่บังคับ · สะสมแต้มสมาชิก)<input id="cphone" inputmode="tel" maxlength="12" autocomplete="tel" value="'+esc(v.phone||'')+'"></label>'+
-      '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(t)+'</span></div><div class="hint">ชำระเงินที่เคาน์เตอร์หรือกับพนักงาน หลังสั่งจะเห็นสถานะออเดอร์ในหน้านี้</div>'+
-      '<button class="big" data-act="order"'+(S.cart.length&&!S.busy?'':' disabled')+'>'+(S.busy?'กำลังส่ง…':'ยืนยันสั่งอาหาร')+'</button></div></div>';
+      '<div class="total"><span>ยอดรวม</span><span class="num">'+baht(t)+'</span></div>'+payInfo('warn','ต้องชำระเงินที่เคาน์เตอร์','หลังกดสั่ง ร้านจะเริ่มทำทันที กรุณามาชำระเงินที่เคาน์เตอร์ และแจ้งหมายเลขออเดอร์'+(S.type==='dine'?'หรือหมายเลขโต๊ะ':'')+' ยังไม่รับชำระผ่านมือถือ')+
+      '<button class="big" data-act="order"'+(S.cart.length&&!S.busy?'':' disabled')+'>'+(S.busy?'กำลังส่ง…':'ยืนยันสั่ง · ชำระที่เคาน์เตอร์')+'</button></div></div>';
   }
 }
 function keepSheetInputs(){var v=S.sheet;if(!v)return;var n=$('#note');if(n)v.note=n.value;var a=$('#cname');if(a)v.name=a.value;var p=$('#cphone');if(p)v.phone=p.value}
@@ -284,7 +291,7 @@ function stopPoll(){clearTimeout(pollT);pollT=null}
 function openStatus(tok){stopPoll();S.token=tok;S.view='status';S.order=null;S.sheet=null;var p=new URLSearchParams(location.search);p.set('o',tok);history.replaceState(null,'','?'+p.toString());render();window.scrollTo({top:0});poll()}
 function poll(){
   rpc('cafe_order_status',{p_token:S.token}).then(function(o){if(S.view!=='status')return;S.order=o||{status:'cancelled',reason:'ไม่พบออเดอร์'};renderStatus();
-    var fin=o&&['done','cancelled','rejected'].indexOf(o.status)>=0;if(!fin)pollT=setTimeout(poll,document.hidden?15000:5000)})
+    var fin=o&&(['cancelled','rejected'].indexOf(o.status)>=0||(o.status==='done'&&o.paid));if(!fin)pollT=setTimeout(poll,document.hidden?15000:5000)})
   .catch(function(){if(S.view==='status')pollT=setTimeout(poll,10000)});
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.view==='status'&&!pollT){poll()}});

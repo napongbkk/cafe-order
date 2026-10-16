@@ -56,13 +56,13 @@ R("async function bridgeTick(){",
     const vals=appStatuses();
     const r=await window.POS_SB.rpc('pos_app_sync',{p_menu:o?o.menu:null,p_shop:o?o.shop:null,p_status:vals.length?vals:null});
     if(r.error)throw {code:'tool_error',message:r.error.message};
-    if(sendSnap)lastSnap=snap;vals.forEach(([a,st])=>{pushed[a]=st});
+    if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd});
     const rows=Array.isArray(r.data)?r.data:[];const acc=[];
     for(const ao of rows){const res=await importAppOrder(ao);if(res)acc.push([ao.id,res])}
     if(acc.length){
       const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
-      acc.forEach(([a])=>{pushed[a]='accepted'});S.app.count+=acc.length;
+      acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
       toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(rows.length===20)wait=1500;
     }

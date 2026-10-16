@@ -381,6 +381,21 @@ td.r,th.r{text-align:right}
 .qrc a{font-size:11px;word-break:break-all;color:var(--muted)}
 .appst{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:600}
 .appst.ok{background:var(--ok-soft);color:var(--ok-ink)}.appst.err{background:var(--bad-soft);color:var(--bad-ink)}.appst.off,.appst.other{background:var(--sunk);color:var(--muted)}
+.unpaid{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 0 4px}
+.unpaid > b{font-size:13px;color:var(--warn-ink);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.unpaid > b i{width:8px;height:8px;border-radius:4px;background:var(--warn);display:inline-block}
+.ubill{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-start;gap:1px;min-height:52px;padding:6px 12px;border-radius:12px;border:1.5px solid var(--warn);background:var(--warn-soft);color:var(--warn-ink);text-align:left}
+.ubill b{font-size:15px;color:var(--ink)}
+.ubill span{font-size:12px;font-family:var(--f-num)}
+.ubill .mob{font-size:10px;font-weight:700;padding:0 5px;border-radius:4px;background:var(--accent);color:var(--on-accent);margin-left:4px;vertical-align:2px}
+.ubill.cur{outline:3px solid var(--accent);outline-offset:1px}
+.mcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+.mcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.mcard.unpaid-c{border:2px solid var(--warn)}
+.mcard .h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.mcard .h b{font-size:20px;font-family:var(--f-num)}
+.mcard ul{margin:0;padding:0;list-style:none;font-size:14px;display:flex;flex-direction:column;gap:2px}
+.mcard ul small{color:var(--muted)}
 .dcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
 .dcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px}
 .dcard-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -613,11 +628,12 @@ const ICON={
   user:'<circle cx="10" cy="8" r="4"/><path d="M3 21c1.3-3.6 3.9-5.5 7-5.5M18 14v6M15 17h6"/>',
   tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
   up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',
-  plus:'<path d="M12 5v14M5 12h14"/>'
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>'
 };
 const ic=(k,sz)=>`<svg width="${sz||20}" height="${sz||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
-const NAV=[['sell','หน้าขาย','sell'],['open','ออเดอร์ที่เปิดอยู่','open'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],
+const NAV=[['sell','หน้าขาย','sell'],['open','Mobile Order','phone'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],
   ['round','รอบการขาย','round'],['reports','รายงาน','reports'],['menu','เมนูและโปรโมชั่น','menu'],['settings','ตั้งค่า','settings'],['display','จอลูกค้า','display']];
 const TYPES=[{v:'dine',l:'ทานที่ร้าน'},{v:'take',l:'กลับบ้าน'},{v:'deli',l:'เดลิเวอรี'}];
 const METHODS=[{v:'cash',l:'เงินสด'},{v:'qr',l:'QR Code'},{v:'card',l:'บัตรเครดิต'},{v:'wallet',l:'โอนเงิน'}];
@@ -688,6 +704,7 @@ function norm(o){
 function ordersMap(){return Object.assign({},S.oToday,S.oOpen)}
 function allOrders(){return Object.values(ordersMap()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
 function todayOrders(){const s=startToday();return Object.values(S.oToday).filter(o=>(o.createdAt||0)>=s)}
+function isAppOrder(o){return o.source==='app'||(o.appIds||[]).length>0}
 function openBills(){return allOrders().filter(o=>o.state==='open')}
 function findOrder(id){return ordersMap()[id]||(S.hist.list||[]).find(o=>o.id===id)||null}
 function nextNo(){const sh=shop();return (sh.qPrefix||'')+pad(todayOrders().length+(+sh.qStart||1),3)}
@@ -825,7 +842,7 @@ function needRound(){return shop().roundOn&&!S.round}
 
 /* ===== top & rail ===== */
 function renderRail(){
-  const nOpen=openBills().length,nBar=allOrders().filter(o=>o.state!=='void'&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
+  const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
   $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.map(([v,l,k])=>{
     const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
     return `<button class="nav" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
@@ -852,7 +869,7 @@ function hasOptions(m){return (m.optionIds||[]).some(id=>S.opts.some(o=>o.id===i
 function sellShell(){
   return `<div class="sell"><section class="menu-pane" aria-label="เมนู">
     <label class="search">${ic('search')}<input id="q" type="search" placeholder="ค้นหาเมนู" aria-label="ค้นหาเมนู" value="${esc(S.q)}"></label>
-    <div class="kstrip" id="kstrip" aria-label="สถานะครัว/บาร์"></div><div class="chips" id="cats" role="tablist" aria-label="หมวดหมู่"></div><div class="grid" id="grid"></div></section>
+    <div class="unpaid" id="unpaid" aria-label="บิลที่ยังไม่ชำระ" hidden></div><div class="kstrip" id="kstrip" aria-label="สถานะครัว/บาร์"></div><div class="chips" id="cats" role="tablist" aria-label="หมวดหมู่"></div><div class="grid" id="grid"></div></section>
     <aside class="bill" id="bill" aria-label="บิล"></aside><button class="cartbar" id="cartbar" data-act="sheet"></button></div>`;
 }
 const KLIM={waiting:[5,10],making:[5,10],ready:[3,5]};
@@ -884,7 +901,13 @@ function imgPickHtml(v){
     ${S.assets?`<div class="opts"><label class="btn" for="m_img">${img?'เปลี่ยนรูป':'เลือกรูป'}<input id="m_img" type="file" accept="image/*" class="sr"></label>${img?'<button type="button" class="btn danger" data-act="mimgdel">ลบรูป</button>':''}</div><span class="hint">${v.uploading?'กำลังอัปโหลด…':'JPG หรือ PNG ระบบย่อรูปให้อัตโนมัติ แนะนำรูปแนวนอน'}</span>`:'<span class="hint">อัปโหลดรูปได้เฉพาะเจ้าของร้านหรือผู้มีสิทธิ์แก้ไข</span>'}</div>`;
 }
 function renderImgPick(){const el=$('#imgpick');if(el&&S.ov&&S.ov.k==='editmenu')el.innerHTML=imgPickHtml(S.ov)}
-function renderKstrip(){
+function renderUnpaid(){
+  const el=$('#unpaid');if(!el)return;
+  const list=openBills().filter(o=>o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  el.hidden=!list.length;if(!list.length){el.innerHTML='';return}
+  el.innerHTML=`<b><i></i>ยังไม่ชำระ ${list.length}</b>`+list.map(o=>`<button class="ubill${S.bill.id===o.id?' cur':''}" data-act="checkbill" data-id="${esc(o.id)}" aria-label="เช็คบิล ${esc(o.table?'โต๊ะ '+o.table.name:o.no)}"><b>${esc(o.table?'โต๊ะ '+o.table.name:(o.custName||o.no))}${isAppOrder(o)?'<span class="mob">มือถือ</span>':''}</b><span>${baht(o.sums.total)} · ${ageMin(o.createdAt)} นาที</span></button>`).join('');
+}
+function renderKstrip(){renderUnpaid();
   const el=$('#kstrip');if(!el)return;
   const list=allOrders().filter(o=>o.state!=='void'&&o.items.length);
   const sinceOf=kSince;
@@ -935,7 +958,7 @@ function renderBill(){
       ${b.member?`<div class="row"><span>สมาชิก</span><span class="num">${esc(b.member)}</span></div>`:''}
       <div class="row total"><b>ยอดสุทธิ</b><span class="num">${baht(t.total)}</span></div></div>
     <div class="bill-acts"><div class="three"><button class="btn" data-act="promo">${ic('tag',18)}โปรโมชัน</button><button class="btn" data-act="member">${ic('user',18)}สมาชิก</button>
-      <button class="btn" data-act="hold"${b.items.length&&b.items.some(l=>!l.batch)||(b.id&&b.dirty)?'':' disabled'}>${b.id?'บันทึก':'ส่งค้างไว้'}</button></div>
+      <button class="btn" data-act="hold"${b.items.length&&b.items.some(l=>!l.batch)||(b.id&&b.dirty)?'':' disabled'}>${b.id?'บันทึก':'ชำระภายหลัง'}</button></div>
       <button class="btn primary big" data-act="pay"${b.items.length?'':' disabled'}>ชำระเงิน <span class="num">${baht(t.total)}</span></button></div>`;
   const bar=$('#cartbar');if(bar)bar.innerHTML=`${esc(title)} · ${t.count} รายการ<span class="num">${baht(t.total)}</span>`;
 }
@@ -1002,13 +1025,19 @@ function kdsView(){
 
 /* ===== open bills ===== */
 function openView(){
-  const list=openBills();
-  return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h2 style="margin:0;font-size:20px">ออเดอร์ที่เปิดอยู่ (${list.length})</h2><span class="muted" style="font-size:13px">บิลที่กด “ส่งค้างไว้” หรือโต๊ะที่เปิดอยู่ แตะเพื่อสั่งเพิ่มหรือเช็คบิล</span></div>
-    ${list.length?`<div class="bills">${list.map(o=>`<article class="panel" style="gap:8px"><div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><b class="num" style="font-size:20px">${esc(o.table?'โต๊ะ '+o.table.name:o.no)}</b><span class="muted" style="font-size:13px">${ageMin(o.createdAt)} นาที</span></div>
-      <div class="muted" style="font-size:13px">${esc(o.no)} · ${esc(whereOf(o))}</div><div style="font-size:14px">${o.items.length?o.items.map(i=>i.qty+'× '+esc(i.name)).join(', '):'<span class="muted">ยังไม่มีรายการ</span>'}</div>
-      <div class="row total" style="margin:0"><b>ยอด</b><span class="num" style="font-size:22px">${baht(o.sums.total)}</span></div>
-      <div style="display:flex;gap:8px"><button class="btn grow" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">สั่งเพิ่ม</button><button class="btn primary" style="flex:1" data-act="checkbill" data-id="${esc(o.id)}"${o.items.length?'':' disabled'}>เช็คบิล</button></div></article>`).join('')}</div>`
-      :'<div class="panel"><div class="empty"><b>ไม่มีออเดอร์ที่เปิดอยู่</b>ที่หน้าขาย กด “ส่งค้างไว้” เพื่อเก็บบิลไว้ชำระทีหลัง หรือเปิดโต๊ะจากหน้า “โต๊ะ”</div></div>'}</div>`;
+  const all=allOrders().filter(o=>isAppOrder(o)&&o.state!=='void');
+  const unpaid=all.filter(o=>o.state==='open'&&o.items.length).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const paid=all.filter(o=>o.state==='paid'&&(o.paidAt||o.createdAt)>=startToday()).sort((a,b)=>(b.paidAt||0)-(a.paidAt||0));
+  const KL={waiting:'รอทำ',making:'กำลังทำ',ready:'พร้อมเสิร์ฟ',done:'เสิร์ฟแล้ว'};
+  const card=(o,pay)=>{const k=overallK(o);return `<article class="mcard${pay?' unpaid-c':''}"><div class="h"><b>${esc(o.table?'โต๊ะ '+o.table.name:o.no)}</b><span class="pill">${esc(o.table?o.no:'กลับบ้าน'+(o.custName?' · '+o.custName:''))}</span><span class="pill ${k==='ready'?'ok':k==='done'?'':'warn'}">${KL[k]||''}</span><span class="muted" style="margin-left:auto;font-size:13px">${hm(o.createdAt)} · ${ageMin(o.createdAt)} นาที</span></div>
+    <ul>${o.items.map(i=>`<li>${i.qty} × ${esc(i.name)}${i.opts?` <small>· ${esc(i.opts)}</small>`:''}</li>`).join('')}</ul>
+    ${o.member?`<div class="muted" style="font-size:13px">โทร ${esc(o.member)}</div>`:''}
+    <div class="row total" style="margin:0"><b>${pay?'ยอดที่ต้องชำระ':'ชำระแล้ว · '+esc(MLABEL[o.method]||'')}</b><span class="num" style="font-size:22px">${baht(o.sums.total)}</span></div>
+    ${pay?`<div style="display:flex;gap:8px"><button class="btn" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">ดู / แก้บิล</button><button class="btn primary" style="flex:1.4" data-act="checkbill" data-id="${esc(o.id)}">รับชำระเงิน</button></div>`:`<button class="btn" data-act="openrv" data-id="${esc(o.id)}">ดูใบเสร็จ</button>`}</article>`};
+  return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">Mobile Order</h2><span class="muted" style="font-size:13px">ออเดอร์ที่ลูกค้าสั่งจากมือถือ ลูกค้าต้องมาชำระเงินที่เคาน์เตอร์ · ${shop().appOpen?'เปิดรับออเดอร์อยู่':'ปิดรับออเดอร์อยู่'}</span></div>
+    <button class="pillx${shop().appOpen?'':' warn'}" data-act="apptoggle"${S.canEdit?'':' disabled'}><i></i><span>รับออเดอร์มือถือ: ${shop().appOpen?'เปิด':'ปิด'}</span></button></div>
+    <section class="panel"><h2>รอชำระเงินที่เคาน์เตอร์ (${unpaid.length})</h2>${unpaid.length?`<div class="mcards">${unpaid.map(o=>card(o,true)).join('')}</div>`:'<div class="empty"><b>ไม่มีออเดอร์ค้างชำระ</b>ออเดอร์ใหม่จากมือถือจะขึ้นที่นี่ทันที</div>'}</section>
+    <details class="history"${paid.length?'':' '}><summary>ชำระแล้ววันนี้ (${paid.length})</summary>${paid.length?`<div class="mcards" style="padding-bottom:12px">${paid.map(o=>card(o,false)).join('')}</div>`:'<div class="empty">ยังไม่มี</div>'}</details></div>`;
 }
 
 /* ===== tables ===== */
@@ -1477,7 +1506,8 @@ function appSnapshot(){const sh=shop();return {menu:{menu:S.menu.map(m=>({id:m.i
 const ARANK={accepted:1,making:2,ready:3,done:4,cancelled:9};
 function appStatuses(){const out=[];allOrders().forEach(o=>{const ids=(o.appIds||[]).filter(x=>UUIDRE.test(x));if(!ids.length)return;
   const k=overallK(o);const st=o.state==='void'?'cancelled':k==='done'?'done':k==='ready'?'ready':k==='making'?'making':'accepted';
-  ids.forEach(a=>{const prev=pushed[a];if(prev===st)return;if(prev&&ARANK[st]<ARANK[prev]&&st!=='cancelled')return;out.push([a,st])})});return out}
+  const paid=o.state==='paid';
+  ids.forEach(a=>{const prev=(pushed[a]||'').split('|');let s2=st;if(prev[0]&&ARANK[st]<ARANK[prev[0]]&&st!=='cancelled')s2=prev[0];if(prev[0]===s2&&prev[1]===String(paid))return;out.push([a,s2,paid])})});return out}
 async function importAppOrder(ao){
   if(!UUIDRE.test(String(ao.id)))return null;
   const ex=allOrders().find(o=>(o.appIds||[]).includes(ao.id));if(ex)return {id:ex.id,no:ex.no};
@@ -1506,13 +1536,13 @@ async function bridgeTickSB(){
     const vals=appStatuses();
     const r=await window.POS_SB.rpc('pos_app_sync',{p_menu:o?o.menu:null,p_shop:o?o.shop:null,p_status:vals.length?vals:null});
     if(r.error)throw {code:'tool_error',message:r.error.message};
-    if(sendSnap)lastSnap=snap;vals.forEach(([a,st])=>{pushed[a]=st});
+    if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd});
     const rows=Array.isArray(r.data)?r.data:[];const acc=[];
     for(const ao of rows){const res=await importAppOrder(ao);if(res)acc.push([ao.id,res])}
     if(acc.length){
       const a2=await window.POS_SB.rpc('pos_app_accept',{p_list:acc.map(([a,res])=>({id:a,pos_id:res.id,pos_no:res.no}))});
       if(a2.error)throw {code:'tool_error',message:a2.error.message};
-      acc.forEach(([a])=>{pushed[a]='accepted'});S.app.count+=acc.length;
+      acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
       toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(rows.length===20)wait=1500;
     }
@@ -1533,14 +1563,14 @@ async function bridgeTick(){
     if(sendSnap){const o=JSON.parse(snap);q+=`insert into cafe.state(key,data,updated_at) values ('menu',${dq(JSON.stringify(o.menu))}::jsonb,now()),('shop',${dq(JSON.stringify(o.shop))}::jsonb,now()) on conflict (key) do update set data=excluded.data, updated_at=now();\n`}
     const vals=appStatuses();
     if(vals.length)q+=`update cafe.orders c set status=v.s, updated_at=now() from (values ${vals.map(([a,st])=>`('${a}','${st}')`).join(',')}) as v(id,s) where c.id=v.id::uuid and c.status<>v.s and c.status not in ('cancelled','rejected');\n`;
-    if(q){await sql(q);if(sendSnap)lastSnap=snap;vals.forEach(([a,st])=>{pushed[a]=st})}
+    if(q){await sql(q);if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd})}
     const r=await sql(`select replace(encode(convert_to(coalesce((select json_agg(o order by o.created_at)::text from (select id,created_at,table_id,table_name,type,items,note,customer_name,phone,total from cafe.orders where status='new' order by created_at limit 20) o),'[]'),'utf8'),'base64'),E'\\n','') as b;`);
     const rows=b64Rows(r);if(rows==null)throw {code:'tool_error',message:'อ่านผลลัพธ์ไม่ได้'};
     const acc=[];
     for(const ao of rows){const res=await importAppOrder(ao);if(res)acc.push([ao.id,res])}
     if(acc.length){
       await sql(acc.map(([a,res])=>`update cafe.orders set status='accepted', pos_id=${dq(res.id)}, pos_no=${dq(res.no)}, updated_at=now() where id='${a}' and status='new';`).join('\n'));
-      acc.forEach(([a])=>{pushed[a]='accepted'});S.app.count+=acc.length;
+      acc.forEach(([a])=>{pushed[a]='accepted|false'});S.app.count+=acc.length;
       toast('ออเดอร์ใหม่จากแอป: '+acc.map(([,res])=>res.where).join(', '));if(S.sound)beep();
       if(acc.length===rows.length&&rows.length===20)wait=1500;
     }
