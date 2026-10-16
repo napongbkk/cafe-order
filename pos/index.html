@@ -312,7 +312,8 @@ td.r,th.r{text-align:right}
 /* customer display */
 .catpick{display:flex;gap:8px;align-items:flex-end}.catpick .btn{height:46px;white-space:nowrap}
 .newcatrow{display:flex;gap:8px;align-items:center;margin-top:-4px}.newcatrow input{flex:1;min-width:0}.newcatrow[hidden]{display:none}
-.linkrow{display:flex;gap:8px;align-items:stretch}.linkrow input{flex:1;min-width:0}.linkrow .btn{white-space:nowrap;text-decoration:none}
+.linkrow{display:flex;gap:8px;align-items:stretch}.moblink{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--card,#fff);border:1px solid var(--line,#e3e6ea);border-radius:12px;padding:8px 10px}.moblink>span{font-size:13px;font-weight:600;white-space:nowrap}.moblink input{flex:1 1 260px;min-width:0;font-size:14px;height:40px;padding:0 10px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);color:var(--ink)}.moblink .btn{white-space:nowrap;text-decoration:none}
+.memstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.memstats .panel{padding:12px 14px;gap:2px}.memstats b{font-size:22px}.memtools{display:flex;flex-direction:row;gap:8px;flex-wrap:wrap;align-items:end}.memtools .btn{height:44px}.memtools label{flex:1 1 220px}.memtbl td{vertical-align:middle}.memtbl .acts{display:flex;gap:6px;justify-content:flex-end}.memlog{max-height:180px;overflow:auto;font-size:13px}.memhit{border:1px solid var(--line,#e3e6ea);border-radius:10px;padding:8px 10px;font-size:14px}.linkrow input{flex:1;min-width:0}.linkrow .btn{white-space:nowrap;text-decoration:none}
 .adgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .adtile{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--surface)}
 .adth{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
@@ -831,7 +832,7 @@ const ICON={
 };
 const ic=(k,sz)=>`<svg width="${sz||20}" height="${sz||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
-const NAV=[['sell','หน้าขาย','sell'],['open','Mobile Order','phone'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],
+const NAV=[['sell','หน้าขาย','sell'],['open','Mobile Order','phone'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],['members','สมาชิก','user'],
   ['round','รอบการขาย','round'],['reports','รายงาน','reports'],['menu','เมนูและโปรโมชั่น','menu'],['settings','ตั้งค่า','settings'],['display','จอลูกค้า','display']];
 const TYPES=[{v:'dine',l:'ทานที่ร้าน'},{v:'take',l:'กลับบ้าน'},{v:'deli',l:'เดลิเวอรี'}];
 const METHODS=[{v:'cash',l:'เงินสด'},{v:'qr',l:'QR Code'},{v:'card',l:'บัตรเครดิต'},{v:'wallet',l:'โอนเงิน'}];
@@ -864,7 +865,7 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   shop:Object.assign({},DEF_SHOP),cats:[],opts:[],menu:[],promos:[],tables:[],oToday:{},oOpen:{},round:null,display:null,
   cat:'all',q:'',bill:null,sheet:false,ov:null,
   floorEdit:false,sel:null,zone:null,snap:true,tsel:null,addZone:false,
-  hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},rep:{date:dayKey(Date.now()),list:null},
+  hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},rep:{date:dayKey(Date.now()),list:null},
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
 let PR={bridge:!!window.POS_STANDALONE,paper:'80',auto:false,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'}};
 try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
@@ -980,7 +981,7 @@ function receiptBody(o,kind,copy,st){
     h+=`<hr><div class="r"><span>รับ ${esc(MLABEL[o.method]||'')}</span><span>${money(o.received)}</span></div>`;
     if(o.method==='cash')h+=`<div class="r"><span>เงินทอน</span><span>${money(o.change)}</span></div>`;
   }
-  if(o.member){const m=String(o.member);h+=`<div class="r sm"><span>สมาชิก xxx-xxx-${esc(m.slice(-4))}</span><span>+${Math.floor((s.total||0)/10)} แต้ม</span></div>`}
+  if(o.member){const m=String(o.member);h+=`<div class="r sm"><span>สมาชิก xxx-xxx-${esc(m.slice(-4))}</span><span>+${ptsFor(s.total)} แต้ม</span></div>`}
   h+=`<hr><div class="c sm">${esc(sh.footer||'ขอบคุณที่อุดหนุน')}</div>`+(o.state==='void'?'<div class="c b xl">*** ทำลายบิลแล้ว (VOID) ***</div>':'');
   return `<div class="rcpt">${h}</div>`;
 }
@@ -1199,7 +1200,7 @@ function renderBill(){
       ${t.sc?`<div class="row"><span>Service charge ${shop().scRate}%</span><span class="num">${baht(t.sc)}</span></div>`:''}
       ${shop().vatMode==='excluded'?`<div class="row"><span>VAT 7%</span><span class="num">${baht(t.vat)}</span></div>`:shop().vatMode==='included'?`<div class="row"><span>VAT 7% (รวมในราคา)</span><span class="num">${baht(t.vat)}</span></div>`:''}
       ${t.round?`<div class="row"><span>ปัดเศษ</span><span class="num">${baht(t.round)}</span></div>`:''}
-      ${b.member?`<div class="row"><span>สมาชิก</span><span class="num">${esc(b.member)}</span></div>`:''}
+      ${b.member?(()=>{const m=memberOf(b.member);return `<div class="row"><span>สมาชิก${m&&m.name?' · '+esc(m.name):''}</span><span class="num">${esc(b.member)}${m?' · '+(m.points||0)+' แต้ม':''}</span></div>`})():''}
       <div class="row total"><b>ยอดสุทธิ</b><span class="num">${baht(t.total)}</span></div></div>
     <div class="bill-acts"><div class="three"><button class="btn" data-act="promo">${ic('tag',18)}โปรโมชัน</button><button class="btn" data-act="member">${ic('user',18)}สมาชิก</button>
       <button class="btn" data-act="hold"${b.items.length&&b.items.some(l=>!l.batch)||(b.id&&b.dirty)?'':' disabled'}>${b.id?'บันทึก':'ชำระภายหลัง'}</button></div>
@@ -1289,9 +1290,42 @@ function openView(){
   return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">Mobile Order</h2><span class="muted" style="font-size:13px">ออเดอร์จากมือถือจะยังไม่เข้าครัวจนกว่าลูกค้าจะชำระเงินที่เคาน์เตอร์ · ${shop().appOpen?'เปิดรับออเดอร์อยู่':'ปิดรับออเดอร์อยู่'}</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn${PR.mobSound!==false?' primary':''}" data-act="mobsound" aria-pressed="${PR.mobSound!==false}">เสียงแจ้งเตือน: ${PR.mobSound!==false?'เปิด':'ปิด'}</button>
     <button class="pillx${shop().appOpen?'':' warn'}" data-act="apptoggle"${S.canEdit?'':' disabled'}><i></i><span>รับออเดอร์มือถือ: ${shop().appOpen?'เปิด':'ปิด'}</span></button></div></div>
+    <div class="moblink"><span>${ic('phone',16)} ลิงก์สั่งอาหารของร้าน</span><input id="mobUrl" readonly value="${esc(appBase())}" aria-label="ลิงก์หน้าสั่งอาหาร" onclick="this.select()"><button class="btn" type="button" data-act="copylink" data-src="mobUrl">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(appBase())}" target="_blank" rel="noopener">เปิด</a></div>
     <section class="panel"><h2>รอชำระเงินที่เคาน์เตอร์ (${unpaid.length})</h2>${unpaid.length?`<div class="mcards">${unpaid.map(o=>card(o,true)).join('')}</div>`:'<div class="empty"><b>ไม่มีออเดอร์ค้างชำระ</b>ออเดอร์ใหม่จากมือถือจะขึ้นที่นี่ทันที</div>'}</section>
     <details class="history"${paid.length?'':' '}><summary>ชำระแล้ววันนี้ (${paid.length})</summary>${paid.length?`<div class="mcards" style="padding-bottom:12px">${paid.map(o=>card(o,false)).join('')}</div>`:'<div class="empty">ยังไม่มี</div>'}</details></div>`;
 }
+
+/* ===== members ===== */
+const phoneKey=p=>String(p||'').replace(/\D/g,'').slice(0,10);
+const ptRate=()=>Math.max(1,Math.round(+shop().ptRate||10));
+const ptsFor=t=>Math.floor((+t||0)/ptRate());
+function memberOf(p){const k=phoneKey(p);return k?S.members.find(m=>m.id===k)||null:null}
+const memLog=(m,e)=>(m.log||[]).concat([e]).slice(-40);
+async function memberUpsert(id,patch,msg){const k=phoneKey(id);if(!k)return false;const cur=memberOf(k);
+  const full=Object.assign({phone:k,name:'',points:0,visits:0,spent:0,createdAt:Date.now(),lastAt:0,log:[]},cur||{},patch);delete full.id;
+  if(S.db){const ok=await dbDo(db=>cur?db.doc('members/'+k).update(patch):db.doc('members/'+k).set(full),msg);if(!ok)return false}
+  else if(msg)toast(msg+' (โหมดทดลอง)');
+  const i=S.members.findIndex(m=>m.id===k);const rec=Object.assign({id:k},full);if(i>=0)S.members[i]=rec;else S.members.push(rec);return true}
+async function memberEarn(o){const k=phoneKey(o.member);if(k.length<9)return;const m=memberOf(k)||{};const pts=ptsFor(o.sums&&o.sums.total);
+  const patch={points:(m.points||0)+pts,visits:(m.visits||0)+1,spent:r2((m.spent||0)+((o.sums&&o.sums.total)||0)),lastAt:Date.now(),log:memLog(m,{at:Date.now(),d:pts,note:'ซื้อ '+(o.no||'')+' · '+baht((o.sums&&o.sums.total)||0)})};
+  if(!m.id&&o.custName)patch.name=o.custName;
+  try{await memberUpsert(k,patch,null)}catch(e){}
+  if(S.view==='members')render(true)}
+function membersView(){const q=S.mem.q.trim().toLowerCase();const qd=phoneKey(q);
+  let list=S.members.filter(m=>!q||(m.name||'').toLowerCase().includes(q)||(qd&&String(m.phone||m.id).includes(qd)));
+  const so=S.mem.sort;list=list.slice().sort((a,b)=>so==='points'?(b.points||0)-(a.points||0):so==='spent'?(b.spent||0)-(a.spent||0):so==='name'?String(a.name||'').localeCompare(String(b.name||''),'th'):(b.lastAt||b.createdAt||0)-(a.lastAt||a.createdAt||0));
+  const tot=S.members.reduce((a,m)=>a+(m.points||0),0),spent=S.members.reduce((a,m)=>a+(m.spent||0),0);
+  const mon=new Date();mon.setDate(1);mon.setHours(0,0,0,0);const nNew=S.members.filter(m=>(m.createdAt||0)>=mon.getTime()).length;
+  const ro=!S.canEdit;
+  return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">สมาชิกร้าน</h2><span class="muted" style="font-size:13px">ลูกค้าสะสมแต้มด้วยเบอร์โทร · 1 แต้มต่อทุก ${ptRate()} บาท · ลูกค้าที่ใส่เบอร์ในบิลจะเป็นสมาชิกอัตโนมัติเมื่อชำระเงิน</span></div>
+    <button class="btn primary" data-act="memnew">${ic('user',18)}เพิ่มสมาชิก</button></div>
+    <div class="memstats"><div class="panel"><span class="muted">สมาชิกทั้งหมด</span><b class="num">${S.members.length}</b></div><div class="panel"><span class="muted">สมาชิกใหม่เดือนนี้</span><b class="num">${nNew}</b></div><div class="panel"><span class="muted">แต้มคงเหลือรวม</span><b class="num">${tot.toLocaleString()}</b></div><div class="panel"><span class="muted">ยอดซื้อสะสมรวม</span><b class="num">${baht(r2(spent))}</b></div></div>
+    <section class="panel"><div class="form memtools"><label for="memQ">ค้นหา<input id="memQ" type="search" placeholder="ชื่อ หรือ เบอร์โทร" value="${esc(S.mem.q)}"></label>
+      <label for="memSort" style="flex:0 1 200px">เรียงตาม<select id="memSort">${[['last','มาล่าสุด'],['points','แต้มมากสุด'],['spent','ยอดซื้อมากสุด'],['name','ชื่อ']].map(([v,l])=>`<option value="${v}"${so===v?' selected':''}>${l}</option>`).join('')}</select></label>
+      ${ro?'':`<form id="memRateForm" class="form memtools" style="flex:0 1 auto;align-items:end"><label for="mr_rate" style="flex:0 1 150px">ทุกกี่บาทได้ 1 แต้ม<input id="mr_rate" type="number" min="1" step="1" inputmode="numeric" value="${ptRate()}"></label><button class="btn" type="submit">บันทึก</button></form>`}</div>
+      ${list.length?`<div class="htable memtbl"><table><thead><tr><th>ชื่อ</th><th>เบอร์โทร</th><th class="r">แต้ม</th><th class="r">มาแล้ว</th><th class="r">ยอดซื้อสะสม</th><th>มาล่าสุด</th><th></th></tr></thead><tbody>${list.map(m=>`<tr><td><b>${esc(m.name||'—')}</b>${m.note?`<div class="muted" style="font-size:12px">${esc(m.note)}</div>`:''}</td><td class="num">${esc(m.phone||m.id)}</td><td class="r num"><b>${m.points||0}</b></td><td class="r num">${m.visits||0}</td><td class="r num">${baht(m.spent||0)}</td><td>${m.lastAt?fmtDT(m.lastAt):'—'}</td>
+        <td><div class="acts"><button class="btn sm" data-act="memsell" data-id="${esc(m.id)}" title="ใส่สมาชิกในบิลหน้าขาย">ขาย</button><button class="btn sm" data-act="mempts" data-id="${esc(m.id)}">แต้ม</button><button class="btn sm" data-act="memedit" data-id="${esc(m.id)}">แก้ไข</button></div></td></tr>`).join('')}</tbody></table></div>`
+      :`<div class="empty"><b>${S.members.length?'ไม่พบสมาชิกที่ค้นหา':'ยังไม่มีสมาชิก'}</b>${S.members.length?'':'กด เพิ่มสมาชิก หรือใส่เบอร์โทรในบิลที่หน้าขาย'}</div>`}</section></div>`}
 
 /* ===== tables ===== */
 function zones(){const z=(shop().zones&&shop().zones.length)?shop().zones.slice():['ในร้าน'];S.tables.forEach(t=>{if(t.zone&&!z.includes(t.zone))z.push(t.zone)});return z}
@@ -1716,7 +1750,26 @@ function ovHtml(){
     const bp=S.promos.filter(p=>p.active&&p.scope==='bill');
     return wrap(head('โปรโมชัน')+`<div class="grp"><span class="grp-t">ลดท้ายบิล</span><div class="opts"><button class="opt" data-act="setpromo" data-id="" aria-pressed="${!S.bill.promo}">ไม่ใช้โปรโมชัน</button>${bp.map(p=>`<button class="opt" data-act="setpromo" data-id="${esc(p.id)}" aria-pressed="${!!S.bill.promo&&S.bill.promo.id===p.id}">${esc(p.name)}</button>`).join('')}</div></div><span class="hint">ลดรายเมนู: แตะรายการในบิลแล้วเลือกส่วนลด</span>`,'narrow');
   }
-  if(v.k==='member')return wrap(head('สมาชิก')+`<form class="form" id="memberForm"><label for="mPhone">เบอร์โทรสมาชิก<input id="mPhone" inputmode="tel" maxlength="12" value="${esc(S.bill.member)}" placeholder="08xxxxxxxx"></label><span class="hint">สะสม 1 แต้มต่อทุก 10 บาท แสดงบนใบเสร็จ</span><div class="dlg-actions"><button class="btn" type="button" data-act="clearmember">ไม่ระบุ</button><button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow');
+  if(v.k==='memedit'){const m=v.id?memberOf(v.id)||{}:{};const ed=!!v.id;
+    return wrap(head(ed?'ข้อมูลสมาชิก':'เพิ่มสมาชิก')+`<form class="form" id="memEditForm">
+      <label for="me_phone">เบอร์โทร${ed?' (ใช้เป็นรหัสสมาชิก แก้ไม่ได้)':''}<input id="me_phone" inputmode="tel" maxlength="12" required value="${esc(m.phone||v.id||'')}" placeholder="08xxxxxxxx"${ed?' readonly':''}></label>
+      <label for="me_name">ชื่อ<input id="me_name" maxlength="50" value="${esc(m.name||'')}" placeholder="ชื่อลูกค้า"></label>
+      <label for="me_bd">วันเกิด (ไม่บังคับ)<input id="me_bd" type="date" value="${esc(m.birthday||'')}"></label>
+      <label for="me_note">หมายเหตุ<input id="me_note" maxlength="120" value="${esc(m.note||'')}" placeholder="เช่น ชอบหวานน้อย"></label>
+      ${ed?`<div class="memstats"><div class="panel"><span class="muted">แต้มคงเหลือ</span><b class="num">${m.points||0}</b></div><div class="panel"><span class="muted">มาแล้ว</span><b class="num">${m.visits||0} ครั้ง</b></div><div class="panel"><span class="muted">ยอดซื้อสะสม</span><b class="num">${baht(m.spent||0)}</b></div></div>
+        ${(m.log||[]).length?`<div><b style="font-size:14px">ประวัติแต้ม</b><div class="memlog htable"><table><tbody>${m.log.slice().reverse().map(x=>`<tr><td>${fmtDT(x.at)}</td><td style="white-space:normal">${esc(x.note||'')}</td><td class="r num" style="color:${x.d<0?'var(--bad)':'inherit'}">${x.d>0?'+':''}${x.d}</td></tr>`).join('')}</tbody></table></div></div>`:''}`:''}
+      <div class="dlg-actions">${ed&&S.canEdit?(v.del?`<button class="btn danger" type="button" data-act="memdel">ยืนยันลบ</button><button class="btn" type="button" data-act="memdelno">ไม่ลบ</button>`:`<button class="btn" type="button" data-act="memdelask">ลบสมาชิก</button>`):''}<button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow')}
+  if(v.k==='mempts'){const m=memberOf(v.id);if(!m)return wrap(head('แต้มสมาชิก')+'<div class="empty">ไม่พบสมาชิก</div>','narrow');
+    return wrap(head('แต้มสมาชิก · '+esc(m.name||m.phone))+`<form class="form" id="memPtsForm"><div class="memhit">คงเหลือ <b class="num">${m.points||0}</b> แต้ม · ${esc(m.phone)}</div>
+      <label for="mp_mode">รายการ<select id="mp_mode"><option value="redeem"${v.mode!=='add'?' selected':''}>ใช้ / แลกแต้ม (หักออก)</option><option value="add"${v.mode==='add'?' selected':''}>เพิ่มแต้ม</option></select></label>
+      <label for="mp_n">จำนวนแต้ม<input id="mp_n" type="number" min="1" step="1" inputmode="numeric" required></label>
+      <label for="mp_note">หมายเหตุ<input id="mp_note" maxlength="80" placeholder="เช่น แลกกาแฟฟรี 1 แก้ว"></label>
+      <div class="dlg-actions"><button class="btn" type="button" data-act="close">ยกเลิก</button><button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow')}
+  if(v.k==='member'){const ph=v.ph!=null?v.ph:S.bill.member;const m=memberOf(ph);const ok=phoneKey(ph).length>=9;
+    return wrap(head('สมาชิก')+`<form class="form" id="memberForm"><label for="mPhone">เบอร์โทรสมาชิก<input id="mPhone" inputmode="tel" maxlength="12" value="${esc(ph)}" placeholder="08xxxxxxxx" autocomplete="off"></label>
+      <div class="memhit" id="memHit">${m?`<b>${esc(m.name||'สมาชิก')}</b> · <span class="num">${m.points||0}</span> แต้ม · มาแล้ว ${m.visits||0} ครั้ง`:ok?'ยังไม่เป็นสมาชิก · ใส่ชื่อเพื่อสมัครสมาชิกใหม่ (ไม่ใส่ก็ได้ ระบบสมัครให้ตอนชำระเงิน)':'พิมพ์เบอร์โทรเพื่อค้นหาสมาชิก'}</div>
+      ${m?'':`<label for="mName">ชื่อสมาชิกใหม่ (ไม่บังคับ)<input id="mName" maxlength="50" value="${esc(v.nm||'')}" placeholder="เช่น คุณนก"></label>`}
+      <span class="hint">สะสม 1 แต้มต่อทุก ${ptRate()} บาท ได้แต้มเมื่อชำระเงิน แสดงบนใบเสร็จ</span><div class="dlg-actions"><button class="btn" type="button" data-act="clearmember">ไม่ระบุ</button><button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow')}
   if(v.k==='pay'){
     const t=calc(S.bill.items,S.bill.promo);const cash=parseFloat(v.cash||'0')||0;const ch=r2(cash-t.total);
     let body='';
@@ -1946,7 +1999,7 @@ const STAFF_ERR={bad_username:'ชื่อผู้ใช้ใช้ได้ 
 function staffErr(e){const m=String(e&&e.message||'');return /staff_limit/.test(m)?'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':/duplicate|pos_members_pkey/.test(m)?'อีเมลนี้ใช้กับร้านอื่นอยู่แล้ว':/bad_email/.test(m)?'อีเมลไม่ถูกต้อง':'บันทึกไม่สำเร็จ: '+m}
 
 /* ===== render ===== */
-const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
+const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,members:membersView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
 function render(force){
   renderTop();renderMobAlert();
   if(S.view==='round'&&S.rounds==null&&!loadRounds.busy){loadRounds.busy=true;loadRounds().finally(()=>{loadRounds.busy=false})}
@@ -1988,6 +2041,7 @@ async function payNow(){
   const o=await commitBill({method:v.tab,received,change:r2(received-t.total)});
   S.busy=false;
   if(!o){renderOverlay();return}
+  if(o.member)memberEarn(o);
   S.done={no:o.no,at:Date.now()};S.docState={kind:'receipt',taxForm:false};
   S.ov={k:'paid',id:o.id,order:o};S.bill=newBill();S.sheet=false;
   render();syncDisplay();
@@ -2089,10 +2143,17 @@ document.addEventListener('click',e=>{
     case 'newcatshow':{const r=$('#newCatRow');if(r){r.hidden=false;const i=$('#m_newcat');i&&i.focus()}break;}
     case 'newcathide':{const r=$('#newCatRow');if(r){r.hidden=true;$('#m_newcat').value=''}break;}
     case 'newcatadd':addCatInline();break;
-    case 'copylink':{const inp=$('#s_appUrl');const v=inp?inp.value:'';const ok=()=>{toast('คัดลอกลิงก์แล้ว');b.innerHTML=ic('check',18)+'คัดลอกแล้ว';setTimeout(()=>{if(b.isConnected)b.innerHTML=ic('copy',18)+'คัดลอก'},1800)};
+    case 'copylink':{const inp=$('#'+(d.src||'s_appUrl'));const v=inp?inp.value:'';const ok=()=>{toast('คัดลอกลิงก์แล้ว');b.innerHTML=ic('check',18)+'คัดลอกแล้ว';setTimeout(()=>{if(b.isConnected)b.innerHTML=ic('copy',18)+'คัดลอก'},1800)};
       if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(ok,()=>{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}});
       else{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}}break;}
     case 'moback':mobAck();break;
+    case 'memnew':S.ov={k:'memedit',id:null};renderOverlay();break;
+    case 'memedit':S.ov={k:'memedit',id:d.id};renderOverlay();break;
+    case 'mempts':S.ov={k:'mempts',id:d.id,mode:d.mode||'redeem'};renderOverlay();break;
+    case 'memdelask':S.ov.del=true;renderOverlay();break;
+    case 'memdelno':S.ov.del=false;renderOverlay();break;
+    case 'memdel':{const id=S.ov.id;S.ov=null;if(S.db)dbDo(db=>db.doc('members/'+id).delete(),'ลบสมาชิกแล้ว');else{S.members=S.members.filter(m=>m.id!==id);toast('ลบสมาชิกแล้ว (โหมดทดลอง)')}renderOverlay();render(true);break;}
+    case 'memsell':{const id=d.id;if(!S.bill)S.bill=newBill();S.bill.member=id;S.bill.dirty=true;go('sell');toast('ใส่สมาชิกในบิลแล้ว');break;}
     case 'mobsound':PR.mobSound=PR.mobSound===false;savePR();if(PR.mobSound)mobChime();mobRepeat();render(true);break;
     case 'holdask':S.confirm='hcancel:'+d.id;render(true);break;
     case 'holdundo':S.confirm=null;render(true);break;
@@ -2200,6 +2261,9 @@ document.addEventListener('input',e=>{
   if(e.target.closest&&e.target.closest('#lookForm')){updateLookPreview()}
   const id=e.target.id;
   if(id==='q'){S.q=e.target.value;renderGrid()}
+  else if(id==='memQ'){S.mem.q=e.target.value;const pos=e.target.selectionStart;render(true);const i=$('#memQ');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
+  else if(id==='mPhone'&&S.ov&&S.ov.k==='member'){S.ov.ph=e.target.value;const n=$('#mName');if(n)S.ov.nm=n.value;const pos=e.target.selectionStart;renderOverlay(true);const i=$('#mPhone');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
+  else if(id==='mName'&&S.ov&&S.ov.k==='member'){S.ov.nm=e.target.value}
   else if(id==='hQ'){S.hist.q=e.target.value;const pos=e.target.selectionStart;render(true);const i=$('#hQ');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
   else if(id==='crCount'&&S.ov){S.ov.counted=e.target.value;const pos=e.target.selectionStart;S.ov.focus=false;renderOverlay(true);const i=$('#crCount');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
 });
@@ -2209,6 +2273,7 @@ document.addEventListener('change',async e=>{
   if(id==='rDate'){S.rep.date=e.target.value||dayKey(Date.now());e.target.blur();loadRep();render(true);return}
   if(id==='snap'){S.snap=e.target.checked;return}
   if(id==='p_paper'){PR.paper=e.target.value;savePR();return}
+  if(id==='memSort'){S.mem.sort=e.target.value;e.target.blur();render(true);return}
   if(e.target.dataset&&e.target.dataset.adup){const files=[...(e.target.files||[])];if(!files.length||!S.assets)return;S.adUp=true;render(true);
     let ads=validAds().slice(),n=0;
     for(const file of files){try{const vid=/^video\//.test(file.type);if(!vid&&!/^image\//.test(file.type)){toast('ข้ามไฟล์ที่ไม่ใช่รูปหรือวิดีโอ');continue}
@@ -2261,7 +2326,18 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('submit',async e=>{
   e.preventDefault();const f=e.target;const id=f.id;
   if(id==='openRoundForm'){const v=parseFloat(($('#rStart')||{}).value)||0;S.ov={k:'openround',amount:v,focus:false};renderOverlay();return}
-  if(id==='memberForm'){S.bill.member=($('#mPhone').value||'').replace(/\D/g,'');S.bill.dirty=true;S.ov=null;renderOverlay();setBill();return}
+  if(id==='memberForm'){const ph=phoneKey($('#mPhone').value);if(ph&&ph.length<9){toast('เบอร์โทรไม่ถูกต้อง');return}const nm=(($('#mName')||{}).value||'').trim();
+    if(ph&&nm&&!memberOf(ph))await memberUpsert(ph,{name:nm},'สมัครสมาชิกแล้ว');
+    S.bill.member=ph;S.bill.dirty=true;S.ov=null;renderOverlay();setBill();return}
+  if(id==='memEditForm'){const v=S.ov;const ph=v.id||phoneKey($('#me_phone').value);if(ph.length<9||ph.length>10){toast('เบอร์โทร 9–10 หลัก');return}
+    if(!v.id&&memberOf(ph)){toast('เบอร์นี้เป็นสมาชิกอยู่แล้ว');return}
+    const patch={name:$('#me_name').value.trim(),birthday:$('#me_bd').value||'',note:$('#me_note').value.trim()};
+    if(await memberUpsert(ph,patch,v.id?'บันทึกข้อมูลสมาชิกแล้ว':'เพิ่มสมาชิกแล้ว')){S.ov=null;renderOverlay();render(true)}return}
+  if(id==='memPtsForm'){const v=S.ov;const m=memberOf(v.id);if(!m)return;const n=Math.floor(Math.abs(parseFloat($('#mp_n').value)||0));if(!n){toast('ใส่จำนวนแต้ม');return}
+    const mode=$('#mp_mode').value;const d=mode==='add'?n:-n;if((m.points||0)+d<0){toast('แต้มไม่พอ มี '+(m.points||0)+' แต้ม');return}
+    const note=$('#mp_note').value.trim()||(mode==='add'?'เพิ่มแต้ม':'แลกแต้ม');
+    if(await memberUpsert(m.id,{points:(m.points||0)+d,log:memLog(m,{at:Date.now(),d,note})},(mode==='add'?'เพิ่ม ':'ใช้ ')+n+' แต้มแล้ว')){S.ov=null;renderOverlay();render(true)}return}
+  if(id==='memRateForm'){const r=Math.max(1,Math.round(parseFloat($('#mr_rate').value)||10));saveShop({ptRate:r},'บันทึกอัตราแต้มแล้ว');return}
   if(id==='moveForm'){const amt=r2(parseFloat($('#mvAmt').value)||0);if(amt<=0)return;const mv={type:S.ov.type,amount:amt,note:$('#mvNote').value.trim(),at:Date.now()};
     const moves=(S.round.moves||[]).concat([mv]);
     if(S.db){const ok=await dbDo(db=>db.doc('rounds/'+S.round.id).update({moves}),'บันทึกแล้ว');if(!ok)return}
@@ -2350,7 +2426,8 @@ render();
 
 function startDemo(){
   if(S.mode!=='loading')return;S.mode='demo';
-  S.cats=clone(DEMO.cats);S.opts=clone(DEMO.opts);S.menu=clone(DEMO.menu);S.promos=clone(DEMO.promos);S.tables=clone(DEMO.tables);S.rounds=[];render(true);
+  S.cats=clone(DEMO.cats);S.opts=clone(DEMO.opts);S.menu=clone(DEMO.menu);S.promos=clone(DEMO.promos);S.tables=clone(DEMO.tables);
+  S.members=[['0812345678','คุณนก',42,9,1850,1],['0898765432','คุณต้น',15,3,640,3],['0861112222','คุณแพร',120,24,5210,0]].map(r=>({id:r[0],phone:r[0],name:r[1],points:r[2],visits:r[3],spent:r[4],createdAt:Date.now()-86400000*30*r[5],lastAt:Date.now()-3600000*(r[5]*20+2),log:[]}));S.rounds=[];render(true);
 }
 function rerenderFor(kind){
   if(drag)return;
@@ -2372,6 +2449,7 @@ function rerenderFor(kind){
   db.collection('options').onSnapshot(s=>{S.opts=sorted(s);rerenderFor('menu')},fail);
   db.collection('menu').onSnapshot(s=>{S.menu=sorted(s);rerenderFor('menu')},fail);
   db.collection('promos').onSnapshot(s=>{S.promos=sorted(s);rerenderFor('menu')},fail);
+  db.collection('members').onSnapshot(s=>{S.members=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='members'&&!S.ov)render();else if(S.ov&&/^mem|^member$/.test(S.ov.k||''))renderOverlay();else if(S.view==='sell')renderBill()},fail);
   db.collection('tables').onSnapshot(s=>{S.tables=s.docs.map(d=>{const t=Object.assign({id:d.id},d.data());const p=tSave[d.id];if(p)Object.assign(t,p);return t});rerenderFor('tables')},fail);
   db.collection('orders').where('createdAt','>=',startToday()).onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=norm(Object.assign({id:d.id},d.data()))});S.oToday=m;kdsArrive();mobArrive();rerenderFor('orders')},fail);
   db.collection('orders').where('state','==','open').onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=norm(Object.assign({id:d.id},d.data()))});S.oOpen=m;kdsArrive();mobArrive();rerenderFor('orders')},fail);
