@@ -316,6 +316,11 @@ td.r,th.r{text-align:right}
 .adact{display:flex;gap:4px;align-items:center}
 .adadd{align-items:center;justify-content:center;text-align:center;min-height:120px;border:2px dashed var(--line2);color:var(--accent);font-weight:700;cursor:pointer}
 .adadd small{color:var(--muted);font-weight:400;font-size:12px}
+.dwrap{flex:1;min-height:0;display:flex;flex-direction:column}
+.dprev{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 12px;background:var(--warn-soft);color:var(--warn-ink);border-bottom:1px solid var(--line)}
+.adlink{display:flex;gap:8px;margin-top:8px}.adlink input{flex:1;min-width:0}
+.adty.yt{background:#c00}
+.adstage iframe.ytf{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
 .adstage{flex:1;min-height:0;position:relative;background:#000;overflow:hidden}
 .adstage .ad-media{position:absolute;inset:0}
 .adstage .ad-media img,.adstage .ad-media video{width:100%;height:100%;display:block;animation:adfade .8s ease}
@@ -1480,16 +1485,18 @@ function settingsView(){
     (ql.length?ql.map(q=>`<div class="mrow"><div class="info"><b>${esc(q.name)}</b> ${q.def?'<span class="pill ok">ค่าเริ่มต้น</span>':''}<small>พร้อมเพย์ ${esc(q.pp)}</small></div><button class="btn sm" data-act="qrtest" data-id="${esc(q.id)}">ทดสอบ</button>${ro||q.id==='pp'&&!(shop().qrs||[]).length?'':`${q.def?'':`<button class="btn sm" data-act="qrdef" data-id="${esc(q.id)}">ตั้งเป็นค่าเริ่มต้น</button>`}<button class="btn sm" data-act="editqr" data-id="${esc(q.id)}">แก้ไข</button>`}</div>`).join(''):'<div class="empty"><b>ยังไม่มี QR</b>เพิ่มเลขพร้อมเพย์ของร้านเพื่อรับเงินผ่าน QR</div>');}
   else if(tab==='queue')body=`<h2>จัดการคิว</h2><form class="form" data-stab="queue"><div class="two"><label for="s_qPrefix">ตัวอักษรนำหน้า<input id="s_qPrefix" maxlength="3" value="${esc(sh.qPrefix)}"${dis}></label><label for="s_qStart">เลขเริ่มต้นแต่ละวัน<input id="s_qStart" type="number" min="0" value="${esc(sh.qStart)}"${dis}></label></div><span class="hint">ตัวอย่าง: ${esc((sh.qPrefix||'')+pad(+sh.qStart||1,3))}</span>${save}</form>`;
   else if(tab==='tables')body=`<h2>จัดการโต๊ะ</h2><p class="muted" style="margin:0">สร้างโซนและวางโต๊ะได้อิสระที่หน้า “โต๊ะ” › จัดผังร้าน ตอนนี้มี ${S.tables.filter(isTable).length} โต๊ะ ใน ${zones().length} โซน</p><button class="btn primary" data-act="gofloor" style="align-self:flex-start"${dis}>ไปจัดผังร้าน</button>`;
-  else{const ads=(sh.dispAds||[]).filter(a=>a&&a.id);const can=S.assets&&!ro;const side=sh.dispSide;
+  else{const ads=validAds();const can=S.assets&&!ro;const canL=S.canEdit&&!ro;const side=sh.dispSide;
     body=`<h2>จอลูกค้า</h2><span class="hint">เปิดเมนู “จอลูกค้า” บนแท็บเล็ตหรือจอที่หันให้ลูกค้า ตอนมีออเดอร์จะแสดงรายการ ยอดเงิน และ QR ตามเครื่องแคชเชียร์ ตอนไม่มีออเดอร์จะเล่นรูปและวิดีโอโฆษณาด้านล่างวนไปเรื่อย ๆ</span>
     <form class="form" data-stab="display"><label for="s_idleText">ข้อความต้อนรับ (แสดงแถบล่างตอนเล่นโฆษณา และแถบขวาตอนไม่มีโฆษณา)<input id="s_idleText" maxlength="80" placeholder="สมัครสมาชิกด้วยเบอร์โทร สะสมแต้มทุกครั้งที่ซื้อ" value="${esc(sh.idleText)}"${dis}></label>
       <div class="two"><label for="s_adSec">แสดงรูปละ (วินาที)<input id="s_adSec" type="number" min="3" max="120" value="${esc(sh.adSec||8)}"${dis}></label>
       <label for="s_adFit">การจัดรูป/วิดีโอ<select id="s_adFit"${dis}><option value="cover"${sh.adFit!=='contain'?' selected':''}>เต็มจอ (ตัดขอบ)</option><option value="contain"${sh.adFit==='contain'?' selected':''}>แสดงทั้งภาพ (มีขอบ)</option></select></label></div>${save}</form>
     <div class="grp"><span class="grp-t">รูปและวิดีโอโฆษณา (${ads.length})</span>
-      <div class="adgrid">${ads.map((a,i)=>`<div class="adtile"><div class="adth">${a.type==='video'?`<video src="${esc(imgUrl(a.id))}" muted preload="metadata"></video><span class="adty">วิดีโอ</span>`:`<img src="${esc(imgUrl(a.id))}" alt="">`}<span class="adno">${i+1}</span></div>
-        ${can?`<div class="adact"><button class="btn sm icon" type="button" data-act="admove" data-i="${i}" data-d="-1"${i?'':' disabled'} aria-label="เลื่อนขึ้น">‹</button><button class="btn sm icon" type="button" data-act="admove" data-i="${i}" data-d="1"${i<ads.length-1?'':' disabled'} aria-label="เลื่อนลง">›</button><span style="flex:1"></span><button class="btn sm danger" type="button" data-act="addel" data-i="${i}">ลบ</button></div>`:''}</div>`).join('')}
+      <div class="adgrid">${ads.map((a,i)=>`<div class="adtile"><div class="adth">${a.type==='video'?`<video src="${esc(adSrc(a))}" muted preload="metadata"></video><span class="adty">วิดีโอ</span>`:`<img src="${esc(adThumb(a))}" alt="" loading="lazy">${a.type==='youtube'?'<span class="adty yt">YouTube</span>':a.url?'<span class="adty">ลิงก์</span>':''}`}<span class="adno">${i+1}</span></div>
+        ${canL?`<div class="adact"><button class="btn sm icon" type="button" data-act="admove" data-i="${i}" data-d="-1"${i?'':' disabled'} aria-label="เลื่อนขึ้น">‹</button><button class="btn sm icon" type="button" data-act="admove" data-i="${i}" data-d="1"${i<ads.length-1?'':' disabled'} aria-label="เลื่อนลง">›</button><span style="flex:1"></span><button class="btn sm danger" type="button" data-act="addel" data-i="${i}">ลบ</button></div>`:''}</div>`).join('')}
         ${can?`<label class="adtile adadd" for="adUp">${S.adUp?'กำลังอัปโหลด…':'+ เพิ่มรูป / วิดีโอ'}<small>JPG PNG MP4 WEBM · วิดีโอไม่เกิน 50MB</small><input id="adUp" data-adup="1" type="file" accept="image/*,video/mp4,video/webm,video/quicktime" multiple class="sr"></label>`:''}</div>
-      ${can?'':`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดได้บน POS เว็บ'}</span>`}</div>
+      ${canL?`<div class="adlink"><label for="adLink" class="sr">ลิงก์รูป หรือ YouTube</label><input id="adLink" placeholder="วางลิงก์รูป (https://…jpg) หรือลิงก์ YouTube"><button class="btn primary" type="button" data-act="adlink">เพิ่มจากลิงก์</button></div><span class="hint">YouTube จะเล่นแบบปิดเสียงจนจบแล้วไปไฟล์ถัดไป · ลิงก์รูปต้องเปิดได้แบบสาธารณะ</span>`:''}
+      ${can?'':`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดไฟล์ได้บน POS เว็บ (ใส่ลิงก์ได้ที่นี่)'}</span>`}</div>
+    <div class="grp"><span class="grp-t">ดูตัวอย่างจอลูกค้า</span><div class="chips" style="flex-wrap:wrap">${DPREV.slice(1).map(([k,l])=>`<button class="chip" type="button" data-act="dprevgo" data-v="${k}">${l}</button>`).join('')}</div></div>
     <div class="grp"><span class="grp-t">รูปพื้นหลังแถบขวา (ตอนไม่มีโฆษณา)</span><div class="imgrow"><div class="ph">${side?`<img src="${esc(imgUrl(side))}" alt="">`:ic('cup',22)}</div>${can?`<label class="btn" for="dsUp">${side?'เปลี่ยนรูป':'เลือกรูป'}<input id="dsUp" data-dispside="1" type="file" accept="image/*" class="sr"></label>${side?'<button class="btn danger" type="button" data-act="dsidedel">ลบ</button>':''}`:''}<span class="hint">ถ้าไม่ใส่จะใช้สีหลักของร้าน</span></div></div>`}
   return `<div class="settings"><nav class="subnav" aria-label="หมวดตั้งค่า">${tabs.map(([v,l])=>`<button data-act="stab" data-v="${v}" aria-current="${tab===v}">${l}</button>`).join('')}</nav><section class="panel">${ro&&!['printer','drawer','devices','kprinter'].includes(tab)?'<div class="note">ตั้งค่าร้านได้เฉพาะเจ้าของหรือผู้มีสิทธิ์แก้ไข</div>':''}${body}</section></div>`;
 }
@@ -1497,28 +1504,56 @@ const SFIELDS={look:['lookColor','lookTagline','lookNotice','lookLayout','lookSh
 const NUMF=['scRate','roundStart','qStart','adSec'];
 
 /* ===== customer display ===== */
-function dispState(){const d=(S.db&&S.display)?S.display:localDisplay();const lines=d.lines||[];
-  const recent=!!(d.done&&Date.now()-d.done.at<20000&&!lines.length);const ads=(shop().dispAds||[]).filter(a=>a&&a.id);
+function validAds(){return (shop().dispAds||[]).filter(a=>a&&(a.id||a.url||a.yt))}
+function adSrc(a){return a.url||(a.id?imgUrl(a.id):'')}
+function adThumb(a){return a.type==='youtube'?'https://i.ytimg.com/vi/'+encodeURIComponent(a.yt)+'/hqdefault.jpg':adSrc(a)}
+function ytId(u){const m=String(u).match(/(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([A-Za-z0-9_-]{11})/);return m?m[1]:''}
+function parseAdLink(u){u=String(u||'').trim();if(!u)return null;const y=ytId(u);if(y)return {type:'youtube',yt:y};
+  if(!/^https:\/\/[^\s"'<>]+$/i.test(u))return {err:'ลิงก์ต้องขึ้นต้นด้วย https://'};
+  return /\.(mp4|webm|mov)(\?|#|$)/i.test(u)?{type:'video',url:u}:{type:'image',url:u}}
+const DPREV=[['live','จอจริง'],['ads','ตอนโฆษณา'],['buy','กำลังซื้อ'],['cash','ชำระเงินสด'],['qr','ชำระ QR'],['bank','ชำระโอนเงิน'],['done','ชำระเสร็จ']];
+function prevDisplay(k){
+  const ms=S.menu.filter(m=>!m.soldOut).slice(0,3);const lines=(ms.length?ms:[{name:'ลาเต้',price:70},{name:'ครัวซองต์เนยสด',price:75}]).map((m,i)=>({name:m.name,opts:i===0?'เย็น · กลาง':'',qty:i===0?2:1,total:(+m.price||0)*(i===0?2:1)}));
+  const total=lines.reduce((a,l)=>a+l.total,0);const b=defBank();
+  if(k==='ads')return {lines:[],total:0};
+  if(k==='buy')return {lines,total,disc:0};
+  if(k==='cash')return {lines,total,disc:0,cash:true};
+  if(k==='qr')return {lines,total,disc:0,qr:true,qrPP:(defQr()||{}).pp||''};
+  if(k==='bank')return {lines,total,disc:0,bank:b?{bank:bankName(b.bank),no:b.no,name:b.name||''}:{bank:'ธนาคารตัวอย่าง',no:'123-4-56789-0',name:shop().name}};
+  if(k==='done')return {lines:[],total:0,done:{no:(shop().qPrefix||'A')+'012',at:Date.now()}};
+  return null}
+function dispState(){const pv=S.dprev&&S.dprev!=='live'?prevDisplay(S.dprev):null;
+  const d=pv||((S.db&&S.display)?S.display:localDisplay());const lines=d.lines||[];
+  const recent=!!(d.done&&Date.now()-d.done.at<20000&&!lines.length);const ads=validAds();
   const idle=!lines.length&&!recent&&!((d.bank||d.qr)&&d.total);return {d,lines,recent,ads,idle}}
-function adKey(){const sh=shop();return JSON.stringify([sh.dispAds,sh.adSec,sh.adFit,sh.idleText,sh.name,sh.lookLogo])}
-let adT=null,adI=0;
-function runAds(){clearTimeout(adT);adT=null;const box=$('#adMedia');if(!box)return;const ads=(shop().dispAds||[]).filter(a=>a&&a.id);if(!ads.length)return;
-  adI=adI%ads.length;const a=ads[adI];const fit=shop().adFit==='contain'?'contain':'cover';const next=()=>{adI=(adI+1)%ads.length;runAds()};
-  if(a.type==='video'){box.innerHTML=`<video src="${esc(imgUrl(a.id))}" muted autoplay playsinline${ads.length===1?' loop':''} style="object-fit:${fit}"></video>`;const v=box.querySelector('video');v.onended=next;v.onerror=()=>{adT=setTimeout(next,3000)};const p=v.play();if(p&&p.catch)p.catch(()=>{adT=setTimeout(next,Math.max(3,+shop().adSec||8)*1000)})}
-  else{box.innerHTML=`<img src="${esc(imgUrl(a.id))}" alt="" style="object-fit:${fit}">`;if(ads.length>1)adT=setTimeout(next,Math.max(3,+shop().adSec||8)*1000)}}
+function adKey(){const sh=shop();return JSON.stringify([sh.dispAds,sh.adSec,sh.adFit,sh.idleText,sh.name,sh.lookLogo,S.dprev||''])}
+let adT=null,adI=0,ytWin=null;
+window.addEventListener('message',e=>{if(!ytWin||e.source!==ytWin)return;let m=e.data;try{if(typeof m==='string')m=JSON.parse(m)}catch(x){return}
+  if(m&&m.event==='onStateChange'&&m.info===0||m&&m.event==='infoDelivery'&&m.info&&m.info.playerState===0){ytWin=null;adI++;runAds()}});
+function runAds(){clearTimeout(adT);adT=null;ytWin=null;const box=$('#adMedia');if(!box)return;const ads=validAds();if(!ads.length)return;
+  adI=adI%ads.length;const a=ads[adI];const fit=shop().adFit==='contain'?'contain':'cover';const sec=Math.max(3,+shop().adSec||8)*1000;const next=()=>{adI=(adI+1)%ads.length;runAds()};
+  if(a.type==='youtube'){const one=ads.length===1;const id=encodeURIComponent(a.yt);
+    box.innerHTML=`<iframe class="ytf" src="https://www.youtube-nocookie.com/embed/${id}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1${one?'&loop=1&playlist='+id:''}" title="วิดีโอโฆษณา" allow="autoplay; encrypted-media" frameborder="0"></iframe>`;
+    const f=box.querySelector('iframe');f.addEventListener('load',()=>{ytWin=f.contentWindow;try{ytWin.postMessage(JSON.stringify({event:'listening',id:1}),'*');ytWin.postMessage(JSON.stringify({event:'command',func:'addEventListener',args:['onStateChange']}),'*')}catch(x){}});
+    if(!one)adT=setTimeout(next,Math.max(+a.sec||0,0)*1000||10*60*1000);return}
+  if(a.type==='video'){box.innerHTML=`<video src="${esc(adSrc(a))}" muted autoplay playsinline${ads.length===1?' loop':''} style="object-fit:${fit}"></video>`;const v=box.querySelector('video');v.onended=next;v.onerror=()=>{adT=setTimeout(next,3000)};const p=v.play();if(p&&p.catch)p.catch(()=>{adT=setTimeout(next,sec)})}
+  else{box.innerHTML=`<img src="${esc(adSrc(a))}" alt="" style="object-fit:${fit}">`;const im=box.querySelector('img');im.onerror=()=>{if(ads.length>1){clearTimeout(adT);adT=setTimeout(next,1500)}};if(ads.length>1)adT=setTimeout(next,sec)}}
+function dprevBar(){if(!S.dprev)return '';return `<div class="dprev" role="toolbar" aria-label="ดูตัวอย่างจอลูกค้า"><b>ตัวอย่าง</b>${DPREV.map(([k,l])=>`<button class="chip" data-act="dprev" data-v="${k}" aria-pressed="${S.dprev===k}">${l}</button>`).join('')}<span style="flex:1"></span><button class="btn sm" data-act="dprevoff">ปิดตัวอย่าง</button></div>`}
 function displayView(){
-  const {d,lines,recent,ads,idle}=dispState();
+  const {d,lines,recent,ads,idle}=dispState();const bar=dprevBar();
   if(idle&&ads.length){const sh=shop();const logo=sh.lookLogo?imgUrl(sh.lookLogo):'';
-    return `<div class="adstage" id="adStage" data-key="${esc(adKey())}"><div class="ad-media" id="adMedia"></div><div class="ad-bar"><span class="ad-logo">${logo?`<img src="${esc(logo)}" alt="">`:esc((sh.name||'C').trim().charAt(0))}</span><div style="display:flex;flex-direction:column;gap:2px"><b>${esc(sh.name)}</b><span>${esc(sh.idleText||'ยินดีต้อนรับ')}</span></div></div></div>`}
+    return `<div class="dwrap">${bar}<div class="adstage" id="adStage" data-key="${esc(adKey())}"><div class="ad-media" id="adMedia"></div><div class="ad-bar"><span class="ad-logo">${logo?`<img src="${esc(logo)}" alt="">`:esc((sh.name||'C').trim().charAt(0))}</span><div style="display:flex;flex-direction:column;gap:2px"><b>${esc(sh.name)}</b><span>${esc(sh.idleText||'ยินดีต้อนรับ')}</span></div></div></div></div>`}
   let side;
   if(recent)side=`<div style="font-size:18px">ขอบคุณที่อุดหนุน</div><div>หมายเลขออเดอร์</div><div class="done-no">${esc(d.done.no)}</div>`;
   else if(d.bank&&d.total)side=`<div style="font-weight:600">โอนเงินเข้าบัญชี</div><div class="bankcard"><span style="font-size:13px;color:#666">${esc(d.bank.bank)}</span><span class="no">${esc(d.bank.no)}</span><span>${esc(d.bank.name)}</span></div><div class="num" style="font-size:28px;font-weight:600">${baht(d.total)}</div>`;
   else if(d.qr&&d.total)side=`<div style="font-weight:600">สแกนจ่ายด้วยแอปธนาคาร</div><div class="qrwrap"><div id="dispQr"></div></div><div class="num" style="font-size:28px;font-weight:600">${baht(d.total)}</div>`;
+  else if(d.cash&&d.total)side=`<div style="font-weight:600">ชำระด้วยเงินสด</div><div style="opacity:.9">ยอดที่ต้องชำระ</div><div class="num" style="font-size:44px;font-weight:600">${baht(d.total)}</div>`;
   else side=`<div style="font-size:22px;font-weight:700">${esc(shop().name)}</div><div style="opacity:.9">${esc(shop().idleText||'ยินดีต้อนรับ')}</div>`;
-  return `<div class="disp"><section class="disp-main"><h1>${lines.length?'รายการของคุณ':'ยินดีต้อนรับ'}</h1><div class="disp-list">${lines.length?lines.map(l=>`<div class="line" style="border-bottom:1px solid var(--line)"><span class="q">${l.qty}</span><span class="info"><span class="nm" style="font-size:18px">${esc(l.name)}</span><span class="op" style="display:block">${esc(l.opts||'')}</span></span><span class="amt" style="font-size:18px">${baht(l.total)}</span></div>`).join(''):'<div class="empty"><b>พร้อมรับออเดอร์</b>เปิดหน้านี้บนแท็บเล็ตที่หันให้ลูกค้า</div>'}</div>
-    ${lines.length?`${d.disc?`<div class="row" style="padding:0 6px"><span>ส่วนลด</span><span class="num">-${baht(d.disc)}</span></div>`:''}<div class="disp-total"><span style="font-size:18px;font-weight:600">ยอดชำระ</span><span class="num">${baht(d.total)}</span></div>`:''}</section><aside class="disp-side${shop().dispSide&&!recent&&!lines.length&&idle?' bgimg':''}"${shop().dispSide&&idle?` style="background-image:url('${esc(imgUrl(shop().dispSide))}')"`:''}>${side}</aside></div>`;
+  const bg=shop().dispSide&&idle;
+  return `<div class="dwrap">${bar}<div class="disp"><section class="disp-main"><h1>${lines.length?'รายการของคุณ':'ยินดีต้อนรับ'}</h1><div class="disp-list">${lines.length?lines.map(l=>`<div class="line" style="border-bottom:1px solid var(--line)"><span class="q">${l.qty}</span><span class="info"><span class="nm" style="font-size:18px">${esc(l.name)}</span><span class="op" style="display:block">${esc(l.opts||'')}</span></span><span class="amt" style="font-size:18px">${baht(l.total)}</span></div>`).join(''):'<div class="empty"><b>พร้อมรับออเดอร์</b>เปิดหน้านี้บนแท็บเล็ตที่หันให้ลูกค้า</div>'}</div>
+    ${lines.length?`${d.disc?`<div class="row" style="padding:0 6px"><span>ส่วนลด</span><span class="num">-${baht(d.disc)}</span></div>`:''}<div class="disp-total"><span style="font-size:18px;font-weight:600">ยอดชำระ</span><span class="num">${baht(d.total)}</span></div>`:''}</section><aside class="disp-side${bg?' bgimg':''}"${bg?` style="background-image:url('${esc(imgUrl(shop().dispSide))}')"`:''}>${side}</aside></div></div>`;
 }
-function localDisplay(){const t=calc(S.bill.items,S.bill.promo);return {lines:S.bill.items.map(l=>({name:l.name,opts:l.opts,qty:l.qty,total:r2(l.unit*l.qty-lineDisc(l))})),disc:t.disc,total:t.total,qr:!!(S.ov&&S.ov.k==='pay'&&S.ov.tab==='qr'),qrPP:(S.ov&&S.ov.k==='pay'&&S.ov.tab==='qr')?((qrList().find(x=>x.id===S.ov.qrId)||defQr()||{}).pp||''):'',bank:dispBank(),done:S.done}}
+function localDisplay(){const t=calc(S.bill.items,S.bill.promo);return {lines:S.bill.items.map(l=>({name:l.name,opts:l.opts,qty:l.qty,total:r2(l.unit*l.qty-lineDisc(l))})),disc:t.disc,total:t.total,qr:!!(S.ov&&S.ov.k==='pay'&&S.ov.tab==='qr'),qrPP:(S.ov&&S.ov.k==='pay'&&S.ov.tab==='qr')?((qrList().find(x=>x.id===S.ov.qrId)||defQr()||{}).pp||''):'',bank:dispBank(),cash:!!(S.ov&&S.ov.k==='pay'&&S.ov.tab==='cash'),done:S.done}}
 function dispBank(){if(!(S.ov&&S.ov.k==='pay'&&S.ov.tab==='wallet'))return null;const b=bankList().find(x=>x.id===S.ov.bankId)||defBank();return b&&b.display?{bank:bankName(b.bank),no:b.no,name:b.name||''}:null}
 let syncT=null;
 function syncDisplay(){
@@ -1790,11 +1825,11 @@ function render(force){
   }else{
     if(S.view==='display'){const st=$('#adStage');const ds=dispState();if(st&&ds.idle&&ds.ads.length&&st.dataset.key===adKey()){renderOverlay();return}}
     const ae=document.activeElement;const keep=ae&&v.contains(ae)&&(ae.tagName==='INPUT'||ae.tagName==='SELECT')&&!force;
-    if(!keep){v.dataset.v=S.view;v.innerHTML=VIEWS[S.view]();if(S.view==='settings')drawQrs();if(S.view==='display'){runAds();const d=(S.db&&S.display)?S.display:localDisplay();if(d.qr&&d.total)drawQr(document.getElementById('dispQr'),d.total,220,d.qrPP||undefined)}}
+    if(!keep){v.dataset.v=S.view;v.innerHTML=VIEWS[S.view]();if(S.view==='settings')drawQrs();if(S.view==='display'){runAds();const d=dispState().d;if(d.qr&&d.total)drawQr(document.getElementById('dispQr'),d.total,220,d.qrPP||undefined)}}
   }
   renderOverlay();
 }
-function go(view){S.view=view;S.sheet=false;S.confirm=null;S.docState=null;try{localStorage.setItem('pos.view',view)}catch(e){}
+function go(view){if(view!=='display')S.dprev=null;S.view=view;S.sheet=false;S.confirm=null;S.docState=null;try{localStorage.setItem('pos.view',view)}catch(e){}
   if(view==='history'&&S.hist.date!==dayKey(Date.now())&&S.hist.list==null)loadHistDate();
   if(view==='round')loadRounds();
   render(true)}
@@ -1907,8 +1942,12 @@ document.addEventListener('click',e=>{
     case 'print':{const o=findOrder(d.id)||(S.ov&&S.ov.order);if(o)printDoc(o,d.k,!(S.ov&&S.ov.k==='paid'));break;}
     case 'taxform':(S.docState=S.docState||{kind:'receipt'}).taxForm=true;if(S.ov)renderOverlay();else render(true);{const i=$('#tiName');i&&i.focus()}break;
     case 'canceltax':S.docState.taxForm=false;if(S.ov)renderOverlay();else render(true);break;
-    case 'admove':{const ads=(shop().dispAds||[]).slice();const i=+d.i,j=i+(+d.d);if(j<0||j>=ads.length)return;[ads[i],ads[j]]=[ads[j],ads[i]];saveShop({dispAds:ads},'จัดลำดับแล้ว');break;}
-    case 'addel':{const ads=(shop().dispAds||[]).slice();const x=ads.splice(+d.i,1)[0];saveShop({dispAds:ads},'ลบแล้ว').then(ok=>{if(ok&&x&&S.assets)S.assets.delete(x.id).catch(()=>{})});break;}
+    case 'adlink':{const inp=$('#adLink');const a=parseAdLink(inp&&inp.value);if(!a){inp&&inp.focus();return}if(a.err){toast(a.err);return}saveShop({dispAds:validAds().concat([a])},a.type==='youtube'?'เพิ่มวิดีโอ YouTube แล้ว':'เพิ่มลิงก์แล้ว');break;}
+    case 'dprevgo':S.dprev=d.v;adI=0;go('display');break;
+    case 'dprev':S.dprev=d.v;adI=0;render(true);break;
+    case 'dprevoff':S.dprev=null;go('settings');break;
+    case 'admove':{const ads=validAds().slice();const i=+d.i,j=i+(+d.d);if(j<0||j>=ads.length)return;[ads[i],ads[j]]=[ads[j],ads[i]];saveShop({dispAds:ads},'จัดลำดับแล้ว');break;}
+    case 'addel':{const ads=validAds().slice();const x=ads.splice(+d.i,1)[0];saveShop({dispAds:ads},'ลบแล้ว').then(ok=>{if(ok&&x&&x.id&&S.assets)S.assets.delete(x.id).catch(()=>{})});break;}
     case 'dsidedel':{const old=shop().dispSide;saveShop({dispSide:''},'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
     case 'newcatshow':{const r=$('#newCatRow');if(r){r.hidden=false;const i=$('#m_newcat');i&&i.focus()}break;}
     case 'newcathide':{const r=$('#newCatRow');if(r){r.hidden=true;$('#m_newcat').value=''}break;}
@@ -2031,7 +2070,7 @@ document.addEventListener('change',async e=>{
   if(id==='snap'){S.snap=e.target.checked;return}
   if(id==='p_paper'){PR.paper=e.target.value;savePR();return}
   if(e.target.dataset&&e.target.dataset.adup){const files=[...(e.target.files||[])];if(!files.length||!S.assets)return;S.adUp=true;render(true);
-    let ads=(shop().dispAds||[]).slice(),n=0;
+    let ads=validAds().slice(),n=0;
     for(const file of files){try{const vid=/^video\//.test(file.type);if(!vid&&!/^image\//.test(file.type)){toast('ข้ามไฟล์ที่ไม่ใช่รูปหรือวิดีโอ');continue}
       if(vid&&file.size>50*1024*1024){toast('วิดีโอ '+file.name+' ใหญ่เกิน 50MB');continue}
       const blob=vid?file:await shrinkImage(file,1920);const r=await S.assets.upload(blob);ads.push({id:r.id,type:vid?'video':'image'});n++}catch(err){toast('อัปโหลด '+file.name+' ไม่สำเร็จ')}}
