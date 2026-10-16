@@ -93,6 +93,7 @@ h1{margin:0;font-size:24px}
 .zoom{position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.85);display:grid;place-items:center;padding:16px;cursor:zoom-out;border:0;width:100%}
 .zoom img{max-width:100%;max-height:100%}
 .acct{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 0;border-bottom:1px solid var(--line)}.acct:last-child{border-bottom:0}.acct .who{flex:1;min-width:200px;display:flex;flex-direction:column}.acct .acts{display:flex;gap:6px}
+.pwc{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}.pwc code{font-family:var(--fn);font-size:14px;font-weight:600;background:var(--bg,#f3f6fa);padding:3px 8px;border-radius:6px;user-select:all;color:var(--ink)}
 .pwbox{display:flex;gap:8px;align-items:center;padding:12px;border-radius:12px;background:var(--ok-soft);color:var(--ok-ink)}.pwbox code{font-family:var(--fn);font-size:20px;font-weight:600;flex:1;user-select:all;color:var(--ink)}
 .search{min-height:40px;padding:6px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);min-width:220px}
 @media (max-width:860px){.app{flex-direction:column}.rail{width:auto;height:auto;position:static;flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);padding:10px}.brand{padding:4px 8px;width:100%}.nav{width:auto}.rail .sp,.me{display:none}.grid2{grid-template-columns:minmax(0,1fr)}main{padding:16px}.form .two,.form .three{grid-template-columns:minmax(0,1fr)}}
@@ -147,7 +148,8 @@ function shopBy(id){return S.shops.find(function(s){return s.id===id})||{}}
 /* ---------- auth ---------- */
 function showLogin(t){$('#authView').hidden=false;$('#appView').hidden=true;var m=$('#loginMsg');m.hidden=!t;m.textContent=t||''}
 $('#loginForm').addEventListener('submit',function(e){e.preventDefault();$('#lgBtn').disabled=true;
-  sb.auth.signInWithPassword({email:$('#lgEmail').value.trim(),password:$('#lgPass').value}).then(function(r){$('#lgBtn').disabled=false;if(r.error){showLogin(/Invalid/i.test(r.error.message)?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':r.error.message);return}start()})});
+  var lp=$('#lgPass').value;sb.auth.signInWithPassword({email:$('#lgEmail').value.trim(),password:lp}).then(function(r){$('#lgBtn').disabled=false;if(r.error){showLogin(/Invalid/i.test(r.error.message)?'อีเมลหรือรหัสผ่านไม่ถูกต้อง':r.error.message);return}
+    if(r.data&&r.data.session)fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+r.data.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'remember',password:lp})}).catch(function(){});start()})});
 function out(){sb.auth.signOut().then(function(){location.reload()})}
 $('#lgOut').addEventListener('click',out);$('#logoutBtn').addEventListener('click',out);
 function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showLogin('');return}
@@ -292,14 +294,21 @@ function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expire
   loadMembers(id)}
 function acctRow(m,showShop){var sh=shopBy(m.shop_id);return '<div class="acct"><div class="who"><b>'+esc(m.username||m.email)+'</b>'+(m.username?'<span class="muted small">ชื่อผู้ใช้ (ไม่มีอีเมล)</span>':'')+'<span class="muted small">'+esc(m.name||'')+(showShop?' · '+esc(sh.name||'-'):'')+'</span></div>'+
   '<span class="chip '+(m.role==='manager'?'':'mute')+'">'+(m.role==='manager'?'ผู้จัดการ':'พนักงาน')+'</span>'+(m.active?'':'<span class="chip bad">ปิดใช้งาน</span>')+
-  '<span class="small muted">'+(m.has_login?(m.last_sign_in?'เข้าล่าสุด '+dtTh(m.last_sign_in):'ยังไม่เคยเข้า'):'ยังไม่มีรหัสผ่าน')+'</span>'+
+  '<span class="small muted">'+(m.has_login?(m.last_sign_in?'เข้าล่าสุด '+dtTh(m.last_sign_in):'ยังไม่เคยเข้า'):'ยังไม่มีรหัสผ่าน')+'</span>'+pwCell(m)+
   '<span class="acts"><button class="btn sm" data-act="setpw" data-id="'+esc(m.email)+'">'+(m.has_login?'ตั้งรหัสผ่านใหม่':'สร้างรหัสผ่าน')+'</button>'+(m.role==='staff'?'<button class="btn sm" data-act="memtoggle" data-shop="'+m.shop_id+'" data-id="'+esc(m.email)+'" data-v="'+(m.active?'0':'1')+'">'+(m.active?'ปิด':'เปิด')+'</button>':'')+'</span></div>'}
-function loadMembers(id){sb.rpc('pos_admin_accounts',{p_sid:id}).then(function(r){var el=$('#memList');if(!el)return;if(r.error){el.textContent='โหลดไม่สำเร็จ';return}
-  el.innerHTML=(r.data||[]).length?r.data.map(function(m){return acctRow(m,false)}).join(''):'ยังไม่มีบัญชี'})}
-function loadAccts(){S.accts=[];sb.rpc('pos_admin_accounts',{p_sid:null}).then(function(r){S.accts=r.data||[];if(S.view==='users')render()})}
-function usersView(){var q=S.uq.trim().toLowerCase();var list=(S.accts||[]).filter(function(m){var sh=shopBy(m.shop_id);return !q||(m.email+' '+(m.name||'')+' '+(sh.name||'')).toLowerCase().indexOf(q)>=0});
+var CREDS={},SHOWPW={};
+function pwCell(m){var c=CREDS[m.email];var login=m.username||m.email.replace('@staff.cafe-pos.app','');
+  if(!c||c.password==null)return '<span class="pwc"><span class="small muted">รหัสผ่าน: ยังไม่ทราบ</span></span>';
+  var on=SHOWPW[m.email];return '<span class="pwc"><span class="small">รหัสผ่าน:</span><code>'+(on?esc(c.password):'••••••••')+'</code>'+
+    '<button class="btn sm" data-act="pwshow" data-id="'+esc(m.email)+'">'+(on?'ซ่อน':'ดู')+'</button><button class="btn sm" data-act="pwcopy" data-id="'+esc(m.email)+'" title="คัดลอกชื่อผู้ใช้และรหัสผ่าน">คัดลอก</button></span>'}
+function loadCreds(sid){return sb.auth.getSession().then(function(r){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(r.data.session&&r.data.session.access_token),'Content-Type':'application/json'},body:JSON.stringify({action:'creds',sid:sid||null})}).then(function(x){return x.json()})})
+  .then(function(r){if(r&&r.creds)Object.keys(r.creds).forEach(function(k){CREDS[k]=r.creds[k]})}).catch(function(){})}
+function loadMembers(id){Promise.all([sb.rpc('pos_admin_accounts',{p_sid:id}),loadCreds(id)]).then(function(x){var r=x[0];S.memRows=r.data||[];S.memShop=id;drawMembers()})}
+function drawMembers(){var el=$('#memList');if(!el)return;var rows=S.memRows||[];el.innerHTML=rows.length?rows.map(function(m){return acctRow(m,false)}).join(''):'ยังไม่มีบัญชี'}
+function loadAccts(){S.accts=[];Promise.all([sb.rpc('pos_admin_accounts',{p_sid:null}),loadCreds(null)]).then(function(x){S.accts=x[0].data||[];if(S.view==='users')render()})}
+function usersView(){var q=S.uq.trim().toLowerCase();var list=(S.accts||[]).filter(function(m){var sh=shopBy(m.shop_id);return !q||(m.email+' '+(m.username||'')+' '+(m.name||'')+' '+(sh.name||'')).toLowerCase().indexOf(q)>=0});
   return '<div class="head"><h1>บัญชีผู้ใช้</h1><span class="sp"></span><input class="search" id="userQ" type="search" placeholder="ค้นหาอีเมล ชื่อ หรือร้าน" value="'+esc(S.uq)+'" aria-label="ค้นหาบัญชี"></div>'+
-  '<div class="note">ชื่อผู้ใช้คืออีเมล · รหัสผ่านถูกเข้ารหัสไว้ ไม่มีใครเปิดดูได้ รวมถึงผู้ดูแลระบบ ถ้าร้านลืมรหัสผ่าน ให้กด “ตั้งรหัสผ่านใหม่” แล้วแจ้งรหัสใหม่ให้ร้าน</div>'+
+  '<div class="note">ผู้จัดการเข้าด้วยอีเมล พนักงานเข้าด้วยชื่อผู้ใช้ · กด “ดู” เพื่อแสดงรหัสผ่าน · บัญชีที่ขึ้นว่า “ยังไม่ทราบ” จะแสดงรหัสเองหลังเจ้าของบัญชีเข้าสู่ระบบครั้งถัดไป หรือกด “ตั้งรหัสผ่านใหม่”</div>'+
   '<section class="panel">'+(list.length?list.map(function(m){return acctRow(m,true)}).join(''):'<div class="empty">'+(S.accts&&S.accts.length?'ไม่พบบัญชี':'กำลังโหลด…')+'</div>')+'</section>'}
 function setPw(email){drawer('ตั้งรหัสผ่านใหม่','<div class="small">บัญชี <b>'+esc(email.replace('@staff.cafe-pos.app',''))+'</b></div><form class="form" id="pwForm" data-email="'+esc(email)+'">'+
   '<label for="pw_new">รหัสผ่านใหม่ (เว้นว่างให้ระบบสุ่มให้)<input id="pw_new" type="text" minlength="8" autocomplete="off" placeholder="อย่างน้อย 8 ตัวอักษร"></label>'+
@@ -331,6 +340,8 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='pkadd'){$('#pkRows').insertAdjacentHTML('beforeend',pkRow({}));return}
   if(a==='pkdel'){b.closest('.pkrow').remove();return}
   if(a==='setpw'){setPw(d.id);return}
+  if(a==='pwshow'){SHOWPW[d.id]=!SHOWPW[d.id];drawMembers();if(S.view==='users')render();return}
+  if(a==='pwcopy'){var c=CREDS[d.id];if(!c)return;var t='ชื่อผู้ใช้: '+d.id.replace('@staff.cafe-pos.app','')+'\nรหัสผ่าน: '+c.password;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกชื่อผู้ใช้และรหัสผ่านแล้ว')},function(){toast('คัดลอกไม่ได้')});return}
   if(a==='copypw'){var t=$('#pwVal').textContent;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(function(){toast('คัดลอกรหัสผ่านแล้ว')},function(){toast('เลือกข้อความแล้วคัดลอกเอง')});return}
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
@@ -352,7 +363,7 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
   if(f.id==='pwForm'){var em=f.dataset.email,pw=$('#pw_new').value.trim();if(pw&&pw.length<8){done();toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}
     sb.auth.getSession().then(function(r){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+(r.data.session&&r.data.session.access_token),'Content-Type':'application/json'},body:JSON.stringify({action:'setpw',email:em,password:pw||null})}).then(function(x){return x.json()})})
     .then(function(r){done();if(!r||r.error){toast('ตั้งรหัสผ่านไม่สำเร็จ'+(r&&r.error?' ('+r.error+')':''));return}
-      f.remove();$('#pwOut').innerHTML='<div class="pwbox"><code id="pwVal">'+esc(r.password)+'</code><button class="btn sm" data-act="copypw">คัดลอก</button></div><div class="hint" style="margin-top:8px">ชื่อผู้ใช้: <b>'+esc(em)+'</b> · แจ้งรหัสนี้ให้เจ้าของบัญชี ระบบจะไม่แสดงรหัสนี้อีกหลังปิดหน้าต่าง</div>';S.accts=null})
+      CREDS[em]={password:r.password};f.remove();$('#pwOut').innerHTML='<div class="pwbox"><code id="pwVal">'+esc(r.password)+'</code><button class="btn sm" data-act="copypw">คัดลอก</button></div><div class="hint" style="margin-top:8px">ชื่อผู้ใช้: <b>'+esc(em.replace('@staff.cafe-pos.app',''))+'</b> · ดูรหัสนี้ได้อีกที่หน้าบัญชีผู้ใช้</div>';S.accts=null})
     .catch(function(){done();toast('เชื่อมต่อไม่สำเร็จ')});return}
   if(f.id==='adminForm'){sb.from('pos_admins').insert({email:$('#ad_email').value.trim().toLowerCase()}).then(function(r){done();toast(r.error?err(r.error):'เพิ่มผู้ดูแลระบบแล้ว');loadAll()});return}
   done();

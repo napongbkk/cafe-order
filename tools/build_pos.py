@@ -128,7 +128,7 @@ R("  if(id==='catForm'){",
   if(f.classList.contains('stpw')){const pw=f.querySelector('input').value;if(pw.length<6){toast(STAFF_ERR.weak_password);return}
     const r=await staffFn({action:'staff_pw',email:f.dataset.email,password:pw});if(r.error){toast(STAFF_ERR[r.error]||'เปลี่ยนไม่สำเร็จ');return}S.staffPw=null;toast('เปลี่ยนรหัสผ่านพนักงานแล้ว');loadStaff();return}
   if(id==='myPwForm'){const a1=$('#my_pw').value,a2=$('#my_pw2').value;if(a1.length<8){toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}if(a1!==a2){toast('ยืนยันรหัสผ่านไม่ตรงกัน');return}
-    const r=await window.POS_SB.auth.updateUser({password:a1});if(r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ: '+r.error.message);return}f.reset();toast('เปลี่ยนรหัสผ่านแล้ว');return}
+    const r=await staffFn({action:'my_pw',password:a1});if(!r||r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ'+(r&&r.error?' ('+r.error+')':''));return}f.reset();toast('เปลี่ยนรหัสผ่านแล้ว');return}
   if(id==='catForm'){""")
 
 # Staff accounts do not see reports or the menu editor.

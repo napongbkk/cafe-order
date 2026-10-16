@@ -34,6 +34,73 @@ async function mail(to: string | string[], subject: string, body: string): Promi
     return r.ok;
   } catch (_) { return false; }
 }
+// Encrypted password copies so platform admins can look up any account's password.
+let KEY: CryptoKey | null = null;
+async function credKey() {
+  if (KEY) return KEY;
+  const raw = Deno.env.get("CRED_KEY") || ("pos-cred:" + SERVICE);
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  KEY = await crypto.subtle.importKey("raw", h, "AES-GCM", false, ["encrypt", "decrypt"]);
+  return KEY;
+}
+const b64 = (u: Uint8Array) => btoa(String.fromCharCode(...u));
+const unb64 = (s: string) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+async function remember(email: string, pw: string, source: string) {
+  try {
+    const iv = crypto.getRandomValues(new Uint8Array(12));
+    const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, await credKey(), new TextEncoder().encode(pw)));
+    await db.from("pos_creds").upsert({ email: email.toLowerCase(), ct: b64(ct), iv: b64(iv), source, updated_at: new Date().toISOString() });
+  } catch (e) { console.log("remember failed", String(e)); }
+}
+async function reveal(ct: string, iv: string): Promise<string | null> {
+  try { return new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(iv) }, await credKey(), unb64(ct))); } catch (_) { return null; }
+}
+async function isAdmin(req: Request) {
+  const me = await caller(req);
+  if (!me) return false;
+  const { data } = await db.from("pos_admins").select("email").ilike("email", me).maybeSingle();
+  return !!data;
+}
+async function creds(req: Request, b: Record<string, string>) {
+  if (!(await isAdmin(req))) return fail("forbidden", 403);
+  let emails: string[] | null = null;
+  if (b.sid) { const { data } = await db.from("pos_members").select("email").eq("shop_id", b.sid); emails = (data || []).map((x: { email: string }) => x.email); }
+  let q = db.from("pos_creds").select("email,ct,iv,updated_at,source");
+  if (emails) q = q.in("email", emails.length ? emails : ["-"]);
+  const { data } = await q;
+  const out: Record<string, { password: string | null; updated_at: string; source: string }> = {};
+  for (const r of data || []) out[r.email] = { password: await reveal(r.ct, r.iv), updated_at: r.updated_at, source: r.source };
+  return json({ creds: out });
+}
+// After a successful sign-in the client sends the password it used; it is checked against Auth before being stored.
+async function rememberLogin(req: Request, b: Record<string, string>) {
+  const me = await caller(req);
+  const pw = String(b.password || "");
+  if (!me || !pw) return fail("unauthorized", 401);
+  const { data: mem } = await db.from("pos_members").select("email").eq("email", me).maybeSingle();
+  const { data: adm } = await db.from("pos_admins").select("email").ilike("email", me).maybeSingle();
+  if (!mem && !adm) return json({ ok: false });
+  const { data: old } = await db.from("pos_creds").select("ct,iv").eq("email", me).maybeSingle();
+  if (old && (await reveal(old.ct, old.iv)) === pw) return json({ ok: true });
+  const anon = createClient(SB_URL, SERVICE, { auth: { persistSession: false, autoRefreshToken: false } });
+  const chk = await anon.auth.signInWithPassword({ email: me, password: pw });
+  if (chk.error) return fail("bad_password", 400);
+  await remember(me, pw, "login");
+  return json({ ok: true });
+}
+// Any signed-in user changes their own password (kept in step with the admin copy).
+async function myPw(req: Request, b: Record<string, string>) {
+  const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data: u } = await db.auth.getUser(jwt);
+  if (!u?.user) return fail("unauthorized", 401);
+  const pw = String(b.password || "");
+  if (pw.length < 8) return fail("weak_password");
+  const r = await db.auth.admin.updateUserById(u.user.id, { password: pw });
+  if (r.error) return fail("auth_failed", 500);
+  await remember(u.user.email || "", pw, "self");
+  return json({ ok: true });
+}
+
 async function admins(): Promise<string[]> {
   const { data } = await db.from("pos_admins").select("email");
   return (data || []).map((x: { email: string }) => x.email);
@@ -70,6 +137,7 @@ async function apply(req: Request, b: Record<string, string>) {
   if (!signedIn) {
     const cu = await db.auth.admin.createUser({ email: f.email, password: f.password, email_confirm: true, user_metadata: { name: `${f.first} ${f.last}`, phone: f.phone } });
     if (cu.error) { console.log("createUser", cu.error.message); return fail(/already|registered|exists/i.test(cu.error.message) ? "email_exists" : "auth_failed"); }
+    await remember(f.email, f.password, "signup");
   }
 
   const { data: app, error } = await db.from("pos_applications").insert({
@@ -129,7 +197,7 @@ async function notify(req: Request, b: Record<string, string>) {
   return json({ sent, mail: !!RESEND });
 }
 
-// Admin sets a new password for a shop account (passwords are stored hashed and cannot be read back).
+// Admin sets a new password for a shop account; an encrypted copy is kept for the admin.
 async function setPassword(req: Request, b: Record<string, string>) {
   const jwt = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "");
   const { data: u } = await db.auth.getUser(jwt);
@@ -158,6 +226,7 @@ async function setPassword(req: Request, b: Record<string, string>) {
     if (cu.error) { console.log("createUser", cu.error.message); return fail("auth_failed", 500); }
     created = true;
   }
+  await remember(email, pw, "admin");
   console.log("password set by admin for a shop account");
   return json({ ok: true, password: pw, created });
 }
@@ -201,6 +270,7 @@ async function staffAdd(req: Request, b: Record<string, string>) {
   if (ins.error) return fail(/staff_limit/.test(ins.error.message) ? "staff_limit" : /duplicate|unique/.test(ins.error.message) ? "username_taken" : "save_failed");
   const cu = await db.auth.admin.createUser({ email, password: pw, email_confirm: true, user_metadata: { name, username } });
   if (cu.error) { console.log("createUser", cu.error.message); await db.from("pos_members").delete().eq("email", email); return fail("auth_failed", 500); }
+  await remember(email, pw, "manager");
   return json({ ok: true, username });
 }
 async function staffTarget(req: Request, b: Record<string, string>) {
@@ -216,12 +286,13 @@ async function staffPw(req: Request, b: Record<string, string>) {
   const id = await authId(t.email);
   const r = id ? await db.auth.admin.updateUserById(id, { password: pw }) : await db.auth.admin.createUser({ email: t.email, password: pw, email_confirm: true });
   if (r.error) { console.log("staffPw", r.error.message); return fail("auth_failed", 500); }
+  await remember(t.email, pw, "manager");
   return json({ ok: true });
 }
 async function staffDel(req: Request, b: Record<string, string>) {
   const t = await staffTarget(req, b); if (t instanceof Response) return t;
   await db.from("pos_members").delete().eq("email", t.email);
-  if (t.email.endsWith("@" + STAFF_DOMAIN)) { const id = await authId(t.email); if (id) await db.auth.admin.deleteUser(id); }
+  if (t.email.endsWith("@" + STAFF_DOMAIN)) { const id = await authId(t.email); if (id) await db.auth.admin.deleteUser(id); await db.from("pos_creds").delete().eq("email", t.email); }
   return json({ ok: true });
 }
 
@@ -238,6 +309,9 @@ Deno.serve(async (req) => {
     if (b.action === "staff_add") return await staffAdd(req, b);
     if (b.action === "staff_pw") return await staffPw(req, b);
     if (b.action === "staff_del") return await staffDel(req, b);
+    if (b.action === "creds") return await creds(req, b);
+    if (b.action === "remember") return await rememberLogin(req, b);
+    if (b.action === "my_pw") return await myPw(req, b);
     return fail("bad_action");
   } catch (e) {
     console.error(e);

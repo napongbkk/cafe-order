@@ -649,7 +649,9 @@ $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var ra
   job.then(function(r){$('#authBtn').disabled=false;
     if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':r.error.message);return}
     if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
+    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);
     check()})});
+function syncCred(tok,p){try{fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({action:'remember',password:p})}).catch(function(){})}catch(e){}}
 sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
 function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(function(x){if(x.error)throw x.error;return x.data})}
 function check(){
@@ -2402,7 +2404,7 @@ document.addEventListener('submit',async e=>{
   if(f.classList.contains('stpw')){const pw=f.querySelector('input').value;if(pw.length<6){toast(STAFF_ERR.weak_password);return}
     const r=await staffFn({action:'staff_pw',email:f.dataset.email,password:pw});if(r.error){toast(STAFF_ERR[r.error]||'เปลี่ยนไม่สำเร็จ');return}S.staffPw=null;toast('เปลี่ยนรหัสผ่านพนักงานแล้ว');loadStaff();return}
   if(id==='myPwForm'){const a1=$('#my_pw').value,a2=$('#my_pw2').value;if(a1.length<8){toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}if(a1!==a2){toast('ยืนยันรหัสผ่านไม่ตรงกัน');return}
-    const r=await window.POS_SB.auth.updateUser({password:a1});if(r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ: '+r.error.message);return}f.reset();toast('เปลี่ยนรหัสผ่านแล้ว');return}
+    const r=await staffFn({action:'my_pw',password:a1});if(!r||r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ'+(r&&r.error?' ('+r.error+')':''));return}f.reset();toast('เปลี่ยนรหัสผ่านแล้ว');return}
   if(id==='catForm'){const v=$('#catName').value.trim();if(!v)return;const data={name:v,sort:S.cats.length};
     if(S.db){const ok=await dbDo(db=>db.collection('categories').add(data),'สร้างหมวดหมู่แล้ว');if(!ok)return}else{S.cats.push(Object.assign({id:'local-c'+Date.now()},data))}
     $('#catName').value='';render(true);return}
