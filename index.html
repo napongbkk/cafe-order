@@ -117,6 +117,13 @@ h2.cat{font-size:17px;margin:18px 0 8px}
 .step{display:flex;gap:12px;align-items:flex-start;padding-bottom:16px;position:relative}
 .step:not(:last-child)::before{content:"";position:absolute;left:13px;top:28px;bottom:0;width:2px;background:var(--line2)}
 .step i{width:28px;height:28px;border-radius:14px;border:2px solid var(--line2);background:var(--surface);flex-shrink:0;display:grid;place-items:center;font-style:normal;font-size:13px;font-weight:700}
+.step.pay{background:var(--bad-soft);border:2px solid var(--bad);border-radius:14px;padding:10px 12px;margin:2px 0 14px -14px;animation:paypulse 1.2s ease-in-out infinite}
+.step.pay::before{display:none}
+.step.pay i{background:var(--bad);border-color:var(--bad);color:#fff}
+.step.pay b{color:var(--bad-ink);font-size:17px}
+.step.pay small{color:var(--bad-ink)}
+@keyframes paypulse{50%{box-shadow:0 0 0 4px var(--bad-soft)}}
+@media (prefers-reduced-motion:reduce){.step.pay{animation:none}}
 .step.done i{background:var(--ok);border-color:var(--ok);color:#fff}
 .step.cur i{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-soft-ink)}
 .step.cur b{color:var(--accent)}
@@ -235,12 +242,12 @@ function myOrdersHtml(){var l=myOrders().filter(function(x){return Date.now()-x.
 
 function stepsHtml(o,r){var paid=!!o.paid||r>=2;
   var list=[['ส่งออเดอร์แล้ว','ร้านได้รับออเดอร์ของคุณ',r>=1||paid?'done':'cur'],
-    ['ชำระเงินที่เคาน์เตอร์','ร้านจะเริ่มทำเมื่อชำระเงินแล้ว',paid?'done':'cur'],
+    paid?['ชำระเงินแล้ว','ขอบคุณค่ะ','done']:['กรุณาไปชำระเงินที่เคาน์เตอร์','แจ้งหมายเลข '+(o.no||'')+(o.type==='dine'&&o.table?' (โต๊ะ '+o.table+')':'')+' กับพนักงาน ร้านจะเริ่มทำหลังชำระเงิน','pay'],
     ['ส่งเข้าครัวแล้ว','รอคิวทำ',!paid?'':r>=2?'done':'cur'],
     ['กำลังทำ','บาริสต้ากำลังเตรียม',!paid?'':r>2?'done':r===2?'cur':''],
     ['พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ',!paid?'':r>3?'done':r===3?'cur':''],
     ['เสร็จแล้ว','ขอให้อร่อย',r>=4&&paid?'done':'']];
-  return '<div class="steps">'+list.map(function(s,i){return '<div class="step '+s[2]+'"><i>'+(s[2]==='done'?'✓':i+1)+'</i><div><b>'+s[0]+'</b><small>'+s[1]+'</small></div></div>'}).join('')+'</div>'}
+  return '<div class="steps">'+list.map(function(s,i){return '<div class="step '+s[2]+'"'+(s[2]==='pay'?' role="alert"':'')+'><i>'+(s[2]==='done'?'✓':s[2]==='pay'?'!':i+1)+'</i><div><b>'+s[0]+'</b><small>'+s[1]+'</small></div></div>'}).join('')+'</div>'}
 var STEPS=[['accepted','ร้านรับออเดอร์แล้ว','ส่งเข้าครัวเรียบร้อย'],['making','กำลังทำ','บาริสต้ากำลังเตรียม'],['ready','พร้อมเสิร์ฟ','รอรับที่เคาน์เตอร์ หรือพนักงานนำไปเสิร์ฟ'],['done','เสร็จแล้ว','ขอให้อร่อย']];
 function renderStatus(){
   var o=S.order;var m=$('#main');
