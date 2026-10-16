@@ -305,6 +305,8 @@ td.r,th.r{text-align:right}
 .tpick small{font-weight:500;font-size:12px;color:var(--muted)}
 
 /* customer display */
+.catpick{display:flex;gap:8px;align-items:flex-end}.catpick .btn{height:46px;white-space:nowrap}
+.newcatrow{display:flex;gap:8px;align-items:center;margin-top:-4px}.newcatrow input{flex:1;min-width:0}.newcatrow[hidden]{display:none}
 .adgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
 .adtile{display:flex;flex-direction:column;gap:6px;border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--surface)}
 .adth{position:relative;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:#000}
@@ -993,6 +995,17 @@ function renderMobq(){
     list.map(o=>{const nw=S.mobNew.includes(o.id);const n=o.items.reduce((x,i)=>x+i.qty,0);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><button class="o" data-act="openbill" data-id="${esc(o.id)}" title="${esc(mobSummary(o))}" aria-label="เข้าบิล ${esc(mobLabel(o))}"><b class="num">${esc(mobLabel(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span>${ageMin(o.createdAt)?ageMin(o.createdAt)+' นาที':'เพิ่งสั่ง'}</span></button><button class="e" data-act="openbill" data-id="${esc(o.id)}" aria-label="แก้ไขบิล ${esc(mobWhere(o))}">${ic('pen',15)}${S.bill.id===o.id?'กำลังแก้':'แก้ไข'}</button><button class="p" data-act="checkbill" data-id="${esc(o.id)}" aria-label="รับชำระ ${esc(mobWhere(o))}">${ic('cash',15)} ชำระ</button></div>`}).join('');
 }
 let seenM=null,mobT=null;
+async function addCatInline(){
+  const inp=$('#m_newcat'),sel=$('#m_cat');if(!inp||!sel)return;const v=inp.value.trim();if(!v){inp.focus();return}
+  const ex=S.cats.find(c=>c.name.trim().toLowerCase()===v.toLowerCase());
+  let id=ex&&ex.id;
+  if(!id){const data={name:v,sort:S.cats.length};
+    if(S.db){try{const ref=S.db.collection('categories').doc();await ref.set(data);id=ref.id}catch(e){toast(dbErr(e));return}}
+    else id='local-c'+Date.now();
+    if(!S.cats.some(c=>c.id===id))S.cats.push(Object.assign({id},data));
+    if(!sel.querySelector(`option[value="${CSS.escape(id)}"]`)){const o=document.createElement('option');o.value=id;o.textContent=v;sel.appendChild(o)}
+    toast('เพิ่มหมวดหมู่ “'+v+'” แล้ว')}
+  sel.value=id;inp.value='';$('#newCatRow').hidden=true;sel.focus()}
 function mobChime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[[0,660],[0.18,880],[0.36,1175]].forEach(([t,f])=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=f;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.27)})}catch(e){}}
 function mobArrive(){
   const ids=heldMobile().map(o=>o.id);
@@ -1580,7 +1593,8 @@ function ovHtml(){
   if(v.k==='editmenu'){const m=v.id?S.menu.find(x=>x.id===v.id)||{}:{optionIds:[]};const del=S.confirm==='mdel:'+v.id;
     return wrap(head(v.id?'แก้ไขเมนู':'เพิ่มเมนู')+`<form class="form" id="menuForm"><div class="two"><label for="m_name">ชื่อเมนู<input id="m_name" required maxlength="60" value="${esc(m.name||'')}"></label><label for="m_en">ชื่อภาษาอังกฤษ<input id="m_en" maxlength="60" value="${esc(m.en||'')}"></label></div>
       <div class="grp"><span class="grp-t">รูปเมนู</span><div class="imgpick" id="imgpick">${imgPickHtml(v)}</div></div>
-      <label for="m_cat">หมวดหมู่<select id="m_cat" required><option value="">เลือกหมวดหมู่</option>${S.cats.map(c=>`<option value="${esc(c.id)}"${menuCat(m)===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+      <div class="catpick"><label for="m_cat" style="flex:1">หมวดหมู่<select id="m_cat" required><option value="">เลือกหมวดหมู่</option>${S.cats.map(c=>`<option value="${esc(c.id)}"${menuCat(m)===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><button type="button" class="btn" data-act="newcatshow">+ หมวดหมู่ใหม่</button></div>
+      <div class="newcatrow" id="newCatRow" hidden><label for="m_newcat" class="sr">ชื่อหมวดหมู่ใหม่</label><input id="m_newcat" maxlength="30" placeholder="ชื่อหมวดหมู่ใหม่ เช่น ของหวาน"><button type="button" class="btn primary" data-act="newcatadd">เพิ่ม</button><button type="button" class="btn" data-act="newcathide">ยกเลิก</button></div>
       <div class="two"><label for="m_price">ราคาหน้าร้าน (บาท)<input id="m_price" type="number" min="0" step="0.25" required value="${esc(m.price!=null?m.price:'')}"></label><label for="m_deli">ราคาเดลิเวอรี (ไม่บังคับ)<input id="m_deli" type="number" min="0" step="0.25" value="${esc(m.priceDeli||'')}"></label></div>
       <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:4px"><legend class="grp-t" style="margin-bottom:4px">ตัวเลือกที่ใช้กับเมนูนี้</legend>${S.opts.length?S.opts.map(o=>`<label class="check" for="mo_${esc(o.id)}"><input id="mo_${esc(o.id)}" type="checkbox" data-opt="${esc(o.id)}"${(m.optionIds||[]).includes(o.id)?' checked':''}> ${esc(o.name)} <span class="hint">${(o.choices||[]).map(c=>esc(c.name)).join(' · ')}</span></label>`).join(''):'<span class="hint">ยังไม่มีตัวเลือก</span>'}</fieldset>
       <label class="check" for="m_best"><input id="m_best" type="checkbox"${m.best?' checked':''}> แสดงป้าย “ขายดี”</label>
@@ -1896,6 +1910,9 @@ document.addEventListener('click',e=>{
     case 'admove':{const ads=(shop().dispAds||[]).slice();const i=+d.i,j=i+(+d.d);if(j<0||j>=ads.length)return;[ads[i],ads[j]]=[ads[j],ads[i]];saveShop({dispAds:ads},'จัดลำดับแล้ว');break;}
     case 'addel':{const ads=(shop().dispAds||[]).slice();const x=ads.splice(+d.i,1)[0];saveShop({dispAds:ads},'ลบแล้ว').then(ok=>{if(ok&&x&&S.assets)S.assets.delete(x.id).catch(()=>{})});break;}
     case 'dsidedel':{const old=shop().dispSide;saveShop({dispSide:''},'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
+    case 'newcatshow':{const r=$('#newCatRow');if(r){r.hidden=false;const i=$('#m_newcat');i&&i.focus()}break;}
+    case 'newcathide':{const r=$('#newCatRow');if(r){r.hidden=true;$('#m_newcat').value=''}break;}
+    case 'newcatadd':addCatInline();break;
     case 'moback':mobAck();break;
     case 'mobsound':PR.mobSound=PR.mobSound===false;savePR();if(PR.mobSound)mobChime();mobRepeat();render(true);break;
     case 'holdask':S.confirm='hcancel:'+d.id;render(true);break;
@@ -2053,6 +2070,7 @@ document.addEventListener('change',async e=>{
   e.target.blur();renderFloor();
 });
 document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target&&e.target.id==='m_newcat'){e.preventDefault();addCatInline();return}
   if(e.key==='Escape'&&S.ov&&S.ov.k!=='paid'){S.ov=null;S.confirm=null;renderOverlay();syncDisplay();return}
   if(!S.floorEdit||!S.sel||S.view!=='tables')return;
   if(['INPUT','SELECT'].includes((document.activeElement||{}).tagName))return;
