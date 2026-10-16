@@ -382,6 +382,7 @@ td.r,th.r{text-align:right}
 .mq .t b{font-size:16px}
 .mq small{color:var(--muted);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:240px}
 .mq .btn{min-height:38px}
+.mq.cur{outline:3px solid var(--accent);outline-offset:1px}
 .newtag{font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;background:var(--bad);color:#fff}
 .malert{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:90;width:min(460px,calc(100% - 24px));background:var(--surface);border:2px solid var(--accent);border-radius:18px;box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px;animation:mobpulse 1s ease-in-out infinite}
 .malert .h{display:flex;gap:10px;align-items:center}
@@ -389,6 +390,7 @@ td.r,th.r{text-align:right}
 .malert .h b{font-size:17px;display:block}
 .malert .h small{color:var(--muted);font-size:13px}
 .malert .acts{display:flex;gap:8px}.malert .acts .btn{flex:1}
+.malert[hidden],.mobq[hidden]{display:none}
 .nav.blink .badge{animation:kchipb 1s step-end infinite}
 @keyframes mobpulse{50%{box-shadow:0 0 0 5px var(--accent-soft),var(--shadow)}}
 @media (prefers-reduced-motion:reduce){.mobq.fresh,.mq.new,.malert,.nav.blink .badge{animation:none}}
@@ -835,8 +837,8 @@ function renderMobq(){
   el.hidden=!list.length;if(!list.length){el.innerHTML='';return}
   const fresh=list.some(o=>S.mobNew.includes(o.id));el.classList.toggle('fresh',fresh);
   el.innerHTML=`<div class="mobq-h"><b>${ic('phone',18)}Mobile Order รอชำระ <span class="n num">${list.length}</span></b><span class="muted" style="font-size:12px">ยังไม่ส่งครัว จนกว่าจะชำระเงิน</span><span style="flex:1"></span>${fresh?'<button class="btn sm" data-act="moback">รับทราบ</button>':''}<button class="btn sm" data-act="view" data-v="open">ดูทั้งหมด</button></div>
-    <div class="mobq-l">${list.map(o=>{const nw=S.mobNew.includes(o.id);return `<div class="mq${nw?' new':''}"><div class="t"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span class="muted num" style="font-size:12px">${esc(o.no)} · ${ageMin(o.createdAt)} นาที</span></div>
-      <small>${esc(mobSummary(o))}</small><div style="display:flex;gap:6px;align-items:center"><b class="num" style="font-size:17px;flex:1">${baht(o.sums.total)}</b><button class="btn primary sm" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ · ส่งครัว</button></div></div>`}).join('')}</div>`;
+    <div class="mobq-l">${list.map(o=>{const nw=S.mobNew.includes(o.id);return `<div class="mq${nw?' new':''}${S.bill.id===o.id?' cur':''}"><div class="t"><b>${esc(mobWhere(o))}</b>${nw?'<span class="newtag">ใหม่</span>':''}<span class="muted num" style="font-size:12px">${esc(o.no)} · ${ageMin(o.createdAt)} นาที</span></div>
+      <small>${esc(mobSummary(o))}</small><b class="num" style="font-size:17px">${baht(o.sums.total)}</b><div style="display:flex;gap:6px"><button class="btn sm" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">${S.bill.id===o.id?'กำลังแก้บิล':'เข้าบิล / แก้ไข'}</button><button class="btn primary sm" style="flex:1.3" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ · ส่งครัว</button></div></div>`}).join('')}</div>`;
 }
 let seenM=null,mobT=null;
 function mobChime(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[[0,660],[0.18,880],[0.36,1175]].forEach(([t,f])=>{const os=actx.createOscillator(),g=actx.createGain();os.frequency.value=f;os.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(0.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(0.35,actx.currentTime+t+0.02);g.gain.exponentialRampToValueAtTime(0.0001,actx.currentTime+t+0.25);os.start(actx.currentTime+t);os.stop(actx.currentTime+t+0.27)})}catch(e){}}
@@ -857,7 +859,7 @@ function renderMobAlert(){
   const o=list[list.length-1];el.hidden=false;
   el.innerHTML=`<div class="h"><span class="ic">${ic('phone',22)}</span><div style="min-width:0"><b>Mobile Order ใหม่${list.length>1?' '+list.length+' ออเดอร์':''}</b><small>${esc(mobWhere(o))} · ${esc(o.no)} · ${baht(o.sums.total)} · รอชำระที่เคาน์เตอร์</small></div></div>
     <div class="muted" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(mobSummary(o))}</div>
-    <div class="acts"><button class="btn" data-act="moback">รับทราบ</button><button class="btn" data-act="view" data-v="open">ดู Mobile Order</button><button class="btn primary" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ</button></div>`;
+    <div class="acts"><button class="btn" data-act="moback">รับทราบ</button><button class="btn" data-act="openbill" data-id="${esc(o.id)}">เข้าบิล / แก้ไข</button><button class="btn primary" data-act="checkbill" data-id="${esc(o.id)}">รับชำระ</button></div>`;
 }
 function renderKstrip(){renderUnpaid();renderMobq();
   const el=$('#kstrip');if(!el)return;
@@ -913,6 +915,7 @@ function renderBill(){
     <div class="bill-acts"><div class="three"><button class="btn" data-act="promo">${ic('tag',18)}โปรโมชัน</button><button class="btn" data-act="member">${ic('user',18)}สมาชิก</button>
       <button class="btn" data-act="hold"${b.items.length&&b.items.some(l=>!l.batch)||(b.id&&b.dirty)?'':' disabled'}>${b.id?'บันทึก':'ชำระภายหลัง'}</button></div>
       <button class="btn primary big" data-act="pay"${b.items.length?'':' disabled'}>ชำระเงิน <span class="num">${baht(t.total)}</span></button></div>`;
+  renderMobq();
   const bar=$('#cartbar');if(bar)bar.innerHTML=`${esc(title)} · ${t.count} รายการ<span class="num">${baht(t.total)}</span>`;
 }
 function addLine(m,choices,qty,note){
@@ -1703,7 +1706,7 @@ document.addEventListener('click',e=>{
     case 'kdone':e.preventDefault();S.kdone=!S.kdone;render(true);break;
     case 'ksound':S.sound=!S.sound;if(S.sound)beep();render(true);break;
     case 'kfull':{const el=document.documentElement;if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(el.requestFullscreen)el.requestFullscreen().catch(()=>toast('อุปกรณ์นี้เปิดเต็มจอไม่ได้'));else toast('อุปกรณ์นี้เปิดเต็มจอไม่ได้');break;}
-    case 'openbill':{const o=findOrder(d.id);if(!o)return;loadBill(o);S.ov=null;go('sell');break;}
+    case 'openbill':{const o=findOrder(d.id);if(!o)return;if(S.mobNew.includes(o.id))mobAck([o.id]);loadBill(o);S.ov=null;go('sell');break;}
     case 'checkbill':{const o=findOrder(d.id);if(!o)return;if(S.mobNew.includes(o.id))mobAck([o.id]);loadBill(o);go('sell');if(needRound())return;S.ov={k:'pay',tab:'cash',cash:'',focus:false};renderOverlay();syncDisplay();break;}
     case 'printcheck':{const o=findOrder(d.id);if(o)printDoc(o,'check');break;}
     /* tables */
