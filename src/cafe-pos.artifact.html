@@ -394,7 +394,7 @@ td.r,th.r{text-align:right}
 .malert .h b{font-size:17px;display:block}
 .malert .h small{color:var(--muted);font-size:13px}
 .malert .acts{display:flex;gap:8px}.malert .acts .btn{flex:1}
-.malert[hidden],.mobq[hidden],.unpaid[hidden]{display:none}
+.malert[hidden],.mobq[hidden],.unpaid[hidden],.kstrip[hidden]{display:none}
 .nav.blink .badge{animation:kchipb 1s step-end infinite}
 @keyframes mobpulse{50%{box-shadow:0 0 0 5px var(--accent-soft),var(--shadow)}}
 @media (prefers-reduced-motion:reduce){.mobq.fresh,.mq.new,.malert,.nav.blink .badge{animation:none}}
@@ -770,7 +770,7 @@ function needRound(){return shop().roundOn&&!S.round}
 /* ===== top & rail ===== */
 function renderRail(){
   const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
-  $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.map(([v,l,k])=>{
+  $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)).map(([v,l,k])=>{
     const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
     return `<button class="nav${v==='open'&&S.mobNew.length?' blink':''}" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
 }
@@ -867,6 +867,7 @@ function renderMobAlert(){
 }
 function renderKstrip(){renderUnpaid();renderMobq();
   const el=$('#kstrip');if(!el)return;
+  el.hidden=!!shop().kdsOff;if(el.hidden){el.innerHTML='';return}
   const list=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length);
   const sinceOf=kSince;
   el.innerHTML=[['waiting','รอทำ'],['making','กำลังทำ'],['ready','พร้อมเสิร์ฟ']].map(([k,l])=>{
@@ -943,6 +944,7 @@ async function commitBill(pay){
   doc.kst=kst;doc.kitchen=items.length?overallK({items,kst}):'done';if(hasNew)doc.batchAt=now;
   if(keepHold){doc.kst={};doc.kitchen='hold'}else if(prevH.hold)doc.hold=false;
   if(!b.id)Object.assign(doc,{no:nextNo(),createdAt:now,day:dayKey(now),state:'open'});
+  if(pay&&shop().kdsOff&&items.length){stationsOf({items}).forEach(st=>{doc.kst[st]='done'});doc.kitchen='done';doc.doneAt=now}
   if(pay)Object.assign(doc,{state:'paid',paidAt:now,method:pay.method,received:pay.received,change:pay.change,rno:nextRno(),roundId:S.round?S.round.id:null});
   let id=b.id;
   if(S.db){
@@ -998,7 +1000,7 @@ function openView(){
     ${o.member?`<div class="muted" style="font-size:13px">โทร ${esc(o.member)}</div>`:''}
     <div class="row total" style="margin:0"><b>${pay?'ยอดที่ต้องชำระ':'ชำระแล้ว · '+esc(MLABEL[o.method]||'')}</b><span class="num" style="font-size:22px">${baht(o.sums.total)}</span></div>
     ${pay&&o.hold?`<div class="hint">ชำระเงินแล้วจึงส่งเข้าครัวและพิมพ์ใบสั่งอัตโนมัติ</div>`:''}
-    ${pay?`<div style="display:flex;gap:8px"><button class="btn" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">ดู / แก้บิล</button><button class="btn primary" style="flex:1.4" data-act="checkbill" data-id="${esc(o.id)}">${o.hold?'รับชำระ · ส่งครัว':'รับชำระเงิน'}</button></div>
+    ${pay?`<div style="display:flex;gap:8px"><button class="btn" style="flex:1" data-act="openbill" data-id="${esc(o.id)}">ดู / แก้บิล</button><button class="btn primary" style="flex:1.4" data-act="checkbill" data-id="${esc(o.id)}">${o.hold&&!shop().kdsOff?'รับชำระ · ส่งครัว':'รับชำระเงิน'}</button></div>
       ${o.hold?(S.confirm==='hcancel:'+o.id?`<div style="display:flex;gap:8px"><button class="btn danger" style="flex:1" data-act="holdcancel" data-id="${esc(o.id)}">ยืนยันยกเลิก</button><button class="btn" style="flex:1" data-act="holdundo">ไม่ยกเลิก</button></div>`:`<button class="btn" data-act="holdask" data-id="${esc(o.id)}">ลูกค้าไม่มาชำระ · ยกเลิกออเดอร์</button>`):''}`:`<button class="btn" data-act="openrv" data-id="${esc(o.id)}">ดูใบเสร็จ</button>`}</article>`};
   return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">Mobile Order</h2><span class="muted" style="font-size:13px">ออเดอร์จากมือถือจะยังไม่เข้าครัวจนกว่าลูกค้าจะชำระเงินที่เคาน์เตอร์ · ${shop().appOpen?'เปิดรับออเดอร์อยู่':'ปิดรับออเดอร์อยู่'}</span></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn${PR.mobSound!==false?' primary':''}" data-act="mobsound" aria-pressed="${PR.mobSound!==false}">เสียงแจ้งเตือน: ${PR.mobSound!==false?'เปิด':'ปิด'}</button>
@@ -1243,6 +1245,7 @@ function settingsView(){
   else if(tab==='payment')body=`<h2>การชำระเงิน</h2><form class="form" data-stab="payment"><label for="s_vatMode">ภาษีมูลค่าเพิ่ม (VAT 7%)<select id="s_vatMode"${dis}><option value="none"${sh.vatMode==='none'?' selected':''}>ไม่คิด VAT</option><option value="included"${sh.vatMode==='included'?' selected':''}>รวมในราคาอาหารแล้ว</option><option value="excluded"${sh.vatMode==='excluded'?' selected':''}>คิดเพิ่มจากราคาอาหาร</option></select></label>
     <label class="check" for="s_scOn"><input id="s_scOn" type="checkbox"${sh.scOn?' checked':''}${dis}> เก็บ Service charge (คิดเพิ่มจากราคาอาหาร)</label><label for="s_scRate">Service charge (%)<input id="s_scRate" type="number" min="0" max="30" step="0.5" value="${esc(sh.scRate)}"${dis}></label>
     <label for="s_rounding">การปัดเศษยอดชำระ<select id="s_rounding"${dis}>${[['none','ไม่ปัดเศษ'],['down','ปัดลงเป็นบาท'],['nearest','ปัดใกล้สุดเป็นบาท'],['up','ปัดขึ้นเป็นบาท']].map(([v,l])=>`<option value="${v}"${sh.rounding===v?' selected':''}>${l}</option>`).join('')}</select></label>
+    <label class="check" for="s_kdsOff"><input id="s_kdsOff" type="checkbox"${sh.kdsOff?' checked':''}${dis}> ไม่ใช้จอครัว · รับเงินแล้วจบออเดอร์ทันที</label><span class="hint" style="margin-top:-6px">ซ่อนเมนูจอครัวและแถบสถานะครัวที่หน้าขาย ออเดอร์ที่ชำระแล้วจะถือว่าเสร็จทันที ลูกค้า Mobile Order จะเห็นว่าเสร็จแล้ว · ใบสั่งครัวยังพิมพ์ได้ตามการตั้งค่าเครื่องพิมพ์ครัว</span>
     <span class="hint">QR พร้อมเพย์และบัญชีรับโอนตั้งค่าได้ที่ “QR รับชำระเงิน” และ “บัญชีรับโอนเงิน”</span>${save}</form>`;
   else if(tab==='round')body=`<h2>รอบการขาย</h2><form class="form" data-stab="round"><label class="check" for="s_roundOn"><input id="s_roundOn" type="checkbox"${sh.roundOn?' checked':''}${dis}> เปิดรอบการขาย (ถาดเก็บเงิน) ก่อนเริ่มขาย</label><label for="s_roundStart">จำนวนเงินเริ่มต้น (ไม่บังคับ)<input id="s_roundStart" type="number" min="0" value="${esc(sh.roundStart||'')}"${dis}></label><span class="hint">เมื่อเปิดใช้ ต้องเปิดรอบก่อนรับชำระ และปิดรอบพร้อมนับเงินเพื่อดูส่วนต่าง</span>${save}</form>`;
   else if(tab==='receipt')body=`<h2>รูปแบบใบเสร็จ</h2><form class="form" data-stab="receipt"><label for="s_footer">ข้อความท้ายใบเสร็จ<input id="s_footer" maxlength="80" placeholder="ขอบคุณที่อุดหนุน" value="${esc(sh.footer)}"${dis}></label><span class="hint">ชื่อร้าน ที่อยู่ เบอร์โทร และเลขผู้เสียภาษีมาจาก “ข้อมูลร้าน” · หัวใบเสร็จเปลี่ยนเป็นใบกำกับภาษีอย่างย่อเมื่อคิด VAT</span>${save}</form>
@@ -1315,7 +1318,7 @@ function settingsView(){
   else body=`<h2>จอแสดงผลด้านหลัง</h2><form class="form" data-stab="display"><label for="s_idleText">ข้อความตอนไม่มีออเดอร์<input id="s_idleText" maxlength="80" placeholder="สมัครสมาชิกด้วยเบอร์โทร สะสมแต้มทุกครั้งที่ซื้อ" value="${esc(sh.idleText)}"${dis}></label><span class="hint">เปิดเมนู “จอลูกค้า” บนแท็บเล็ตอีกเครื่องที่หันให้ลูกค้า รายการและ QR จะแสดงตามเครื่องแคชเชียร์</span>${save}</form>`;
   return `<div class="settings"><nav class="subnav" aria-label="หมวดตั้งค่า">${tabs.map(([v,l])=>`<button data-act="stab" data-v="${v}" aria-current="${tab===v}">${l}</button>`).join('')}</nav><section class="panel">${ro&&!['printer','drawer','devices','kprinter'].includes(tab)?'<div class="note">ตั้งค่าร้านได้เฉพาะเจ้าของหรือผู้มีสิทธิ์แก้ไข</div>':''}${body}</section></div>`;
 }
-const SFIELDS={look:['lookColor','lookTagline','lookNotice','lookLayout','lookShowImg'],app:['appOpen','appTake','appUrl'],shop:['name','branch','address','phone','taxId'],payment:['vatMode','scOn','scRate','rounding'],round:['roundOn','roundStart'],receipt:['footer'],queue:['qPrefix','qStart'],display:['idleText']};
+const SFIELDS={look:['lookColor','lookTagline','lookNotice','lookLayout','lookShowImg'],app:['appOpen','appTake','appUrl'],shop:['name','branch','address','phone','taxId'],payment:['vatMode','scOn','scRate','rounding','kdsOff'],round:['roundOn','roundStart'],receipt:['footer'],queue:['qPrefix','qStart'],display:['idleText']};
 const NUMF=['scRate','roundStart','qStart'];
 
 /* ===== customer display ===== */
