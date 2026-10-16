@@ -23,7 +23,7 @@ def R(a, b):
 src = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
        '<meta name="theme-color" content="#2F6FB0">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n'
-       '<meta name="robots" content="noindex">\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
+       '<meta name="robots" content="noindex">\n<style>[hidden]{display:none!important}:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
 R('html,body{height:100%}', 'html,body{height:100%;margin:0}')
 
 # Runtime shim (login + Supabase store) loads before the app script.
