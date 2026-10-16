@@ -392,6 +392,7 @@ td.r,th.r{text-align:right}
 .nav.blink .badge{animation:kchipb 1s step-end infinite}
 @keyframes mobpulse{50%{box-shadow:0 0 0 5px var(--accent-soft),var(--shadow)}}
 @media (prefers-reduced-motion:reduce){.mobq.fresh,.mq.new,.malert,.nav.blink .badge{animation:none}}
+.kt.locked{opacity:.85}.kt.locked .kt-h{background:var(--sunk)!important;color:var(--muted)!important;animation:none!important}.kt.locked{animation:none!important}
 .unpaid{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 0 4px}
 .unpaid > b{font-size:13px;color:var(--warn-ink);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
 .unpaid > b i{width:8px;height:8px;border-radius:4px;background:var(--warn);display:inline-block}
@@ -625,6 +626,7 @@ function ordersMap(){return Object.assign({},S.oToday,S.oOpen)}
 function allOrders(){return Object.values(ordersMap()).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))}
 function todayOrders(){const s=startToday();return Object.values(S.oToday).filter(o=>(o.createdAt||0)>=s)}
 function isAppOrder(o){return o.source==='app'||(o.appIds||[]).length>0}
+function kLocked(o){return !!o&&o.state==='open'&&isAppOrder(o)}
 function openBills(){return allOrders().filter(o=>o.state==='open')}
 function findOrder(id){return ordersMap()[id]||(S.hist.list||[]).find(o=>o.id===id)||null}
 function nextNo(){const sh=shop();return (sh.qPrefix||'')+pad(todayOrders().length+(+sh.qStart||1),3)}
@@ -960,13 +962,14 @@ function kdsView(){
   const tile=o=>{
     const s=statusOf(o);const a=ageMin(kSince(o,s));const lv=s==='done'?'':kLevel(s,a);const cls=lv?' '+lv:'';
     const nb=o.batch||1;const tl=TYPES.find(x=>x.v===o.type);const idone=o.idone||{};
-    const btn=s==='waiting'?`<button class="btn primary" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เริ่มทำ</button>`
+    const lock=kLocked(o)&&s!=='done';
+    const btn=lock?`<button class="btn" disabled aria-disabled="true">รอชำระเงินที่เคาน์เตอร์</button>`:s==='waiting'?`<button class="btn primary" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เริ่มทำ</button>`
       :s==='making'?`<button class="btn primary" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสร็จ · พร้อมเสิร์ฟ</button>`
       :s==='ready'?`<button class="btn dark" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสิร์ฟแล้ว</button>`
       :`<button class="btn" data-act="krecall" data-id="${esc(o.id)}" data-st="${esc(st)}">เรียกคืน</button>`;
-    return `<article class="kt${cls}"><header class="kt-h"><b>${esc(o.table?o.table.name:o.no)}</b><span>${esc(o.table?o.no:(tl?tl.l:''))}</span><span class="kt-age">${a} นาที</span></header>
-      <div class="kt-meta"><span>สั่ง ${hm(o.createdAt)}</span>${nb>1?`<span class="pill warn">สั่งเพิ่มครั้งที่ ${nb-1}</span>`:''}${s==='making'?'<span class="pill ok">กำลังทำ</span>':''}${o.source==='app'||(o.appIds||[]).length?'<span class="pill ok">สั่งผ่านแอป</span>':''}${o.custName?`<span>${esc(o.custName)}</span>`:''}${o.state==='open'?'<span class="pill">ยังไม่ชำระ</span>':''}${o.guests?`<span>${o.guests} ท่าน</span>`:''}</div>
-      <ul>${itemsOf(o).map(({i,idx})=>`<li><button class="ki${idone[idx]?' done':''}${nb>1&&i.batch===nb?' new':''}" data-act="kitem" data-id="${esc(o.id)}" data-i="${idx}" aria-pressed="${!!idone[idx]}">${i.qty} × ${esc(i.name)}${st==='all'&&stations().length>1?`<span class="st">${esc(stName(itemSt(i)))}</span>`:''}${nb>1&&i.batch===nb?' <span class="st">ใหม่</span>':''}${i.opts?`<small>${esc(i.opts)}</small>`:''}</button></li>`).join('')}</ul>
+    return `<article class="kt${cls}${lock?' locked':''}"><header class="kt-h"><b>${esc(o.table?o.table.name:o.no)}</b><span>${esc(o.table?o.no:(tl?tl.l:''))}</span><span class="kt-age">${a} นาที</span></header>
+      <div class="kt-meta"><span>สั่ง ${hm(o.createdAt)}</span>${nb>1?`<span class="pill warn">สั่งเพิ่มครั้งที่ ${nb-1}</span>`:''}${s==='making'?'<span class="pill ok">กำลังทำ</span>':''}${o.source==='app'||(o.appIds||[]).length?'<span class="pill ok">สั่งผ่านแอป</span>':''}${o.custName?`<span>${esc(o.custName)}</span>`:''}${o.state==='open'?`<span class="pill${lock?' bad':''}">ยังไม่ชำระ${lock?' · ห้ามเริ่มทำ':''}</span>`:''}${o.guests?`<span>${o.guests} ท่าน</span>`:''}</div>
+      <ul>${itemsOf(o).map(({i,idx})=>`<li><button${lock?' disabled':''} class="ki${idone[idx]?' done':''}${nb>1&&i.batch===nb?' new':''}" data-act="kitem" data-id="${esc(o.id)}" data-i="${idx}" aria-pressed="${!!idone[idx]}">${i.qty} × ${esc(i.name)}${st==='all'&&stations().length>1?`<span class="st">${esc(stName(itemSt(i)))}</span>`:''}${nb>1&&i.batch===nb?' <span class="st">ใหม่</span>':''}${i.opts?`<small>${esc(i.opts)}</small>`:''}</button></li>`).join('')}</ul>
       <footer>${btn}<button class="btn icon" data-act="kprint" data-id="${esc(o.id)}" data-st="${esc(st)}" aria-label="พิมพ์ใบสั่ง ${esc(o.no)}">${ic('print',18)}</button></footer></article>`};
   const col=(t,l,empty)=>`<section class="ocol" aria-label="${t}"><h2>${t}<span>${l.length}</span></h2>${l.length?l.map(tile).join(''):`<div class="empty" style="padding:20px 8px">${empty}</div>`}</section>`;
   return `<div class="pad-view"><div class="ktool"><div class="chips" role="tablist" aria-label="สถานี">${[{id:'all',name:'ทุกสถานี'}].concat(stations()).map(x=>`<button class="chip" role="tab" data-act="kst" data-v="${esc(x.id)}" aria-selected="${st===x.id}">${esc(x.name)}</button>`).join('')}</div>
@@ -1684,13 +1687,13 @@ document.addEventListener('click',e=>{
     case 'unconfirm':S.confirm=null;if(S.ov)renderOverlay();if(S.view==='tables')renderFloorSide();else render(true);break;
     case 'hsel':S.hist.sel=d.id;S.docState={kind:'receipt',taxForm:false};S.confirm=null;render(true);break;
     /* bar & open */
-    case 'kadv':case 'krecall':{const o=findOrder(d.id);if(!o)return;const sts=d.st==='all'?stationsOf(o):[d.st];
+    case 'kadv':case 'krecall':{const o=findOrder(d.id);if(!o)return;if(kLocked(o)&&a==='kadv'){toast('ออเดอร์มือถือนี้ยังไม่ชำระเงิน เริ่มทำไม่ได้');return}const sts=d.st==='all'?stationsOf(o):[d.st];
       const cur=d.st==='all'?overallK(o):stStatus(o,d.st);const next=a==='krecall'?'ready':KNEXT[cur];if(!next)return;
       const kst=Object.assign({},o.kst||{});stationsOf(o).forEach(x=>{if(!kst[x])kst[x]=stStatus(o,x)});
       sts.forEach(x=>{if(a==='krecall'||KRANK[kst[x]]<=KRANK[cur])kst[x]=next});
       const patch={kst,kitchen:overallK(Object.assign({},o,{kst}))};patch[next+'At']=Date.now();
       Object.assign(o,patch);render(true);if(S.db)dbDo(db=>db.doc('orders/'+o.id).update(patch));break;}
-    case 'kitem':{const o=findOrder(d.id);if(!o)return;const cur=!!(o.idone&&o.idone[d.i]);const patch={idone:Object.assign({},o.idone||{},{[d.i]:!cur})};
+    case 'kitem':{const o=findOrder(d.id);if(!o)return;if(kLocked(o)){toast('ยังไม่ชำระเงิน');return}const cur=!!(o.idone&&o.idone[d.i]);const patch={idone:Object.assign({},o.idone||{},{[d.i]:!cur})};
       Object.assign(o,patch);render(true);if(S.db)dbDo(db=>db.doc('orders/'+o.id).update(patch));break;}
     case 'kprint':{const o=findOrder(d.id);if(!o)return;if(d.st==='all')stationsOf(o).forEach(x=>printStation(o,x));else printStation(o,d.st);break;}
     case 'kst':S.kst=d.v;try{localStorage.setItem('pos.kds',d.v)}catch(err){}render(true);break;
