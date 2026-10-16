@@ -60,7 +60,12 @@ h1,h2,h3{text-wrap:balance}
 
 .app{height:100%;display:flex}
 .rail{width:96px;flex-shrink:0;background:var(--rail);border-right:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:4px;overflow-y:auto;padding-block:12px;padding-left:env(safe-area-inset-left,0px)}
-.rail .logo{width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px;margin-bottom:10px;flex-shrink:0}
+.rail .logo{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;margin-bottom:10px;flex-shrink:0;overflow:hidden;box-shadow:0 4px 12px rgba(47,111,176,.25)}
+.rail .logo.has-img{background:var(--surface);border:1px solid var(--line)}
+.rail .logo img{width:100%;height:100%;object-fit:cover;display:block}
+.logopick{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.logopick .lp{width:84px;height:84px;border-radius:20px;overflow:hidden;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex-shrink:0}
+.logopick .lp img{width:100%;height:100%;object-fit:cover}
 .nav{width:82px;min-height:62px;border:0;border-radius:12px;background:transparent;color:var(--rail-ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11.5px;line-height:1.2;text-align:center;padding:6px 4px;position:relative;flex-shrink:0}
 .nav svg{width:22px;height:22px}
 .nav[aria-current="page"]{box-shadow:inset 3px 0 0 var(--accent-fill);background:var(--rail-on);color:var(--rail-on-ink);font-weight:600}
@@ -588,7 +593,7 @@ td.r,th.r{text-align:right}
 @media (max-width:640px){.bill-pay{grid-template-columns:minmax(0,1fr)}}
 </style>
 <div class="auth" id="auth" hidden><form class="box form" id="authForm" novalidate>
-  <div style="display:flex;align-items:center;gap:12px"><div class="logo" style="width:46px;height:46px;border-radius:14px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:18px">P</div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า</p></div></div>
+  <div style="display:flex;align-items:center;gap:12px"><div style="width:52px;height:52px;border-radius:15px;overflow:hidden;flex-shrink:0"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6AA8E6"/><stop offset="1" stop-color="#245C96"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG2)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#2F6FB0" stroke-width="2.2" stroke-linecap="round"/></svg></div><div><h1>POS คาเฟ่</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล<input id="authEmail" type="email" autocomplete="username" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -791,6 +796,9 @@ function dbErr(e){const c=e&&e.code;
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';
   return 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'}
 
+const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6AA8E6"/><stop offset="1" stop-color="#245C96"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#2F6FB0" stroke-width="2.2" stroke-linecap="round"/></svg>';
+function shopLogoUrl(){const id=shop().lookLogo;return id?imgUrl(id):''}
+function railLogo(){const u=shopLogoUrl();return u?`<img src="${esc(u)}" alt="${esc(shop().name||'โลโก้ร้าน')}">`:BRAND_SVG}
 const ICON={
   copy:'<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/>',check:'<path d="M5 12l5 5L20 7"/>',
   sell:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
@@ -1026,7 +1034,7 @@ function needRound(){return shop().roundOn&&!S.round}
 /* ===== top & rail ===== */
 function renderRail(){
   const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
-  $('#rail').innerHTML=`<div class="logo" aria-hidden="true">${esc((shop().name||'C').trim().charAt(0).toUpperCase()||'C')}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(v))).map(([v,l,k])=>{
+  $('#rail').innerHTML=`<div class="logo${shopLogoUrl()?' has-img':''}" title="${esc(shop().name||'')}">${railLogo()}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)&&!(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role!=='manager'&&['reports','menu'].includes(v))).map(([v,l,k])=>{
     const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
     return `<button class="nav${v==='open'&&S.mobNew.length?' blink':''}" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
 }
@@ -1509,7 +1517,11 @@ function settingsView(){
   const tabs=[['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
-  if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2><form class="form" data-stab="shop"><label for="s_name">ชื่อร้าน<input id="s_name" maxlength="60" value="${esc(sh.name)}"${dis}></label><label for="s_branch">สาขา<input id="s_branch" maxlength="60" value="${esc(sh.branch)}"${dis}></label><label for="s_address">ที่อยู่<input id="s_address" maxlength="160" value="${esc(sh.address)}"${dis}></label><div class="two"><label for="s_phone">เบอร์โทร<input id="s_phone" maxlength="20" value="${esc(sh.phone)}"${dis}></label><label for="s_taxId">เลขประจำตัวผู้เสียภาษี<input id="s_taxId" inputmode="numeric" maxlength="17" value="${esc(sh.taxId)}"${dis}></label></div>${save}</form>`;
+  if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2>
+    <div class="grp"><span class="grp-t">โลโก้ร้าน</span><div class="logopick"><div class="lp">${shopLogoUrl()?`<img src="${esc(shopLogoUrl())}" alt="โลโก้ร้าน">`:BRAND_SVG}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">${S.assets&&!ro?`<div style="display:flex;gap:8px;flex-wrap:wrap"><label class="btn" for="lk_shopLogo" style="cursor:pointer">${sh.lookLogo?'เปลี่ยนโลโก้':'อัปโหลดโลโก้'}<input id="lk_shopLogo" data-lookimg="lookLogo" type="file" accept="image/*" class="sr"></label>${sh.lookLogo?'<button class="btn danger" type="button" data-act="lookimgdel" data-k="lookLogo">ใช้โลโก้มาตรฐาน</button>':''}</div>`:`<span class="hint">${ro?'เปลี่ยนโลโก้ได้เฉพาะผู้จัดการร้าน':'อัปโหลดโลโก้ได้บน POS เว็บ'}</span>`}
+      <span class="hint">รูปสี่เหลี่ยมจัตุรัส PNG หรือ JPG · แสดงที่เมนูด้านซ้ายของ POS หน้าสั่งอาหารของลูกค้า และจอลูกค้า</span></div></div></div>
+    <form class="form" data-stab="shop"><label for="s_name">ชื่อร้าน<input id="s_name" maxlength="60" value="${esc(sh.name)}"${dis}></label><label for="s_branch">สาขา<input id="s_branch" maxlength="60" value="${esc(sh.branch)}"${dis}></label><label for="s_address">ที่อยู่<input id="s_address" maxlength="160" value="${esc(sh.address)}"${dis}></label><div class="two"><label for="s_phone">เบอร์โทร<input id="s_phone" maxlength="20" value="${esc(sh.phone)}"${dis}></label><label for="s_taxId">เลขประจำตัวผู้เสียภาษี<input id="s_taxId" inputmode="numeric" maxlength="17" value="${esc(sh.taxId)}"${dis}></label></div>${save}</form>`;
   else if(tab==='payment')body=`<h2>การชำระเงิน</h2><form class="form" data-stab="payment"><label for="s_vatMode">ภาษีมูลค่าเพิ่ม (VAT 7%)<select id="s_vatMode"${dis}><option value="none"${sh.vatMode==='none'?' selected':''}>ไม่คิด VAT</option><option value="included"${sh.vatMode==='included'?' selected':''}>รวมในราคาอาหารแล้ว</option><option value="excluded"${sh.vatMode==='excluded'?' selected':''}>คิดเพิ่มจากราคาอาหาร</option></select></label>
     <label class="check" for="s_scOn"><input id="s_scOn" type="checkbox"${sh.scOn?' checked':''}${dis}> เก็บ Service charge (คิดเพิ่มจากราคาอาหาร)</label><label for="s_scRate">Service charge (%)<input id="s_scRate" type="number" min="0" max="30" step="0.5" value="${esc(sh.scRate)}"${dis}></label>
     <label for="s_rounding">การปัดเศษยอดชำระ<select id="s_rounding"${dis}>${[['none','ไม่ปัดเศษ'],['down','ปัดลงเป็นบาท'],['nearest','ปัดใกล้สุดเป็นบาท'],['up','ปัดขึ้นเป็นบาท']].map(([v,l])=>`<option value="${v}"${sh.rounding===v?' selected':''}>${l}</option>`).join('')}</select></label>
