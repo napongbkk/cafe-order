@@ -984,7 +984,7 @@ function mobRepeat(){clearInterval(mobT);mobT=null;if(S.mobNew.length&&PR.mobSou
 function mobAck(ids){S.mobNew=ids?S.mobNew.filter(x=>!ids.includes(x)):[];mobRepeat();renderMobAlert();renderMobq();renderRail()}
 function renderMobAlert(){
   const el=$('#malert');if(!el)return;const list=heldMobile().filter(o=>S.mobNew.includes(o.id));
-  if(!list.length||['open','kds','display'].includes(S.view)){el.hidden=true;el.innerHTML='';return}
+  if(true){el.hidden=true;el.innerHTML='';return}
   const o=list[list.length-1];el.hidden=false;
   el.innerHTML=`<div class="h"><span class="ic">${ic('phone',22)}</span><div style="min-width:0"><b>Mobile Order ใหม่${list.length>1?' '+list.length+' ออเดอร์':''}</b><small><b class="num" style="display:inline;font-size:inherit;color:var(--ink)">${esc(mobLabel(o))}</b>${o.custName?' · '+esc(o.custName):''} · ${baht(o.sums.total)} · รอชำระที่เคาน์เตอร์</small></div></div>
     <div class="muted" style="font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(mobSummary(o))}</div>
