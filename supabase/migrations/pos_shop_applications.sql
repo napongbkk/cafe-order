@@ -1,0 +1,5 @@
+-- Shop sign-up applications (applied to the project as migrations pos_shop_applications + pos_application_status).
+-- Tables: pos_applications (admin-only via RLS). Functions: pos_public_billing, pos_my_application,
+-- pos_app_status(id, token), pos_admin_approve_app(id, slug, note), pos_admin_reject_app(id, note).
+-- Packages live in pos_platform(key='billing').data.packages.
+-- Edge function supabase/functions/pos-signup handles account creation, slip upload and e-mails.
