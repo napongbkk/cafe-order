@@ -1952,7 +1952,7 @@ const VIEWS={pos:viewPOS,sales:viewSales,stock:viewStock,members:viewMembers,ser
 /* ---------- actions ---------- */
 const A={
  closeModal,go(el){ST.route=el.dataset.r;render();$('main')&&($('main').scrollTop=0)},tab(el){ST.tab[el.dataset.g]=el.dataset.t;render()},
- logout(){if(HOSTED()&&window.POS_SB){window.POS_SB.auth.signOut().then(()=>location.reload());return}ST.user=null;loc.set('simbat-user',null);pinBuf='';render()},
+ logout(){location.href='/retail';return;if(HOSTED()&&window.POS_SB){window.POS_SB.auth.signOut().then(()=>location.reload());return}ST.user=null;loc.set('simbat-user',null);pinBuf='';render()},
  acctOpen(){modal('บัญชีเข้าสู่ระบบของพนักงาน',`<div id="acctBox"><p class="muted">กำลังโหลด…</p></div>`,{wide:true,onMount(){if(window.POS_STAFF_UI)window.POS_STAFF_UI.render($('#acctBox'))}})},
  billOpen(){modal('ค่าบริการรายเดือน',`<div id="billBox"><p class="muted">กำลังโหลด…</p></div>`,{wide:true,onMount(){if(window.POS_BILLING)window.POS_BILLING.render($('#billBox'))}})},
  pickStaff(el){pinStaff=el.dataset.id;pinBuf='';render()},

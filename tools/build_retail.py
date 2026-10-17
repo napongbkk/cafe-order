@@ -60,6 +60,10 @@ print('built retail/index.html', len(page), 'bytes')
 # Public demo: the same app on its own, data stays in this browser (no login, nothing shared).
 demo = rd('src', 'retail-pos.artifact.html').replace('<title>POS ร้านคุณสิมบัติ</title>', '<title>เดโม Easy POS Retail · ทดลองใช้ได้ทันที</title>', 1)
 demo = demo.replace('ร้านคุณสิมบัติ', 'ร้านตัวอย่าง').replace('คุณสิมบัติ', 'เจ้าของร้าน')
+# The demo has no PIN screen: signing out goes to the Easy POS Retail login page.
+if ' logout(){' not in demo:
+    sys.exit('build_retail: demo logout patch point not found')
+demo = demo.replace(' logout(){', " logout(){location.href='/retail';return;", 1)
 BAR = ('<div style="position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:300;display:flex;gap:10px;align-items:center;'
        'padding:6px 8px 6px 14px;border-radius:999px;background:#13202c;color:#fff;font:600 13px/1.2 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 24px)">'
        '<span>เดโม · ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น</span><a href="/retail/signup" style="background:#2a9df4;color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap">สมัครใช้งานจริง</a></div>')
