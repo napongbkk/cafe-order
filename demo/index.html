@@ -516,7 +516,7 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink);font-weight:600;box-shadow:none}
 .btn.primary:hover:not(:disabled){background:var(--amber-hover);border-color:var(--amber-hover)}
 .btn.primary:disabled{background:#F8DDA5;border-color:#F8DDA5;opacity:1;color:#8C7A55}
-.btn.dark{background:var(--dark);border-color:#F3D9A6;color:var(--on-dark);font-weight:600}
+.btn.dark{background:var(--dark);border-color:var(--amber-line);color:var(--on-dark);font-weight:600}
 .btn.danger{color:var(--bad);border-color:#F6C9C9;background:var(--surface)}
 .btn.big{height:52px;font-size:16px;border-radius:12px}
 .btn.sm{height:34px;border-radius:9px;font-size:13.5px}
@@ -527,7 +527,7 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .panel{border-radius:14px;border-color:var(--line);box-shadow:0 1px 2px rgba(27,27,27,.03)}
 .form label{font-weight:500}
 .form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{border-radius:10px;border-color:var(--line2);height:42px}
-.form input:focus,.form select:focus,.form textarea:focus,.search:focus-within{border-color:#BDB9B2;outline:0;box-shadow:0 0 0 3px rgba(246,190,85,.25)}
+.form input:focus,.form select:focus,.form textarea:focus,.search:focus-within{border-color:#BDB9B2;outline:0;box-shadow:0 0 0 3px var(--ring)}
 .check input{accent-color:var(--amber)}
 .note{background:var(--amber-soft);color:var(--warn-ink);border-radius:10px}
 .seg{background:var(--sunk);border-radius:11px}
@@ -634,10 +634,73 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none !important}}
 
+
+/* appearance dialog */
+.ui-dlg{max-width:860px}
+.ui-body{display:flex;flex-direction:column;gap:16px;overflow-y:auto;max-height:calc(100vh - 220px);padding-right:4px}
+.ui-f{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ui-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.ui-pres{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.ui-pre{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);min-height:92px}
+.ui-pre b{font-size:14px}.ui-pre small{font-size:12px;color:var(--muted);line-height:1.35}
+.ui-pre[aria-pressed="true"]{border-color:var(--amber);box-shadow:inset 0 0 0 1.5px var(--amber);background:var(--amber-soft)}
+.ui-dots{display:flex;gap:4px;margin-bottom:4px}.ui-dots i{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.08)}
+.ui-pals{display:flex;flex-wrap:wrap;gap:8px}
+.ui-pal{display:inline-flex;align-items:center;gap:8px;height:38px;padding:0 14px 0 6px;border:1px solid var(--line2);border-radius:999px;background:var(--surface);font-weight:500}
+.ui-pal i{width:26px;height:26px;border-radius:50%}
+.ui-pal[aria-pressed="true"]{border-color:var(--amber);box-shadow:inset 0 0 0 1.5px var(--amber);background:var(--amber-soft);font-weight:600}
+.ui-seg{display:flex;flex-wrap:wrap;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--surface)}
+.ui-seg button{flex:1 1 auto;min-height:38px;padding:0 12px;border:0;border-right:1px solid var(--line);background:transparent;font-weight:500;color:var(--ink);white-space:nowrap}
+.ui-seg button:last-child{border-right:0}
+.ui-seg button[aria-checked="true"]{background:var(--amber);color:var(--amber-ink);font-weight:600}
+.ui-acts{align-items:center;border-top:1px solid var(--line);padding-top:12px}
+.uibtn{color:var(--muted)}
+@media (max-width:640px){.ui-two{grid-template-columns:minmax(0,1fr)}.ui-acts .grow{display:none}.ui-acts{justify-content:flex-end}}
+/* appearance: corners */
+html[data-ui-radius="square"] :is(.btn,.chip,.item,.panel,.dialog,.line,.search,.seg,.opt,.kpi,.ocol,.ocard,.tpick,.ui-pre,.ui-pal,.ui-seg,.subnav button,.nav){border-radius:4px}
+html[data-ui-radius="square"] :is(.item .pic,.seg button,.line .q,.item .plus){border-radius:3px}
+html[data-ui-radius="square"] .form :is(input,select,textarea){border-radius:4px}
+html[data-ui-radius="round"] :is(.btn,.search){border-radius:14px}
+html[data-ui-radius="round"] .chip{border-radius:999px}
+html[data-ui-radius="round"] :is(.item,.panel,.kpi,.ocard){border-radius:20px}
+html[data-ui-radius="round"] .item .pic{border-radius:15px}
+html[data-ui-radius="round"] .dialog{border-radius:26px}
+html[data-ui-radius="round"] .line{border-radius:16px}
+html[data-ui-radius="round"] .item .plus{border-radius:50%}
+html[data-ui-radius="round"] .form :is(input,select,textarea){border-radius:14px}
+/* appearance: density */
+html[data-ui-density="compact"] .btn{height:36px}
+html[data-ui-density="compact"] .btn.big{height:46px}
+html[data-ui-density="compact"] :is(.grid){gap:8px}
+html[data-ui-density="compact"] .menu-pane{padding:10px;gap:8px}
+html[data-ui-density="compact"] .item .meta{padding:6px 2px 0}
+html[data-ui-density="compact"] .line{padding:6px 8px;margin-bottom:6px}
+html[data-ui-density="comfy"] .btn{height:50px}
+html[data-ui-density="comfy"] .btn.big{height:62px;font-size:18px}
+html[data-ui-density="comfy"] .grid{gap:16px}
+html[data-ui-density="comfy"] .item .meta{padding:10px 6px 4px}
+html[data-ui-density="comfy"] .item .plus{width:36px;height:36px}
+html[data-ui-density="comfy"] .line{padding:14px 12px}
+html[data-ui-density="comfy"] .chip{height:44px}
+/* appearance: menu layout */
+html[data-ui-menu="small"] .grid{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+html[data-ui-menu="small"] .item .pic{aspect-ratio:16/9}
+html[data-ui-menu="small"] .item .pic svg{width:30px;height:30px}
+html[data-ui-menu="small"] .item .en{display:none}
+html[data-ui-menu="list"] .grid{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:8px}
+html[data-ui-menu="list"] .item{flex-direction:row;align-items:center;gap:10px}
+html[data-ui-menu="list"] .item .pic{width:64px;height:64px;aspect-ratio:auto;flex-shrink:0}
+html[data-ui-menu="list"] .item .pic svg{width:28px;height:28px}
+html[data-ui-menu="list"] .item .tag{font-size:9px;padding:1px 4px;top:3px;left:3px}
+html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
+/* appearance: bill side */
+@media (min-width:901px){html[data-ui-bill="left"] .sell{grid-template-columns:390px minmax(0,1fr)}
+  html[data-ui-bill="left"] .sell .bill{order:-1;border-left:0;border-right:1px solid var(--line)}}
+@media (min-width:901px) and (max-width:1180px){html[data-ui-bill="left"] .sell{grid-template-columns:340px minmax(0,1fr)}}
 /* soft, no black blocks */
 .toast{background:var(--surface) !important;color:var(--ink) !important;border:1px solid var(--line2);box-shadow:0 10px 30px rgba(27,27,27,.14);border-left:4px solid var(--amber)}
 .rail .logo{box-shadow:0 6px 16px rgba(240,138,44,.28)}
-.chip[aria-selected="true"],.chip[aria-pressed="true"]{border-color:#F3D9A6;background:var(--amber-soft)}
+.chip[aria-selected="true"],.chip[aria-pressed="true"]{border-color:var(--amber-line);background:var(--amber-soft)}
 .disp-total{background:var(--amber-soft);color:var(--ink)}
 .d-counter{background:var(--sunk);color:var(--muted);border-color:var(--line2)}
 </style>
@@ -651,6 +714,7 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
       <span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>
       <span id="roundPill"></span>
       <span class="pillx warn" id="status"><i></i><span>กำลังเชื่อมต่อ…</span></span>
+      <button class="btn sm icon uibtn" type="button" data-act="uiopen" aria-label="รูปแบบหน้าตา" title="รูปแบบหน้าตา"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11.5" r="1.2"/><circle cx="10.5" cy="7.5" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/></svg></button>
       <span class="clock" id="clock">--:--</span>
     </header>
     <div id="abar" class="abar" role="alert" hidden></div>
@@ -697,7 +761,7 @@ function dbErr(e){const c=e&&e.code;
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';
   return 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'}
 
-const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC56B"/><stop offset="1" stop-color="#F08A2C"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#F08A2C" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--logo1,#FFC56B)"/><stop offset="1" style="stop-color:var(--logo2,#F08A2C)"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" style="stroke:var(--logo2,#F08A2C)" stroke-width="2.2" stroke-linecap="round"/></svg>';
 function shopLogoUrl(){const id=shop().lookLogo;return id?imgUrl(id):''}
 function railLogo(){const u=shopLogoUrl();return u?`<img src="${esc(u)}" alt="${esc(shop().name||'โลโก้ร้าน')}">`:BRAND_SVG}
 const ICON={
@@ -1450,7 +1514,7 @@ function menuView(){
 /* ===== settings ===== */
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['devices','อุปกรณ์และการรับเงิน'],['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
+  const tabs=[['ui','รูปแบบหน้าตาระบบ'],['devices','อุปกรณ์และการรับเงิน'],['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2>
@@ -1466,6 +1530,10 @@ function settingsView(){
   else if(tab==='round')body=`<h2>รอบการขาย</h2><form class="form" data-stab="round"><label class="check" for="s_roundOn"><input id="s_roundOn" type="checkbox"${sh.roundOn?' checked':''}${dis}> เปิดรอบการขาย (ถาดเก็บเงิน) ก่อนเริ่มขาย</label><label for="s_roundStart">จำนวนเงินเริ่มต้น (ไม่บังคับ)<input id="s_roundStart" type="number" min="0" value="${esc(sh.roundStart||'')}"${dis}></label><span class="hint">เมื่อเปิดใช้ ต้องเปิดรอบก่อนรับชำระ และปิดรอบพร้อมนับเงินเพื่อดูส่วนต่าง</span>${save}</form>`;
   else if(tab==='receipt')body=`<h2>รูปแบบใบเสร็จ</h2><form class="form" data-stab="receipt"><label for="s_footer">ข้อความท้ายใบเสร็จ<input id="s_footer" maxlength="80" placeholder="ขอบคุณที่อุดหนุน" value="${esc(sh.footer)}"${dis}></label><span class="hint">ชื่อร้าน ที่อยู่ เบอร์โทร และเลขผู้เสียภาษีมาจาก “ข้อมูลร้าน” · หัวใบเสร็จเปลี่ยนเป็นใบกำกับภาษีอย่างย่อเมื่อคิด VAT</span>${save}</form>
     <div class="paper${PR.paper==='58'?' p58':''}" style="max-width:360px">${receiptBody({no:'A-001',type:'dine',items:[{name:'ลาเต้',opts:'เย็น · กลาง',unit:80,qty:1},{name:'ครัวซองต์เนยสด',opts:'',unit:75,qty:1}],sums:calc([{unit:80,qty:1},{unit:75,qty:1}],null),method:'cash',received:200,change:200-calc([{unit:80,qty:1},{unit:75,qty:1}],null).total,createdAt:Date.now(),paidAt:Date.now(),rno:'R'+ymd(Date.now())+'-0001'},'receipt')}</div>`;
+  else if(tab==='ui'){const u=uiEffective(),dev=!!uiDevice(),P=UI_PALS[u.pal]||UI_PALS.caramel;const F=UI_FONTS[u.font]||UI_FONTS.modern;const lab=(k)=>((UI_OPTS[k].find(x=>x[0]===u[k])||[])[1]||'');
+    body=`<h2>รูปแบบหน้าตาระบบ</h2><span class="hint">เลือกชุดสี ฟอนต์ ขนาดตัวอักษร มุมปุ่ม ความหนาแน่น รูปแบบเมนู และตำแหน่งบิล ปรับได้ทั้งเฉพาะเครื่องนี้ หรือใช้กับทุกเครื่องของร้าน</span>
+    <div class="dcards"><div class="dcard"><div class="dcard-h"><h3><span class="ui-dots" style="display:inline-flex;vertical-align:-3px;margin:0 6px 0 0"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i></span>${esc(P[0])} · ${esc(F[0])}</h3><button class="btn sm primary" data-act="uiopen">ปรับรูปแบบหน้าตา</button></div>
+    <p>${lab('mode')} · ตัวอักษร${lab('size')} · มุม${lab('radius')} · ${lab('density')} · เมนู${lab('menu')} · ${lab('bill')}</p><p class="hint" style="margin:0">${dev?'เครื่องนี้ตั้งค่าเอง (ไม่ตามค่าของร้าน)':'ใช้ค่าของร้าน'}</p></div></div>`}
   else if(tab==='devices'){
     const q=defQr(),bk=defBank(),dr=PR.drawer||{};
     const card=(t,sub,btn,v)=>`<div class="dcard"><div class="dcard-h"><h3>${t}</h3><button class="btn sm primary" data-act="stab" data-v="${v}">${btn}</button></div><p>${sub}</p></div>`;
@@ -1612,6 +1680,7 @@ function ovHtml(){
   const v=S.ov;if(!v)return '';
   const wrap=(inner,cls,scrim)=>`<div class="scrim"${scrim===false?'':' data-act="scrim"'}><div class="dialog ${cls||''}" role="dialog" aria-modal="true" aria-labelledby="dlgT">${inner}</div></div>`;
   const head=(t)=>`<div class="dlg-head"><h2 id="dlgT">${t}</h2><button class="btn icon" data-act="close" aria-label="ปิด">${ic('x')}</button></div>`;
+  if(v.k==='ui')return uiDialogHtml(wrap,head);
   if(v.k==='item'){
     const m=S.menu.find(x=>x.id===v.id);if(!m)return '';
     const groups=(m.optionIds||[]).map(id=>S.opts.find(o=>o.id===id)).filter(Boolean);
@@ -1851,7 +1920,7 @@ function saveQrSheet(){
 /* ===== render ===== */
 const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,members:membersView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
 function render(force){
-  renderTop();renderMobAlert();
+  applyUI();renderTop();renderMobAlert();
   if(S.view==='round'&&S.rounds==null&&!loadRounds.busy){loadRounds.busy=true;loadRounds().finally(()=>{loadRounds.busy=false})}
   const v=$('#view');
   if(S.view==='sell'&&needRound()){v.dataset.v='gate';v.innerHTML=`<div class="gate"><div class="panel"><h2>เปิดรอบการขาย</h2><p class="muted" style="margin:0">ต้องเปิดรอบการขายก่อนเริ่มรับออเดอร์</p><form class="form" id="openRoundForm"><label for="rStart">ระบุจำนวนเงิน (เงินทอนในถาด)<input id="rStart" type="number" min="0" step="1" inputmode="numeric" value="${esc(shop().roundStart||'')}"></label><button class="btn primary big" type="submit">เปิดรอบ</button></form></div></div>`;renderOverlay();return}
@@ -1907,10 +1976,95 @@ async function openTable(t,guests){
   loadBill(o);S.ov=null;go('sell');toast('เปิดโต๊ะ '+t.name+' แล้ว');
 }
 
+/* ===== Appearance (per device, or the shop default for every device) ===== */
+const UI_DEF={pal:'caramel',mode:'auto',size:'m',font:'modern',radius:'normal',density:'normal',menu:'card',bill:'right'};
+// main, hover, text on main, soft background, soft text, logo light, logo dark
+const UI_PALS={caramel:['คาราเมล','#F6BE55','#F0AE34','#2B1F05','#FDF3DC','#7A5200','#FFC56B','#F08A2C'],
+  sky:['ฟ้าสดใส','#2E9BE6','#1F86CF','#FFFFFF','#E3F2FD','#145C94','#5EC2FF','#1F7FD1'],
+  forest:['เขียวป่า','#1E8A5A','#187449','#FFFFFF','#E3F4EA','#145C3B','#4CC38A','#16784C'],
+  navy:['น้ำเงินทะเล','#2459B8','#1C489A','#FFFFFF','#E5ECFA','#1A3F82','#5B8DEF','#1E4FA8'],
+  teal:['ฟ้าอมเขียว','#128C8C','#0E7474','#FFFFFF','#DFF3F2','#0B5C5C','#3CC7C0','#0F7F7F'],
+  berry:['ม่วงเบอร์รี่','#7E3FB8','#6A329D','#FFFFFF','#EFE6F8','#55287F','#B07CE8','#6E35A6'],
+  rose:['ชมพูกุหลาบ','#D63A75','#BC2D64','#FFFFFF','#FBE6EE','#8E1F4A','#FF7EA8','#C92E68'],
+  brick:['ส้มอิฐ','#D2581F','#B84A18','#FFFFFF','#FCEADF','#8A3510','#FF9A5C','#C9501C'],
+  red:['แดงมงคล','#C8252C','#AD1F25','#FFFFFF','#FBE4E5','#8A1419','#F2585E','#B81F26'],
+  gold:['ทองอำพัน','#B7791F','#9C6716','#FFFFFF','#F7EBD6','#6E4A10','#E0A84A','#A86E1A'],
+  mono:['ขาวดำ','#2B2B2B','#111111','#FFFFFF','#EFEEEC','#2B2B2B','#5A5A5A','#1B1B1B']};
+const UI_FONTS={modern:['ทันสมัย (ค่าเริ่มต้น)',"'Inter','IBM Plex Sans Thai'",''],prompt:['Prompt',"'Prompt'",'Prompt:wght@400;500;600;700'],kanit:['Kanit',"'Kanit'",'Kanit:wght@400;500;600;700'],
+  sarabun:['Sarabun',"'Sarabun'",'Sarabun:wght@400;500;600;700'],noto:['Noto Sans Thai',"'Noto Sans Thai'",'Noto+Sans+Thai:wght@400;500;600;700'],mitr:['Mitr',"'Mitr'",'Mitr:wght@400;500;600']};
+const UI_PRESETS=[
+  ['caramel','คาราเมล (ค่าเริ่มต้น)','โทนอบอุ่น ปุ่มเหลืองอำพัน การ์ดขาวสะอาด',{}],
+  ['sky','ฟ้าสดใส','ฟ้าอ่อน การ์ดขาวโค้งมน ฟอนต์ Prompt',{pal:'sky',font:'prompt',radius:'round'}],
+  ['forest','เขียวร้าน','สีเขียวสบายตา มุมปกติ',{pal:'forest'}],
+  ['sea','ทะเลสดใส','น้ำเงินสว่าง ฟอนต์ Prompt ขอบมน',{pal:'navy',font:'prompt',radius:'round'}],
+  ['minimal','มินิมอลขาวดำ','ขาวดำ เหลี่ยม กะทัดรัด เมนูไอคอน',{pal:'mono',radius:'square',density:'compact',menu:'small'}],
+  ['night','กลางคืน','พื้นมืดถนอมสายตา ร้านเปิดดึก',{mode:'dark'}],
+  ['touch','จอสัมผัสตัวใหญ่','ปุ่มใหญ่ ตัวใหญ่ เมนูเต็มตา',{size:'l',density:'comfy'}],
+  ['thai','ร้านไทยอบอุ่น','สีทองอำพัน ฟอนต์ Sarabun อ่านง่าย',{pal:'gold',font:'sarabun',size:'l'}],
+  ['sweet','หวานละมุน','ชมพูกุหลาบ ฟอนต์ Mitr ขอบมน',{pal:'rose',font:'mitr',radius:'round'}],
+  ['classic','คลาสสิกแดง','แดงมงคล เหลี่ยม บิลอยู่ซ้าย',{pal:'red',radius:'square',bill:'left'}]];
+const UI_OPTS={mode:[['auto','ตามเครื่อง'],['light','สว่าง'],['dark','มืด']],size:[['s','เล็ก'],['m','ปกติ'],['l','ใหญ่'],['xl','ใหญ่มาก']],
+  radius:[['square','เหลี่ยม'],['normal','ปกติ'],['round','โค้งมน']],density:[['compact','กะทัดรัด'],['normal','ปกติ'],['comfy','โปร่ง ปุ่มใหญ่']],
+  menu:[['card','การ์ดรูปใหญ่'],['small','การ์ดเล็ก'],['list','รายการ']],bill:[['right','บิลอยู่ขวา'],['left','บิลอยู่ซ้าย']]};
+function uiDevice(){try{return JSON.parse(localStorage.getItem('pos.ui')||'null')}catch(e){return null}}
+function uiEffective(){return Object.assign({},UI_DEF,(S.shop&&S.shop.ui)||{},uiDevice()||{})}
+function hx(h){const n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+function hmix(a,b,t){const x=hx(a),y=hx(b);return '#'+x.map((v,i)=>('0'+Math.round(v+(y[i]-v)*t).toString(16)).slice(-2)).join('')}
+function hrgba(a,al){const x=hx(a);return `rgba(${x[0]},${x[1]},${x[2]},${al})`}
+let uiKey='';const uiFontsLoaded={};
+function applyUI(u){u=Object.assign({},UI_DEF,u||uiEffective());const k=JSON.stringify(u);if(k===uiKey)return;uiKey=k;
+  const P=UI_PALS[u.pal]||UI_PALS.caramel,[,m,hv,on,soft,softInk,l1,l2]=P;
+  const dm=u.pal==='mono'?['#EDEDED','#FFFFFF','#141414']:[m,hv,on];
+  const light=`--amber:${m};--amber-hover:${hv};--amber-ink:${on};--amber-soft:${soft};--amber-line:${hmix(m,'#FFFFFF',.55)};--ring:${hrgba(m,.25)};--accent:${m};--accent-hover:${hv};--on-accent:${on};--accent-fill:${m};--accent-soft:${soft};--accent-soft-ink:${softInk};--dark:${soft};--on-dark:${softInk};--ch-store:${m};--warn-soft:${soft};--logo1:${l1};--logo2:${l2};`;
+  const dsoft=hmix(dm[0],'#1E1E1E',.78),dink=hmix(dm[0],'#FFFFFF',.45);
+  const dark=`--amber:${dm[0]};--amber-hover:${dm[1]};--amber-ink:${dm[2]};--amber-soft:${dsoft};--amber-line:${hmix(dm[0],'#1E1E1E',.5)};--ring:${hrgba(dm[0],.3)};--accent:${dm[0]};--accent-hover:${dm[1]};--on-accent:${dm[2]};--accent-fill:${dm[0]};--accent-soft:${dsoft};--accent-soft-ink:${dink};--dark:${dsoft};--on-dark:${dink};--ch-store:${dm[0]};--warn-soft:${dsoft};`;
+  const F=UI_FONTS[u.font]||UI_FONTS.modern;
+  if(F[2]&&!uiFontsLoaded[u.font]){uiFontsLoaded[u.font]=1;const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+F[2]+'&display=swap';document.head.appendChild(l)}
+  const fam=F[1]+",'IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif";
+  let st=document.getElementById('uiTheme');if(!st){st=document.createElement('style');st.id='uiTheme';document.head.appendChild(st)}
+  // doubled :root outranks the base tokens, which load later in the page
+  st.textContent=`:root:root{${light}--f-body:${fam};--f-num:${fam}}@media (prefers-color-scheme: dark){:root:root:not([data-theme="light"]){${dark}}}:root:root[data-theme="dark"]{${dark}}`;
+  const r=document.documentElement;
+  if(u.mode==='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',u.mode);
+  ['radius','density','menu','bill','size'].forEach(x=>r.setAttribute('data-ui-'+x,u[x]));
+  document.body.style.zoom={s:.92,m:'',l:1.08,xl:1.16}[u.size]||'';
+}
+function uiDialogHtml(wrap,head){const v=S.ov,u=v.u;
+  const seg=(key,title)=>`<div class="ui-f"><span class="grp-t">${title}</span><div class="ui-seg" role="radiogroup" aria-label="${title}">${UI_OPTS[key].map(([val,l])=>`<button type="button" role="radio" aria-checked="${u[key]===val}" data-act="uiset" data-k="${key}" data-v="${val}">${l}</button>`).join('')}</div></div>`;
+  const fonts=`<div class="ui-f"><span class="grp-t">ฟอนต์</span><div class="ui-seg" role="radiogroup" aria-label="ฟอนต์">${Object.entries(UI_FONTS).map(([k,f])=>`<button type="button" role="radio" aria-checked="${u.font===k}" data-act="uiset" data-k="font" data-v="${k}" style="font-family:${f[1].replace(/"/g,'')},sans-serif">${f[0]}</button>`).join('')}</div></div>`;
+  const dots=p=>{const P=UI_PALS[p.pal||'caramel'];return `<span class="ui-dots"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i><i style="background:#F1F0EE"></i></span>`};
+  const presets=UI_PRESETS.map(([id,name,desc,o])=>{const on=Object.keys(UI_DEF).every(k=>(Object.assign({},UI_DEF,o))[k]===u[k]);
+    return `<button type="button" class="ui-pre" aria-pressed="${on}" data-act="uipre" data-v="${id}">${dots(o)}<b>${name}</b><small>${desc}</small></button>`}).join('');
+  const pals=Object.entries(UI_PALS).map(([k,P])=>`<button type="button" class="ui-pal" aria-pressed="${u.pal===k}" data-act="uiset" data-k="pal" data-v="${k}"><i style="background:${P[1]}"></i>${P[0]}</button>`).join('');
+  const all=S.canEdit;
+  return wrap(head('รูปแบบหน้าตา')+`<div class="ui-body">
+    <div class="ui-f"><span class="grp-t">รูปแบบสำเร็จรูป</span><div class="ui-pres">${presets}</div></div>
+    <div class="ui-f"><span class="grp-t">ชุดสี</span><div class="ui-pals">${pals}</div></div>
+    <div class="ui-two">${seg('mode','โหมดสี')}${seg('size','ขนาดตัวอักษร')}</div>
+    ${fonts}
+    <div class="ui-two">${seg('radius','มุมปุ่มและการ์ด')}${seg('density','ความหนาแน่น')}</div>
+    <div class="ui-two">${seg('menu','เมนู (คอมพิวเตอร์/แท็บเล็ต)')}${seg('bill','บิลในหน้าขาย')}</div>
+    <span class="hint">ดูผลได้ทันที “บันทึกเครื่องนี้” ใช้เฉพาะเครื่องนี้${all?' · “ใช้กับทุกเครื่อง” ตั้งเป็นค่าของร้าน ทุกเครื่องที่ยังไม่ได้ตั้งเองจะเปลี่ยนตาม':''}</span></div>
+    <div class="dlg-actions ui-acts"><button class="btn" type="button" data-act="uireset">คืนค่าเดิม</button><span class="grow"></span><button class="btn" type="button" data-act="close">ยกเลิก</button>${all?'<button class="btn" type="button" data-act="uiall">ใช้กับทุกเครื่อง</button>':''}<button class="btn primary" type="button" data-act="uisave">บันทึกเครื่องนี้</button></div>`,'wide ui-dlg')}
+function uiClick(a,d){
+  const v=S.ov;
+  if(a==='uiopen'){S.ov={k:'ui',u:uiEffective(),focus:false};renderOverlay(true);return true}
+  if(!v||v.k!=='ui')return false;
+  if(a==='close'||a==='scrim'){S.ov=null;uiKey='';applyUI();renderOverlay(true);render(true);return true}
+  if(a==='uiset'){v.u=Object.assign({},v.u,{[d.k]:d.v})}
+  else if(a==='uipre'){const p=UI_PRESETS.find(x=>x[0]===d.v);if(p)v.u=Object.assign({},UI_DEF,p[3])}
+  else if(a==='uireset'){v.u=Object.assign({},UI_DEF,(S.shop&&S.shop.ui)||{})}
+  else if(a==='uisave'){try{localStorage.setItem('pos.ui',JSON.stringify(v.u))}catch(e){}S.ov=null;uiKey='';applyUI();renderOverlay(true);render(true);toast('บันทึกรูปแบบหน้าตาของเครื่องนี้แล้ว');return true}
+  else if(a==='uiall'){const u=v.u;try{localStorage.removeItem('pos.ui')}catch(e){}S.ov=null;renderOverlay(true);saveShop({ui:u},'ใช้รูปแบบหน้าตานี้กับทุกเครื่องแล้ว').then(()=>{uiKey='';applyUI();render(true)});return true}
+  else return false;
+  uiKey='';applyUI(v.u);const sc=document.querySelector('.ui-body');const top=sc?sc.scrollTop:0;renderOverlay(true);render(true);const sc2=document.querySelector('.ui-body');if(sc2)sc2.scrollTop=top;return true;
+}
+
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act,d=b.dataset;
   if(a==='scrim'&&e.target!==b)return;
+  if(uiClick(a,d))return;
   switch(a){
     case 'view':go(d.v);break;
     case 'gosettings':S.stab=d.v;go('settings');break;
