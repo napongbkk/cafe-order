@@ -9,7 +9,7 @@
 <link rel="icon" href="/easypos.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
 :root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
   --grad:linear-gradient(120deg,#7C5CFF,#4F7BFF 50%,#22C3EE);--fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;--accent:#4F7BFF;--on-accent:#fff;--line2:#D5DAEE}
@@ -90,6 +90,49 @@ footer a{color:rgba(255,255,255,.8)}
 @media (max-width:960px){.wrap{grid-template-columns:1fr}.toc{position:static;max-height:none}.toc nav{display:grid;grid-template-columns:1fr 1fr}}
 @media (max-width:640px){.path{white-space:normal}table.t{display:block;overflow-x:auto}.top .in{gap:8px}.top .btn{padding:10px 10px;font-size:13px}section.s{padding:20px;border-radius:18px}.grid2{grid-template-columns:1fr}.top a.t{display:none}.toc nav{grid-template-columns:1fr}section.s>h2{font-size:22px}.demo a{margin-left:0}}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== Theme: warm neutral + black + amber ===== */
+:root{--bg:#F4F3F1;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#7C7A76;--line:#ECEBE8;--line2:#E0DED9;--b:#1B1B1B;--accent:#1B1B1B;--amber:#F6BE55;--amber-ink:#2B1F05;--amber-soft:#FDF3DC;--sunk:#F1F0EE;
+  --grad:linear-gradient(0deg,#1B1B1B,#1B1B1B);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+body{-webkit-font-smoothing:antialiased;font-size:15.5px}
+a{color:var(--ink)}
+h1,h2,h3{font-weight:600}
+.top{background:rgba(255,255,255,.88);color:var(--ink);border-bottom:1px solid var(--line)}
+.logo{color:var(--ink)}
+.logo span{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--ink)}
+.top a.t{color:var(--muted)}
+.top a.t:hover{background:var(--sunk);color:var(--ink)}
+.top .btn{background:var(--amber);color:var(--amber-ink);border-radius:10px}
+.top .eplang{border-color:var(--line2);background:var(--surface);color:var(--ink)}
+.hero{background:var(--surface);color:var(--ink);border-bottom:1px solid var(--line)}
+.hero > .in > span:first-child{color:var(--muted) !important}
+.hero p{color:var(--muted)}
+.hero .chips a{background:var(--sunk);border:1px solid var(--line);color:var(--ink);border-radius:10px}
+.hero .chips a:hover{background:var(--surface);border-color:var(--line2)}
+.toc{border-radius:14px}
+.toc a{color:var(--ink2)}
+.toc a.on{background:var(--sunk);color:var(--ink)}
+.toc a i{background:var(--sunk);border-radius:6px}
+.toc a.on i{background:var(--amber);color:var(--amber-ink)}
+section.s{border-radius:16px}
+section.s>h2{font-size:23px}
+section.s>h2 i{background:var(--ink);color:#fff;border-radius:10px}
+ol.steps>li{background:var(--sunk);border-radius:12px}
+ol.steps>li::before{color:var(--ink);border-radius:8px}
+ul.ck li::before{background:var(--amber)}
+.path{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.vid{border-radius:14px;background:#1B1B1B;box-shadow:0 14px 34px -20px rgba(27,27,27,.45)}
+.vid video{background:#1B1B1B}
+.vid figcaption{background:#232323}
+.tip{border-radius:12px;background:var(--amber-soft);border-color:#F3DDAA;color:#5C4208}
+.tip.info{background:var(--sunk);border-color:var(--line2);color:var(--ink2)}
+.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#19663F}
+.card,details.q{border-radius:12px}
+table.t th{background:var(--sunk)}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.demo a{background:var(--amber);color:var(--amber-ink);border-radius:10px}
+footer{background:var(--surface);color:var(--muted);border-top:1px solid var(--line)}
+footer a{color:var(--ink)}
 </style>
 </head>
 <body>

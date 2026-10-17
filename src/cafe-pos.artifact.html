@@ -1,39 +1,42 @@
 <title>POS คาเฟ่</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
 /* Layout: restaurant-POS shell. Dark left rail of sections; working area right. Sell = menu grid + bill panel. */
 :root{
-  --bg:#F3F7FC; --surface:#FFFFFF; --sunk:#E9F0F8; --ink:#1F2A37; --muted:#5B6B7D; --line:#E1E8F0; --line2:#CDD8E4;
-  --accent:#2F6FB0; --accent-hover:#275E96; --on-accent:#FFFFFF; --accent-fill:#6AA9E0; --accent-soft:#E3F0FC; --accent-soft-ink:#1E4F80;
-  --dark:#1F2A37; --on-dark:#FFFFFF; --rail:#FFFFFF; --rail-ink:#5B6B7D; --rail-on:#E3F0FC; --rail-on-ink:#2C66A3;
-  --ok:#2E9D62; --ok-soft:#E5F6EE; --ok-ink:#19663F;
-  --warn:#F2B200; --warn-soft:#FFF6D9; --warn-ink:#7A5600; --bad:#D9534F; --bad-soft:#FDECEC; --bad-ink:#A12020;
-  --ch-store:#1F2A37; --ch-take:#9AA8B8; --ch-deli:#F0A04B;
-  --t-0:#E3F0FC; --i-0:#2C66A3; --t-1:#E5F6EE; --i-1:#1E7A4B; --t-2:#FFF4DA; --i-2:#8A6200; --t-3:#F1E9FB; --i-3:#6A44A8; --t-4:#FDE8EE; --i-4:#A33A5B; --t-5:#E2F6F7; --i-5:#1F6E75;
-  --scrim:rgba(15,22,32,.5); --shadow:0 1px 3px rgba(31,42,55,.12);
-  --f-body:'IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;
-  --f-num:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+  --bg:#F4F3F1; --surface:#FFFFFF; --sunk:#F1F0EE; --ink:#1B1B1B; --muted:#7C7A76; --line:#ECEBE8; --line2:#E0DED9;
+  --accent:#1B1B1B; --accent-hover:#000000; --on-accent:#FFFFFF; --accent-fill:#F4B740; --accent-soft:#F1F0EE; --accent-soft-ink:#1B1B1B;
+  --amber:#F6BE55; --amber-hover:#F0AE34; --amber-ink:#2B1F05; --amber-soft:#FDF3DC;
+  --dark:#1B1B1B; --on-dark:#FFFFFF; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#F1F0EE; --rail-on-ink:#1B1B1B;
+  --ok:#2E9D62; --ok-soft:#E7F5EC; --ok-ink:#19663F;
+  --warn:#F4B740; --warn-soft:#FDF3DC; --warn-ink:#7A5200; --bad:#EF5B5B; --bad-soft:#FDECEC; --bad-ink:#B42323;
+  --ch-store:#1B1B1B; --ch-take:#B9B6B0; --ch-deli:#F4B740;
+  --t-0:#F2F1EF; --i-0:#8C6A4C; --t-1:#F2F1EF; --i-1:#6F7A52; --t-2:#F2F1EF; --i-2:#A0743A; --t-3:#F2F1EF; --i-3:#7A6070; --t-4:#F2F1EF; --i-4:#9A5A4A; --t-5:#F2F1EF; --i-5:#4F6E6E;
+  --scrim:rgba(27,27,27,.38); --shadow:0 1px 2px rgba(27,27,27,.08),0 4px 14px rgba(27,27,27,.05);
+  --f-body:'Inter','IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;
+  --f-num:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0F1620; --surface:#18212D; --sunk:#222D3B; --ink:#E6EDF5; --muted:#9DADBF; --line:#263243; --line2:#34435A;
-  --accent:#8EC5F0; --accent-hover:#A9D3F5; --on-accent:#0B1D2E; --accent-fill:#7FB9EC; --accent-soft:#1C3045; --accent-soft-ink:#B8DBF8;
-  --dark:#E6EDF5; --on-dark:#0F1620; --rail:#131B26; --rail-ink:#9DADBF; --rail-on:#1C3045; --rail-on-ink:#A9D3F5;
+  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
+  --accent:#F2F1EE; --accent-hover:#FFFFFF; --on-accent:#141414; --accent-fill:#F4B740; --accent-soft:#2A2A2A; --accent-soft-ink:#F2F1EE;
+  --amber:#F6BE55; --amber-hover:#F0AE34; --amber-ink:#2B1F05; --amber-soft:#3A2F17;
+  --dark:#F2F1EE; --on-dark:#141414; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
-  --warn:#F2C230; --warn-soft:#3A3014; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
-  --ch-store:#E6EDF5; --ch-take:#7D8B9C; --ch-deli:#F0A04B;
-  --t-0:#1C3045; --i-0:#B8DBF8; --t-1:#173326; --i-1:#9BE3BC; --t-2:#3A3014; --i-2:#F5D97A; --t-3:#2A2140; --i-3:#CDB6F2; --t-4:#3A1F2A; --i-4:#F2B0C4; --t-5:#16343A; --i-5:#9EDDE3;
-  --scrim:rgba(0,0,0,.65); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}}
+  --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
+  --ch-store:#F2F1EE; --ch-take:#7D7A75; --ch-deli:#F4B740;
+  --t-0:#262626; --i-0:#D2B08F; --t-1:#262626; --i-1:#B9C496; --t-2:#262626; --i-2:#E3B47A; --t-3:#262626; --i-3:#C9A9BC; --t-4:#262626; --i-4:#E09C8C; --t-5:#262626; --i-5:#9CC4C4;
+  --scrim:rgba(0,0,0,.6); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0F1620; --surface:#18212D; --sunk:#222D3B; --ink:#E6EDF5; --muted:#9DADBF; --line:#263243; --line2:#34435A;
-  --accent:#8EC5F0; --accent-hover:#A9D3F5; --on-accent:#0B1D2E; --accent-fill:#7FB9EC; --accent-soft:#1C3045; --accent-soft-ink:#B8DBF8;
-  --dark:#E6EDF5; --on-dark:#0F1620; --rail:#131B26; --rail-ink:#9DADBF; --rail-on:#1C3045; --rail-on-ink:#A9D3F5;
+  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
+  --accent:#F2F1EE; --accent-hover:#FFFFFF; --on-accent:#141414; --accent-fill:#F4B740; --accent-soft:#2A2A2A; --accent-soft-ink:#F2F1EE;
+  --amber:#F6BE55; --amber-hover:#F0AE34; --amber-ink:#2B1F05; --amber-soft:#3A2F17;
+  --dark:#F2F1EE; --on-dark:#141414; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
-  --warn:#F2C230; --warn-soft:#3A3014; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
-  --ch-store:#E6EDF5; --ch-take:#7D8B9C; --ch-deli:#F0A04B;
-  --t-0:#1C3045; --i-0:#B8DBF8; --t-1:#173326; --i-1:#9BE3BC; --t-2:#3A3014; --i-2:#F5D97A; --t-3:#2A2140; --i-3:#CDB6F2; --t-4:#3A1F2A; --i-4:#F2B0C4; --t-5:#16343A; --i-5:#9EDDE3;
-  --scrim:rgba(0,0,0,.65); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}
+  --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
+  --ch-store:#F2F1EE; --ch-take:#7D7A75; --ch-deli:#F4B740;
+  --t-0:#262626; --i-0:#D2B08F; --t-1:#262626; --i-1:#B9C496; --t-2:#262626; --i-2:#E3B47A; --t-3:#262626; --i-3:#C9A9BC; --t-4:#262626; --i-4:#E09C8C; --t-5:#262626; --i-5:#9CC4C4;
+  --scrim:rgba(0,0,0,.6); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}
 
 html,body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.45}
@@ -483,6 +486,99 @@ td.r,th.r{text-align:right}
 .disp-side .bankcard{background:#fff;color:#1F2A37;border:0;min-width:240px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--dark);color:var(--on-dark);padding:12px 18px;border-radius:12px;font-weight:600;z-index:80;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 
+
+a.btn{color:var(--ink);text-decoration:none}a.btn.primary{color:var(--amber-ink)}
+/* ===== Theme: warm neutral + black + amber (Beans & Bills style) ===== */
+body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
+.num{font-family:var(--f-num);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.rail{background:var(--rail);border-right:1px solid var(--line)}
+.rail .logo{border-radius:14px;box-shadow:none}
+.nav{border-radius:12px;font-weight:500}
+.nav[aria-current="page"]{box-shadow:none;background:var(--rail-on);color:var(--rail-on-ink);font-weight:600}
+.badge{background:var(--amber);color:var(--amber-ink)}
+.top{background:var(--bg);border-bottom:0;padding-block:12px}
+.top h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.clock{font-family:var(--f-num);font-weight:500;font-size:15px;color:var(--muted)}
+.btn{height:42px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);font-weight:500;box-shadow:0 1px 1px rgba(27,27,27,.03)}
+.btn:hover:not(:disabled){border-color:#CFCCC6}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink);font-weight:600;box-shadow:none}
+.btn.primary:hover:not(:disabled){background:var(--amber-hover);border-color:var(--amber-hover)}
+.btn.primary:disabled{background:#F8DDA5;border-color:#F8DDA5;opacity:1;color:#8C7A55}
+.btn.dark{background:var(--dark);border-color:var(--dark);color:var(--on-dark)}
+.btn.danger{color:var(--bad);border-color:#F6C9C9;background:var(--surface)}
+.btn.big{height:52px;font-size:16px;border-radius:12px}
+.btn.sm{height:34px;border-radius:9px;font-size:13.5px}
+.chip{height:36px;padding:0 12px;border-radius:10px;border:1px solid transparent;background:transparent;color:var(--muted);font-weight:500}
+.chip small{display:inline-grid;place-items:center;min-width:22px;height:20px;padding:0 6px;border-radius:6px;background:var(--sunk);color:var(--muted);font-size:11.5px;font-weight:600;opacity:1}
+.chip[aria-selected="true"],.chip[aria-pressed="true"]{background:var(--surface);border-color:var(--line2);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(27,27,27,.06)}
+.chip[aria-selected="true"] small,.chip[aria-pressed="true"] small{background:var(--amber);color:var(--amber-ink)}
+.panel{border-radius:14px;border-color:var(--line);box-shadow:0 1px 2px rgba(27,27,27,.03)}
+.form label{font-weight:500}
+.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{border-radius:10px;border-color:var(--line2);height:42px}
+.form input:focus,.form select:focus,.form textarea:focus,.search:focus-within{border-color:#BDB9B2;outline:0;box-shadow:0 0 0 3px rgba(246,190,85,.25)}
+.check input{accent-color:var(--amber)}
+.note{background:var(--amber-soft);color:var(--warn-ink);border-radius:10px}
+.seg{background:var(--sunk);border-radius:11px}
+.seg button{border-radius:8px;font-weight:500}
+.seg button[aria-checked="true"],.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(27,27,27,.08)}
+.search{height:42px;border-radius:10px;border-color:var(--line2);background:var(--surface)}
+/* sell */
+.menu-pane{gap:12px}
+.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.item{border:1px solid var(--line);border-radius:14px;padding:6px;background:var(--surface);transition:border-color .15s,box-shadow .15s}
+.item:hover:not(:disabled){border-color:#D8D5CF;box-shadow:0 4px 14px rgba(27,27,27,.06)}
+.item .pic{height:auto;aspect-ratio:4/3;border-radius:10px;background:var(--sunk) !important;overflow:hidden}
+.item .pic svg{width:40px;height:40px}
+.item .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.item .tag{top:6px;left:6px;border-radius:6px;font-weight:600;background:rgba(27,27,27,.85)}
+.item .meta{padding:8px 4px 2px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:8px;row-gap:1px}
+.item .meta .nm,.item .meta .en{grid-column:1/-1}
+.item .nm{font-weight:500;font-size:14px;line-height:1.3}
+.item .en{font-size:11.5px}
+.item .pr{color:var(--ink);font-weight:600;font-size:14px;margin-top:4px}
+.item .plus{width:28px;height:28px;border-radius:7px;background:var(--dark);color:var(--on-dark);display:grid;place-items:center}
+.item:disabled .plus{opacity:.35}
+.bill{background:var(--surface);border-left:1px solid var(--line)}
+.bill-head{border-bottom:0}
+.bill-id b{font-size:17px;font-weight:600}
+.lines{padding:4px 12px}
+.line{border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 8px;background:var(--surface);align-items:center}
+.line .q{min-width:30px;height:30px;border-radius:8px;border:1px solid var(--line2);background:var(--surface)}
+.line .nm{font-weight:500}
+.line .op{font-size:12px}
+.line .dc{color:var(--warn-ink)}
+.bill-sum{border-top:1px solid var(--line);font-size:13.5px}
+.row.total .num{font-size:24px}
+.cartbar{background:var(--amber) !important;color:var(--amber-ink) !important}
+/* dialogs */
+.scrim{background:var(--scrim);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+.dialog{border-radius:18px;box-shadow:0 20px 50px rgba(27,27,27,.18)}
+.dlg-head h2{font-size:18px;font-weight:600}
+.grp-t{color:var(--ink);font-weight:600}
+.opt{border:1px solid var(--line2);border-radius:10px;font-weight:500}
+.opt[aria-pressed="true"],.opt[aria-checked="true"]{background:var(--sunk);border-color:var(--amber);color:var(--ink);box-shadow:inset 0 0 0 1px var(--amber)}
+.stepper button{width:40px;height:40px;border-radius:10px}
+.numpad button,.quick button{border-radius:10px;font-weight:500}
+.recv{border:1.5px solid var(--ink)}
+.pay-sum{background:var(--sunk);border-radius:14px}
+.done-no{color:var(--ink)}
+/* tables & lists */
+.fi{background:var(--sunk);border-color:transparent}
+.st-busy{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.fsum i.s{background:var(--amber);border-color:var(--amber)}
+.fi.sel{outline-color:var(--amber)}
+.rz{background:var(--amber)}
+.tpick{border:1px solid var(--line2);border-radius:12px;background:var(--sunk)}
+.hrow[aria-current="true"]{background:var(--sunk);color:var(--ink);box-shadow:inset 3px 0 0 var(--amber)}
+.subnav button{font-weight:500;border-radius:9px}
+.subnav button[aria-current="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(27,27,27,.06),inset 0 0 0 1px var(--line2)}
+.bars i,.hbar .fill{background:var(--amber)}
+.kpi{border-radius:14px}
+.ocol{background:var(--sunk);border-radius:16px}
+.ocard{border-radius:12px;border:1px solid var(--line);border-top:4px solid var(--ch-store)}
+.disp-side{background:var(--dark);color:var(--on-dark)}
+.adadd{color:var(--ink)}
 @media (max-width:1180px){
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .panels{grid-template-columns:minmax(0,1fr)}
@@ -532,7 +628,7 @@ td.r,th.r{text-align:right}
   <nav class="rail" id="rail" aria-label="เมนูหลัก"></nav>
   <div class="main">
     <header class="top">
-      <div><h1 id="shopName">ร้านของคุณ</h1><small id="viewName">หน้าขาย</small></div>
+      <div><h1 id="shopName" data-noi18n>ร้านของคุณ</h1><small id="viewName">หน้าขาย</small></div>
       <div class="spacer"></div>
       <span id="appPill"></span>
       <span id="roundPill"></span>
@@ -574,7 +670,7 @@ function dbErr(e){const c=e&&e.code;
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';
   return 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'}
 
-const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6AA8E6"/><stop offset="1" stop-color="#245C96"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#2F6FB0" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E2E2E"/><stop offset="1" stop-color="#151515"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#F6BE55" stroke-width="2.2" stroke-linecap="round"/></svg>';
 function shopLogoUrl(){const id=shop().lookLogo;return id?imgUrl(id):''}
 function railLogo(){const u=shopLogoUrl();return u?`<img src="${esc(u)}" alt="${esc(shop().name||'โลโก้ร้าน')}">`:BRAND_SVG}
 const ICON={
@@ -947,7 +1043,7 @@ function renderGrid(){
   if(!items.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><b>ไม่พบเมนู</b>ลองค้นด้วยคำอื่น หรือเลือกหมวด “ทั้งหมด”</div>';return}
   el.innerHTML=items.map(m=>{const c=catColor(menuCat(m));const drink=hasOptions(m);
     return `<button class="item" data-act="item" data-id="${esc(m.id)}"${m.soldOut?' disabled':''}><div class="pic${m.imgId?' photo':''}" style="background:var(--t-${c});color:var(--i-${c})">${m.imgId?`<img src="${imgUrl(m.imgId)}" alt="" loading="lazy">`:ic(drink?'cup':'bread',36)}${m.soldOut?'<span class="tag out">หมด</span>':m.best?'<span class="tag">ขายดี</span>':''}</div>
-      <div class="meta"><span class="nm">${esc(m.name)}</span>${m.en?`<span class="en">${esc(m.en)}</span>`:''}<span class="pr">${baht(priceFor(m,S.bill.type))}${drink?'+':''}</span></div></button>`}).join('');
+      <div class="meta"><span class="nm">${esc(m.name)}</span>${m.en?`<span class="en">${esc(m.en)}</span>`:''}<span class="pr">${baht(priceFor(m,S.bill.type))}${drink?'+':''}</span><span class="plus" aria-hidden="true">${ic('plus',16)}</span></div></button>`}).join('');
 }
 function renderBill(){
   const el=$('#bill');if(!el)return;
@@ -1638,9 +1734,9 @@ function b64Rows(r){
   const m=txt.match(/"b"\s*:\s*"([A-Za-z0-9+\/=]*)"/);if(!m)return null;
   const bin=atob(m[1]);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   try{return JSON.parse(new TextDecoder().decode(bytes))}catch(e){return null}}
-const LOOK_COLORS=[['#2F6FB0','ฟ้า'],['#1E7A4B','เขียว'],['#D1450A','ส้ม'],['#B03A6B','ชมพู'],['#6A44A8','ม่วง'],['#7A4A2A','น้ำตาลกาแฟ'],['#1F2A37','ดำ']];
+const LOOK_COLORS=[['#1B1B1B','ดำ'],['#2F6FB0','ฟ้า'],['#1E7A4B','เขียว'],['#D1450A','ส้ม'],['#B03A6B','ชมพู'],['#6A44A8','ม่วง'],['#7A4A2A','น้ำตาลกาแฟ'],['#1F2A37','ดำ']];
 function lookImg(id){return id&&window.POS_IMG?window.POS_IMG(id):''}
-function lookOf(sh){return {color:/^#[0-9a-f]{6}$/i.test(sh.lookColor||'')?sh.lookColor:'#2F6FB0',tagline:sh.lookTagline||'',notice:sh.lookNotice||'',layout:sh.lookLayout==='grid'?'grid':'list',showImg:sh.lookShowImg!==false,logo:lookImg(sh.lookLogo),cover:lookImg(sh.lookCover)}}
+function lookOf(sh){return {color:/^#[0-9a-f]{6}$/i.test(sh.lookColor||'')?sh.lookColor:'#1B1B1B',tagline:sh.lookTagline||'',notice:sh.lookNotice||'',layout:sh.lookLayout==='grid'?'grid':'list',showImg:sh.lookShowImg!==false,logo:lookImg(sh.lookLogo),cover:lookImg(sh.lookCover)}}
 function onColor(hex){const n=parseInt(hex.slice(1),16);const ch=[n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});const L=0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];return L>0.36?'#111111':'#FFFFFF'}
 function lookPreview(L){const sh=shop();const on=onColor(L.color);const items=S.menu.filter(m=>!m.soldOut).slice(0,4);
   return `<div class="phone" aria-hidden="true"><div class="ph-top"><div class="ph-logo" style="background:${L.color};color:${on}">${L.logo?`<img src="${esc(L.logo)}" alt="">`:esc((sh.name||'C').charAt(0))}</div><div><b style="font-size:13px">${esc(sh.name||'ร้านของคุณ')}</b><div style="color:#5B6B7D">${esc(L.tagline||sh.branch||'สั่งอาหารออนไลน์')}</div></div></div>

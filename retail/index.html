@@ -9,7 +9,7 @@
 <link rel="icon" href="/easypos.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
 :root{--ink:#0E1330;--muted:#5F6B7A;--line:#E2E8EE;--g1:#10B981;--g2:#0EA5A4;--fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif}
 *{box-sizing:border-box}
@@ -41,6 +41,24 @@ li svg{color:var(--g1);flex-shrink:0;margin-top:4px}
 .langsw button[aria-pressed=true]{background:#fff;color:var(--ink)}
 body{padding-top:76px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important}}
+
+/* ===== Theme: warm neutral + black + amber ===== */
+:root{--ink:#1B1B1B;--muted:#7C7A76;--line:#E0DED9;--g1:#1B1B1B;--g2:#1B1B1B;--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+body{background:#F4F3F1;-webkit-font-smoothing:antialiased}
+.blob{display:none}
+.card{border:1px solid #ECEBE8;border-radius:18px;box-shadow:0 20px 50px -30px rgba(27,27,27,.25)}
+.mk{background:#1B1B1B;border-radius:14px}
+h1{font-weight:600}
+.pill{background:#FDF3DC;color:#7A5200}
+li svg{color:#C9952F}
+.btn{border-radius:10px;font-weight:500}
+.btn.main{background:#F6BE55;color:#2B1F05}
+.btn:focus-visible{outline-color:#F6BE55}
+.note a{color:#1B1B1B}
+.brand{color:#1B1B1B}
+.langsw{border-color:#E0DED9;background:#fff}
+.langsw button{color:#7C7A76}
+.langsw button[aria-pressed=true]{background:#1B1B1B;color:#fff}
 </style>
 </head>
 <body>

@@ -23,7 +23,7 @@ def R(a, b):
 # The page runs as its own website, so it needs a full HTML document.
 src = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-       '<meta name="theme-color" content="#2F6FB0">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n'
+       '<meta name="theme-color" content="#F4F3F1">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n'
        '<meta name="robots" content="noindex">\n<style>[hidden]{display:none!important}:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}img{max-width:100%}.ugrp{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--surface)}.ugrp b{display:flex;align-items:center;padding:0 10px;background:var(--bg,#eef2f6);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.5px;border-right:1px solid var(--line2);user-select:none}.form .ugrp input{border:0!important;border-radius:0!important;min-width:0}</style>\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
 R('html,body{height:100%}', 'html,body{height:100%;margin:0}')
 R('<title>POS คาเฟ่</title>', '<title>Easy POS Cafe</title>')
@@ -193,7 +193,7 @@ demo = demo.replace('<span id="appPill"></span>',
   '<span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>', 1)
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="theme-color" content="#2F6FB0">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
+        '<meta name="theme-color" content="#F4F3F1">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
         '<meta name="description" content="ลองใช้ Easy POS Cafe ได้ทันที ไม่ต้องสมัคร ข้อมูลในเดโมไม่ถูกบันทึก">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + demo + '\n<script src="/i18n-en.js"></script>\n<script src="/easypos-i18n.js"></script>\n</body>\n</html>\n')
