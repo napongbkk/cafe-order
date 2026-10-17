@@ -157,6 +157,7 @@ window.EP_DICT={
 "/ เดือน · ทดลองฟรี 30 วัน": "/ month · free 30-day trial",
 "/ เดือน · เมื่อเปิดให้บริการ": "/ month · at launch",
 "299 บาท/เดือน": "฿299/month",
+"49 บาท/เดือน": "฿49/month",
 "A012 (โต๊ะ 4) · รอชำระ": "A012 (Table 4) · Awaiting payment",
 "Cafe ออกแบบสำหรับร้านที่ขายเมนูมีตัวเลือก มีโต๊ะ ครัว และออเดอร์จากมือถือ ส่วน Retail สำหรับร้านค้าที่ขายสินค้าด้วยบาร์โค้ดและต้องคุมสต็อก ทั้งสองระบบมีบัญชีและหน้าเข้าสู่ระบบแยกกัน ตอนนี้ Retail กำลังพัฒนา": "Cafe is built for menus with options, tables, a kitchen and mobile orders. Retail is for shops that sell barcoded goods and track stock. Each has its own accounts and login. Retail is in development.",
 "Coconut POS Cafe กับ Coconut POS Retail ต่างกันอย่างไร": "How is Coconut POS Cafe different from Coconut POS Retail?",
