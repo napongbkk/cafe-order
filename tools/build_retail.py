@@ -49,7 +49,7 @@ R("(สลับร้านได้ที่แถบบน)</p>",
 R('function toast(msg,kind){', 'window.POS_TOAST=(m)=>toast(m);function toast(msg,kind){')
 page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="theme-color" content="#1f7fc0">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
+        '<meta name="theme-color" content="#1f7fc0">\n<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="robots" content="noindex">\n<meta name="description" content="Coconut POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + src + '\n</body>\n</html>\n')
@@ -73,7 +73,7 @@ AUTO = ("<script>(function(){var n=0;function go(){if(typeof A==='undefined'||ty
         "if(o&&!me()){ST.user=o.id;loc.set('simbat-user',o.id)}ST.route='pos';render()}go()})();</script>")
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
+        '<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="description" content="ลองใช้ Coconut POS Retail ได้ทันที ไม่ต้องสมัคร">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + demo + '\n' + BAR + '\n' + AUTO + '\n</body>\n</html>\n')
