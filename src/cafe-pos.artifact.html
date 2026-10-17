@@ -2667,7 +2667,7 @@ document.addEventListener('change',async e=>{
   if(id==='d_t2'){PR.drawer.t2=Math.min(500,Math.max(50,parseInt(e.target.value,10)||500));savePR();return}
   if(id==='d_needpin'){PR.drawer.needPin=e.target.checked;savePR();return}
   if(id==='bk_days'){S.bkDays=+e.target.value;return}
-  if(id==='bk_file'){const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{let d=null;try{d=JSON.parse(t)}catch(err){}if(!d||!d.data||d.app!=='Coconut POS Cafe'){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Coconut POS Cafe');return}S.bk={name:f.name,data:d};render(true)});return}
+  if(id==='bk_file'){const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{let d=null;try{d=JSON.parse(t)}catch(err){}if(!d||!d.data||!/^(Easy|Coconut) POS Cafe$/.test(d.app||'')){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Coconut POS Cafe');return}S.bk={name:f.name,data:d};render(true)});return}
   if(id==='p_auto'){PR.auto=e.target.checked;savePR();return}
   if(e.target.name==='p_conn'){const prev=PR.conn;PR.conn=e.target.value;savePR();if(prev!==PR.conn)prDisconnect();render(true);return}
   if(id==='p_pmodel'){PR.pmodel=e.target.value;PR.paper=String((PRMODEL[PR.pmodel]||{}).paper||80);savePR();render(true);return}
