@@ -360,6 +360,18 @@ tr.click{cursor:pointer} tr.click:hover td{background:var(--surface2)}
 .madd:hover{border-color:var(--accent)}.madd small{color:var(--muted);font-size:.74rem}
 .sidebg{width:88px;height:56px;border-radius:var(--rb2);background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--muted)}.sidebg img{width:100%;height:100%;object-fit:cover}.sidebg svg{width:22px;height:22px}
 details.prsec summary{cursor:pointer;list-style:revert}
+.cdv{display:flex;flex-direction:column;gap:12px;height:calc(100dvh - 120px);min-height:520px}
+.cdvbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--accent-soft);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px}
+.cdvbar>b{color:var(--accent);font-family:var(--display)}
+.cdvtabs{display:flex;gap:4px;flex-wrap:wrap;min-width:0}
+.cdvacts{display:flex;align-items:center;gap:6px;min-width:0;margin-left:auto}.cdvst{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block}
+.cdvtabs button{border:1px solid transparent;background:none;border-radius:var(--rb);padding:6px 12px;color:var(--ink);cursor:pointer;font:inherit}
+.cdvtabs button.on{background:var(--surface);border-color:var(--line);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.cdvstage{flex:1;min-height:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:grid;background:var(--surface)}
+.cdvstage>.cust{height:100%;min-height:0}
+.cdvstage .cust .cexit{display:none}
+.warnbox{background:#FFF4D6;color:#7A4E00;border-radius:var(--rb);padding:10px 12px}
+@media (max-width:700px){.cdv{height:auto}.cdvstage{height:70vh}.cdvtabs{flex-wrap:nowrap;overflow-x:auto;width:100%}.cdvtabs button{flex:0 0 auto}.cdvbar>.spacer{display:none}}
 .cdprev{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;height:300px}
 .cdprev .cust{font-size:10px!important}
 .cdprev.big .cust{font-size:12px!important}
@@ -1086,6 +1098,7 @@ function scheduleRender(){clearTimeout(rT);rT=setTimeout(()=>{const a=document.a
 document.addEventListener('focusout',()=>{if(pendingRender){pendingRender=false;setTimeout(render,50)}});
 const ICON={
  pos:'<path d="M3 4h18v12H3z"/><path d="M7 20h10M12 16v4"/>',
+ cdview:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/><circle cx="12" cy="10" r="2.2"/>',
  sales:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
  stock:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/>',
  members:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 010 7M18 14.6c1.8.7 3 2.5 3.5 5.4"/>',
@@ -1107,7 +1120,7 @@ const ICON={
  cam:'<path d="M3 8h3.5l2-3h7l2 3H21v12H3z"/><circle cx="12" cy="13.5" r="3.8"/>',
  ui:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 21c-1.5 0-2-1-2-2s1-1.6 2.3-1.6H15a3 3 0 003-3"/>',
  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'};
-const ROUTES=[['pos','ขายหน้าร้าน','pos'],['sales','บิลขาย','sales'],['stock','สินค้า/สต็อก','stock'],['members','สมาชิก','members'],['service','งานบริการ','service'],['docs','เอกสารขาย','docs'],['branch','ร้านค้า/สาขา','branch'],['report','รายงาน','report'],['shift','กะ/ลิ้นชัก','shift'],['settings','ตั้งค่า','*']];
+const ROUTES=[['pos','ขายหน้าร้าน','pos'],['sales','บิลขาย','sales'],['stock','สินค้า/สต็อก','stock'],['members','สมาชิก','members'],['service','งานบริการ','service'],['docs','เอกสารขาย','docs'],['branch','ร้านค้า/สาขา','branch'],['report','รายงาน','report'],['shift','กะ/ลิ้นชัก','shift'],['cdview','จอลูกค้า','pos'],['settings','ตั้งค่า','*']];
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 function render(){
   const app=$('#app');if(!ST.uiPreview)applyUI(curUI());const a=document.activeElement,fid=a&&a.id,sel=a&&a.selectionStart;
@@ -1190,9 +1203,10 @@ const CDDEF={media:[],slideSec:8,fit:'cover',sideBg:null,theme:'green',size:'l',
 function CD(){const s=SET();const o=Object.assign({},CDDEF,s.cd||{},{on:s.display!==false});if(!o.qrMode)o.qrMode=o.showQR===false?'off':'pay';return o}
 const dispPath=b=>'live/disp-'+(b||curBranch());
 let dispT;
+function dispData(){const c=calc(ST.cart),m=get('members',ST.cart.memberId);return {branch:curBranch(),ts:Date.now(),lines:c.lines.map(l=>({n:l.name+(l.unit?' ('+l.unit+')':''),q:l.qty,p:l.price,t:l.total,o:[l.note,l.disc?'ลด ฿'+money(l.disc):''].filter(Boolean).join(' · ')})),promo:r2(c.promoTot+c.billDisc+c.rewardDisc),total:c.total,member:m?m.name:'',points:m?(+m.points||0):null,qr:ST.payQR||null,bank:ST.payBank||null,cash:ST.payCash||null,done:null}}
 function pushDisplay(extra){if(!ST.db||!CD().on)return;clearTimeout(dispT);
   const fire=()=>{const c=calc(ST.cart),now=Date.now();if(!extra&&!c.lines.length&&ST.dispHold>now){dispT=setTimeout(fire,ST.dispHold-now+60);return}
-   const m=get('members',ST.cart.memberId);const d=Object.assign({branch:curBranch(),ts:now,lines:c.lines.map(l=>({n:l.name+(l.unit?' ('+l.unit+')':''),q:l.qty,p:l.price,t:l.total,o:[l.note,l.disc?'ลด ฿'+money(l.disc):''].filter(Boolean).join(' · ')})),promo:r2(c.promoTot+c.billDisc+c.rewardDisc),total:c.total,member:m?m.name:'',points:m?(+m.points||0):null,qr:ST.payQR||null,bank:ST.payBank||null,cash:ST.payCash||null,done:null},extra||{});
+   const d=Object.assign(dispData(),{ts:now},extra||{});
    const path=dispPath();ST.lastPush=now;ST.lastDisp=JSON.parse(JSON.stringify(d));chain(path,()=>ST.db.doc(path).set(ST.lastDisp))};
   if(extra)fire();else dispT=setTimeout(fire,500)}
 function saveCart(){loc.set('simbat-cart',ST.cart);pushDisplay()}
@@ -2218,7 +2232,15 @@ function cdOpen(){const draft=CD();let pv=(draft.media||[]).length?'ad':'sale';c
    const save=()=>{const cfg=read();const old=CD();const {on,...rest}=cfg;put('settings',Object.assign({},SET(),{id:'main',display:on,cd:rest}));if(old.logo&&old.logo!==rest.logo)dropAsset(old.logo);img.fresh=null;toast('บันทึกการตั้งค่าจอลูกค้าแล้ว');pushDisplay()};
    $('#cdSaveTop').onclick=save;$('#cdSave').onclick=()=>{save();closeModal()}}})}
 
-const VIEWS={pos:viewPOS,sales:viewSales,stock:viewStock,members:viewMembers,service:viewService,docs:viewDocs,branch:viewBranch,report:viewReport,shift:viewShift,settings:viewSettings};
+const CDV_TABS=[['live','จอจริง'],['ad','ตอนโฆษณา'],['sale','กำลังซื้อ'],['cash','ชำระเงินสด'],['qr','ชำระ QR'],['bank','ชำระโอนเงิน'],['done','ชำระเสร็จ']];
+function viewCdview(){const k=ST.cdv||'live',cfg=CD(),st=cdStatus();const name=SHOPS().length>1?bName(curBranch()):SET().shop;
+  let d;if(k==='live'){const x=dispData();d=x.lines.length||x.qr||x.bank?x:null}else d=cdSample(k);
+  return `<div class="cdv"><div class="cdvbar"><b>ตัวอย่าง</b><div class="cdvtabs" role="tablist">${CDV_TABS.map(([v,t])=>`<button type="button" role="tab" aria-selected="${k===v}" class="${k===v?'on':''}" data-act="cdvTab" data-v="${v}">${t}</button>`).join('')}</div><span class="spacer"></span>
+   <span class="cdvacts"><span class="chip cdvst ${st.cls==='bad'?'bad':st.cls==='warn'?'warn':'ok'}" title="${h(st.txt)}">${h(st.txt)}</span>${can('*')?`<button class="btn sm" data-act="cdOpen">ตั้งค่า</button>`:''}<button class="btn sm" data-act="go" data-r="pos">ปิดตัวอย่าง</button></span></div>
+   ${cfg.on?'':'<div class="note warnbox">หน้าจอลูกค้าปิดอยู่ ลูกค้าจะไม่เห็นหน้านี้จนกว่าจะเปิดที่ ตั้งค่า › หน้าจอฝั่งลูกค้า</div>'}
+   <div class="cdvstage">${custHTML(d,cfg,name,true)}</div>
+   <p class="small muted" style="margin:0">${k==='live'?'แสดงตามบิลปัจจุบันบนเครื่องนี้ เพิ่มสินค้าหรือกดชำระเงินแล้วกลับมาดูได้':'ตัวอย่างด้วยข้อมูลสมมติ'} · เปิดจอจริงบนแท็บเล็ตด้วยลิงก์นี้ต่อท้าย <span class="mono">#customer-${h(curBranch())}</span></p></div>`}
+const VIEWS={pos:viewPOS,sales:viewSales,stock:viewStock,members:viewMembers,service:viewService,docs:viewDocs,branch:viewBranch,report:viewReport,shift:viewShift,settings:viewSettings,cdview:viewCdview};
 
 /* ---------- actions ---------- */
 const A={
@@ -2256,6 +2278,7 @@ const A={
  pay:payModal,
  notif(){notifOpen()},
  userMenu(){userMenu()},
+ cdvTab(el){ST.cdv=el.dataset.v;render()},
  newBill(){if(ST.route!=='pos'){ST.route='pos'}if(ST.cart.lines.length){A.park();toast('พักบิลเดิมแล้ว เริ่มบิลใหม่')}else{render();toast('พร้อมเริ่มบิลใหม่')}},
  uiOpen(){uiOpen()},
  qrOpen(){qrOpen()},
