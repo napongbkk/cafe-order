@@ -580,6 +580,25 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .fsum i.s{background:var(--amber);border-color:var(--amber)}
 .fi.sel{outline-color:var(--amber)}
 .rz{background:var(--amber)}
+/* floor plan look */
+.floor{isolation:isolate;--chg:1.35cqw;--chair:color-mix(in srgb,var(--muted) 30%,var(--surface));--chair-back:color-mix(in srgb,var(--muted) 62%,var(--surface));--door-leaf:color-mix(in srgb,var(--ink) 70%,var(--surface))}
+.floor .fi.t-round,.floor .fi.t-square,.floor .fi.t-rect{overflow:visible;background:var(--surface);border:1.5px solid var(--line2);box-shadow:0 1px 0 rgba(27,27,27,.04),0 6px 16px -10px rgba(27,27,27,.35)}
+.floor .fi.t-square,.floor .fi.t-rect{border-radius:10px}
+.floor .fi.st-busy{background:var(--amber);border-color:var(--amber);color:var(--amber-ink)}
+.fi .ch{position:absolute;width:2.3cqw;height:1.45cqw;border-radius:.5cqw .5cqw .3cqw .3cqw;background:var(--chair);box-shadow:inset 0 .32cqw 0 var(--chair-back);pointer-events:none;z-index:-1}
+.fi.st-busy .ch{background:color-mix(in srgb,var(--amber) 55%,var(--surface));box-shadow:inset 0 .32cqw 0 var(--amber)}
+.floor .fi.deco{box-shadow:none}
+.floor .fi.d-wall{background:color-mix(in srgb,var(--ink) 72%,var(--surface));border:0;border-radius:2px;padding:0}
+.floor .fi.d-window{background:color-mix(in srgb,#8EC5E8 40%,var(--surface));border:1.5px solid #5E97C2;border-radius:1px;padding:0;overflow:visible}
+.floor .fi.d-window::after{content:"";position:absolute;left:0;right:0;top:50%;height:1px;background:#5E97C2}
+.floor .fi.d-window.vert::after{left:50%;right:auto;top:0;bottom:0;width:1px;height:auto}
+.floor .fi.d-door.swing{background:transparent;border:0;padding:0;border-radius:0;overflow:visible}
+.floor .fi.d-plant{background:transparent;border:0;padding:0;border-radius:50%;overflow:visible;filter:drop-shadow(0 3px 4px rgba(0,0,0,.18))}
+.floor .fi.d-counter{background:linear-gradient(180deg,#8A6A4F,#6B4F39);color:#FFF7EE;border:0;border-radius:10px;box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 6px 16px -10px rgba(0,0,0,.5)}
+.floor .fi.d-counter small{font-weight:600;letter-spacing:.02em}
+.fi svg.dv{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.floor.edit .fi.deco:hover{outline:1.5px dashed var(--line2);outline-offset:3px}
+
 .tpick{border:1px solid var(--line2);border-radius:12px;background:var(--sunk)}
 .hrow[aria-current="true"]{background:var(--sunk);color:var(--ink);box-shadow:inset 3px 0 0 var(--amber)}
 .subnav button{font-weight:500;border-radius:9px}
@@ -824,7 +843,7 @@ const bankShort=c=>{const b=BANKS.find(x=>x[0]===c);return b?(b[1]||b[2]):''};
 const bankName=c=>{const b=BANKS.find(x=>x[0]===c);return b?'ธนาคาร'+b[2]:''};
 const DWHEN={cash:'เมื่อรับ/ทอนเงินสด',always:'ทุกครั้งที่ชำระเงิน',manual:'กดเปิดเองเท่านั้น'};
 const KINDS={round:{l:'โต๊ะกลม',w:90,h:90,seats:2,table:1},square:{l:'โต๊ะเหลี่ยม',w:100,h:100,seats:4,table:1},rect:{l:'โต๊ะยาว',w:190,h:100,seats:6,table:1},
-  counter:{l:'เคาน์เตอร์',w:300,h:70},wall:{l:'ผนัง',w:300,h:16},door:{l:'ทางเข้า',w:130,h:24},plant:{l:'ต้นไม้',w:50,h:50}};
+  counter:{l:'เคาน์เตอร์',w:300,h:70},wall:{l:'ผนัง',w:300,h:8},door:{l:'ประตู',w:90,h:90},window:{l:'หน้าต่าง',w:160,h:10},plant:{l:'ต้นไม้',w:60,h:60}};
 
 /* demo data: used only when the shared store is unavailable */
 const DEMO={
@@ -835,7 +854,7 @@ const DEMO={
   menu:[['lat','ลาเต้','Latte',70,'coffee',['temp','size','sweet'],1],['ame','อเมริกาโน่','Americano',60,'coffee',['temp','size','sweet'],0],['mat','มัทฉะลาเต้','Matcha Latte',85,'tea',['temp','size','sweet'],1],
     ['cro','ครัวซองต์เนยสด','Butter Croissant',75,'bakery',[],1],['coo','คุกกี้ช็อกชิพ','Choc Chip Cookie',45,'bakery',[],0]].map((r,i)=>({id:r[0],name:r[1],en:r[2],price:r[3],catId:r[4],optionIds:r[5],best:!!r[6],soldOut:false,sort:i})),
   promos:[{id:'p1',name:'ลด 10% ท้ายบิล (ตัวอย่าง)',scope:'bill',type:'percent',value:10,active:true}],
-  tables:[['T1','round',120,140],['T2','round',280,140],['T3','square',120,340],['T4','square',280,340],['T5','rect',520,540],['','counter',820,90],['','door',540,770]]
+  tables:[['T1','round',120,140],['T2','round',280,140],['T3','square',120,340],['T4','square',280,340],['T5','rect',520,540],['','counter',820,90],['','door',1060,710],['','window',300,0],['','window',560,0],['','plant',30,710],['','plant',1120,20],['','plant',700,560]]
     .map((r,i)=>{const k=KINDS[r[1]];return {id:'demo-t'+i,name:r[0]||k.l,kind:r[1],seats:k.seats||0,x:r[2],y:r[3],w:k.w,h:k.h,zone:'ในร้าน'}})
 };
 
@@ -1311,14 +1330,38 @@ function membersView(){const q=S.mem.q.trim().toLowerCase();const qd=phoneKey(q)
 function zones(){const z=(shop().zones&&shop().zones.length)?shop().zones.slice():['ในร้าน'];S.tables.forEach(t=>{if(t.zone&&!z.includes(t.zone))z.push(t.zone)});return z}
 function curZone(){const z=zones();if(!S.zone||!z.includes(S.zone))S.zone=z[0];return S.zone}
 const isTable=t=>!!(KINDS[t.kind]&&KINDS[t.kind].table);
+/* floor plan drawing: chairs around tables, a potted plant seen from above, a door with its swing */
+function chairsHtml(t){const n=Math.max(0,Math.min(20,+t.seats||0));if(!n)return '';const out=[];
+  const ch=(left,top,deg)=>out.push(`<i class="ch" style="left:${left};top:${top};transform:translate(-50%,-50%) rotate(${deg}deg)"></i>`);
+  const off='var(--chg)';
+  if(t.kind==='round'){for(let i=0;i<n;i++){const a=(n===2?Math.PI:-Math.PI/2)+i*2*Math.PI/n,c=Math.cos(a).toFixed(4),sn=Math.sin(a).toFixed(4);
+      ch(`calc(50% + ${c} * (50% + ${off}))`,`calc(50% + ${sn} * (50% + ${off}))`,(a*180/Math.PI+90).toFixed(1))}return out.join('')}
+  const W=+t.w||1,H=+t.h||1,side={T:0,B:0,L:0,R:0};
+  if(W>=H*1.35){const e=n>=5?1:0;side.L=e;side.R=n>=6?e:0;const r=n-side.L-side.R;side.T=Math.ceil(r/2);side.B=r-side.T}
+  else if(H>=W*1.35){const e=n>=5?1:0;side.T=e;side.B=n>=6?e:0;const r=n-side.T-side.B;side.L=Math.ceil(r/2);side.R=r-side.L}
+  else{const order=['L','R','T','B'];for(let i=0;i<n;i++)side[order[i%4]]++}
+  const pos=(k,m)=>((k+.5)/m*100).toFixed(2)+'%';
+  for(let i=0;i<side.T;i++)ch(pos(i,side.T),`calc(-1 * ${off})`,0);
+  for(let i=0;i<side.B;i++)ch(pos(i,side.B),`calc(100% + ${off})`,180);
+  for(let i=0;i<side.L;i++)ch(`calc(-1 * ${off})`,pos(i,side.L),270);
+  for(let i=0;i<side.R;i++)ch(`calc(100% + ${off})`,pos(i,side.R),90);
+  return out.join('')}
+const PLANT_SVG=(rot)=>{let l='';const leaf=(a,len,wd,c)=>`<g transform="rotate(${a} 50 50)"><path d="M50 50 C${50-wd} ${50-len*.45} ${50-wd*.6} ${50-len*.9} 50 ${50-len} C${50+wd*.6} ${50-len*.9} ${50+wd} ${50-len*.45} 50 50Z" fill="${c}"/><path d="M50 50 L50 ${50-len*.92}" stroke="rgba(255,255,255,.35)" stroke-width="1.1"/></g>`;
+  for(let i=0;i<9;i++)l+=leaf(i*40,46,15,i%2?'#3E8E4A':'#2F7A3D');
+  for(let i=0;i<7;i++)l+=leaf(20+i*51,34,12,i%2?'#5DAE5B':'#4C9F4C');
+  for(let i=0;i<5;i++)l+=leaf(10+i*72,20,9,'#7CC46F');
+  return `<svg class="dv" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="27" fill="#B5643A"/><circle cx="50" cy="50" r="23" fill="#7A4A2C"/><g transform="rotate(${rot} 50 50)">${l}</g><circle cx="50" cy="50" r="3.2" fill="#9ED18F"/></svg>`};
+const DOOR_SVG=(rot)=>`<svg class="dv" viewBox="0 0 100 100" aria-hidden="true"><g transform="rotate(${rot} 50 50)"><path d="M7 100 L7 6 A94 94 0 0 1 100 100 Z" fill="var(--accent)" fill-opacity=".08"/><path d="M7 6 A94 94 0 0 1 100 100" fill="none" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="4 4"/><rect x="3" y="6" width="5" height="94" rx="1.5" fill="var(--door-leaf)"/><rect x="0" y="96" width="5" height="4" fill="var(--ink)"/><rect x="95" y="96" width="5" height="4" fill="var(--ink)"/><path d="M5 98 L95 98" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="2 3"/></g></svg>`;
 function itemHtml(t){
   const k=KINDS[t.kind]||KINDS.square;const tb=isTable(t);const bill=tb?tableBill(t.id):null;
   const pos=`left:${t.x/12}%;top:${t.y/8}%;width:${t.w/12}%;height:${t.h/8}%`;
   const sel=(S.floorEdit&&S.sel===t.id)||(!S.floorEdit&&S.tsel===t.id);
-  const cls='fi '+(tb?'t-'+t.kind+(bill?' st-busy':''):'deco d-'+t.kind)+(sel?' sel':'');
+  const cls='fi '+(tb?'t-'+t.kind+(bill?' st-busy':''):'deco d-'+t.kind+(t.h>t.w?' vert':'')+(t.kind==='door'&&Math.min(t.w,t.h)>=40?' swing':''))+(sel?' sel':'');
   let inner='';
-  if(tb){const sub=S.floorEdit?t.seats+' ที่':bill?baht(bill.sums.total)+' · '+ageMin(bill.createdAt)+'น.':'ว่าง';inner=`<span class="tn">${esc(t.name)}</span><small>${esc(sub)}</small>`}
-  else if(t.kind!=='wall'&&t.kind!=='plant')inner=`<small>${esc(t.name||k.l)}</small>`;
+  if(tb){const sub=S.floorEdit?t.seats+' ที่':bill?baht(bill.sums.total)+' · '+ageMin(bill.createdAt)+'น.':'ว่าง';inner=`${chairsHtml(t)}<span class="tn">${esc(t.name)}</span><small>${esc(sub)}</small>`}
+  else if(t.kind==='plant')inner=PLANT_SVG(t.rot||0);
+  else if(t.kind==='door'&&Math.min(t.w,t.h)>=40)inner=DOOR_SVG(t.rot||0);
+  else if(t.kind!=='wall'&&t.kind!=='window')inner=`<small>${esc(t.name||k.l)}</small>`;
   const rz=S.floorEdit&&S.sel===t.id?'<span class="rz" data-rz="1" aria-hidden="true"></span>':'';
   if(tb||S.floorEdit)return `<button class="${cls}" data-act="tbl" data-id="${esc(t.id)}" style="${pos}" aria-label="${esc((t.name||k.l)+(tb?' '+t.seats+' ที่นั่ง '+(bill?'มีลูกค้า':'ว่าง'):''))}">${inner}${rz}</button>`;
   return `<div class="${cls}" style="${pos}" aria-hidden="true">${inner}</div>`;
@@ -1343,13 +1386,14 @@ function renderFloorSide(){
   if(S.floorEdit){
     const t=S.tables.find(x=>x.id===S.sel);
     const add=`<h2>เพิ่มลงผัง</h2><div class="opts">${['round','square','rect'].map(k=>`<button class="opt" data-act="addfloor" data-k="${k}">${KINDS[k].l}</button>`).join('')}</div>
-      <div class="opts">${['counter','wall','door','plant'].map(k=>`<button class="opt" data-act="addfloor" data-k="${k}" style="min-width:0">${KINDS[k].l}</button>`).join('')}</div>
+      <div class="opts">${['counter','wall','door','window','plant'].map(k=>`<button class="opt" data-act="addfloor" data-k="${k}" style="min-width:0">${KINDS[k].l}</button>`).join('')}</div>
       <label class="check" for="snap" style="display:flex"><input id="snap" type="checkbox"${S.snap?' checked':''}> จัดชิดกริด</label><span class="hint">ลากเพื่อย้าย ลากมุมขวาล่างเพื่อปรับขนาด บันทึกอัตโนมัติ</span>`;
     if(!t){el.innerHTML=add+'<div class="hint" style="border-top:1px solid var(--line);padding-top:12px">แตะชิ้นในผังเพื่อแก้ชื่อ จำนวนที่นั่ง หรือลบ</div>';return}
     const tb=isTable(t);const del=S.confirm==='tdel:'+t.id;
     el.innerHTML=add+`<div class="form" style="border-top:1px solid var(--line);padding-top:12px"><h3>${tb?'โต๊ะที่เลือก':'ชิ้นที่เลือก'}</h3><label for="tName">ชื่อ<input id="tName" maxlength="20" value="${esc(t.name)}"></label>
       ${tb?`<div class="two"><label for="tSeats">ที่นั่ง<input id="tSeats" type="number" min="1" max="20" value="${esc(t.seats)}"></label><label for="tKind">รูปทรง<select id="tKind">${['round','square','rect'].map(k=>`<option value="${k}"${t.kind===k?' selected':''}>${KINDS[k].l}</option>`).join('')}</select></label></div>`:''}
       <label for="tZone">โซน<select id="tZone">${zones().map(z=>`<option${z===t.zone?' selected':''}>${esc(z)}</option>`).join('')}</select></label>
+      ${t.kind==='wall'||t.kind==='window'?`<div><span class="grp-t">ความหนา</span><div class="opts">${[['บางมาก',4],['บาง',8],['กลาง',12],['หนา',18]].map(([l,v])=>`<button class="opt" type="button" data-act="thick" data-v="${v}" aria-pressed="${Math.min(t.w,t.h)===v}" style="min-width:0">${l}</button>`).join('')}</div></div>`:''}
       <div class="opts"><button class="btn" data-act="rotate" type="button">หมุน 90°</button><button class="btn" data-act="dup" type="button">ทำสำเนา</button></div>
       ${del?'<div class="opts"><button class="btn danger" data-act="tdel" type="button">ยืนยันลบ</button><button class="btn" data-act="unconfirm" type="button">ไม่ลบ</button></div>':'<button class="btn danger" data-act="asktdel" type="button">ลบออกจากผัง</button>'}</div>`;
     return;
@@ -1388,7 +1432,7 @@ document.addEventListener('pointermove',e=>{
   if(!drag)return;const dx=(e.clientX-drag.sx)*drag.kx,dy=(e.clientY-drag.sy)*drag.ky;
   if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;
   const g=v=>S.snap?Math.round(v/10)*10:Math.round(v);const t=S.tables.find(x=>x.id===drag.id);if(!t)return;
-  if(drag.resize){t.w=Math.max(16,Math.min(1200-t.x,g(drag.ow+dx)));t.h=Math.max(16,Math.min(800-t.y,g(drag.oh+dy)));if(t.kind==='round'||t.kind==='plant')t.h=t.w}
+  if(drag.resize){const mn=t.kind==='wall'||t.kind==='window'?4:16,gr=v=>S.snap&&v>=20?g(v):Math.round(v);t.w=Math.max(mn,Math.min(1200-t.x,gr(drag.ow+dx)));t.h=Math.max(mn,Math.min(800-t.y,gr(drag.oh+dy)));if(t.kind==='round'||t.kind==='plant')t.h=t.w}
   else{t.x=Math.max(0,Math.min(1200-t.w,g(drag.ox+dx)));t.y=Math.max(0,Math.min(800-t.h,g(drag.oy+dy)))}
   const n=drag.node;if(n){n.style.left=t.x/12+'%';n.style.top=t.y/8+'%';n.style.width=t.w/12+'%';n.style.height=t.h/8+'%'}
 });
@@ -2249,7 +2293,8 @@ document.addEventListener('click',e=>{
       (S.db?dbDo(db=>db.doc('orders/'+o.id).delete(),'ยกเลิกการเปิดโต๊ะแล้ว'):Promise.resolve(true)).then(ok=>{if(ok){delete S.oOpen[o.id];delete S.oToday[o.id];renderFloor();renderTop()}});break;}
     case 'addfloor':addFloorItem(d.k);break;
     case 'dup':{const t=S.tables.find(x=>x.id===S.sel);if(t)addFloorItem(t.kind,isTable(t)?Object.assign({},t,{name:t.name+'-2'}):t);break;}
-    case 'rotate':{const t=S.tables.find(x=>x.id===S.sel);if(!t)return;saveTable(t.id,{w:Math.min(t.h,1200-t.x),h:Math.min(t.w,800-t.y)});renderFloor();break;}
+    case 'rotate':{const t=S.tables.find(x=>x.id===S.sel);if(!t)return;if(t.kind==='plant'||(t.kind==='door'&&Math.min(t.w,t.h)>=40))saveTable(t.id,{rot:((+t.rot||0)+90)%360});else saveTable(t.id,{w:Math.min(t.h,1200-t.x),h:Math.min(t.w,800-t.y)});renderFloor();break;}
+    case 'thick':{const t=S.tables.find(x=>x.id===S.sel);if(!t)return;const v=+d.v;saveTable(t.id,t.h>t.w?{w:v}:{h:v});renderFloor();break;}
     case 'asktdel':S.confirm='tdel:'+S.sel;renderFloorSide();break;
     case 'tdel':{const id=S.sel;S.confirm=null;S.sel=null;S.tables=S.tables.filter(x=>x.id!==id);if(S.db)dbDo(db=>db.doc('tables/'+id).delete());renderFloor();break;}
     /* round */
