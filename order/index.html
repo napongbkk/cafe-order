@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FBF6F1">
+<meta name="theme-color" content="#F3F7FB">
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/icon.svg">
@@ -14,10 +14,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
 :root{
-  --bg:#FBF6F1;--surface:#FFFFFF;--sunk:#F5EDE6;--ink:#191614;--muted:#7C716A;--line:#EFE4DA;--line2:#E6D8CC;
-  --accent:#FF6A1A;--accent-hover:#E8550B;--on-accent:#FFFFFF;--accent-soft:#FFEADB;--accent-soft-ink:#B5410A;
-  --cta:#FF6A1A;--cta-hover:#E8550B;--cta-ink:#FFFFFF;--amber:#FF6A1A;--amber-ink:#FFFFFF;--amber-soft:#FFEADB;
-  --ok:#2E9D62;--ok-soft:#E7F5EC;--ok-ink:#19663F;--warn-soft:#FFEADB;--warn-ink:#B5410A;--bad:#EF5B5B;--bad-soft:#FDECEC;--bad-ink:#B42323;
+  --bg:#F3F7FB;--surface:#FFFFFF;--sunk:#EAF0F6;--ink:#13202C;--muted:#5B6875;--line:#DDE6EF;--line2:#D0DBE6;
+  --accent:#2E9BE6;--accent-hover:#1F86CF;--on-accent:#FFFFFF;--accent-soft:#E3F2FD;--accent-soft-ink:#145C94;
+  --cta:#2E9BE6;--cta-hover:#1F86CF;--cta-ink:#FFFFFF;--amber:#2E9BE6;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;
+  --ok:#2E9D62;--ok-soft:#E7F5EC;--ok-ink:#19663F;--warn-soft:#FDF3DC;--warn-ink:#7A5200;--bad:#EF5B5B;--bad-soft:#FDECEC;--bad-ink:#B42323;
   --t-0:#F2F1EF;--i-0:#8C6A4C;--t-1:#F2F1EF;--i-1:#6F7A52;--t-2:#F2F1EF;--i-2:#A0743A;--t-3:#F2F1EF;--i-3:#7A6070;--t-4:#F2F1EF;--i-4:#9A5A4A;--t-5:#F2F1EF;--i-5:#4F6E6E;
   --scrim:rgba(27,27,27,.38);--shadow:0 8px 28px rgba(27,27,27,.14);
   --f:'Inter','IBM Plex Sans Thai','Noto Sans Thai',Tahoma,sans-serif;--fn:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;
@@ -25,7 +25,7 @@
 }
 @media (prefers-color-scheme: dark){:root{
   --bg:#141414;--surface:#1E1E1E;--sunk:#262626;--ink:#F2F1EE;--muted:#A3A09A;--line:#2C2C2C;--line2:#3A3A3A;
-  --accent:#F2F1EE;--accent-hover:#FFFFFF;--on-accent:#141414;--accent-soft:#2A2A2A;--accent-soft-ink:#F2F1EE;--amber-soft:#3A2F17;
+  --accent:#5EB6F0;--accent-hover:#7CC5F5;--on-accent:#06213A;--accent-soft:#132C40;--accent-soft-ink:#A8D8FA;--amber-soft:#3A2F17;
   --ok:#5CCB8E;--ok-soft:#173326;--ok-ink:#9BE3BC;--warn-soft:#3A2F17;--warn-ink:#F5D97A;--bad:#FF7B7B;--bad-soft:#3B1F1F;--bad-ink:#FFB5B5;
   --t-0:#262626;--i-0:#D2B08F;--t-1:#262626;--i-1:#B9C496;--t-2:#262626;--i-2:#E3B47A;--t-3:#262626;--i-3:#C9A9BC;--t-4:#262626;--i-4:#E09C8C;--t-5:#262626;--i-5:#9CC4C4;
   --scrim:rgba(0,0,0,.6);--shadow:0 6px 24px rgba(0,0,0,.5);color-scheme:dark}}
@@ -183,14 +183,14 @@ h2.cat{font-weight:600;font-size:16px}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
 .toast{background:var(--surface);color:var(--ink);border:1px solid var(--line2);box-shadow:0 10px 30px rgba(27,27,27,.14);border-left:4px solid var(--cta)}
-.logo{background:linear-gradient(135deg,#FF8A3D,#FF5A0F);color:#fff}
+.logo{background:linear-gradient(135deg,#5EC2FF,#1F7FD1);color:#fff}
 .hero{flex-wrap:wrap}.hero > div:nth-child(2){flex:1 1 140px;min-width:0}.hero h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hero .where{margin-left:0}.hero [data-eplang]{margin-left:auto !important}
-.chip[aria-pressed="true"]{border-color:#F3D9A6;background:var(--amber-soft)}
+.chip[aria-pressed="true"]{border-color:#A8D8FA;background:var(--amber-soft)}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap" style="padding-bottom:0">
-  <div class="hero"><div class="logo" id="logo">C</div><div><h1 id="shopName" data-noi18n>กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button><span data-eplang></span></div>
+  <div class="hero"><div class="logo" id="logo"><img src="/easypos.svg?v=2" alt="Coconut POS"></div><div><h1 id="shopName" data-noi18n>กำลังโหลด…</h1><p id="shopSub">สั่งอาหารออนไลน์</p></div><button class="where" id="where" type="button" data-act="changeway" hidden></button><span data-eplang></span></div>
   <div class="cover" id="cover" hidden></div><div class="notice" id="notice" role="note" hidden></div>
   <nav class="chips" id="cats" aria-label="หมวดหมู่"></nav>
 </div></header>
@@ -397,7 +397,7 @@ function poll(){
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&S.view==='status'&&!pollT){poll()}});
 
 function loadMenu(){
-  return rpc(SLUG?'cafe_menu':'cafe_get_menu',SLUG?{p_shop:SLUG}:{}).then(function(r){if(r&&r.error==='no_shop'){$('#main').innerHTML='<div class="empty"><b>ไม่พบร้านนี้</b>ตรวจสอบลิงก์หรือสแกน QR ที่ร้านอีกครั้ง</div>';$('#shopName').textContent='ไม่พบร้าน';return}
+  return rpc(SLUG?'cafe_menu':'cafe_get_menu',SLUG?{p_shop:SLUG}:{}).then(function(r){if(r&&r.error==='no_shop'){$('#main').innerHTML='<div class="empty"><b>ไม่พบร้านนี้</b>ตรวจสอบลิงก์หรือสแกน QR ที่ร้านอีกครั้ง</div>';$('#shopName').textContent='ไม่พบร้าน';$('#shopSub').textContent='Coconut POS';return}
     var mm=(r&&r.menu)||{};S.shop=(r&&r.shop)||{};S.menu=mm.menu||[];S.cats=mm.cats||[];S.opts=mm.options||[];S.tables=mm.tables||[];
     S.cart=S.cart.filter(function(l){var m=S.menu.find(function(x){return x.id===l.id});return m&&!m.soldOut});saveCart();
     render();
