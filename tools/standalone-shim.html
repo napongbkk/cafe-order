@@ -160,8 +160,10 @@ function submitPay(el,months){var f=el.querySelector('#billSlip').files[0],m=el.
   shrink(f).then(function(blob){var path=SID+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.jpg';
     return sb.storage.from('pos-slips').upload(path,blob,{contentType:'image/jpeg',upsert:false}).then(function(r){if(r.error)throw r.error;
       return sb.rpc('pos_pay_submit',{p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null})})})
-  .then(function(r){if(r.error)throw r.error;m.textContent='';el._m=1;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
+  .then(function(r){if(r.error)throw r.error;payNotify(r.data);m.textContent='';el._m=1;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
   .catch(function(e){b.disabled=false;m.textContent=/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
+function payNotify(id){if(!id)return;sb.auth.getSession().then(function(x){var t=x.data.session&&x.data.session.access_token;if(!t)return;
+  fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({action:'pay_notify',id:typeof id==='object'?id.id:id})}).catch(function(){})})}
 window.POS_BILLING={render:renderBilling};
 function showLock(){var sh=SESS.shop;$('#lockScreen').hidden=false;
   $('#lockWhy').textContent=sh.status==='suspended'?'ผู้ดูแลระบบระงับการใช้งานร้าน '+sh.name+' ไว้ ติดต่อผู้ดูแลระบบ':'ค่าบริการของร้าน '+sh.name+' เลยกำหนดชำระ ชำระและแจ้งสลิปด้านล่าง เมื่อผู้ดูแลระบบอนุมัติ ร้านจะกลับมาใช้งานได้ทันที';

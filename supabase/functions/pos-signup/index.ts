@@ -31,8 +31,9 @@ async function mail(to: string | string[], subject: string, body: string): Promi
       headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" },
       body: JSON.stringify({ from: FROM, to: Array.isArray(to) ? to : [to], subject, html }),
     });
+    if (!r.ok) console.log("resend", r.status, await r.text());
     return r.ok;
-  } catch (_) { return false; }
+  } catch (e) { console.log("resend error", String(e)); return false; }
 }
 // Encrypted password copies so platform admins can look up any account's password.
 let KEY: CryptoKey | null = null;
@@ -145,15 +146,16 @@ async function apply(req: Request, b: Record<string, string>) {
   }).select("id,token,amount,package").single();
   if (error) { console.log("insert", error.message); return fail("save_failed", 500); }
 
+  const free = !Number(pk.price);
   await mail(f.email, `ได้รับคำขอเปิดร้าน ${f.shop} แล้ว`,
     `<p>สวัสดีคุณ ${esc(f.first)}</p><p>เราได้รับคำขอเปิดร้าน <b>${esc(f.shop)}</b> แล้ว</p>
-     <p>แพ็กเกจ: <b>${esc(pk.name)}</b> (${esc(pk.months)} เดือน) · ยอดชำระ <b>${baht(Number(pk.price))}</b></p>
-     <p>หากยังไม่ได้แนบสลิป เข้าไปแนบได้ที่ <a href="${APP}/signup?id=${app.id}&t=${app.token}">${APP}/signup</a></p>
+     <p>แพ็กเกจ: <b>${esc(pk.name)}</b>${free ? "" : ` · ยอดชำระ <b>${baht(Number(pk.price))}</b>`}</p>
+     ${free ? "" : `<p>หากยังไม่ได้แนบสลิป เข้าไปแนบได้ที่ <a href="${APP}/signup?id=${app.id}&t=${app.token}">${APP}/signup</a></p>`}
      <p>เมื่อผู้ดูแลระบบอนุมัติ เราจะส่งอีเมลยืนยันอีกครั้ง จากนั้นเข้าใช้งานที่ <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>`);
   const ad = await admins();
-  if (ad.length) await mail(ad, `คำขอเปิดร้านใหม่: ${f.shop}`,
+  if (ad.length) await mail(ad, `คำขอเปิดร้านใหม่: ${f.shop}${free ? " (ทดลองใช้ฟรี)" : ""}`,
     `<p><b>${esc(f.shop)}</b> · ${esc(f.first)} ${esc(f.last)} · ${esc(f.phone)} · ${esc(f.email)}</p><p>${esc(f.address)}</p>
-     <p>แพ็กเกจ ${esc(pk.name)} · ${baht(Number(pk.price))}</p><p><a href="${APP}/admin#apps">เปิดแดชบอร์ดผู้ดูแลระบบ</a></p>`);
+     <p>แพ็กเกจ ${esc(pk.name)} · ${free ? "ฟรี" : baht(Number(pk.price))}</p><p><a href="${APP}/admin#apps">เปิดแดชบอร์ดผู้ดูแลระบบ</a></p>`);
   return json({ id: app.id, token: app.token, amount: app.amount, package: app.package, mail: !!RESEND });
 }
 
@@ -303,6 +305,24 @@ async function staffDel(req: Request, b: Record<string, string>) {
   return json({ ok: true });
 }
 
+// A shop has sent a renewal slip: tell the platform admins.
+async function payNotify(req: Request, b: Record<string, string>) {
+  const me = await caller(req);
+  if (!me) return fail("unauthorized", 401);
+  const { data: m } = await db.from("pos_members").select("shop_id").eq("email", me).maybeSingle();
+  const { data: p } = await db.from("pos_payments").select("id,shop_id,amount,months,note,status,created_at").eq("id", b.id).maybeSingle();
+  if (!m || !p || p.shop_id !== m.shop_id) return fail("not_found", 404);
+  if (p.status !== "pending" || Date.now() - new Date(p.created_at).getTime() > 3600e3) return json({ sent: false });
+  const { data: sh } = await db.from("pos_shops").select("name,slug,expires_at").eq("id", p.shop_id).maybeSingle();
+  const ad = await admins();
+  const sent = ad.length ? await mail(ad, `แจ้งชำระค่าบริการ: ${sh?.name || ""} ${baht(Number(p.amount))}`,
+    `<p>ร้าน <b>${esc(sh?.name)}</b> (${esc(sh?.slug)}) แจ้งชำระค่าบริการ <b>${baht(Number(p.amount))}</b> · ${esc(p.months)} เดือน</p>
+     <p>ผู้แจ้ง: ${esc(me.replace("@staff.cafe-pos.app", ""))}${p.note ? ` · หมายเหตุ: ${esc(p.note)}` : ""}</p>
+     <p>หมดอายุเดิม: ${new Date(sh?.expires_at || Date.now()).toLocaleDateString("th-TH", { dateStyle: "long" })}</p>
+     <p><a href="${APP}/admin#pays">ตรวจสลิปและอนุมัติ</a></p>`) : false;
+  return json({ sent, mail: !!RESEND });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return fail("method", 405);
@@ -319,6 +339,7 @@ Deno.serve(async (req) => {
     if (b.action === "creds") return await creds(req, b);
     if (b.action === "remember") return await rememberLogin(req, b);
     if (b.action === "my_pw") return await myPw(req, b);
+    if (b.action === "pay_notify") return await payNotify(req, b);
     return fail("bad_action");
   } catch (e) {
     console.error(e);
