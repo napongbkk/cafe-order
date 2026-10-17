@@ -35,7 +35,8 @@ textarea{min-height:76px;resize:vertical}
 .pkc{border:2px solid var(--line2);border-radius:16px;padding:14px;background:var(--surface);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-height:120px}
 .pkc[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
 .pkc.free .p{color:#047857}.pkc.free{position:relative}.pkc.free::after{content:"แนะนำ";position:absolute;top:10px;right:10px;font-size:11px;font-weight:600;background:#E8FBF1;color:#047857;padding:3px 8px;border-radius:99px}
-.pkc b{font-size:17px}.pkc .p{font-family:var(--fn);font-size:24px;font-weight:600;color:var(--accent)}
+.pkc b{font-size:17px}
+.pkc.free b{padding-right:50px}.pkc .p{font-family:var(--fn);font-size:24px;font-weight:600;color:var(--accent)}
 .pkc small{color:var(--muted);font-size:13px}
 .btn{min-height:52px;border-radius:14px;border:1px solid var(--line2);background:var(--surface);font-weight:700;font-size:16px;padding:0 18px;cursor:pointer}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}.btn.primary:hover{background:var(--accent-hover)}
@@ -128,6 +129,15 @@ var KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6In
 var $=function(s){return document.querySelector(s)};
 var sb=window.supabase.createClient(SB,KEY,{auth:{persistSession:true}});
 var S={bill:{},pkg:null,app:null};
+/* Easy POS Retail sign-up uses this same page at /retail/signup (or ?p=retail): only Retail packages, Retail branding and login links */
+var PROD=(location.pathname.indexOf('/retail')===0||new URLSearchParams(location.search).get('p')==='retail')?'retail':'cafe';
+if(PROD==='retail'){document.title='สมัคร Easy POS Retail · ทดลองใช้ฟรี 30 วัน';
+  var bi=document.querySelector('.brand i');if(bi)bi.innerHTML='<span style="display:grid;place-items:center;width:100%;height:100%;background:linear-gradient(135deg,#2a9df4,#1d6fb8);color:#fff"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-label="Easy POS Retail"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>';
+  var h1=document.querySelector('.brand h1');if(h1)h1.textContent='สมัคร Easy POS Retail';
+  document.querySelectorAll('a[href="/pos"]').forEach(function(a){a.setAttribute('href','/retail')});
+  var gb=document.querySelector('#doneView a.btn');if(gb)gb.textContent='ไปหน้าเข้าสู่ระบบ Easy POS Retail';
+  var dt=$('#doneText');if(dt)dt.textContent=dt.textContent.replace('หน้า POS','หน้า Easy POS Retail');
+  var ds=document.querySelector('meta[name=description]');if(ds)ds.setAttribute('content','สมัครใช้ Easy POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ สแกนบาร์โค้ด สต็อก พร้อมเพย์')}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function baht(n){return '฿'+Number(n||0).toLocaleString('en-US')}
 function msg(t,cls){var m=$('#msg');m.hidden=!t;m.textContent=t||'';m.className='msg '+(cls||'bad');if(t)m.scrollIntoView({block:'nearest'})}
@@ -145,7 +155,7 @@ function remember(a){try{localStorage.setItem('posApply',JSON.stringify({id:a.id
 
 /* packages */
 function isFree(p){return p&&Number(p.price)===0}
-function goText(){return S.bill.freeMode?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':goText()}
+function goText(){return S.bill.freeMode?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน'}
 function curPk(){return (S.bill.packages||[]).find(function(p){return p.id===S.pkg})}
 function renderPk(){var l=S.bill.packages||[];$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';var free=isFree(p);
   return '<button type="button" class="pkc'+(free?' free':'')+'" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+(free?'ฟรี':baht(p.price))+'</span><small>'+(p.days?p.days+' วัน · ไม่ต้องชำระเงิน':p.months+' เดือน'+per)+'</small><small>'+(p.staff>0?'พนักงานได้ '+p.staff+' บัญชี':'ไม่รวมบัญชีพนักงาน')+'</small></button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>';
@@ -193,7 +203,8 @@ $('#slipBtn').addEventListener('click',function(){var f=$('#f_slip').files[0];if
 $('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textContent='บันทึกคำขอแล้ว';$('#doneText').textContent='ยังไม่ได้แนบสลิป กลับมาที่หน้านี้ (หรือใช้ลิงก์ในอีเมล) เพื่อแนบสลิป ผู้ดูแลระบบจะอนุมัติเมื่อตรวจสอบการชำระเงินแล้ว';});
 
 /* start: resume an application from a link or this browser */
-rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];
+rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=(S.bill.packages||[]).filter(function(p){return (p.product||'cafe')===PROD});S.bill.packages=l;
+  if(!S.bill.freeMode){var mp=PROD==='retail'?S.bill.priceRetail:S.bill.price;var m1=l.find(function(p){return +p.months===1&&+p.price>0&&!p.days});if(m1)mp=m1.price;if(mp)$('#subPrice').textContent='ทดลองใช้ฟรี 30 วัน · จากนั้น '+Number(mp).toLocaleString('en-US')+' บาท/เดือน · '}
   if(S.bill.freeMode){$('#subPrice').textContent='ใช้งานฟรี · ';$('#pkHead').hidden=true;$('#pkList').hidden=true;$('#st2').hidden=true;$('#st3').textContent='2 รออนุมัติ';$('#goHint').textContent='ใช้งานฟรี ไม่มีค่าใช้จ่าย ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบอนุมัติ'}var want=new URLSearchParams(location.search).get('plan');
   if(l.length&&!S.pkg)S.pkg=(l.find(function(p){return p.id===want})||l.find(isFree)||l[0]).id;renderPk();
   var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');

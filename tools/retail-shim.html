@@ -10,6 +10,7 @@
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
 .auth .msg a{color:inherit;font-weight:700}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.auth .links .lk{color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
 .auth .links button{border:0;background:none;color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;cursor:pointer}
 .auth .foot{display:flex;justify-content:center;gap:16px;font-size:14px}
 .auth .foot a{color:var(--accent,#1f7fc0)}
@@ -69,10 +70,11 @@
   <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
   <button class="sbtn pri" type="submit" id="authBtn">เข้าสู่ระบบ</button>
-  <div class="links"><button type="button" id="authMode">ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
+  <div class="links"><a class="lk" href="/retail/signup">ยังไม่มีบัญชี? สมัคร</a><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
   <button class="sbtn" type="button" id="authOut" hidden>ออกจากระบบ</button>
-  <p style="text-align:center;font-size:13px">ร้านใหม่ติดต่อผู้ดูแลระบบเพื่อเปิดบัญชีร้าน · พนักงานใช้ชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
-  <div class="foot"><a href="/indexpos">หน้าแรก Easy POS</a><a href="/pos">ร้านคาเฟ่? Easy POS Cafe</a></div>
+  <a class="sbtn" href="/retail/signup" style="color:var(--accent,#1f7fc0)">สมัครเปิดร้านใหม่</a>
+  <p style="text-align:center;font-size:13px">พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
+  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/pos">ร้านคาเฟ่? Easy POS Cafe</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="sbtn" type="button" id="lockOut">ออกจากระบบ</button></div>
@@ -101,11 +103,8 @@ window.POS_SESSION=null;
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
 /* ---------- login screen ---------- */
-var signup=false;
 function msg(t,ok,html){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;if(html)m.innerHTML=t;else m.textContent=t;m.className='msg'+(ok?' ok':'')}
 function showAuth(text,signedIn,html){$('#auth').hidden=false;msg(text||'',false,html);$('#authOut').hidden=!signedIn}
-function setMode(s){signup=s;$('#authBtn').textContent=s?'ตั้งรหัสผ่านและสมัคร':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีรหัสผ่านแล้ว? เข้าสู่ระบบ':'ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน';$('#authSub').textContent=s?'ใช้อีเมลที่ผู้ดูแลระบบลงทะเบียนเป็นผู้จัดการร้าน':'เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ';$('#authPass').autocomplete=s?'new-password':'current-password'}
-$('#authMode').addEventListener('click',function(){setMode(!signup);msg('')});
 $('#authReset').addEventListener('click',function(){var e=$('#authEmail').value.trim();if(!e){msg('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');return}
   if(e.indexOf('@')<0){msg('บัญชีพนักงาน (ชื่อผู้ใช้) ให้ผู้จัดการร้านเปลี่ยนรหัสผ่านให้ที่ ตั้งค่า › บัญชีเข้าสู่ระบบของพนักงาน');return}
   sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){msg(r.error?'ส่งอีเมลไม่สำเร็จ: '+r.error.message:'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว',!r.error)})});
@@ -113,12 +112,10 @@ function out(){sb.auth.signOut().then(function(){location.reload()})}
 $('#authOut').addEventListener('click',out);$('#lockOut').addEventListener('click',out);
 $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var raw=$('#authEmail').value.trim(),e=loginEmail(raw),p=$('#authPass').value;
   if(!e||p.length<6){msg('ใส่อีเมลหรือชื่อผู้ใช้ และรหัสผ่านอย่างน้อย 6 ตัวอักษร');return}
-  if(signup&&raw.indexOf('@')<0){msg('การตั้งรหัสผ่านครั้งแรกใช้อีเมลผู้จัดการร้าน · พนักงานไม่ต้องสมัคร ให้ผู้จัดการร้านสร้างชื่อผู้ใช้ให้');return}
   $('#authBtn').disabled=true;
-  var job=signup?sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname}}):sb.auth.signInWithPassword({email:e,password:p});
+  var job=sb.auth.signInWithPassword({email:e,password:p});
   job.then(function(r){$('#authBtn').disabled=false;
-    if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':/already registered/i.test(r.error.message)?'อีเมลนี้ตั้งรหัสผ่านแล้ว กด “เข้าสู่ระบบ” แทน':r.error.message);return}
-    if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
+    if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':r.error.message);return}
     if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);
     check()})});
 function fn(body,tok){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
@@ -131,7 +128,10 @@ function check(){
     loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
       if(!d.shop){
         if(d.admin){location.replace('/admin');return}
-        showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ ติดต่อผู้ดูแลระบบ',true,true);return}
+        sb.rpc('pos_my_application').then(function(x){var a=x.data;
+          if(a&&a.status==='pending')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” รอผู้ดูแลระบบอนุมัติ'+(a.has_slip||!Number(a.amount)?' เราจะแจ้งทางอีเมลเมื่ออนุมัติแล้ว':' · ยังไม่ได้แนบสลิป <a href="/retail/signup?id='+encodeURIComponent(a.id)+'&t='+encodeURIComponent(a.token)+'">แนบสลิป</a>'),true,true);
+          else if(a&&a.status==='rejected')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” ไม่ได้รับการอนุมัติ'+(a.admin_note?' · '+esc(a.admin_note):'')+' <a href="/retail/signup">สมัครใหม่</a>',true,true);
+          else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ <a href="/retail/signup">สมัครเปิดร้าน</a>',true,true)});return}
       if(d.shop.product!=='retail'&&d.admin){showAuth('บัญชีผู้ดูแลระบบ: ร้านที่ผูกกับบัญชีนี้เป็นร้าน Cafe · เปิดร้าน Retail จากแดชบอร์ด <a href="/admin#shops">ไปแดชบอร์ดผู้ดูแลระบบ</a> (กด “เปิด POS” ที่ร้าน Retail) หรือสร้างร้าน Retail ใหม่ที่นั่น',true,true);return}
       if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Easy POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Easy POS Cafe</a>',true,true);return}
       SID=d.shop.id;role=d.role||'staff';

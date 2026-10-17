@@ -98,6 +98,10 @@
   ],
   "rewrites": [
     {
+      "source": "/retail/signup",
+      "destination": "/signup"
+    },
+    {
       "source": "/s/:slug",
       "destination": "/order"
     },
