@@ -882,6 +882,15 @@ check();
 })();
 </script>
 
+<script>window.POS_KIOSK_HREF=function(){var u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');
+var L=['@echo off','rem Easy POS: open the POS so receipts print straight to the default printer (no print dialog)',
+'set "U='+u+'"','set "D=%LOCALAPPDATA%\\EasyPOS-Print"',
+'set "C=%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=msedge"',
+'start "" "%C%" --kiosk-printing --user-data-dir="%D%" --no-first-run --app="%U%"'];
+return 'data:application/octet-stream;charset=utf-8,'+encodeURIComponent(L.join('\r\n')+'\r\n')};</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
@@ -1696,7 +1705,7 @@ function settingsView(){
     <label for="p_copies">จำนวนสำเนาใบเสร็จ<input id="p_copies" type="number" min="1" max="3" value="${esc(PR.copies||1)}"></label></div>
     <label class="check" for="p_auto"><input id="p_auto" type="checkbox"${PR.auto?' checked':''}> พิมพ์ใบเสร็จทันทีหลังชำระเงิน</label><span class="hint">ใบสั่งครัว/บาร์ตั้งค่าที่ “เครื่องพิมพ์ครัว”</span>
     <button class="btn primary" data-act="testprint" type="button" style="align-self:flex-start">${ic('print',18)}ทดสอบพิมพ์</button>
-    <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ต้องกดยืนยัน: ดาวน์โหลดทางลัดด้านล่าง ปิด Chrome ทุกหน้าต่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${(()=>{const u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');const bat='@echo off\r\nstart \"\" chrome --kiosk-printing --app='+u+'\r\n';return `<a class=\"btn\" style=\"align-self:flex-start;text-decoration:none\" download=\"EasyPOS-AutoPrint.bat\" href=\"data:application/octet-stream;charset=utf-8,${encodeURIComponent(bat)}\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`})()}</div>`;
+    <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ขึ้นหน้าต่างพิมพ์: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows ดาวน์โหลดทางลัดด้านล่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง) ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${`<a class=\"btn\" style=\"align-self:flex-start;text-decoration:none\" download=\"EasyPOS-AutoPrint.bat\" href=\"${window.POS_KIOSK_HREF?window.POS_KIOSK_HREF():'#'}\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`}</div>`;
   else if(tab==='look'){const L=lookOf(sh);
     const imgField=(k,label,hint)=>{const id=sh[k];return `<div class="grp"><span class="grp-t">${label}</span><div class="imgrow"><div class="ph">${id&&lookImg(id)?`<img src="${esc(lookImg(id))}" alt="">`:ic('cup',22)}</div>${S.assets&&!ro?`<label class="btn" for="lk_${k}">${id?'เปลี่ยนรูป':'เลือกรูป'}<input id="lk_${k}" data-lookimg="${k}" type="file" accept="image/*" class="sr"></label>${id?`<button class="btn danger" type="button" data-act="lookimgdel" data-k="${k}">ลบ</button>`:''}`:`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดรูปได้บน POS เว็บ'}</span>`}<span class="hint">${hint}</span></div></div>`};
     body=`<h2>หน้าตา Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>

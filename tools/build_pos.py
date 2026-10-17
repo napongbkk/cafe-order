@@ -41,9 +41,18 @@ R("function imgUrl(id){return '/_blob/'+encodeURIComponent(id)}",
 PRINT_JS = ("<script>window.POS_PRINT=window.POS_PRINT||function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');"
             "f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;"
             "setTimeout(function(){f.remove()},120000);return true};</script>")
-KIOSK = ("(()=>{const u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');"
-         "const bat='@echo off\\r\\nstart \\\"\\\" chrome --kiosk-printing --app='+u+'\\r\\n';"
-         "return `<a class=\\\"btn\\\" style=\\\"align-self:flex-start;text-decoration:none\\\" download=\\\"EasyPOS-AutoPrint.bat\\\" href=\\\"data:application/octet-stream;charset=utf-8,${encodeURIComponent(bat)}\\\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`})()")
+# Windows shortcut: opens the POS in Chrome (or Edge) with --kiosk-printing, so print jobs go straight to the
+# default printer with no dialog. Its own browser profile makes the flag work even while other Chrome windows are open.
+KIOSK_JS = r"""<script>window.POS_KIOSK_HREF=function(){var u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');
+var L=['@echo off','rem Easy POS: open the POS so receipts print straight to the default printer (no print dialog)',
+'set "U='+u+'"','set "D=%LOCALAPPDATA%\\EasyPOS-Print"',
+'set "C=%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=%LOCALAPPDATA%\\Google\\Chrome\\Application\\chrome.exe"',
+'if not exist "%C%" set "C=msedge"',
+'start "" "%C%" --kiosk-printing --user-data-dir="%D%" --no-first-run --app="%U%"'];
+return 'data:application/octet-stream;charset=utf-8,'+encodeURIComponent(L.join('\r\n')+'\r\n')};</script>"""
+KIOSK = ("`<a class=\\\"btn\\\" style=\\\"align-self:flex-start;text-decoration:none\\\" download=\\\"EasyPOS-AutoPrint.bat\\\" href=\\\"${window.POS_KIOSK_HREF?window.POS_KIOSK_HREF():'#'}\\\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`")
 WEB_PRINT = [
   ("  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}",
    "  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return false}"),
@@ -59,7 +68,7 @@ WEB_PRINT = [
   ("ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์) · ${PR.auto", "พิมพ์ตรงจากหน้าเว็บ · ${PR.auto"),
   ("<option>ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์)</option>", "<option>พิมพ์ตรงจากหน้าเว็บ (เครื่องพิมพ์ค่าเริ่มต้น)</option>"),
   ("ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” หน้าเว็บส่งคำสั่งตรงถึงเครื่องพิมพ์ไม่ได้ จึงต้องเปิดไฟล์ที่บันทึกเพื่อพิมพ์</div>",
-   "ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ต้องกดยืนยัน: ดาวน์โหลดทางลัดด้านล่าง ปิด Chrome ทุกหน้าต่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${" + KIOSK + "}"),
+   "ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ขึ้นหน้าต่างพิมพ์: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows ดาวน์โหลดทางลัดด้านล่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง) ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${" + KIOSK + "}"),
   ("ระบบจะบันทึกไฟล์แล้วเปิดเพื่อพิมพ์ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์",
    "ระบบส่งพิมพ์ตรงจากหน้าเว็บ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์ และเปิด POS จากทางลัดพิมพ์อัตโนมัติเพื่อไม่ต้องกดยืนยัน"),
   ("ระบบจะบันทึกไฟล์เปิดลิ้นชักให้หลังรับเงินตามเงื่อนไขที่เลือก", "ระบบจะสั่งเปิดลิ้นชักผ่านเครื่องพิมพ์หลังรับเงินตามเงื่อนไขที่เลือก"),
@@ -76,6 +85,8 @@ def web_print(t, label):
         t = t.replace(a, b, 1)
     return t
 src = web_print(src, 'pos')
+QRJS = '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>'
+src = src.replace(QRJS, KIOSK_JS + '\n' + QRJS, 1)
 
 # Customer-app bridge talks to Supabase through RPCs (no connector needed).
 R("async function bridgeTick(){",
@@ -188,7 +199,7 @@ print('built pos/index.html', len(src), 'bytes')
 demo = orig.replace('<title>POS คาเฟ่</title>', '<title>เดโม Easy POS Cafe · ทดลองใช้ได้ทันที</title>', 1)
 demo = web_print(demo, 'demo')
 demo = demo.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
-  PRINT_JS + '\n<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', 1)
+  PRINT_JS + KIOSK_JS + '\n<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', 1)
 demo = demo.replace('<span id="appPill"></span>',
   '<span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>', 1)
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
