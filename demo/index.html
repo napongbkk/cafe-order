@@ -275,6 +275,7 @@ td.r,th.r{text-align:right}
 .subnav button[aria-current="true"]{background:var(--accent-soft);color:var(--accent-soft-ink);box-shadow:none}
 .settings{flex:1;min-height:0;display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;padding-block:16px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));overflow-y:auto;align-items:start}
 .settings .panel{max-width:720px}
+.settings .panel:has(.prgrid){max-width:1120px}
 .mrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
 .mrow .sw{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:grid;place-items:center}
 .mrow .info{flex:1;min-width:150px}
@@ -619,6 +620,20 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .stk-tbl tr.is-bad td:first-child{box-shadow:inset 3px 0 0 var(--bad)}.stk-tbl tr.is-warn td:first-child{box-shadow:inset 3px 0 0 #E5A92A}
 .pill.warn{background:var(--warn-soft,#FFF4D6);color:#7A5300}.pill.bad{background:var(--bad-soft,#FDECEC);color:var(--bad)}
 .pad-view .seg{margin-bottom:8px}
+
+/* receipt printer settings */
+.prgrid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start}
+.prsec{border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.prsec>b{font-size:15px}
+.prconns{display:flex;flex-direction:column;gap:8px}
+.prconn{display:flex!important;flex-direction:row!important;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:400}
+.prconn.on{border-color:var(--accent);background:var(--accent-soft)}
+.prconn input{margin-top:4px;accent-color:var(--accent)}
+.prconn span{display:flex;flex-direction:column;gap:2px}.prconn small{color:var(--muted);font-size:12.5px;line-height:1.45}
+.prrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.prprev{background:var(--sunk);border-radius:16px;padding:14px;display:grid;place-items:start center;max-height:560px;overflow:auto}
+.prprev img{width:min(100%,300px);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.12);image-rendering:auto}
+@media (max-width:1100px){.prgrid{grid-template-columns:minmax(0,1fr)}}
 /* settings navigation */
 .settings:has(.snav){grid-template-columns:260px minmax(0,1fr)}
 .snav{position:sticky;top:0;max-height:calc(100dvh - 110px);overflow-y:auto;scrollbar-width:thin;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 10px;box-shadow:0 1px 2px rgba(27,27,27,.04),0 8px 24px -18px rgba(27,27,27,.25)}
@@ -882,7 +897,7 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   floorEdit:false,sel:null,zone:null,snap:true,tsel:null,addZone:false,
   hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},stock:[],stockLog:[],stk:{f:'all',q:'',cat:'',tab:'items'},rep:{date:dayKey(Date.now()),list:null},
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
-let PR={paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'}};
+let PR={paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'},pmodel:'pr01w',conn:'file',font:22,density:150,cut:true,feed:4,baud:9600};
 try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p&&!p.webPrint){p.auto=true;p.webPrint=1}if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
 try{let v=localStorage.getItem('pos.view');if(v==='bar')v='kds';if(v&&NAV.some(n=>n[0]===v))S.view=v}catch(e){}
 try{S.kst=localStorage.getItem('pos.kds')||'all'}catch(e){S.kst='all'}
@@ -1023,8 +1038,103 @@ async function saveFileNow(name,body,copies){
   try{await S.downloads.save({filename:name+'.html',data:html});toast('บันทึกไฟล์แล้ว เปิดไฟล์เพื่อสั่งพิมพ์');return true}
   catch(e){if(!e||e.code!=='declined')toast(e&&e.code==='rate_limited'?'มีหน้าต่างบันทึกเปิดอยู่ ลองใหม่อีกครั้ง':'บันทึกไฟล์ไม่สำเร็จ');return false}
 }
-function printDoc(o,kind,copy){return saveFile(KLABEL[kind]+'-'+(kind==='check'||kind==='bar'?o.no:(kind==='tax'&&o.taxInvoice?o.taxInvoice.no:(o.rno||o.no))),receiptBody(o,kind,copy),kind==='receipt'&&!copy?(+PR.copies||1):1)}
-function printStation(o,st){return saveFile('ใบสั่ง'+stName(st)+'-'+o.no+((o.batch||1)>1?'-'+o.batch:''),receiptBody(o,'bar',false,st))}
+
+/* ===== direct thermal printing (ESC/POS over USB or COM): the receipt is drawn as an image so Thai prints exactly ===== */
+const PRMODEL={pr01w:{name:'BARIGAN PR-01W (80mm)',paper:80,dots:576},g80:{name:'เครื่องพิมพ์ความร้อน 80mm ทั่วไป',paper:80,dots:576},g58:{name:'เครื่องพิมพ์ความร้อน 58mm ทั่วไป',paper:58,dots:384}};
+const PRCONN={file:'ผ่านไดรเวอร์',usb:'USB ตรง',serial:'COM / Bluetooth'};
+const PRD={usb:null,ep:null,port:null,writer:null,name:''};
+const prDots=()=>(PRMODEL[PR.pmodel]||PRMODEL.pr01w).dots;
+const prDirect=()=>PR.conn==='usb'?!!PRD.usb:PR.conn==='serial'?!!PRD.writer:false;
+function thSegs(t){t=String(t??'');try{if(window.Intl&&Intl.Segmenter)return [...new Intl.Segmenter('th',{granularity:'word'}).segment(t)].map(x=>x.segment)}catch(e){}return Array.from(t)}
+async function prCanvas(blocks){const W=prDots(),F=(+PR.font||22)*(W<500?.8:1);try{await document.fonts.load(`700 ${F}px "IBM Plex Sans Thai"`);await document.fonts.load(`400 ${F}px "IBM Plex Sans Thai"`)}catch(e){}
+  const c=document.createElement('canvas');c.width=W;c.height=12000;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,c.height);x.fillStyle='#000';x.textBaseline='top';
+  const fnt=(sz,b)=>`${b?700:400} ${Math.round(sz)}px "IBM Plex Sans Thai","Sarabun",sans-serif`,P=6;let y=8;
+  const wrap=(t,mw)=>{const out=[];let cur='';for(const sg of thSegs(t)){if(x.measureText(cur+sg).width<=mw||!cur)cur+=sg;else{out.push(cur);cur=sg.replace(/^\s+/,'')}}if(cur||!out.length)out.push(cur);return out};
+  for(const b of blocks){const sz=(b.sz||1)*F,lh=Math.round(sz*1.45);x.font=fnt(sz,b.b);
+    if(b.t==='hr'){x.fillRect(P,y+6,W-2*P,2);y+=16;continue}
+    if(b.t==='gap'){y+=Math.round(F*(b.n||.6));continue}
+    if(b.t==='c'){for(const ln of wrap(b.s,W-2*P)){x.textAlign='center';x.fillText(ln,W/2,y);y+=lh}continue}
+    if(b.t==='l'){for(const ln of wrap(b.s,W-2*P-(b.i||0))){x.textAlign='left';x.fillText(ln,P+(b.i||0),y);y+=lh}continue}
+    if(b.t==='lr'){const r=String(b.r??'');const rw=x.measureText(r).width;const ls=wrap(b.l,W-2*P-rw-14-(b.i||0));ls.forEach((ln,i)=>{x.textAlign='left';x.fillText(ln,P+(b.i||0),y);if(i===ls.length-1&&r){x.textAlign='right';x.fillText(r,W-P,y)}y+=lh});continue}}
+  y+=10;const o=document.createElement('canvas');o.width=W;o.height=Math.max(20,y);o.getContext('2d').drawImage(c,0,0);return o}
+function headBlocks(sh){const B=[{t:'c',s:sh.name||'',sz:1.35,b:1}];if(sh.branch)B.push({t:'c',s:sh.branch,sz:.85});if(sh.address)B.push({t:'c',s:sh.address,sz:.85});if(sh.phone)B.push({t:'c',s:'โทร '+sh.phone,sz:.85});if(sh.taxId)B.push({t:'c',s:'เลขประจำตัวผู้เสียภาษี '+sh.taxId,sz:.85});B.push({t:'hr'});return B}
+function orderBlocks(o,kind,copy,st){const sh=shop();const items=o.items||[];const s=o.sums||calc(items,o.promo);
+  if(kind==='bar'){const nb=o.batch||1;const its=items.filter(i=>(!st||itemSt(i)===st)&&(nb<=1||i.batch===nb||copy));
+    const B=[{t:'c',s:'ใบสั่ง'+(st?stName(st):'ครัว/บาร์')+(nb>1?' (สั่งเพิ่ม)':''),b:1},{t:'c',s:o.no||'',sz:2.2,b:1},{t:'c',s:whereOf(o),sz:1.2,b:1},{t:'c',s:fmtDT(Date.now()),sz:.85},{t:'hr'}];
+    its.forEach(i=>{B.push({t:'l',s:i.qty+' × '+i.name,sz:1.25,b:1});if(i.opts)B.push({t:'l',s:i.opts,i:24,sz:.95})});B.push({t:'hr'},{t:'gap'});return B}
+  const B=headBlocks(sh);const vatOn=sh.vatMode!=='none'||kind==='tax';
+  if(kind==='tax'){const ti=o.taxInvoice||{};B.push({t:'c',s:'ใบกำกับภาษี / ใบเสร็จรับเงิน',b:1});if(copy)B.push({t:'c',s:'(สำเนา)',sz:.85});
+    B.push({t:'lr',l:'เลขที่',r:ti.no||''},{t:'lr',l:'อ้างอิงใบเสร็จ',r:o.rno||o.no||''},{t:'lr',l:'วันที่',r:fmtDT(ti.at||o.paidAt||o.createdAt)},{t:'hr'},{t:'l',s:'ลูกค้า',b:1},{t:'l',s:ti.name||''});
+    if(ti.address)B.push({t:'l',s:ti.address,sz:.85});B.push({t:'l',s:'เลขประจำตัวผู้เสียภาษี '+(ti.taxId||'')+' · '+(ti.branch||'สำนักงานใหญ่'),sz:.85})}
+  else if(kind==='check')B.push({t:'c',s:'ใบแจ้งยอด',b:1},{t:'c',s:'(ยังไม่ใช่ใบเสร็จรับเงิน)',sz:.85},{t:'lr',l:'วันที่',r:fmtDT(Date.now())});
+  else{B.push({t:'c',s:sh.vatMode!=='none'?'ใบเสร็จรับเงิน / ใบกำกับภาษีอย่างย่อ':'ใบเสร็จรับเงิน',b:1});if(copy)B.push({t:'c',s:'(สำเนา)',sz:.85});B.push({t:'lr',l:'เลขที่',r:o.rno||o.no||''},{t:'lr',l:'วันที่',r:fmtDT(o.paidAt||o.createdAt)})}
+  B.push({t:'hr'},{t:'c',s:'หมายเลขออเดอร์',sz:.85},{t:'c',s:o.no||'-',sz:2.1,b:1},{t:'c',s:whereOf(o),b:1},{t:'hr'});
+  items.forEach(i=>{B.push({t:'lr',l:i.qty+' × '+i.name,r:money(i.unit*i.qty)});if(i.opts)B.push({t:'l',s:i.opts,i:22,sz:.85});if(i.disc)B.push({t:'lr',l:'ส่วนลด '+i.disc.name,r:'-'+money(lineDisc(i)),i:22,sz:.85})});
+  B.push({t:'hr'},{t:'lr',l:'รวม '+s.count+' รายการ',r:money(s.sub)});
+  if(s.idisc)B.push({t:'lr',l:'ส่วนลดรายเมนู',r:'-'+money(s.idisc)});if(s.bdisc)B.push({t:'lr',l:'ส่วนลดท้ายบิล'+(o.promo?' ('+o.promo.name+')':''),r:'-'+money(s.bdisc)});
+  if(s.sc)B.push({t:'lr',l:'Service charge '+sh.scRate+'%',r:money(s.sc)});if(sh.vatMode==='excluded'||(kind==='tax'&&sh.vatMode!=='included'))B.push({t:'lr',l:'ภาษีมูลค่าเพิ่ม 7%',r:money(s.vat)});if(s.round)B.push({t:'lr',l:'ปัดเศษ',r:money(s.round)});
+  B.push({t:'lr',l:'ยอดสุทธิ',r:money(s.total),sz:1.35,b:1});
+  if(vatOn&&sh.vatMode!=='excluded'&&s.vat)B.push({t:'lr',l:'มูลค่าก่อนภาษี',r:money(s.pre),sz:.85},{t:'lr',l:'ภาษีมูลค่าเพิ่ม 7% (รวมในราคา)',r:money(s.vat),sz:.85});
+  if(kind!=='check'){B.push({t:'hr'},{t:'lr',l:'รับ '+(MLABEL[o.method]||''),r:money(o.received)});if(o.method==='cash')B.push({t:'lr',l:'เงินทอน',r:money(o.change),b:1})}
+  if(o.member){const m=String(o.member);B.push({t:'lr',l:'สมาชิก xxx-xxx-'+m.slice(-4),r:'+'+ptsFor(s.total)+' แต้ม',sz:.85})}
+  B.push({t:'hr'},{t:'c',s:sh.footer||'ขอบคุณที่อุดหนุน',sz:.9});if(o.state==='void')B.push({t:'c',s:'*** ทำลายบิลแล้ว (VOID) ***',b:1,sz:1.2});B.push({t:'gap'});return B}
+function testBlocks(){return headBlocks(shop()).concat([{t:'c',s:'พิมพ์ทดสอบ',sz:1.3,b:1},{t:'lr',l:'รุ่น',r:(PRMODEL[PR.pmodel]||{}).name||''},{t:'lr',l:'ความกว้าง',r:prDots()+' จุด'},{t:'lr',l:'การเชื่อมต่อ',r:PRCONN[PR.conn]||''},{t:'lr',l:'เวลา',r:fmtDT(Date.now())},{t:'hr'},{t:'l',s:'ภาษาไทย: กขฃคฅฆง ก่ก้ก๊ก๋ ญี่ปุ่น ฤๅษี'},{t:'l',s:'English 0123456789 ฿1,234.50'},{t:'lr',l:'ซ้าย',r:'ขวา'},{t:'lr',l:'ตัวหนา',r:'฿99.00',b:1,sz:1.3},{t:'hr'},{t:'c',s:'ถ้าอ่านทุกบรรทัดได้ชัด แสดงว่าพร้อมใช้งาน',sz:.9},{t:'gap'}])}
+function rasterBands(c){const W=c.width,H=c.height,d=c.getContext('2d').getImageData(0,0,W,H).data,bw=Math.ceil(W/8),th=+PR.density||150,out=[];
+  for(let y0=0;y0<H;y0+=128){const hh=Math.min(128,H-y0),buf=new Uint8Array(8+bw*hh);buf.set([0x1d,0x76,0x30,0,bw&255,bw>>8,hh&255,hh>>8]);
+    for(let y=0;y<hh;y++)for(let x=0;x<W;x++){const i=((y0+y)*W+x)*4;if((d[i]*299+d[i+1]*587+d[i+2]*114)/1000<th)buf[8+y*bw+(x>>3)]|=0x80>>(x&7)}out.push(buf)}return out}
+const drawerCmd=()=>[0x1b,0x70,(PR.drawer||{}).pin==='5'?1:0,25,250];
+function escJob(canvases,o){o=o||{};const parts=[Uint8Array.from([0x1b,0x40])];if(o.drawer)parts.push(Uint8Array.from(drawerCmd()));
+  canvases.forEach(cv=>{rasterBands(cv).forEach(b=>parts.push(b));parts.push(Uint8Array.from([0x1b,0x64,Math.min(10,Math.max(0,+PR.feed||4))]));if(PR.cut)parts.push(Uint8Array.from([0x1d,0x56,0x42,0x00]))});
+  const n=parts.reduce((a,p)=>a+p.length,0),out=new Uint8Array(n);let k=0;parts.forEach(p=>{out.set(p,k);k+=p.length});return out}
+async function prSend(bytes){if(PR.conn==='usb'&&PRD.usb){for(let i=0;i<bytes.length;i+=16384)await PRD.usb.transferOut(PRD.ep,bytes.slice(i,i+16384));return}
+  if(PR.conn==='serial'&&PRD.writer){await PRD.writer.write(bytes);return}throw {code:'notconn'}}
+async function usbConnect(dev){const U=navigator.usb;if(!U)throw {code:'nosupport'};
+  if(!dev){try{dev=await U.requestDevice({filters:[]})}catch(e){throw {code:e&&e.name==='SecurityError'?'blocked':'cancel'}}}
+  await dev.open();if(!dev.configuration)await dev.selectConfiguration(1);let intf=null,ep=null;
+  for(const it of dev.configuration.interfaces)for(const alt of it.alternates){const o=alt.endpoints.find(e=>e.direction==='out'&&e.type==='bulk');if(o&&(!intf||alt.interfaceClass===7)){intf=it;ep=o}}
+  if(!intf)throw {code:'noep'};try{await dev.claimInterface(intf.interfaceNumber)}catch(e){throw {code:'claim'}}
+  PRD.usb=dev;PRD.ep=ep.endpointNumber;PRD.name=dev.productName||'USB'}
+async function serialPrConnect(){const SR=navigator.serial;if(!SR)throw {code:'nosupport'};let port;try{port=await SR.requestPort()}catch(e){throw {code:e&&e.name==='SecurityError'?'blocked':'cancel'}}
+  try{await port.open({baudRate:+PR.baud||9600})}catch(e){throw {code:'open'}}PRD.port=port;PRD.writer=port.writable.getWriter();PRD.name='COM'}
+async function prDisconnect(){try{if(PRD.writer){PRD.writer.releaseLock();PRD.writer=null}if(PRD.port){await PRD.port.close();PRD.port=null}}catch(e){}try{if(PRD.usb){await PRD.usb.close();PRD.usb=null}}catch(e){}PRD.name=''}
+const prErr=e=>{const c=e&&e.code;return c==='nosupport'?'เบราว์เซอร์นี้ไม่รองรับ ใช้ Chrome หรือ Edge บนคอมพิวเตอร์ หรือเลือกพิมพ์ผ่านไดรเวอร์':c==='blocked'?'หน้านี้ไม่ได้รับอนุญาตให้ต่ออุปกรณ์โดยตรง เลือก "ผ่านไดรเวอร์" แทน':c==='claim'?'เครื่องพิมพ์ถูกไดรเวอร์ของ Windows ใช้อยู่ ต่อตรงไม่ได้ เลือก "ผ่านไดรเวอร์" แทน':c==='noep'?'อุปกรณ์นี้ไม่ใช่เครื่องพิมพ์':c==='open'?'เปิดพอร์ตไม่ได้ ลองเปลี่ยนความเร็ว baud':c==='notconn'?'ยังไม่ได้เชื่อมต่อเครื่องพิมพ์':c==='cancel'?'ยกเลิกการเลือกอุปกรณ์':'พิมพ์ไม่สำเร็จ'+(c?' ('+c+')':'')};
+async function directPrint(blocks,copies,drawer){try{const cv=await prCanvas(blocks);await prSend(escJob(Array(Math.max(1,copies||1)).fill(cv),{drawer}));return true}catch(e){toast(prErr(e));return false}}
+async function prPreview(kind){const img=$('#prImg');if(!img)return;
+  const o=kind==='test'?null:(Object.values(S.oToday||{}).filter(x=>x.state==='paid').sort((a,b)=>(b.paidAt||0)-(a.paidAt||0))[0]||{no:'A012',rno:'R-0001',type:'dine',table:{name:'T3'},guests:2,createdAt:Date.now(),paidAt:Date.now(),method:'cash',received:200,change:25,
+    items:[{qty:2,name:'ลาเต้เย็น',unit:55,opts:'หวานน้อย'},{qty:1,name:'ครัวซองต์เนยสด',unit:65}],sums:{count:3,sub:175,total:175,vat:0,pre:175}});
+  const cv=await prCanvas(o?orderBlocks(o,'receipt'):testBlocks());
+  const th=+PR.density||150,x=cv.getContext('2d'),d=x.getImageData(0,0,cv.width,cv.height);for(let i=0;i<d.data.length;i+=4){const v=(d.data[i]*299+d.data[i+1]*587+d.data[i+2]*114)/1000<th?0:255;d.data[i]=d.data[i+1]=d.data[i+2]=v}x.putImageData(d,0,0);img.src=cv.toDataURL('image/png')}
+function printerTab(){const c=PR;const live=prDirect();const pv=S.prPv||'receipt';const web=!!window.POS_PRINT;
+  setTimeout(()=>prPreview(pv),0);
+  const radio=(v,title,sub)=>`<label class="prconn${c.conn===v?' on':''}"><input type="radio" name="p_conn" value="${v}"${c.conn===v?' checked':''}><span><b>${title}</b><small>${sub}</small></span></label>`;
+  return `<h2>เครื่องพิมพ์ใบเสร็จ</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้</span>
+  <div class="prgrid"><div class="form">
+    <div class="prsec"><b>เครื่องพิมพ์</b><label for="p_pmodel">รุ่น<select id="p_pmodel">${Object.entries(PRMODEL).map(([k,v])=>`<option value="${k}"${c.pmodel===k?' selected':''}>${esc(v.name)}</option>`).join('')}</select></label>
+      <div class="prconns" role="radiogroup" aria-label="วิธีเชื่อมต่อ">
+        ${radio('file','ผ่านไดรเวอร์ของคอมพิวเตอร์ · แนะนำสำหรับ Wi-Fi / LAN / USB',web?'ติดตั้งไดรเวอร์ของเครื่องพิมพ์ แล้วตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น ระบบสั่งพิมพ์ผ่านเบราว์เซอร์ ลิ้นชักเปิดจากการตั้งค่าในไดรเวอร์':'ติดตั้งไดรเวอร์ของเครื่องพิมพ์ ระบบบันทึกใบเสร็จให้เปิดแล้วสั่งพิมพ์ ลิ้นชักเปิดจากการตั้งค่าในไดรเวอร์')}
+        ${radio('usb','USB ตรง · พิมพ์ทันทีและเปิดลิ้นชักได้','Chrome หรือ Edge บนคอมพิวเตอร์ หรือ Chrome บน Android ต่อสาย USB')}
+        ${radio('serial','COM / Bluetooth (Serial)','สำหรับเครื่องที่ต่อแบบพอร์ต COM · Chrome หรือ Edge บนคอมพิวเตอร์')}</div>
+      <div class="prrow">${c.conn==='file'?'<span class="pill">ไม่ต้องเชื่อมต่อในหน้านี้</span>':live?`<span class="pill ok">เชื่อมต่อแล้ว · ${esc(PRD.name)}</span><button class="btn sm" type="button" data-act="prdis">ตัดการเชื่อมต่อ</button>`:`<button class="btn sm primary" type="button" data-act="prcon">เลือกเครื่องพิมพ์และเชื่อมต่อ</button><span class="hint">${c.conn==='usb'?('usb' in navigator?'':'เบราว์เซอร์นี้ไม่รองรับ USB ตรง'):('serial' in navigator?'':'เบราว์เซอร์นี้ไม่รองรับ COM')}</span>`}</div>
+      ${c.conn==='serial'?`<label for="p_baud">ความเร็ว baud<select id="p_baud">${[9600,19200,38400,57600,115200].map(x=>`<option${+c.baud===x?' selected':''}>${x}</option>`).join('')}</select></label>`:''}</div>
+    <div class="prsec"><b>การพิมพ์</b>
+      <label class="check" for="p_auto"><input id="p_auto" type="checkbox"${c.auto?' checked':''}> พิมพ์ใบเสร็จอัตโนมัติหลังชำระเงิน</label>
+      <div class="three"><label for="p_copies">จำนวนสำเนา<input id="p_copies" type="number" min="1" max="3" value="${esc(c.copies||1)}"></label>
+        <label for="p_font">ขนาดตัวอักษร<select id="p_font">${[[19,'เล็ก'],[22,'กลาง'],[26,'ใหญ่']].map(([v,l])=>`<option value="${v}"${+c.font===v?' selected':''}>${l}</option>`).join('')}</select></label>
+        <label for="p_density">ความเข้ม<select id="p_density">${[[120,'จาง'],[150,'ปกติ'],[185,'เข้ม']].map(([v,l])=>`<option value="${v}"${+c.density===v?' selected':''}>${l}</option>`).join('')}</select></label></div>
+      <div class="two" style="align-items:end"><label class="check" for="p_cut"><input id="p_cut" type="checkbox"${c.cut?' checked':''}> ตัดกระดาษอัตโนมัติ</label><label for="p_feed">เว้นบรรทัดก่อนตัด<input id="p_feed" type="number" min="0" max="10" value="${esc(c.feed)}"></label></div>
+      <span class="hint">ขนาดตัวอักษร ความเข้ม และการตัดกระดาษใช้กับแบบ USB ตรง / COM · ใบสั่งครัว/บาร์ตั้งค่าที่ “เครื่องพิมพ์ครัว”</span></div>
+    <div class="prrow"><button class="btn" type="button" data-act="testprint">${ic('print',18)}พิมพ์ทดสอบ</button><button class="btn" type="button" data-act="stab" data-v="drawer">ตั้งค่าลิ้นชัก</button><span style="flex:1"></span><button class="btn" type="button" data-act="prdef">ค่าเริ่มต้น</button></div>
+  </div>
+  <div class="form"><div class="prrow"><b>ตัวอย่างที่จะพิมพ์</b><span style="flex:1"></span><div class="seg" style="margin:0"><button type="button" data-act="prpv" data-v="receipt" aria-selected="${pv==='receipt'}">ใบเสร็จ</button><button type="button" data-act="prpv" data-v="test" aria-selected="${pv==='test'}">หน้าทดสอบ</button></div></div>
+    <div class="prprev"><img id="prImg" alt="ตัวอย่างใบเสร็จ"></div>
+    <span class="hint">พิมพ์เป็นภาพขนาดเท่าหัวพิมพ์จริง ภาษาไทยจึงออกครบทุกสระและวรรณยุกต์ ไม่ต้องตั้ง code page</span>
+    <details class="hint"><summary><b>Wi-Fi / LAN และ iPhone</b></summary><p>หน้าเว็บส่งข้อมูลถึงเครื่องพิมพ์ผ่าน Wi-Fi หรือ LAN โดยตรงไม่ได้ ให้ตั้ง IP เครื่องพิมพ์ด้วยโปรแกรมของผู้ผลิต แล้วเพิ่มเครื่องพิมพ์ใน Windows ด้วย IP นั้น (พอร์ต 9100) จากนั้นใช้แบบ "ผ่านไดรเวอร์" ใน Windows ตั้งให้เปิดลิ้นชักได้ที่ Printing Preferences › Cash Drawer › Open before printing</p><p>บน iPhone/iPad พิมพ์ตรงจากหน้านี้ไม่ได้ ใช้คอมพิวเตอร์หรือ Android ที่ต่อเครื่องพิมพ์เป็นเครื่องคิดเงินหลัก</p></details>
+    ${c.conn==='file'&&window.POS_KIOSK_HREF?`<div class="note">พิมพ์ออกเองไม่ต้องกดยืนยัน: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง)</div><a class="btn" style="align-self:flex-start;text-decoration:none" download="EasyPOS-AutoPrint.bat" href="${window.POS_KIOSK_HREF()}">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`:''}
+  </div></div>`}
+if(PR.conn==='usb'&&navigator.usb&&navigator.usb.getDevices){navigator.usb.getDevices().then(ds=>{if(ds[0])usbConnect(ds[0]).catch(()=>{})}).catch(()=>{});try{navigator.usb.addEventListener('disconnect',e=>{if(PRD.usb&&e.device===PRD.usb){PRD.usb=null;PRD.name='';toast('เครื่องพิมพ์ USB ถูกถอดออก')}})}catch(e){}}
+if(PR.conn==='serial'&&navigator.serial&&navigator.serial.getPorts){navigator.serial.getPorts().then(ps=>{const p=ps[0];if(p)p.open({baudRate:+PR.baud||9600}).then(()=>{PRD.port=p;PRD.writer=p.writable.getWriter();PRD.name='COM'}).catch(()=>{})}).catch(()=>{})}
+function printDoc(o,kind,copy){if(prDirect())return directPrint(orderBlocks(o,kind,copy),kind==='receipt'&&!copy?(+PR.copies||1):1,false);return saveFile(KLABEL[kind]+'-'+(kind==='check'||kind==='bar'?o.no:(kind==='tax'&&o.taxInvoice?o.taxInvoice.no:(o.rno||o.no))),receiptBody(o,kind,copy),kind==='receipt'&&!copy?(+PR.copies||1):1)}
+function printStation(o,st){if(prDirect())return directPrint(orderBlocks(o,'bar',false,st),1,false);return saveFile('ใบสั่ง'+stName(st)+'-'+o.no+((o.batch||1)>1?'-'+o.batch:''),receiptBody(o,'bar',false,st))}
 function sendTickets(o){if(!o||!o._newBatch||PR.kmode!=='send')return;stationsOf(o).forEach(st=>{if(!o.items.some(i=>itemSt(i)===st&&i.batch===o.batch))return;markSeen(o,st);if(kprintOn(st))printStation(o,st)})}
 let seenK=null;
 function kKey(o,st){return o.id+'|'+(o.batch||1)+'|'+st}
@@ -1040,9 +1150,9 @@ function kdsArrive(){
   if(S.sound&&mine.length)beep();
   if(PR.kmode==='arrive')fresh.forEach(([,o,st])=>{if(kprintOn(st))printStation(o,st)});
 }
-function openDrawer(){return saveFile('เปิดลิ้นชัก-'+hm(Date.now()).replace(':',''),'<div class="rcpt"><div class="c sm">.</div></div>')}
-function testPrint(){const sh=shop();return saveFile('ทดสอบเครื่องพิมพ์',`<div class="rcpt">${shopHead(sh)}<div class="c b xl">ทดสอบการพิมพ์</div><div class="c sm">${esc(PR.model||'ไม่ระบุรุ่น')} · กระดาษ ${PR.paper} มม.</div><hr><div>ภาษาไทย กขค ฎฏฐ ๑๒๓ ไม้เอก่ ไม้โท้</div><div class="r"><span>English 0123456789</span><span>฿1,234.50</span></div><div class="r b xl"><span>ตัวหนา</span><span>99.00</span></div><hr><div class="c sm">ถ้าเห็นเส้นประเต็มความกว้างและตัวอักษรไม่ถูกตัด แสดงว่าตั้งค่าถูกต้อง</div><div class="c sm">${fmtDT(Date.now())}</div></div>`)}
-function drawerAfterPay(o){const dr=PR.drawer||{};if(!dr.on||dr.when==='manual')return;if(dr.when==='cash'&&o.method!=='cash')return;if(!PR.auto)openDrawer()}
+function openDrawer(){if(prDirect())return prSend(Uint8Array.from([0x1b,0x40,...drawerCmd()])).then(()=>true,e=>{toast(prErr(e));return false});return saveFile('เปิดลิ้นชัก-'+hm(Date.now()).replace(':',''),'<div class="rcpt"><div class="c sm">.</div></div>')}
+function testPrint(){const sh=shop();if(PR.conn!=='file'){if(!prDirect()){toast(prErr({code:'notconn'}));return}return directPrint(testBlocks(),1,false).then(ok=>{if(ok)toast('ส่งพิมพ์ทดสอบแล้ว')})}return saveFile('ทดสอบเครื่องพิมพ์',`<div class="rcpt">${shopHead(sh)}<div class="c b xl">ทดสอบการพิมพ์</div><div class="c sm">${esc(PR.model||'ไม่ระบุรุ่น')} · กระดาษ ${PR.paper} มม.</div><hr><div>ภาษาไทย กขค ฎฏฐ ๑๒๓ ไม้เอก่ ไม้โท้</div><div class="r"><span>English 0123456789</span><span>฿1,234.50</span></div><div class="r b xl"><span>ตัวหนา</span><span>99.00</span></div><hr><div class="c sm">ถ้าเห็นเส้นประเต็มความกว้างและตัวอักษรไม่ถูกตัด แสดงว่าตั้งค่าถูกต้อง</div><div class="c sm">${fmtDT(Date.now())}</div></div>`)}
+function drawerAfterPay(o){const dr=PR.drawer||{};if(!dr.on||dr.when==='manual')return;if(dr.when==='cash'&&o.method!=='cash')return;if(!PR.auto||prDirect())openDrawer()}
 
 /* ===== sales round ===== */
 function roundStats(rd){
@@ -1745,14 +1855,7 @@ function settingsView(){
       card('บัญชีรับโอนเงิน',bk?`${esc(bankShort(bk.bank))} ${esc(bk.no)} · ${bk.display?'แสดงบนจอลูกค้าเมื่อเลือกโอนเงิน':'ไม่แสดงบนจอลูกค้า'}${bankList().length>1?' · ทั้งหมด '+bankList().length+' บัญชี':''}`:'ยังไม่มีบัญชี','จัดการบัญชี','banks')+
       card('QR รับชำระเงิน',q?`${esc(q.name)} · ตั้งค่าเริ่มต้นแยกได้${qrList().length>1?' · ทั้งหมด '+qrList().length+' QR':''}`:'ยังไม่ได้ตั้งค่า','จัดการ QR','qrs')+`</div><span class="hint">เครื่องพิมพ์และลิ้นชักตั้งค่าแยกแต่ละเครื่อง · บัญชีและ QR ใช้ร่วมกันทุกเครื่อง</span>`;
   }
-  else if(tab==='printer')body=`<h2>เครื่องพิมพ์ใบเสร็จ</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้</span><div class="form">
-    <label for="p_model">รุ่นเครื่องพิมพ์<input id="p_model" list="pmodels" maxlength="40" placeholder="เช่น BARIGAN PR-01W" value="${esc(PR.model)}"></label><datalist id="pmodels"><option value="BARIGAN PR-01W"></option><option value="Xprinter XP-Q80"></option><option value="Epson TM-T82X"></option><option value="Gprinter GP-L80250"></option><option value="Sunmi (เครื่องพิมพ์ในตัว)"></option></datalist>
-    <div class="three"><label for="p_paper">ขนาดกระดาษ<select id="p_paper"><option value="80"${PR.paper==='80'?' selected':''}>80 มม.</option><option value="58"${PR.paper==='58'?' selected':''}>58 มม.</option></select></label>
-    <label for="p_conn">การเชื่อมต่อ<select id="p_conn"><option>พิมพ์ตรงจากหน้าเว็บ (เครื่องพิมพ์ค่าเริ่มต้น)</option></select></label>
-    <label for="p_copies">จำนวนสำเนาใบเสร็จ<input id="p_copies" type="number" min="1" max="3" value="${esc(PR.copies||1)}"></label></div>
-    <label class="check" for="p_auto"><input id="p_auto" type="checkbox"${PR.auto?' checked':''}> พิมพ์ใบเสร็จทันทีหลังชำระเงิน</label><span class="hint">ใบสั่งครัว/บาร์ตั้งค่าที่ “เครื่องพิมพ์ครัว”</span>
-    <button class="btn primary" data-act="testprint" type="button" style="align-self:flex-start">${ic('print',18)}ทดสอบพิมพ์</button>
-    <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ขึ้นหน้าต่างพิมพ์: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows ดาวน์โหลดทางลัดด้านล่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง) ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${`<a class=\"btn\" style=\"align-self:flex-start;text-decoration:none\" download=\"EasyPOS-AutoPrint.bat\" href=\"${window.POS_KIOSK_HREF?window.POS_KIOSK_HREF():'#'}\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`}</div>`;
+  else if(tab==='printer')body=printerTab();
   else if(tab==='look'){const L=lookOf(sh);
     const imgField=(k,label,hint)=>{const id=sh[k];return `<div class="grp"><span class="grp-t">${label}</span><div class="imgrow"><div class="ph">${id&&lookImg(id)?`<img src="${esc(lookImg(id))}" alt="">`:ic('cup',22)}</div>${S.assets&&!ro?`<label class="btn" for="lk_${k}">${id?'เปลี่ยนรูป':'เลือกรูป'}<input id="lk_${k}" data-lookimg="${k}" type="file" accept="image/*" class="sr"></label>${id?`<button class="btn danger" type="button" data-act="lookimgdel" data-k="${k}">ลบ</button>`:''}`:`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดรูปได้บน POS เว็บ'}</span>`}<span class="hint">${hint}</span></div></div>`};
     body=`<h2>ปรับแต่งรูปแบบ Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>
@@ -2300,6 +2403,10 @@ document.addEventListener('click',e=>{
     case 'payqr':S.ov.qrId=d.id;renderOverlay();syncDisplay();break;
     case 'paybank':S.ov.bankId=d.id;renderOverlay();syncDisplay();break;
     case 'testprint':testPrint();break;
+    case 'prcon':(async()=>{try{if(PR.conn==='usb')await usbConnect();else await serialPrConnect();toast('เชื่อมต่อเครื่องพิมพ์แล้ว')}catch(e){toast(prErr(e))}render(true)})();break;
+    case 'prdis':prDisconnect().then(()=>render(true));break;
+    case 'prpv':S.prPv=d.v;render(true);break;
+    case 'prdef':Object.assign(PR,{pmodel:'pr01w',conn:'file',font:22,density:150,cut:true,feed:4,baud:9600,copies:1,auto:true,paper:'80'});savePR();prDisconnect();render(true);toast('คืนค่าเริ่มต้นแล้ว');break;
     case 'lookswatch':{const c=document.getElementById('s_lookColor');if(c){c.value=d.v;updateLookPreview()}break;}
     case 'lookimgdel':{const k=d.k,old=shop()[k];const pt={};pt[k]='';saveShop(pt,'ลบรูปแล้ว').then(ok=>{if(ok&&old&&S.assets)S.assets.delete(old).catch(()=>{})});break;}
     case 'apptoggle':{if(!S.canEdit){toast('เปิด/ปิดได้เฉพาะเจ้าของร้านหรือผู้มีสิทธิ์แก้ไข');return}const on=!shop().appOpen;saveShop({appOpen:on},on?'เปิดรับออเดอร์จากมือถือแล้ว':'ปิดรับออเดอร์จากมือถือแล้ว').then(ok=>{if(ok)scheduleBridge(300)});break;}
@@ -2511,6 +2618,12 @@ document.addEventListener('change',async e=>{
   if(id==='d_pin'){PR.drawer.pin=e.target.value;savePR();render(true);return}
   if(id==='d_when'){PR.drawer.when=e.target.value;savePR();return}
   if(id==='p_auto'){PR.auto=e.target.checked;savePR();return}
+  if(e.target.name==='p_conn'){const prev=PR.conn;PR.conn=e.target.value;savePR();if(prev!==PR.conn)prDisconnect();render(true);return}
+  if(id==='p_pmodel'){PR.pmodel=e.target.value;PR.paper=String((PRMODEL[PR.pmodel]||{}).paper||80);savePR();render(true);return}
+  if(id==='p_baud'){PR.baud=+e.target.value||9600;savePR();return}
+  if(id==='p_font'||id==='p_density'){PR[id.slice(2)]=+e.target.value;savePR();prPreview(S.prPv||'receipt');return}
+  if(id==='p_cut'){PR.cut=e.target.checked;savePR();return}
+  if(id==='p_feed'){PR.feed=Math.min(10,Math.max(0,parseInt(e.target.value,10)||0));savePR();return}
   if(id==='p_bar'){PR.bar=e.target.checked;savePR();return}
   if(!S.floorEdit||!S.sel)return;
   const t=S.tables.find(x=>x.id===S.sel);if(!t)return;
