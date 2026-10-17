@@ -200,7 +200,7 @@ demo = demo.replace('<span id="appPill"></span>',
   '<span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>', 1)
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
-        '<meta name="theme-color" content="#FAF6F2">\n<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
+        '<meta name="theme-color" content="#F3F7FB">\n<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="description" content="ลองใช้ Coconut POS Cafe ได้ทันที ไม่ต้องสมัคร ข้อมูลในเดโมไม่ถูกบันทึก">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + demo + '\n<script src="/i18n-en.js"></script>\n<script src="/easypos-i18n.js"></script>\n</body>\n</html>\n')

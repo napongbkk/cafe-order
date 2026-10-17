@@ -5,13 +5,13 @@
 <style>
 /* Layout: restaurant-POS shell. Dark left rail of sections; working area right. Sell = menu grid + bill panel. */
 :root{
-  --bg:#FAF6F2; --surface:#FFFFFF; --sunk:#F5EFEA; --ink:#1B1B1B; --muted:#7C7A76; --line:#EFE7E0; --line2:#E6DCD3;
-  --accent:#FF6B1A; --accent-hover:#E85A0C; --on-accent:#FFFFFF; --accent-fill:#FF6B1A; --accent-soft:#FFEBDD; --accent-soft-ink:#B23F00;
-  --amber:#FF6B1A; --amber-hover:#E85A0C; --amber-ink:#FFFFFF; --amber-soft:#FFEBDD;
-  --dark:#FFEBDD; --on-dark:#B23F00; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#F5EFEA; --rail-on-ink:#1B1B1B;
+  --bg:#F3F7FB; --surface:#FFFFFF; --sunk:#EDF2F7; --ink:#1B1B1B; --muted:#7C7A76; --line:#E3EAF1; --line2:#D6E0EA;
+  --accent:#2E9BE6; --accent-hover:#1F86CF; --on-accent:#FFFFFF; --accent-fill:#2E9BE6; --accent-soft:#E3F2FD; --accent-soft-ink:#145C94;
+  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#E3F2FD;
+  --dark:#E3F2FD; --on-dark:#145C94; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#EDF2F7; --rail-on-ink:#1B1B1B;
   --ok:#2E9D62; --ok-soft:#E7F5EC; --ok-ink:#19663F;
-  --warn:#F4B740; --warn-soft:#FFEBDD; --warn-ink:#B23F00; --bad:#EF5B5B; --bad-soft:#FDECEC; --bad-ink:#B42323;
-  --ch-store:#FF6B1A; --ch-take:#B9B6B0; --ch-deli:#F4B740;
+  --warn:#F4B740; --warn-soft:#FDF3DC; --warn-ink:#7A5200; --bad:#EF5B5B; --bad-soft:#FDECEC; --bad-ink:#B42323;
+  --ch-store:#2E9BE6; --ch-take:#B9B6B0; --ch-deli:#F4B740;
   --t-0:#F2F1EF; --i-0:#8C6A4C; --t-1:#F2F1EF; --i-1:#6F7A52; --t-2:#F2F1EF; --i-2:#A0743A; --t-3:#F2F1EF; --i-3:#7A6070; --t-4:#F2F1EF; --i-4:#9A5A4A; --t-5:#F2F1EF; --i-5:#4F6E6E;
   --scrim:rgba(27,27,27,.38); --shadow:0 1px 2px rgba(27,27,27,.08),0 4px 14px rgba(27,27,27,.05);
   --f-body:'Inter','IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;
@@ -19,22 +19,22 @@
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
-  --accent:#FF7A2E; --accent-hover:#FF8F4D; --on-accent:#1A0B02; --accent-fill:#FF7A2E; --accent-soft:#3A2215; --accent-soft-ink:#FFC29C;
-  --amber:#FF6B1A; --amber-hover:#E85A0C; --amber-ink:#FFFFFF; --amber-soft:#3A2215;
-  --dark:#3A2215; --on-dark:#FFC29C; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
+  --accent:#5EB6F0; --accent-hover:#7CC5F5; --on-accent:#06213A; --accent-fill:#5EB6F0; --accent-soft:#132C40; --accent-soft-ink:#A8D8FA;
+  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#132C40;
+  --dark:#132C40; --on-dark:#A8D8FA; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
-  --warn:#F4B740; --warn-soft:#3A2215; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
-  --ch-store:#FF7A2E; --ch-take:#7D7A75; --ch-deli:#F4B740;
+  --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
+  --ch-store:#5EB6F0; --ch-take:#7D7A75; --ch-deli:#F4B740;
   --t-0:#262626; --i-0:#D2B08F; --t-1:#262626; --i-1:#B9C496; --t-2:#262626; --i-2:#E3B47A; --t-3:#262626; --i-3:#C9A9BC; --t-4:#262626; --i-4:#E09C8C; --t-5:#262626; --i-5:#9CC4C4;
   --scrim:rgba(0,0,0,.6); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
-  --accent:#FF7A2E; --accent-hover:#FF8F4D; --on-accent:#1A0B02; --accent-fill:#FF7A2E; --accent-soft:#3A2215; --accent-soft-ink:#FFC29C;
-  --amber:#FF6B1A; --amber-hover:#E85A0C; --amber-ink:#FFFFFF; --amber-soft:#3A2215;
-  --dark:#3A2215; --on-dark:#FFC29C; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
+  --accent:#5EB6F0; --accent-hover:#7CC5F5; --on-accent:#06213A; --accent-fill:#5EB6F0; --accent-soft:#132C40; --accent-soft-ink:#A8D8FA;
+  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#132C40;
+  --dark:#132C40; --on-dark:#A8D8FA; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
-  --warn:#F4B740; --warn-soft:#3A2215; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
-  --ch-store:#FF7A2E; --ch-take:#7D7A75; --ch-deli:#F4B740;
+  --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
+  --ch-store:#5EB6F0; --ch-take:#7D7A75; --ch-deli:#F4B740;
   --t-0:#262626; --i-0:#D2B08F; --t-1:#262626; --i-1:#B9C496; --t-2:#262626; --i-2:#E3B47A; --t-3:#262626; --i-3:#C9A9BC; --t-4:#262626; --i-4:#E09C8C; --t-5:#262626; --i-5:#9CC4C4;
   --scrim:rgba(0,0,0,.6); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}
 
@@ -1875,7 +1875,7 @@ function settingsView(){
   else if(tab==='round')body=`<h2>รอบการขาย</h2><form class="form" data-stab="round"><label class="check" for="s_roundOn"><input id="s_roundOn" type="checkbox"${sh.roundOn?' checked':''}${dis}> เปิดรอบการขาย (ถาดเก็บเงิน) ก่อนเริ่มขาย</label><label for="s_roundStart">จำนวนเงินเริ่มต้น (ไม่บังคับ)<input id="s_roundStart" type="number" min="0" value="${esc(sh.roundStart||'')}"${dis}></label><span class="hint">เมื่อเปิดใช้ ต้องเปิดรอบก่อนรับชำระ และปิดรอบพร้อมนับเงินเพื่อดูส่วนต่าง</span>${save}</form>`;
   else if(tab==='receipt')body=`<h2>รูปแบบใบเสร็จ</h2><form class="form" data-stab="receipt"><label for="s_footer">ข้อความท้ายใบเสร็จ<input id="s_footer" maxlength="80" placeholder="ขอบคุณที่อุดหนุน" value="${esc(sh.footer)}"${dis}></label><span class="hint">ชื่อร้าน ที่อยู่ เบอร์โทร และเลขผู้เสียภาษีมาจาก “ข้อมูลร้าน” · หัวใบเสร็จเปลี่ยนเป็นใบกำกับภาษีอย่างย่อเมื่อคิด VAT</span>${save}</form>
     <div class="paper${PR.paper==='58'?' p58':''}" style="max-width:360px">${receiptBody({no:'A-001',type:'dine',items:[{name:'ลาเต้',opts:'เย็น · กลาง',unit:80,qty:1},{name:'ครัวซองต์เนยสด',opts:'',unit:75,qty:1}],sums:calc([{unit:80,qty:1},{unit:75,qty:1}],null),method:'cash',received:200,change:200-calc([{unit:80,qty:1},{unit:75,qty:1}],null).total,createdAt:Date.now(),paidAt:Date.now(),rno:'R'+ymd(Date.now())+'-0001'},'receipt')}</div>`;
-  else if(tab==='ui'){const u=uiEffective(),dev=!!uiDevice(),P=UI_PALS[u.pal]||UI_PALS.coconut;const F=UI_FONTS[u.font]||UI_FONTS.modern;const lab=(k)=>((UI_OPTS[k].find(x=>x[0]===u[k])||[])[1]||'');
+  else if(tab==='ui'){const u=uiEffective(),dev=!!uiDevice(),P=UI_PALS[u.pal]||UI_PALS.sky;const F=UI_FONTS[u.font]||UI_FONTS.modern;const lab=(k)=>((UI_OPTS[k].find(x=>x[0]===u[k])||[])[1]||'');
     body=`<h2>ปรับแต่งรูปแบบระบบ</h2><span class="hint">เลือกชุดสี ฟอนต์ ขนาดตัวอักษร มุมปุ่ม ความหนาแน่น รูปแบบเมนู และตำแหน่งบิล ปรับได้ทั้งเฉพาะเครื่องนี้ หรือใช้กับทุกเครื่องของร้าน</span>
     <div class="dcards"><div class="dcard"><div class="dcard-h"><h3><span class="ui-dots" style="display:inline-flex;vertical-align:-3px;margin:0 6px 0 0"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i></span>${esc(P[0])} · ${esc(F[0])}</h3><button class="btn sm primary" data-act="uiopen">ปรับรูปแบบหน้าตา</button></div>
     <p>${lab('mode')} · ตัวอักษร${lab('size')} · มุม${lab('radius')} · ${lab('density')} · เมนู${lab('menu')} · ${lab('bill')}</p><p class="hint" style="margin:0">${dev?'เครื่องนี้ตั้งค่าเอง (ไม่ตามค่าของร้าน)':'ใช้ค่าของร้าน'}</p></div></div>`}
@@ -2311,7 +2311,7 @@ async function openTable(t,guests){
 }
 
 /* ===== Appearance (per device, or the shop default for every device) ===== */
-const UI_DEF={pal:'coconut',mode:'auto',size:'m',font:'modern',radius:'normal',density:'normal',menu:'card',bill:'right'};
+const UI_DEF={pal:'sky',mode:'auto',size:'m',font:'modern',radius:'normal',density:'normal',menu:'card',bill:'right'};
 // main, hover, text on main, soft background, soft text, logo light, logo dark
 const UI_PALS={coconut:['ส้มมะพร้าว (Coconut)','#FF6B1A','#E85A0C','#FFFFFF','#FFEBDD','#B23F00','#FF9A5C','#FF6B1A'],
   caramel:['คาราเมล','#F6BE55','#F0AE34','#2B1F05','#FDF3DC','#7A5200','#FFC56B','#F08A2C'],
@@ -2328,7 +2328,8 @@ const UI_PALS={coconut:['ส้มมะพร้าว (Coconut)','#FF6B1A','#E
 const UI_FONTS={modern:['ทันสมัย (ค่าเริ่มต้น)',"'Inter','IBM Plex Sans Thai'",''],prompt:['Prompt',"'Prompt'",'Prompt:wght@400;500;600;700'],kanit:['Kanit',"'Kanit'",'Kanit:wght@400;500;600;700'],
   sarabun:['Sarabun',"'Sarabun'",'Sarabun:wght@400;500;600;700'],noto:['Noto Sans Thai',"'Noto Sans Thai'",'Noto+Sans+Thai:wght@400;500;600;700'],mitr:['Mitr',"'Mitr'",'Mitr:wght@400;500;600']};
 const UI_PRESETS=[
-  ['coconut','Coconut ส้ม (ค่าเริ่มต้น)','ส้มสด ขาว ดำ ตามแบรนด์ Coconut POS',{}],
+  ['std','ฟ้าสดใส (ค่าเริ่มต้น)','ฟ้าสด การ์ดขาวสะอาด อ่านง่าย',{}],
+  ['coconut','Coconut ส้ม','ส้มสด ขาว ดำ',{pal:'coconut'}],
   ['caramel','คาราเมล','โทนอบอุ่น ปุ่มเหลืองอำพัน การ์ดขาวสะอาด',{pal:'caramel'}],
   ['sky','ฟ้าสดใส','ฟ้าอ่อน การ์ดขาวโค้งมน ฟอนต์ Prompt',{pal:'sky',font:'prompt',radius:'round'}],
   ['forest','เขียวร้าน','สีเขียวสบายตา มุมปกติ',{pal:'forest'}],
@@ -2349,7 +2350,7 @@ function hmix(a,b,t){const x=hx(a),y=hx(b);return '#'+x.map((v,i)=>('0'+Math.rou
 function hrgba(a,al){const x=hx(a);return `rgba(${x[0]},${x[1]},${x[2]},${al})`}
 let uiKey='';const uiFontsLoaded={};
 function applyUI(u){u=Object.assign({},UI_DEF,u||uiEffective());const k=JSON.stringify(u);if(k===uiKey)return;uiKey=k;
-  const P=UI_PALS[u.pal]||UI_PALS.coconut,[,m,hv,on,soft,softInk,l1,l2]=P;
+  const P=UI_PALS[u.pal]||UI_PALS.sky,[,m,hv,on,soft,softInk,l1,l2]=P;
   const dm=u.pal==='mono'?['#EDEDED','#FFFFFF','#141414']:[m,hv,on];
   const light=`--amber:${m};--amber-hover:${hv};--amber-ink:${on};--amber-soft:${soft};--amber-line:${hmix(m,'#FFFFFF',.55)};--ring:${hrgba(m,.25)};--accent:${m};--accent-hover:${hv};--on-accent:${on};--accent-fill:${m};--accent-soft:${soft};--accent-soft-ink:${softInk};--dark:${soft};--on-dark:${softInk};--ch-store:${m};--warn-soft:${soft};--logo1:${l1};--logo2:${l2};`;
   const dsoft=hmix(dm[0],'#1E1E1E',.78),dink=hmix(dm[0],'#FFFFFF',.45);
@@ -2368,7 +2369,7 @@ function applyUI(u){u=Object.assign({},UI_DEF,u||uiEffective());const k=JSON.str
 function uiDialogHtml(wrap,head){const v=S.ov,u=v.u;
   const seg=(key,title)=>`<div class="ui-f"><span class="grp-t">${title}</span><div class="ui-seg" role="radiogroup" aria-label="${title}">${UI_OPTS[key].map(([val,l])=>`<button type="button" role="radio" aria-checked="${u[key]===val}" data-act="uiset" data-k="${key}" data-v="${val}">${l}</button>`).join('')}</div></div>`;
   const fonts=`<div class="ui-f"><span class="grp-t">ฟอนต์</span><div class="ui-seg" role="radiogroup" aria-label="ฟอนต์">${Object.entries(UI_FONTS).map(([k,f])=>`<button type="button" role="radio" aria-checked="${u.font===k}" data-act="uiset" data-k="font" data-v="${k}" style="font-family:${f[1].replace(/"/g,'')},sans-serif">${f[0]}</button>`).join('')}</div></div>`;
-  const dots=p=>{const P=UI_PALS[p.pal||'coconut'];return `<span class="ui-dots"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i><i style="background:#F1F0EE"></i></span>`};
+  const dots=p=>{const P=UI_PALS[p.pal||'sky'];return `<span class="ui-dots"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i><i style="background:#F1F0EE"></i></span>`};
   const presets=UI_PRESETS.map(([id,name,desc,o])=>{const on=Object.keys(UI_DEF).every(k=>(Object.assign({},UI_DEF,o))[k]===u[k]);
     return `<button type="button" class="ui-pre" aria-pressed="${on}" data-act="uipre" data-v="${id}">${dots(o)}<b>${name}</b><small>${desc}</small></button>`}).join('');
   const pals=Object.entries(UI_PALS).map(([k,P])=>`<button type="button" class="ui-pal" aria-pressed="${u.pal===k}" data-act="uiset" data-k="pal" data-v="${k}"><i style="background:${P[1]}"></i>${P[0]}</button>`).join('');
