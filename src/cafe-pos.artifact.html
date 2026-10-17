@@ -2840,7 +2840,7 @@ function rerenderFor(kind){
   try{const user=await window.claude.use('user');if(user)S.canEdit=await user.canEdit()}catch(e){}
   const fail=()=>{};
   const sorted=(s)=>s.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>(a.sort||0)-(b.sort||0)||String(a.name).localeCompare(String(b.name),'th'));
-  db.doc('settings/shop').onSnapshot(s=>{S.shop=s.exists?Object.assign({},s.data()):{};rerenderFor('shop')},fail);
+  db.doc('settings/shop').onSnapshot(s=>{S.shop=s.exists?Object.assign({},s.data()):{};S.shopLoaded=true;rerenderFor('shop')},fail);
   db.collection('categories').onSnapshot(s=>{S.cats=sorted(s);rerenderFor('menu')},fail);
   db.collection('options').onSnapshot(s=>{S.opts=sorted(s);rerenderFor('menu')},fail);
   db.collection('menu').onSnapshot(s=>{S.menu=sorted(s);rerenderFor('menu')},fail);

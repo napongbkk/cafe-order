@@ -91,9 +91,9 @@ R("async function bridgeTick(){",
   try{
     const lease=await S.db.doc('bridge/lock').acquire({holder:deviceId,ttlMs:30000});
     if(!lease.acquired){S.app.state='other';S.app.msg='มีเครื่องอื่นเป็นตัวรับออเดอร์จากแอปอยู่';renderAppStatus();scheduleBridge(20000);return}
-    const snap=JSON.stringify(appSnapshot());const sendSnap=snap!==lastSnap&&S.menu.length;const o=sendSnap?JSON.parse(snap):null;
+    const snap=JSON.stringify(appSnapshot());const sendSnap=snap!==lastSnap&&(S.menu.length||S.shopLoaded);const o=sendSnap?JSON.parse(snap):null;
     const vals=appStatuses();
-    const sid=window.POS_SESSION.shop.id;const r=await window.POS_SB.rpc('pos_shop_sync',{p_sid:sid,p_menu:o?o.menu:null,p_shopdata:o?o.shop:null,p_status:vals.length?vals:null});
+    const sid=window.POS_SESSION.shop.id;const r=await window.POS_SB.rpc('pos_shop_sync',{p_sid:sid,p_menu:o&&S.menu.length?o.menu:null,p_shopdata:o?o.shop:null,p_status:vals.length?vals:null});
     if(r.error)throw {code:'tool_error',message:r.error.message};
     if(sendSnap)lastSnap=snap;vals.forEach(([a,st,pd])=>{pushed[a]=st+'|'+pd});
     const rows=Array.isArray(r.data)?r.data:[];const acc=[];
