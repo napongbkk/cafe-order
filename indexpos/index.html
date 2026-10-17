@@ -568,5 +568,6 @@ fetch(SB+'/rest/v1/rpc/pos_public_billing',{method:'POST',headers:{apikey:KEY,Au
 .then(function(r){return r.json()}).then(function(b){if(b&&b.freeMode){freeMode(b);return}var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;PK=l;drawLongs()}).catch(function(){});
 })();
 </script>
+<script src="/track.js" data-page="landing" defer></script>
 </body>
 </html>

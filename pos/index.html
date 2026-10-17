@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F4F3F1">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
+<script src="/track.js" data-page="pos" defer></script>
 <meta name="robots" content="noindex">
 <style>[hidden]{display:none!important}:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}img{max-width:100%}.ugrp{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--surface)}.ugrp b{display:flex;align-items:center;padding:0 10px;background:var(--bg,#eef2f6);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.5px;border-right:1px solid var(--line2);user-select:none}.form .ugrp input{border:0!important;border-radius:0!important;min-width:0}</style>
 </head>
@@ -910,7 +911,7 @@ function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(
 function check(){
   sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
     email=s.user.email;
-    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
+    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;if(d&&d.shop&&window.cpTrack&&window.POS_SB)window.cpTrack('cafe-app',null,window.POS_SB);
       if(!d.shop){
         if(d.admin){location.replace('/admin');return}
         sb.rpc('pos_my_application').then(function(x){var a=x.data;

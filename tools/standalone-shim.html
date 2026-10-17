@@ -101,7 +101,7 @@ function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(
 function check(){
   sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
     email=s.user.email;
-    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
+    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;if(d&&d.shop&&window.cpTrack&&window.POS_SB)window.cpTrack('cafe-app',null,window.POS_SB);
       if(!d.shop){
         if(d.admin){location.replace('/admin');return}
         sb.rpc('pos_my_application').then(function(x){var a=x.data;

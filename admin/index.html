@@ -133,6 +133,7 @@ h1{font-weight:600;letter-spacing:-.01em}
     <button class="nav" data-go="apps">คำขอเปิดร้าน<span class="badge" id="appBadge" hidden></span></button>
     <button class="nav" data-go="shops">ร้านค้า</button>
     <button class="nav" data-go="users">บัญชีผู้ใช้</button>
+    <button class="nav" data-go="stats">สถิติผู้เข้าใช้</button>
     <button class="nav" data-go="pays">การชำระเงิน<span class="badge" id="payBadge" hidden></span></button>
     <button class="nav" data-go="settings">ตั้งค่าระบบ</button>
     <span class="sp"></span>
@@ -173,7 +174,7 @@ $('#lgOut').addEventListener('click',out);$('#logoutBtn').addEventListener('clic
 function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showLogin('');return}
   sb.rpc('pos_session',{p_slug:null}).then(function(x){if(x.error||!x.data||!x.data.admin){showLogin('บัญชีนี้ไม่ใช่ผู้ดูแลระบบ');$('#lgOut').hidden=false;return}
     S.me=x.data.email;$('#meBox').textContent=S.me;$('#authView').hidden=true;$('#appView').hidden=false;
-    var h=location.hash.slice(1);if(['home','apps','shops','users','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
+    var h=location.hash.slice(1);if(['home','apps','shops','users','stats','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
 
 /* ---------- data ---------- */
 function loadAll(){return Promise.all([
@@ -187,13 +188,39 @@ function loadAll(){return Promise.all([
 ]).then(render).catch(function(e){toast('โหลดข้อมูลไม่สำเร็จ: '+err(e))})}
 setInterval(function(){if(!document.hidden&&!$('#drawer').innerHTML)loadAll()},60000);
 
+
+/* ---------- visitor statistics ---------- */
+var PAGE_TH={landing:'หน้าแรก',guide:'คู่มือ Cafe','guide-retail':'คู่มือ Retail',signup:'สมัครใช้งาน',demo:'เดโม Cafe','retail-demo':'เดโม Retail',pos:'หน้าเข้าสู่ระบบ Cafe',retail:'หน้าเข้าสู่ระบบ Retail','cafe-app':'ใช้งานระบบ Cafe (ล็อกอินแล้ว)','retail-app':'ใช้งานระบบ Retail (ล็อกอินแล้ว)',order:'หน้าสั่งอาหารของลูกค้า',admin:'หน้าผู้ดูแลระบบ'};
+S.statDays=30;
+function loadStats(){S.statsBusy=true;sb.rpc('pos_admin_visits',{p_days:S.statDays}).then(function(r){S.statsBusy=false;if(r.error){toast(err(r.error));S.stats={error:1};}else S.stats=r.data;if(S.view==='stats')render()})}
+function nf(n){return Number(n||0).toLocaleString('th-TH')}
+function statsChart(daily){if(!daily.length)return '';var W=760,H=220,pl=34,pb=26,pt=10,iw=W-pl-8,ih=H-pt-pb;
+  var mx=Math.max(4,Math.max.apply(null,daily.map(function(d){return d.visitors})));var raw=mx/4,mg=Math.pow(10,Math.floor(Math.log10(raw))),nice=[1,2,2.5,5,10].map(function(k){return k*mg}).find(function(k){return k>=raw});var top=nice*4;
+  var bw=iw/daily.length,g='';for(var i=0;i<=4;i++){var y=pt+ih-ih*i/4;g+='<line x1="'+pl+'" x2="'+(W-8)+'" y1="'+y+'" y2="'+y+'" stroke="var(--line)"/><text x="'+(pl-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="11" fill="var(--muted)">'+nf(Math.round(top*i/4))+'</text>'}
+  var bars=daily.map(function(d,i){var x=pl+i*bw+bw*.15,w=Math.max(2,bw*.7),hv=ih*d.visitors/top,hu=ih*d.users/top,dt=new Date(d.day+'T00:00:00');
+    var lab=(daily.length<=14||i%Math.ceil(daily.length/10)===0||i===daily.length-1)?'<text x="'+(x+w/2)+'" y="'+(H-8)+'" text-anchor="middle" font-size="11" fill="var(--muted)">'+dt.getDate()+'/'+(dt.getMonth()+1)+'</text>':'';
+    return '<g><title>'+dt.toLocaleDateString('th-TH',{dateStyle:'medium'})+' · ผู้เข้าชม '+d.visitors+' คน · ผู้ใช้ระบบ '+d.users+' คน · '+d.views+' ครั้ง</title><rect x="'+x+'" y="'+(pt+ih-hv)+'" width="'+w+'" height="'+hv+'" rx="3" fill="var(--accent)" opacity=".35"/><rect x="'+x+'" y="'+(pt+ih-hu)+'" width="'+w+'" height="'+hu+'" rx="3" fill="var(--accent)"/></g>'+lab}).join('');
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="กราฟผู้เข้าชมรายวัน">'+g+bars+'</svg><div class="muted small" style="display:flex;gap:16px"><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent);opacity:.35"></i> ผู้เข้าชมทั้งหมด</span><span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--accent)"></i> ผู้ใช้ระบบ (ล็อกอินแล้ว)</span></div>'}
+function statsView(){var st=S.stats;
+  var head='<div class="head"><h1>สถิติผู้เข้าใช้</h1><span class="sp"></span><div class="seg" role="group" aria-label="ช่วงเวลา">'+[[1,'วันนี้'],[7,'7 วัน'],[30,'30 วัน'],[90,'90 วัน']].map(function(x){return '<button data-act="statdays" data-v="'+x[0]+'" aria-pressed="'+(S.statDays===x[0])+'">'+x[1]+'</button>'}).join('')+'</div><button class="btn" data-act="statreload">รีเฟรช</button></div>';
+  if(!st||S.statsBusy&&!st.daily)return head+'<section class="panel"><p class="muted">กำลังโหลด…</p></section>';
+  if(st.error)return head+'<section class="panel"><p class="muted">โหลดสถิติไม่สำเร็จ</p></section>';
+  var t=st.total||{},td=(st.daily||[]).slice(-1)[0]||{};
+  return head+'<div class="kpis"><div class="kpi"><small>ออนไลน์ตอนนี้ (5 นาที)</small><b>'+nf(st.now)+'</b></div><div class="kpi"><small>ผู้เข้าชมวันนี้</small><b>'+nf(td.visitors)+'</b></div>'+
+    '<div class="kpi"><small>ผู้เข้าชม '+(st.days===1?'วันนี้':st.days+' วัน')+' (ไม่ซ้ำ)</small><b>'+nf(t.visitors)+'</b></div><div class="kpi"><small>จำนวนครั้งที่เปิดหน้า</small><b>'+nf(t.views)+'</b></div>'+
+    '<div class="kpi"><small>ผู้ใช้ระบบ (ล็อกอินแล้ว)</small><b>'+nf(t.users)+'</b></div><div class="kpi"><small>ร้านที่เข้าใช้งาน</small><b>'+nf(t.shops)+'</b></div></div>'+
+    (st.days>1?'<section class="panel"><h2>ผู้เข้าชมรายวัน</h2>'+statsChart(st.daily||[])+'</section>':'')+
+    '<section class="panel"><h2>หน้าที่เข้าชม</h2>'+((st.pages||[]).length?'<div class="scroll"><table class="tbl"><thead><tr><th>หน้า</th><th class="num">ผู้เข้าชม (คน)</th><th class="num">เปิดหน้า (ครั้ง)</th></tr></thead><tbody>'+st.pages.map(function(p){return '<tr><td>'+esc(PAGE_TH[p.page]||p.page)+'</td><td class="num">'+nf(p.visitors)+'</td><td class="num">'+nf(p.views)+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="muted">ยังไม่มีข้อมูลในช่วงนี้</p>')+'</section>'+
+    '<section class="panel"><h2>ร้านที่เข้าใช้งาน</h2>'+((st.shops||[]).length?'<div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th class="num">จำนวนวันที่ใช้</th><th class="num">ผู้ใช้ (เครื่อง)</th><th>ใช้ล่าสุด</th></tr></thead><tbody>'+st.shops.map(function(x){return '<tr><td><b>'+esc(x.name)+'</b><div class="muted small">'+esc(x.slug)+'</div></td><td class="num">'+nf(x.days)+'</td><td class="num">'+nf(x.users)+'</td><td>'+dtTh(x.last)+'</td></tr>'}).join('')+'</tbody></table></div>':'<p class="muted">ยังไม่มีร้านเข้าใช้งานในช่วงนี้</p>')+'</section>'+
+    '<p class="muted small">นับจากเบราว์เซอร์: 1 เครื่อง 1 เบราว์เซอร์ = 1 คนต่อวัน ไม่เก็บข้อมูลส่วนตัว เริ่มเก็บตั้งแต่ 17 ต.ค. 2569</p>'}
 /* ---------- views ---------- */
 function render(){
   document.querySelectorAll('.nav[data-go]').forEach(function(b){b.setAttribute('aria-current',b.dataset.go===S.view?'page':'false')});
   var pend=S.pays.filter(function(p){return p.status==='pending'}).length;var pb=$('#payBadge');pb.hidden=!pend;pb.textContent=pend;
   var pa=S.apps.filter(function(a){return a.status==='pending'}).length;var ab=$('#appBadge');ab.hidden=!pa;ab.textContent=pa;
   if(S.view==='users'&&S.accts==null)loadAccts();
-  $('#main').innerHTML=({home:homeView,apps:appsView,users:usersView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
+  if(S.view==='stats'&&!S.stats)loadStats();
+  $('#main').innerHTML=({home:homeView,apps:appsView,users:usersView,stats:statsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
   if(S.view==='pays'||S.view==='apps')loadSlips();
   if(S.view==='settings')drawPpPrev();
 }
@@ -367,6 +394,7 @@ function setPw(email){drawer('ตั้งรหัสผ่านใหม่',
 
 /* ---------- events ---------- */
 document.addEventListener('click',function(e){var go=e.target.closest('[data-go]');if(go){S.view=go.dataset.go;history.replaceState(null,'','#'+S.view);render();return}
+  var sa=e.target.closest('[data-act="statdays"],[data-act="statreload"]');if(sa){if(sa.dataset.act==='statdays')S.statDays=+sa.dataset.v;S.stats=null;render();return}
   var b=e.target.closest('[data-act]');if(!b)return;var a=b.dataset.act,d=b.dataset;
   if(a==='dclose'&&e.target!==b)return;
   if(a==='dclose'||a==='close'){closeDrawer();return}
@@ -455,5 +483,6 @@ start();
 </script>
 <script src="/i18n-en.js"></script>
 <script src="/easypos-i18n.js"></script>
+<script src="/track.js" data-page="admin" defer></script>
 </body>
 </html>
