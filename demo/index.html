@@ -309,6 +309,11 @@ td.r,th.r{text-align:right}
 .floor.edit .fi{cursor:grab;touch-action:none}
 .fi.sel{outline:3px solid var(--accent);outline-offset:2px;z-index:5}
 .rz{position:absolute;right:0;bottom:0;width:22px;height:22px;background:var(--accent);border-radius:6px 0 0 0;cursor:nwse-resize;touch-action:none}
+.tblrow{display:flex;align-items:center;gap:8px;margin-top:8px;padding:6px 6px 6px 10px;border-radius:12px;background:var(--accent-soft);color:var(--accent-soft-ink);min-height:44px}
+.tblrow .tbl-t{flex:1;font-weight:500}.tblrow .tbl-t b{font-weight:700}.tblrow .tbl-ic{display:grid;place-items:center}
+.tblrow.add{width:100%;border:1.5px dashed var(--line2);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left;font:inherit;padding-right:12px}
+.tblrow.add:hover{border-color:var(--accent);color:var(--accent)}.tblrow.add small{color:var(--muted);font-size:12px}
+.tpick.on{border-color:var(--accent);color:var(--accent)}
 .tlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px}
 .tpick{height:64px;border-radius:12px;border:2px solid var(--line2);background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;font-weight:600}
 .tpick small{font-weight:500;font-size:12px;color:var(--muted)}
@@ -1373,7 +1378,9 @@ function renderBill(){
   el.innerHTML=`<div class="bill-head"><div class="bill-id"><div><b>${esc(title)}</b><small>${esc(sub)}</small></div><div style="display:flex;gap:6px">
       ${b.id?'<button class="btn sm" data-act="leavebill">ออกจากบิล</button>':`<button class="btn sm" data-act="clearbill"${b.items.length?'':' disabled'}>ล้าง</button>`}
       <button class="btn sm icon sheet-close" data-act="sheet" aria-label="ปิดบิล">${ic('x',18)}</button></div></div>
-    <div class="seg" role="radiogroup" aria-label="ช่องทางการขาย">${TYPES.map(x=>`<button role="radio" data-act="type" data-v="${x.v}" aria-checked="${b.type===x.v}"${b.table&&x.v!=='dine'?' disabled':''}>${x.l}</button>`).join('')}</div></div>
+    <div class="seg" role="radiogroup" aria-label="ช่องทางการขาย">${TYPES.map(x=>`<button role="radio" data-act="type" data-v="${x.v}" aria-checked="${b.type===x.v}"${b.table&&x.v!=='dine'?' disabled':''}>${x.l}</button>`).join('')}</div>
+    ${b.type==='dine'&&S.tables.some(isTable)?(b.table?`<div class="tblrow"><span class="tbl-ic">${ic('tables',18)}</span><span class="tbl-t">โต๊ะ <b>${esc(b.table.name)}</b>${b.guests?` · ${b.guests} ท่าน`:''}</span><button class="btn sm" data-act="picktable">เปลี่ยนโต๊ะ</button>${b.id?'':`<button class="btn sm icon" data-act="untable" aria-label="ไม่ระบุโต๊ะ">${ic('x',16)}</button>`}</div>`
+      :`<button class="tblrow add" data-act="picktable"><span class="tbl-ic">${ic('tables',18)}</span><span class="tbl-t">เลือกโต๊ะ</span><small>ไม่บังคับ</small>${ic('plus',16)}</button>`):''}</div>
     <div class="lines">${b.items.length?b.items.map(l=>{const d=lineDisc(l);return `<button class="line" data-act="line" data-k="${l.key}"><span class="q">${l.qty}</span><span class="info"><span class="nm">${esc(l.name)}</span>${l.opts?`<span class="op" style="display:block">${esc(l.opts)}</span>`:''}${l.disc?`<span class="dc" style="display:block">${ic('tag',12)} ${esc(l.disc.name)}</span>`:''}${l.batch?'<span class="op" style="display:block">ส่งแล้ว</span>':''}</span><span class="amt">${baht(l.unit*l.qty-d)}${d?`<s>${baht(l.unit*l.qty)}</s>`:''}</span></button>`}).join('')
       :'<div class="empty"><b>ยังไม่มีรายการ</b>แตะเมนูเพื่อเพิ่มลงบิล</div>'}</div>
     <div class="bill-sum"><div class="row"><span>รวม ${t.count} รายการ</span><span class="num">${baht(t.sub)}</span></div>
@@ -2105,6 +2112,8 @@ function ovHtml(){
   }
   if(v.k==='paid'){const o=findOrder(v.id)||v.order;return wrap(docPanel(o,true),'wide',false)}
   if(v.k==='opentable'){const t=S.tables.find(x=>x.id===v.id);return wrap(head('เปิดโต๊ะ '+esc(t?t.name:''))+`<div class="grp"><span class="grp-t">จำนวนลูกค้า</span><div class="stepper"><button data-act="guests" data-d="-1" aria-label="ลด"${v.guests<=1?' disabled':''}>−</button><span>${v.guests}</span><button data-act="guests" data-d="1" aria-label="เพิ่ม">+</button></div></div><button class="btn primary big" data-act="doopentable"${S.busy?' disabled':''}>เปิดโต๊ะและสั่งอาหาร</button>`,'narrow')}
+  if(v.k==='picktable'){const cur=S.bill.table&&S.bill.table.id;const free=S.tables.filter(t=>isTable(t)&&(t.id===cur||!tableBill(t.id)));
+    return wrap(head(cur?'เปลี่ยนโต๊ะ':'เลือกโต๊ะ')+`<div class="grp"><span class="grp-t">จำนวนลูกค้า</span><div class="stepper"><button data-act="pguests" data-d="-1" aria-label="ลด"${v.guests<=0?' disabled':''}>−</button><span>${v.guests||'-'}</span><button data-act="pguests" data-d="1" aria-label="เพิ่ม">+</button></div></div>`+(free.length?zones().map(z=>{const ts=free.filter(t=>t.zone===z);return ts.length?`<div class="grp"><span class="grp-t">${esc(z)}</span><div class="tlist">${ts.map(t=>`<button class="tpick${t.id===cur?' on':''}" data-act="dopicktable" data-id="${esc(t.id)}"><span class="num">${esc(t.name)}</span><small>${t.seats} ที่</small></button>`).join('')}</div></div>`:''}).join(''):'<div class="empty">ไม่มีโต๊ะว่าง</div>'))}
   if(v.k==='movetable'){const free=S.tables.filter(t=>isTable(t)&&!tableBill(t.id));
     return wrap(head('ย้ายไปโต๊ะ')+(free.length?zones().map(z=>{const ts=free.filter(t=>t.zone===z);return ts.length?`<div class="grp"><span class="grp-t">${esc(z)}</span><div class="tlist">${ts.map(t=>`<button class="tpick" data-act="domove" data-id="${esc(t.id)}"><span class="num">${esc(t.name)}</span><small>${t.seats} ที่</small></button>`).join('')}</div></div>`:''}).join(''):'<div class="empty">ไม่มีโต๊ะว่าง</div>'))}
   if(v.k==='move')return wrap(head(v.type==='in'?'นำเงินเข้า':'นำเงินออก')+`<form class="form" id="moveForm"><label for="mvAmt">จำนวนเงิน<input id="mvAmt" type="number" min="1" step="1" inputmode="numeric" required></label><label for="mvNote">หมายเหตุ<input id="mvNote" maxlength="60" placeholder="${v.type==='in'?'เช่น แลกเหรียญเพิ่ม':'เช่น ซื้อน้ำแข็ง'}"></label><button class="btn primary big" type="submit">บันทึก</button></form>`,'narrow');
@@ -2578,6 +2587,14 @@ document.addEventListener('click',e=>{
     case 'opentable':{const t=S.tables.find(x=>x.id===S.tsel);if(!t)return;S.ov={k:'opentable',id:t.id,guests:Math.min(2,t.seats||2)};renderOverlay();break;}
     case 'guests':S.ov.guests=Math.max(1,S.ov.guests+(+d.d));renderOverlay();break;
     case 'doopentable':{const t=S.tables.find(x=>x.id===S.ov.id);if(t)openTable(t,S.ov.guests);break;}
+    case 'picktable':S.ov={k:'picktable',guests:S.bill.guests||0};renderOverlay();break;
+    case 'pguests':S.ov.guests=Math.max(0,(S.ov.guests||0)+(+d.d));renderOverlay();break;
+    case 'untable':if(!S.bill.id){S.bill.table=null;S.bill.guests=0;setBill()}break;
+    case 'dopicktable':{const t=S.tables.find(x=>x.id===d.id);if(!t)return;if(tableBill(t.id)&&tableBill(t.id).id!==S.bill.id){toast('โต๊ะนี้มีลูกค้าแล้ว');return}
+      const g=S.ov.guests||0;S.ov=null;S.bill.table={id:t.id,name:t.name};S.bill.guests=g;S.bill.type='dine';
+      if(S.bill.id){const o=findOrder(S.bill.id);const patch={table:{id:t.id,name:t.name},guests:g,type:'dine'};
+        (S.db?dbDo(db=>db.doc('orders/'+S.bill.id).update(patch),'โต๊ะ '+t.name):Promise.resolve(true)).then(ok=>{if(ok&&o)Object.assign(o,patch);render(true)})}
+      else{renderOverlay();setBill();toast('โต๊ะ '+t.name)}break;}
     case 'movetable':S.ov={k:'movetable',bill:d.id};renderOverlay();break;
     case 'domove':{const t=S.tables.find(x=>x.id===d.id),o=findOrder(S.ov.bill);if(!t||!o)return;const patch={table:{id:t.id,name:t.name}};S.ov=null;
       (S.db?dbDo(db=>db.doc('orders/'+o.id).update(patch),'ย้ายไปโต๊ะ '+t.name+' แล้ว'):Promise.resolve(true)).then(ok=>{if(ok){Object.assign(o,patch);S.tsel=t.id;render(true)}});break;}
