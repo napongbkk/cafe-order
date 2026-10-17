@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Easy POS · ระบบขายหน้าร้านสำหรับคาเฟ่และร้านค้า</title>
-<meta name="description" content="Easy POS ระบบ POS ใช้ง่ายสำหรับคาเฟ่ ร้านอาหาร และร้านของชำ ขายหน้าร้าน รับออเดอร์ผ่านมือถือ จอครัว สมาชิกสะสมแต้ม เริ่มต้น 299 บาทต่อเดือน ทดลองใช้ฟรี 30 วัน">
+<meta name="description" content="Easy POS ระบบ POS ใช้ง่ายสำหรับคาเฟ่ ร้านอาหาร และร้านของชำ ขายหน้าร้าน รับออเดอร์ผ่านมือถือ จอครัว สมาชิกสะสมแต้ม เริ่มต้น 49 บาทต่อเดือน ทดลองใช้ฟรี 30 วัน">
 <meta name="theme-color" content="#0B1024">
 <meta property="og:title" content="Easy POS · ระบบ POS สำหรับคาเฟ่และร้านค้า">
-<meta property="og:description" content="ขายหน้าร้าน รับออเดอร์ผ่าน QR จอครัว สมาชิกสะสมแต้ม · 299 บาท/เดือน · ทดลองใช้ฟรี 30 วัน">
+<meta property="og:description" content="ขายหน้าร้าน รับออเดอร์ผ่าน QR จอครัว สมาชิกสะสมแต้ม · เริ่มต้น 49 บาท/เดือน · ทดลองใช้ฟรี 30 วัน">
 <link rel="icon" href="/easypos.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/easypos.svg">
 <script>
@@ -222,7 +222,7 @@ section{padding:96px 0}
 .plan li{display:flex;gap:10px;color:rgba(255,255,255,.86)}
 .plan li svg{color:#6FE3FF;flex-shrink:0;margin-top:4px}
 .plan .btn{width:100%}
-.longs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.longs{display:flex;flex-direction:column;gap:8px;margin-top:22px;text-align:left}
 .longs span{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:9px 14px;border-radius:12px;font-size:14px;color:rgba(255,255,255,.85)}
 .longs b{font-family:var(--fh)}
 
@@ -366,7 +366,7 @@ footer a:hover{color:#fff}
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>จอลูกค้าพร้อมโฆษณารูป/วิดีโอ</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สมาชิกสะสมแต้มด้วยเบอร์โทร</li>
         </ul>
-        <div class="price paidonly"><b>฿299</b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span class="flim">สินค้า 50 รายการ · 500 บิล/เดือน</span></div>
+        <div class="price paidonly"><span>เริ่มที่</span><b>฿<span id="cMonthCard">49</span></b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span class="flim">สินค้า 50 รายการ · 500 บิล/เดือน</span></div>
         <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>เข้าสู่ระบบร้านคาเฟ่ที่ <code>/pos</code></span></div>
         <div class="acts"><a class="btn main" href="/signup" data-free="สมัครใช้งานฟรี">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/pos">เข้าสู่ระบบ Cafe</a></div>
       </article>
@@ -381,7 +381,7 @@ footer a:hover{color:#fff}
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR พิมพ์ใบเสร็จ</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รายงานยอดขายรายวัน/สินค้าขายดี</li>
         </ul>
-        <div class="price paidonly"><b>฿<span id="rMonthCard">349</span></b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span class="flim">สินค้า 50 รายการ · 500 บิล/เดือน</span></div>
+        <div class="price paidonly"><span>เริ่มที่</span><b>฿<span id="rMonthCard">49</span></b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span class="flim">สินค้า 50 รายการ · 500 บิล/เดือน</span></div>
         <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>เข้าสู่ระบบร้านค้าที่ <code>/retail</code></span></div>
         <div class="acts"><a class="btn main" href="/retail/signup" data-free="สมัครใช้งานฟรี">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/retail">เข้าสู่ระบบ Retail</a></div>
       </article>
@@ -425,11 +425,11 @@ footer a:hover{color:#fff}
     <div class="plan fx d2">
       <span class="tag">ทดลองใช้ฟรี 30 วัน</span>
       <div style="font:600 16px/1 var(--fh);color:rgba(255,255,255,.8)">Easy POS Cafe</div>
-      <div class="amt">฿<span id="pMonth">299</span><small> / เดือน</small></div>
+      <div class="amt"><small>เริ่มที่ </small>฿<span id="pMonth">49</span><small> / เดือน</small></div>
       <div class="sub">ใช้ฟรี 30 วันแรก ชำระผ่านพร้อมเพย์</div>
       <ul>
         <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ทุกฟีเจอร์: หน้าขาย Mobile Order จอครัว จอลูกค้า สมาชิก รายงาน</li>
-        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ใช้ได้ไม่จำกัดอุปกรณ์และไม่จำกัดจำนวนบิล</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ใช้ได้ไม่จำกัดอุปกรณ์ · จำนวนสินค้าและบิลตามแพ็กเกจ</li>
         <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>บัญชีพนักงานตามแพ็กเกจ</li>
         <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ดูวันหมดอายุและแจ้งชำระได้เองในระบบ</li>
       </ul>
@@ -439,7 +439,7 @@ footer a:hover{color:#fff}
     <div class="plan fx d3">
       <span class="tag">ทดลองใช้ฟรี 30 วัน</span>
       <div style="font:600 16px/1 var(--fh);color:rgba(255,255,255,.8)">Easy POS Retail</div>
-      <div class="amt">฿<span id="rMonth">349</span><small> / เดือน</small></div>
+      <div class="amt"><small>เริ่มที่ </small>฿<span id="rMonth">49</span><small> / เดือน</small></div>
       <div class="sub">ใช้ฟรี 30 วันแรก ชำระผ่านพร้อมเพย์</div>
       <ul>
         <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ทุกฟีเจอร์: ขายด้วยบาร์โค้ด สต็อก รับสินค้าเข้า ขายเงินเชื่อ สมาชิก รายงานกำไร</li>
@@ -505,13 +505,14 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 var SB='https://roggqmvmgfxsxynulpvk.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 function money(n){return Number(n||0).toLocaleString('th-TH')}
 var PK=null;
-function longsHtml(list,en){return list.filter(function(p){return Number(p.months)>1}).map(function(p){var mo=Number(p.months);
-    var name=en?(mo===12?'Yearly':mo+' months'):String(p.name).replace(/[<>&]/g,'');
-    return '<span>'+name+' <b>฿'+money(p.price)+'</b> · '+(en?'avg ฿'+money(Math.round(p.price/mo))+'/mo':'เฉลี่ย ฿'+money(Math.round(p.price/mo))+'/เดือน')+'</span>'}).join('')}
+function longsHtml(list,en){var nf=function(v){return v?money(v):(en?'unlimited':'ไม่จำกัด')};
+  return list.map(function(p){var mo=Number(p.months)||1,name=String(p.name||'').replace(/[<>&]/g,'');
+    return '<span><b>'+name+'</b> ฿'+money(p.price)+(mo>1?' / '+mo+(en?' months':' เดือน'):(en?'/mo':'/เดือน'))+' · '+(en?nf(p.items)+' products · '+nf(p.bills)+' bills/mo':'สินค้า '+nf(p.items)+' รายการ · '+nf(p.bills)+' บิล/เดือน')+(p.staff?' · '+(en?p.staff+' staff':'พนักงาน '+p.staff):'')+'</span>'}).join('')}
+function minMonthly(list){var v=list.map(function(p){return Number(p.price)/Math.max(1,Number(p.months)||1)}).filter(function(x){return x>0});return v.length?Math.round(Math.min.apply(null,v)):null}
 function drawLongs(){if(!PK)return;var en=window.EP_LANG==='en';
   var C=PK.filter(function(p){return p.product!=='retail'}),Rt=PK.filter(function(p){return p.product==='retail'});
-  var m=C.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
-  var r=Rt.find(function(p){return Number(p.months)===1});if(r){document.getElementById('rMonth').textContent=money(r.price);document.getElementById('rMonthCard').textContent=money(r.price)}
+  var m=minMonthly(C);if(m!=null){document.getElementById('pMonth').textContent=money(m);document.getElementById('cMonthCard').textContent=money(m)}
+  var r=minMonthly(Rt);if(r!=null){document.getElementById('rMonth').textContent=money(r);document.getElementById('rMonthCard').textContent=money(r)}
   document.getElementById('longs').innerHTML=longsHtml(C,en);document.getElementById('longsR').innerHTML=longsHtml(Rt,en)}
 document.addEventListener('ep-lang',drawLongs);
 /* Admin turned payments off: the service is free, so no prices anywhere. */

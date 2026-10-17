@@ -663,6 +663,7 @@ tr.click:hover td{background:var(--accent-soft)}
 .bill-pay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
 .bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center;border:1px solid var(--line,#dde3ea)}
 .bill-months{display:flex;gap:6px;flex-wrap:wrap}
+.bill-pks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}.bill-pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.bill-pk b{font-size:15px}.bill-pk .pp{font-size:18px;font-weight:800}.bill-pk small{color:var(--muted);font-size:12px;line-height:1.35}.bill-pk[aria-pressed=true]{border-color:var(--accent,#E39B2D);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#E39B2D) 22%,transparent)}.bill-pk .cur{font-size:11px;font-weight:700;color:var(--ok-ink,#166534);background:var(--ok-soft,#dcfce7);padding:1px 8px;border-radius:999px}
 .bill .chip{border:1px solid var(--line,#dde3ea);background:var(--surface,#fff);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;color:var(--ink,#13202c)}
 .bill .chip[aria-pressed=true]{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff)}
 .bill .form{display:flex;flex-direction:column;gap:10px}
@@ -790,13 +791,18 @@ function shrink(file){return new Promise(function(res){try{var img=new Image();i
 function renderBilling(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=el._m||1;
   var lim=function(n){return n==null?'ไม่จำกัด':n};var limStat=(sh.productLimit!=null||sh.billLimit!=null)?'<div><small>สินค้า</small><b>'+(sh.productsUsed||0)+' / '+lim(sh.productLimit)+'</b></div><div><small>บิลเดือนนี้</small><b>'+(sh.billsMonth||0)+' / '+lim(sh.billLimit)+'</b></div>':'';
   if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Easy POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';return}
-  var amt=(+sh.price||0)*months;
+  var nf=function(v){return v?Number(v).toLocaleString('th-TH'):'ไม่จำกัด'};
+  var pks=(bl.packages||[]).filter(function(p){return (p.product||'cafe')===(sh.product||'cafe')&&+p.price>0});
+  var curPk=pks.filter(function(p){return (+p.months||1)===1&&+p.price===+sh.price&&(sh.productLimit==null||+p.items===+sh.productLimit)})[0];
+  var pk=pks.filter(function(p){return p.id===el._pk})[0]||curPk||pks[0]||null;var multi=pk&&(+pk.months||1)>1;
+  var amt=pk?(multi?+pk.price:+pk.price*months):(+sh.price||0)*months;
   el.innerHTML='<div class="bill">'+
     '<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
     '<div class="bill-stat"><div><small>ใช้งานได้ถึง</small><b>'+dTh(sh.expiresAt)+'</b></div><div><small>ค่าบริการ</small><b>'+baht(sh.price)+' / เดือน</b></div><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div><div><small>ผ่อนผันถึง</small><b>'+dTh(sh.graceUntil)+'</b></div>'+limStat+'</div>'+
     '<span class="hint">ชำระก่อนวันหมดอายุเพื่อใช้งานต่อเนื่อง หลังหมดอายุใช้งานต่อได้อีก '+(bl.graceDays||7)+' วัน จากนั้นระบบจะล็อกการขายจนกว่าผู้ดูแลระบบจะอนุมัติการชำระเงิน ข้อมูลร้านไม่หาย</span></div>'+
     (isMgr?'<div class="bill-card"><h3>ชำระค่าบริการ</h3><div class="bill-pay"><div class="bill-qr" id="billQr">'+(bl.promptpay?'':'ผู้ดูแลระบบยังไม่ได้ตั้ง QR รับเงิน')+'</div><div class="form" style="gap:10px">'+
-      '<div><span class="grp-t">จำนวนเดือน</span><div class="bill-months">'+[1,3,6,12].map(function(m){return '<button type="button" class="chip" data-bm="'+m+'" aria-pressed="'+(m===months)+'">'+m+' เดือน</button>'}).join('')+'</div></div>'+
+      (pks.length?'<div><span class="grp-t">แพ็กเกจ</span><div class="bill-pks">'+pks.map(function(p){var mo=+p.months||1;return '<button type="button" class="bill-pk" data-bp="'+esc(p.id)+'" aria-pressed="'+(pk&&p.id===pk.id)+'"><b>'+esc(p.name||'')+(curPk&&p.id===curPk.id?' <span class="cur">แพ็กเกจปัจจุบัน</span>':'')+'</b><span class="pp">'+baht(p.price)+'<small> / '+(mo>1?mo+' เดือน':'เดือน')+'</small></span><small>สินค้า '+nf(p.items)+' · บิล '+nf(p.bills)+'/เดือน<br>พนักงาน '+(p.staff||0)+' บัญชี'+((sh.product==='retail')?' · ร้าน/สาขา '+(p.branches||1):'')+'</small></button>'}).join('')+'</div><span class="hint">เลือกแพ็กเกจอื่นเพื่ออัปเกรดหรือลดแพ็กเกจ มีผลเมื่อผู้ดูแลระบบอนุมัติการชำระเงิน</span></div>':'')+
+      (multi?'':'<div><span class="grp-t">จำนวนเดือน</span><div class="bill-months">'+[1,3,6,12].map(function(m){return '<button type="button" class="chip" data-bm="'+m+'" aria-pressed="'+(m===months)+'">'+m+' เดือน</button>'}).join('')+'</div></div>')+
       '<div style="font-size:15px">ยอดที่ต้องโอน <b class="num" style="font-size:24px">'+baht(amt)+'</b></div>'+
       (bl.bankNo?'<div class="hint" style="font-size:14px;color:var(--ink)">'+esc(bl.bankName||'')+' '+esc(bl.bankNo)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
       (bl.promptpay?'<div class="hint">พร้อมเพย์ '+esc(bl.promptpay)+(bl.accountName?' · '+esc(bl.accountName):'')+'</div>':'')+
@@ -807,19 +813,20 @@ function renderBilling(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=
     '<div class="bill-card"><h3>ประวัติการแจ้งชำระ</h3><div class="bill-hist" id="billHist"><div class="muted">กำลังโหลด…</div></div></div></div>';
   if(bl.promptpay&&isMgr&&typeof QRCode!=='undefined'){try{new QRCode(el.querySelector('#billQr'),{text:ppPayload(bl.promptpay,amt),width:190,height:190,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}
   el.querySelectorAll('[data-bm]').forEach(function(b){b.addEventListener('click',function(){el._m=+b.dataset.bm;renderBilling(el)})});
-  var send=el.querySelector('#billSend');if(send)send.addEventListener('click',function(){submitPay(el,months)});
+  el.querySelectorAll('[data-bp]').forEach(function(b){b.addEventListener('click',function(){el._pk=b.dataset.bp;renderBilling(el)})});
+  var send=el.querySelector('#billSend');if(send)send.addEventListener('click',function(){submitPay(el,multi?+pk.months:months,pk&&pk.id)});
   if(isMgr)sb.from('pos_payments').select('*').eq('shop_id',SID).order('created_at',{ascending:false}).limit(20).then(function(r){var h=el.querySelector('#billHist');if(!h)return;
     if(r.error){h.innerHTML='<div class="note">โหลดประวัติไม่สำเร็จ</div>';return}
     h.innerHTML=r.data.length?r.data.map(function(p){var s=PST[p.status]||['',''];return '<div class="r"><span>'+dTh(p.created_at)+'</span><b class="num">'+baht(p.amount)+'</b><span class="muted">'+p.months+' เดือน</span><span class="bchip '+s[1]+'">'+s[0]+'</span><span class="sp"></span>'+(p.period_to?'<span class="muted">ต่ออายุถึง '+dTh(p.period_to)+'</span>':'')+(p.admin_note?'<span class="muted">· '+esc(p.admin_note)+'</span>':'')+'</div>'}).join(''):'<div class="muted">ยังไม่มีการแจ้งชำระ</div>'});
   else{var h=el.querySelector('#billHist');if(h)h.parentNode.remove()}
 }
-function submitPay(el,months){var f=el.querySelector('#billSlip').files[0],m=el.querySelector('#billMsg'),b=el.querySelector('#billSend');
+function submitPay(el,months,pkg){var f=el.querySelector('#billSlip').files[0],m=el.querySelector('#billMsg'),b=el.querySelector('#billSend');
   if(!f){m.textContent='แนบสลิปการโอนก่อน';return}if(!/^image\//.test(f.type)){m.textContent='สลิปต้องเป็นไฟล์รูปภาพ';return}
   b.disabled=true;m.textContent='กำลังส่ง…';
   shrink(f).then(function(blob){var path=SID+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)+'.jpg';
     return sb.storage.from('pos-slips').upload(path,blob,{contentType:'image/jpeg',upsert:false}).then(function(r){if(r.error)throw r.error;
-      return sb.rpc('pos_pay_submit',{p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null})})})
-  .then(function(r){if(r.error)throw r.error;payNotify(r.data);m.textContent='';el._m=1;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
+      var args={p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null};if(pkg)args.p_pkg=pkg;return sb.rpc('pos_pay_submit',args)})})
+  .then(function(r){if(r.error)throw r.error;payNotify(r.data);m.textContent='';el._m=1;el._pk=null;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
   .catch(function(e){b.disabled=false;m.textContent=/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
 function payNotify(id){if(!id)return;sb.auth.getSession().then(function(x){var t=x.data.session&&x.data.session.access_token;if(!t)return;
   fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({action:'pay_notify',id:typeof id==='object'?id.id:id})}).catch(function(){})})}
