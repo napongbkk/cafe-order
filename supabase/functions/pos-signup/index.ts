@@ -6,7 +6,8 @@ const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_ENV = Deno.env.get("RESEND_API_KEY") || "";
 const FROM = Deno.env.get("MAIL_FROM") || "Coconut POS <onboarding@resend.dev>";
-const APP = (Deno.env.get("APP_URL") || "https://easyposth.vercel.app").replace(/\/$/, "");
+const APP_ENV = Deno.env.get("APP_URL") || "";
+const APP = (APP_ENV && !/easyposth|cafe-order-umber/.test(APP_ENV) ? APP_ENV : "https://coconutpos.vercel.app").replace(/\/$/, "");
 const db = createClient(SB_URL, SERVICE, { auth: { persistSession: false } });
 
 const CORS = {

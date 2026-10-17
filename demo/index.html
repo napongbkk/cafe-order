@@ -2160,7 +2160,7 @@ function renderOverlay(force){
 
 /* ===== customer app bridge (Supabase) ===== */
 const SB_PROJECT='roggqmvmgfxsxynulpvk';
-const APP_URL_DEFAULT=(/^https?:$/.test(location.protocol)&&/(^|\.)vercel\.app$|easypos/i.test(location.hostname)?location.origin:'https://cafe-order-umber.vercel.app')+'/order/';
+const APP_URL_DEFAULT=(/^https?:$/.test(location.protocol)&&/(^|\.)vercel\.app$|easypos|coconutpos/i.test(location.hostname)?location.origin:'https://coconutpos.vercel.app')+'/order/';
 const UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const deviceId=(()=>{try{let d=localStorage.getItem('pos.dev');if(!d){d=uid();localStorage.setItem('pos.dev',d)}return d}catch(e){return uid()}})();
 S.app={state:'off',msg:'',last:0,count:0};let bridgeT=null,lastSnap='',pushed={};
