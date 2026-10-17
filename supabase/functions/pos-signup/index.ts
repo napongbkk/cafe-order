@@ -172,14 +172,17 @@ async function apply(req: Request, b: Record<string, string>) {
   if (error) { console.log("insert", error.message); return fail("save_failed", 500); }
 
   const free = !Number(pk.price);
-  const freeUse = pk.id === "free";
+  const freeUse = pk.id === "free" || pk.id === "free-r";
+  const retail = pk.product === "retail";
+  const PNAME = retail ? "Easy POS Retail" : "Easy POS Cafe";
+  const LOGIN = `${APP}${retail ? "/retail" : "/pos"}`;
   await mail(f.email, `Easy POS - ได้รับคำขอเปิดร้าน ${f.shop}`,
     `<p>สวัสดีคุณ ${esc(f.first)}</p><p>เราได้รับคำขอเปิดร้าน <b>${esc(f.shop)}</b> แล้ว</p>
      <p>แพ็กเกจ: <b>${esc(pk.name)}</b>${free ? "" : ` · ยอดชำระ <b>${baht(Number(pk.price))}</b>`}</p>
      ${free ? "" : `<p>หากยังไม่ได้แนบสลิป เข้าไปแนบได้ที่ <a href="${APP}/signup?id=${app.id}&t=${app.token}">${APP}/signup</a></p>`}
-     <p>เมื่อผู้ดูแลระบบอนุมัติ เราจะส่งอีเมลยืนยันอีกครั้ง จากนั้นเข้าใช้งานที่ <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>`);
+     <p>เมื่อผู้ดูแลระบบอนุมัติ เราจะส่งอีเมลยืนยันอีกครั้ง จากนั้นเข้าใช้งาน ${PNAME} ที่ <a href="${LOGIN}">${LOGIN}</a> ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>`);
   const ad = await admins();
-  if (ad.length) await mail(ad, `Easy POS - ร้านสมัครใหม่${freeUse ? " (ใช้ฟรี)" : free ? " (ทดลองฟรี)" : ""}: ${f.shop}`,
+  if (ad.length) await mail(ad, `Easy POS - ร้านสมัครใหม่ ${retail ? "Retail" : "Cafe"}${freeUse ? " (ใช้ฟรี)" : free ? " (ทดลองฟรี)" : ""}: ${f.shop}`,
     `<p><b>${esc(f.shop)}</b> · ${esc(f.first)} ${esc(f.last)} · ${esc(f.phone)} · ${esc(f.email)}</p><p>${esc(f.address)}</p>
      <p>แพ็กเกจ ${esc(pk.name)} · ${free ? "ฟรี" : baht(Number(pk.price))}</p><p><a href="${APP}/admin#apps">เปิดแดชบอร์ดผู้ดูแลระบบ</a></p>`);
   return json({ id: app.id, token: app.token, amount: app.amount, package: app.package, mail: await mailOn() });
@@ -213,11 +216,13 @@ async function notify(req: Request, b: Record<string, string>) {
   if (!a) return fail("not_found", 404);
   let sent = false;
   if (a.status === "approved") {
-    const { data: s } = await db.from("pos_shops").select("slug,expires_at").eq("id", a.shop_id).maybeSingle();
+    const { data: s } = await db.from("pos_shops").select("slug,expires_at,product").eq("id", a.shop_id).maybeSingle();
+    const retail = s?.product === "retail";
+    const LOGIN = `${APP}${retail ? "/retail" : "/pos"}`;
     sent = await mail(a.email, `Easy POS - ร้าน ${a.shop_name} ได้รับการอนุมัติแล้ว`,
       `<p>สวัสดีคุณ ${esc(a.first_name)}</p><p>ร้าน <b>${esc(a.shop_name)}</b> ได้รับการอนุมัติแล้ว ใช้งานได้ถึง ${new Date(s?.expires_at || Date.now()).toLocaleDateString("th-TH", { dateStyle: "long" })}</p>
-       <p>เข้าใช้งาน POS: <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมล ${esc(a.email)} และรหัสผ่านที่ตั้งไว้ตอนสมัคร</p>
-       <p>ลิงก์สั่งอาหารของลูกค้า: <a href="${APP}/s/${s?.slug}">${APP}/s/${esc(s?.slug)}</a></p>${a.admin_note ? `<p>หมายเหตุ: ${esc(a.admin_note)}</p>` : ""}`);
+       <p>เข้าใช้งาน ${retail ? "Easy POS Retail" : "POS"}: <a href="${LOGIN}">${LOGIN}</a> ด้วยอีเมล ${esc(a.email)} และรหัสผ่านที่ตั้งไว้ตอนสมัคร</p>
+       ${retail ? "" : `<p>ลิงก์สั่งอาหารของลูกค้า: <a href="${APP}/s/${s?.slug}">${APP}/s/${esc(s?.slug)}</a></p>`}${a.admin_note ? `<p>หมายเหตุ: ${esc(a.admin_note)}</p>` : ""}`);
   } else if (a.status === "rejected") {
     sent = await mail(a.email, `Easy POS - ผลคำขอเปิดร้าน ${a.shop_name}`,
       `<p>สวัสดีคุณ ${esc(a.first_name)}</p><p>คำขอเปิดร้าน <b>${esc(a.shop_name)}</b> ยังไม่ได้รับการอนุมัติ</p>${a.admin_note ? `<p>เหตุผล: ${esc(a.admin_note)}</p>` : ""}<p>ติดต่อผู้ดูแลระบบหากมีข้อสงสัย</p>`);

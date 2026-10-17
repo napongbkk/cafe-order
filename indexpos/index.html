@@ -203,7 +203,8 @@ section{padding:96px 0}
 .pricing .blob.b{top:-200px;right:-160px;opacity:.3}
 .pricing .shead p{color:rgba(255,255,255,.7)}
 .pricing .eyebrow{color:#9DB4FF}
-.plan{max-width:560px;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:36px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:center;position:relative}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:28px;max-width:1120px;margin:0 auto;align-items:stretch}
+.plan{max-width:560px;width:100%;margin:0 auto;background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.04));border:1px solid rgba(255,255,255,.16);border-radius:30px;padding:36px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);text-align:center;position:relative}
 .plan .tag{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:var(--grad);color:#fff;padding:7px 16px;border-radius:99px;font:600 13px/1 var(--fh);box-shadow:0 10px 24px -10px rgba(79,123,255,.8)}
 .plan .amt{font:700 64px/1 var(--fh);margin:10px 0 4px}
 .plan .amt small{font-size:20px;font-weight:500;color:rgba(255,255,255,.7)}
@@ -361,7 +362,7 @@ footer a:hover{color:#fff}
       </article>
       <article class="prod retail fx d2">
         <div class="top"><span class="mk retail"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>
-          <h3>Easy POS Retail<small>ร้านค้า ร้านของชำ มินิมาร์ท</small></h3><span class="pill st dev">กำลังพัฒนา</span></div>
+          <h3>Easy POS Retail<small>ร้านค้า ร้านของชำ มินิมาร์ท</small></h3><span class="pill st live"><i></i>พร้อมใช้งาน</span></div>
         <ul>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สแกนบาร์โค้ดขายสินค้า</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สต็อกสินค้า แจ้งเตือนของใกล้หมด</li>
@@ -370,9 +371,9 @@ footer a:hover{color:#fff}
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR พิมพ์ใบเสร็จ</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รายงานยอดขายรายวัน/สินค้าขายดี</li>
         </ul>
-        <div class="price paidonly"><b>฿299</b><span>/ เดือน · เมื่อเปิดให้บริการ</span></div>
-        <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>ระบบเข้าสู่ระบบแยกที่ <code>/retail</code> · เปิดเร็ว ๆ นี้</span></div>
-        <div class="acts"><a class="btn main" href="/retail">ดูรายละเอียด</a><a class="btn line" href="/retail">เข้าสู่ระบบ Retail</a></div>
+        <div class="price paidonly"><b>฿<span id="rMonthCard">349</span></b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span>ไม่มีค่าใช้จ่าย</span></div>
+        <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>เข้าสู่ระบบร้านค้าที่ <code>/retail</code></span></div>
+        <div class="acts"><a class="btn main" href="/retail/signup" data-free="สมัครใช้งานฟรี">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/retail">เข้าสู่ระบบ Retail</a></div>
       </article>
     </div>
   </div>
@@ -409,7 +410,8 @@ footer a:hover{color:#fff}
 <section class="pricing paidonly" id="pricing" aria-labelledby="priceT">
   <div class="blob a"></div><div class="blob b"></div>
   <div class="wrap">
-    <div class="shead"><span class="eyebrow fx">ราคา</span><h2 id="priceT" class="fx d1">ราคาเดียว ใช้ได้ทุกฟีเจอร์</h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีสัญญาผูกมัด ทดลองใช้ฟรีก่อนตัดสินใจ</p></div>
+    <div class="shead"><span class="eyebrow fx">ราคา</span><h2 id="priceT" class="fx d1">ราคาชัดเจน ใช้ได้ทุกฟีเจอร์</h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีสัญญาผูกมัด ทดลองใช้ฟรีก่อนตัดสินใจ</p></div>
+    <div class="plans">
     <div class="plan fx d2">
       <span class="tag">ทดลองใช้ฟรี 30 วัน</span>
       <div style="font:600 16px/1 var(--fh);color:rgba(255,255,255,.8)">Easy POS Cafe</div>
@@ -424,6 +426,21 @@ footer a:hover{color:#fff}
       <a class="btn grad" href="/signup">เริ่มทดลองใช้ฟรี 30 วัน</a>
       <div class="longs" id="longs"></div>
     </div>
+    <div class="plan fx d3">
+      <span class="tag">ทดลองใช้ฟรี 30 วัน</span>
+      <div style="font:600 16px/1 var(--fh);color:rgba(255,255,255,.8)">Easy POS Retail</div>
+      <div class="amt">฿<span id="rMonth">349</span><small> / เดือน</small></div>
+      <div class="sub">ใช้ฟรี 30 วันแรก ชำระผ่านพร้อมเพย์</div>
+      <ul>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ทุกฟีเจอร์: ขายด้วยบาร์โค้ด สต็อก รับสินค้าเข้า ขายเงินเชื่อ สมาชิก รายงานกำไร</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>หลายสาขา/คลัง โอนสินค้า เอกสารขาย ใบกำกับภาษี</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>บัญชีพนักงานพร้อมสิทธิ์แคชเชียร์/ผู้จัดการ</li>
+        <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ดูวันหมดอายุและแจ้งชำระได้เองในระบบ</li>
+      </ul>
+      <a class="btn grad" href="/retail/signup">เริ่มทดลองใช้ Retail ฟรี 30 วัน</a>
+      <div class="longs" id="longsR"></div>
+    </div>
+    </div>
   </div>
 </section>
 
@@ -434,7 +451,7 @@ footer a:hover{color:#fff}
       <details class="fx freeonly"><summary>ใช้งานฟรีจริงไหม</summary><p>จริง ตอนนี้เปิดให้ใช้ Easy POS Cafe ฟรีทุกฟีเจอร์ ไม่ต้องชำระเงินและไม่ต้องผูกบัตร สมัครแล้วรอทีมงานยืนยันเปิดร้านก็เริ่มขายได้ทันที</p></details>
       <details class="fx paidonly"><summary>ทดลองใช้ฟรี 30 วัน ต้องจ่ายเงินก่อนไหม</summary><p>ไม่ต้อง เลือกแพ็กเกจ “ทดลองใช้ฟรี 30 วัน” ตอนสมัคร เมื่อร้านได้รับการยืนยันก็ใช้งานได้ทุกฟีเจอร์ทันที ยกเว้นบัญชีพนักงานซึ่งเพิ่มได้หลังชำระค่าบริการ ใกล้ครบกำหนดค่อยชำระผ่านพร้อมเพย์จากหน้าตั้งค่าของร้าน</p></details>
       <details class="fx d1"><summary>ต้องใช้อุปกรณ์อะไรบ้าง</summary><p>ใช้แท็บเล็ต คอมพิวเตอร์ หรือมือถือที่มีเบราว์เซอร์และอินเทอร์เน็ตก็พอ ต่อเครื่องพิมพ์ใบเสร็จและลิ้นชักเก็บเงินเพิ่มได้ถ้าต้องการ</p></details>
-      <details class="fx d2"><summary>Easy POS Cafe กับ Easy POS Retail ต่างกันอย่างไร</summary><p>Cafe ออกแบบสำหรับร้านที่ขายเมนูมีตัวเลือก มีโต๊ะ ครัว และออเดอร์จากมือถือ ส่วน Retail สำหรับร้านค้าที่ขายสินค้าด้วยบาร์โค้ดและต้องคุมสต็อก ทั้งสองระบบมีบัญชีและหน้าเข้าสู่ระบบแยกกัน ตอนนี้ Retail กำลังพัฒนา</p></details>
+      <details class="fx d2"><summary>Easy POS Cafe กับ Easy POS Retail ต่างกันอย่างไร</summary><p>Cafe ออกแบบสำหรับร้านที่ขายเมนูมีตัวเลือก มีโต๊ะ ครัว และออเดอร์จากมือถือ ส่วน Retail สำหรับร้านค้าที่ขายสินค้าด้วยบาร์โค้ดและต้องคุมสต็อก ทั้งสองระบบมีบัญชีและหน้าเข้าสู่ระบบแยกกัน (Cafe ที่ /pos · Retail ที่ /retail) ตอนสมัครเลือกระบบที่ต้องการได้เลย</p></details>
       <details class="fx d3"><summary>พนักงานเข้าใช้งานอย่างไร</summary><p>ผู้จัดการร้านสร้างบัญชีให้พนักงานในหน้าตั้งค่า ชื่อผู้ใช้ขึ้นต้นด้วยรหัสร้านของคุณ พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล</p></details>
       <details class="fx d4"><summary>มีคู่มือหรือวิดีโอสอนไหม</summary><p>มี <a href="/guide">คู่มือการใช้งานแบบละเอียด</a> พร้อมวิดีโอสอนทีละขั้น และลองใช้ระบบจริงได้ที่ <a href="/demo">เดโม</a> โดยไม่ต้องสมัคร</p></details>
       <details class="fx d4 paidonly"><summary>ถ้าไม่ต่ออายุ ข้อมูลจะหายไหม</summary><p>ไม่หาย หลังครบกำหนดมีช่วงผ่อนผัน 7 วัน จากนั้นการขายจะถูกล็อกไว้ชั่วคราว เมื่อชำระและได้รับการยืนยัน ร้านกลับมาใช้งานต่อได้พร้อมข้อมูลเดิม</p></details>
@@ -455,7 +472,7 @@ footer a:hover{color:#fff}
   <div class="wrap">
     <a class="logo" href="/indexpos" aria-label="Easy POS"><img src="/easypos.svg" alt="" width="30" height="30"><b style="font-size:18px">Easy<span>POS</span></b></a>
     <span>© <span id="yr">2026</span> Easy POS</span>
-    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/guide">คู่มือการใช้งาน</a><a href="/demo">ลองเดโม</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a class="paidonly" href="#pricing">ราคา</a></nav>
+    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/guide">คู่มือการใช้งาน</a><a href="/guide/retail">คู่มือ Retail</a><a href="/demo">ลองเดโม</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a class="paidonly" href="#pricing">ราคา</a></nav>
   </div>
 </footer>
 
@@ -484,11 +501,14 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 var SB='https://roggqmvmgfxsxynulpvk.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 function money(n){return Number(n||0).toLocaleString('th-TH')}
 var PK=null;
-function drawLongs(){if(!PK)return;var en=window.EP_LANG==='en';
-  var m=PK.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
-  document.getElementById('longs').innerHTML=PK.filter(function(p){return Number(p.months)>1}).map(function(p){var mo=Number(p.months);
+function longsHtml(list,en){return list.filter(function(p){return Number(p.months)>1}).map(function(p){var mo=Number(p.months);
     var name=en?(mo===12?'Yearly':mo+' months'):String(p.name).replace(/[<>&]/g,'');
     return '<span>'+name+' <b>฿'+money(p.price)+'</b> · '+(en?'avg ฿'+money(Math.round(p.price/mo))+'/mo':'เฉลี่ย ฿'+money(Math.round(p.price/mo))+'/เดือน')+'</span>'}).join('')}
+function drawLongs(){if(!PK)return;var en=window.EP_LANG==='en';
+  var C=PK.filter(function(p){return p.product!=='retail'}),Rt=PK.filter(function(p){return p.product==='retail'});
+  var m=C.find(function(p){return Number(p.months)===1});if(m)document.getElementById('pMonth').textContent=money(m.price);
+  var r=Rt.find(function(p){return Number(p.months)===1});if(r){document.getElementById('rMonth').textContent=money(r.price);document.getElementById('rMonthCard').textContent=money(r.price)}
+  document.getElementById('longs').innerHTML=longsHtml(C,en);document.getElementById('longsR').innerHTML=longsHtml(Rt,en)}
 document.addEventListener('ep-lang',drawLongs);
 /* Admin turned payments off: the service is free, so no prices anywhere. */
 function freeMode(){document.documentElement.classList.add('freemode');document.querySelectorAll('[data-free]').forEach(function(e){e.textContent=e.getAttribute('data-free')})}

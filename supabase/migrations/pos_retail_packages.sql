@@ -1,0 +1,5 @@
+-- Packages per system: billing.packages[].product = 'cafe' | 'retail', billing.priceRetail = default Retail price.
+-- Retail packages: r-trial (free 30 days, no staff), r1 ฿349/month (5 staff), r6 ฿1,890 (5 staff), r12 ฿3,490 (10 staff).
+-- pos_public_billing returns all packages (and price/priceRetail); in free mode it returns 'free' (cafe) and 'free-r' (retail).
+-- pos_admin_approve_app creates the shop with the package's product and seeds Retail settings for retail shops.
+-- pos_pay_review picks the staff quota from packages of the shop's product.
