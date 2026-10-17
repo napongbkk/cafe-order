@@ -286,6 +286,24 @@ footer a:hover{color:#fff}
   .menu{width:min(300px,calc(100vw - 32px))}
   footer nav{margin-left:0}
 }
+
+/* contact (LINE) */
+.ctlink[hidden]{display:none!important}
+.ctmodal{position:fixed;inset:0;z-index:200;background:rgba(11,16,36,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding:16px}
+.ctmodal[hidden]{display:none}
+.ctbox{position:relative;width:min(380px,100%);background:#fff;border-radius:26px;padding:26px 24px 22px;text-align:center;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:12px;align-items:center;animation:ctin .22s ease-out}
+@keyframes ctin{from{opacity:0;transform:translateY(12px) scale(.98)}}
+.ctx{position:absolute;top:10px;right:12px;width:36px;height:36px;border-radius:50%;border:0;background:#F1F3F9;font-size:22px;line-height:1;cursor:pointer;color:var(--ink)}
+.cthead{display:flex;gap:12px;align-items:center;text-align:left;align-self:stretch;padding-right:30px}
+.ctico{width:48px;height:48px;border-radius:14px;background:#06C755;color:#fff;display:grid;place-items:center;flex-shrink:0}
+.cthead h3{font-size:19px}.cthead p{margin:2px 0 0;color:var(--muted);font-size:14px;line-height:1.4}
+.ctqr{width:220px;height:220px;border-radius:18px;border:1px solid var(--line);padding:10px;background:#fff;display:grid;place-items:center}
+.ctqr img{width:100%;height:100%;object-fit:contain}
+.ctid{font-size:15px;color:var(--ink2)}.ctid b{font-family:var(--fh);color:#06A847}
+.ctadd{background:#06C755;color:#fff;width:100%;box-shadow:0 10px 22px -12px rgba(6,199,85,.8)}.ctadd:hover{background:#05B34C}
+.ctphone{font-size:14px;color:var(--ink2)}.ctphone a{color:var(--ink);font-weight:600}
+.cthint{color:var(--muted);font-size:12.5px}
+.mguide.ctlink a{display:inline-flex;align-items:center;gap:6px;color:#06A847}
 </style>
 </head>
 <body class="no-js">
@@ -293,7 +311,7 @@ footer a:hover{color:#fff}
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="logo" href="/indexpos" aria-label="Easy POS หน้าแรก"><img src="/easypos.svg" alt="" width="38" height="38"><b>Easy<span>POS</span></b></a>
-    <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a class="paidonly" href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a><div class="login gmenu" id="guideDd"><button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="guideMenu">คู่มือ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="menu" id="guideMenu" role="menu"><a href="/guide" role="menuitem"><span class="mk cafe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5c-.8 1 .8 2 0 3.2M12 2.5c-.8 1 .8 2 0 3.2"/></svg></span><span><b>คู่มือ Easy POS Cafe</b><small>คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม · มีวิดีโอสอน</small></span></a><a href="/guide/retail" role="menuitem"><span class="mk retail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><span><b>คู่มือ Easy POS Retail</b><small>ร้านค้า ร้านของชำ มินิมาร์ท</small></span></a></div></div></nav>
+    <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a class="paidonly" href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a><a href="#contact" class="ctlink" data-contact hidden>ติดต่อเรา</a><div class="login gmenu" id="guideDd"><button type="button" aria-haspopup="true" aria-expanded="false" aria-controls="guideMenu">คู่มือ <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button><div class="menu" id="guideMenu" role="menu"><a href="/guide" role="menuitem"><span class="mk cafe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5c-.8 1 .8 2 0 3.2M12 2.5c-.8 1 .8 2 0 3.2"/></svg></span><span><b>คู่มือ Easy POS Cafe</b><small>คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม · มีวิดีโอสอน</small></span></a><a href="/guide/retail" role="menuitem"><span class="mk retail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><span><b>คู่มือ Easy POS Retail</b><small>ร้านค้า ร้านของชำ มินิมาร์ท</small></span></a></div></div></nav>
     <span class="sp"></span>
     <div class="langsw" role="group" aria-label="ภาษา"><button type="button" data-lang="th" aria-pressed="true">TH</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
     <div class="login" id="login">
@@ -301,7 +319,7 @@ footer a:hover{color:#fff}
       <div class="menu" id="loginMenu" role="menu">
         <a href="/pos" role="menuitem"><span class="mk cafe"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9h13v4a6 6 0 0 1-6 6h-1a6 6 0 0 1-6-6z"/><path d="M17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 2.5c-.8 1 .8 2 0 3.2M12 2.5c-.8 1 .8 2 0 3.2"/></svg></span><span><b>Easy POS Cafe</b><small>คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม</small></span></a>
         <a href="/retail" role="menuitem"><span class="mk retail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><span><b>Easy POS Retail</b><small>ร้านค้า ร้านของชำ มินิมาร์ท</small></span></a>
-        <div class="mguide"><small>คู่มือการใช้งาน</small><a href="/guide" role="menuitem">คู่มือ Cafe</a><a href="/guide/retail" role="menuitem">คู่มือ Retail</a></div>
+        <div class="mguide"><small>คู่มือการใช้งาน</small><a href="/guide" role="menuitem">คู่มือ Cafe</a><a href="/guide/retail" role="menuitem">คู่มือ Retail</a></div><div class="mguide ctlink" hidden><small>ติดต่อเรา</small><a href="#contact" role="menuitem" data-contact><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8zm-3.6 10.3H6.4c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.4h1.5c.3 0 .5.2.5.5s-.2.5-.5.5zm2.1-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm4.7 0c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-2-2.7v2.4c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l2 2.7V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm3.2-2.4c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5h2c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5z"/></svg> ติดต่อผ่าน LINE</a></div>
       </div>
     </div>
     <a class="btn grad sm cta-top" href="/signup" data-free="สมัครใช้ฟรี">ทดลองฟรี 30 วัน</a>
@@ -471,11 +489,21 @@ footer a:hover{color:#fff}
 
 </main>
 
+
+<div class="ctmodal" id="ctModal" hidden role="dialog" aria-modal="true" aria-labelledby="ctT"><div class="ctbox">
+  <button type="button" class="ctx" data-ctclose aria-label="ปิด">×</button>
+  <div class="cthead"><span class="ctico"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8zm-3.6 10.3H6.4c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.4h1.5c.3 0 .5.2.5.5s-.2.5-.5.5zm2.1-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm4.7 0c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-2-2.7v2.4c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l2 2.7V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm3.2-2.4c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5h2c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5z"/></svg></span><div><h3 id="ctT">ติดต่อเราทาง LINE</h3><p id="ctNote">สอบถาม แจ้งปัญหา หรือขอเปิดร้าน ทักมาได้เลย</p></div></div>
+  <div class="ctqr" id="ctQr"></div>
+  <div class="ctid">LINE ID <b id="ctId"></b></div>
+  <a class="btn ctadd" id="ctAdd" href="#" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8zm-3.6 10.3H6.4c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.4h1.5c.3 0 .5.2.5.5s-.2.5-.5.5zm2.1-.5c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm4.7 0c0 .2-.1.4-.3.5h-.2c-.2 0-.3-.1-.4-.2l-2-2.7v2.4c0 .3-.2.5-.5.5s-.5-.2-.5-.5V8.9c0-.2.1-.4.3-.5h.2c.2 0 .3.1.4.2l2 2.7V8.9c0-.3.2-.5.5-.5s.5.2.5.5v3.9zm3.2-2.4c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5c.3 0 .5.2.5.5s-.2.5-.5.5h-2c-.3 0-.5-.2-.5-.5V8.9c0-.3.2-.5.5-.5h2c.3 0 .5.2.5.5s-.2.5-.5.5h-1.5v.9h1.5z"/></svg> เพิ่มเพื่อนใน LINE</a>
+  <div class="ctphone" id="ctPhone" hidden></div>
+  <small class="cthint">สแกน QR ด้วยแอป LINE หรือกดปุ่มบนมือถือเพื่อเพิ่มเพื่อน</small>
+</div></div>
 <footer>
   <div class="wrap">
     <a class="logo" href="/indexpos" aria-label="Easy POS"><img src="/easypos.svg" alt="" width="30" height="30"><b style="font-size:18px">Easy<span>POS</span></b></a>
     <span>© <span id="yr">2026</span> Easy POS</span>
-    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/guide">คู่มือ Cafe</a><a href="/guide/retail">คู่มือ Retail</a><a href="/demo">เดโม Cafe</a><a href="/retail/demo">เดโม Retail</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a class="paidonly" href="#pricing">ราคา</a></nav>
+    <nav aria-label="ลิงก์ท้ายหน้า"><a href="#contact" class="ctlink" data-contact hidden>ติดต่อเรา (LINE)</a><a href="/guide">คู่มือ Cafe</a><a href="/guide/retail">คู่มือ Retail</a><a href="/demo">เดโม Cafe</a><a href="/retail/demo">เดโม Retail</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a class="paidonly" href="#pricing">ราคา</a></nav>
   </div>
 </footer>
 
@@ -503,6 +531,21 @@ document.getElementById('yr').textContent=new Date().getFullYear();
 
 /* Show the paid packages the admin has set (falls back to the default text). */
 var SB='https://roggqmvmgfxsxynulpvk.supabase.co',KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
+
+/* contact (LINE) from the admin settings */
+(function(){var C=null;
+  function open(e){if(e)e.preventDefault();if(!C)return;var m=document.getElementById('ctModal');
+    document.getElementById('ctQr').innerHTML=C.qr?'<img src="'+String(C.qr).replace(/"/g,'&quot;')+'" alt="QR code LINE">':'<span style="color:#888;font-size:13px">ยังไม่มี QR</span>';
+    document.getElementById('ctId').textContent=C.lineId||'';document.getElementById('ctId').parentNode.hidden=!C.lineId;
+    var a=document.getElementById('ctAdd');a.href=C.lineUrl||'#';a.hidden=!C.lineUrl;
+    if(C.note)document.getElementById('ctNote').textContent=C.note;
+    var ph=document.getElementById('ctPhone');ph.hidden=!C.phone;if(C.phone)ph.innerHTML='โทร <a href="tel:'+String(C.phone).replace(/[^\d+]/g,'')+'">'+String(C.phone).replace(/[<>&]/g,'')+'</a>';
+    m.hidden=false;document.querySelectorAll('.login.open').forEach(function(x){x.classList.remove('open')})}
+  function close(){document.getElementById('ctModal').hidden=true}
+  document.addEventListener('click',function(e){var t=e.target.closest('[data-contact]');if(t){open(e);return}if(e.target.closest('[data-ctclose]')||e.target.id==='ctModal')close()});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close()});
+  fetch(SB+'/rest/v1/pos_platform?key=eq.contact&select=data',{headers:{apikey:KEY,Authorization:'Bearer '+KEY}}).then(function(r){return r.json()}).then(function(rows){var d=rows&&rows[0]&&rows[0].data;
+    if(!d||d.on===false||!(d.qr||d.lineId||d.lineUrl))return;C=d;document.querySelectorAll('.ctlink').forEach(function(x){x.hidden=false});if(location.hash==='#contact')open()}).catch(function(){})})();
 function money(n){return Number(n||0).toLocaleString('th-TH')}
 var PK=null;
 function longsHtml(list,en){var nf=function(v){return v?money(v):(en?'unlimited':'ไม่จำกัด')};
