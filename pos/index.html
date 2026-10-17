@@ -634,6 +634,11 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .prprev{background:var(--sunk);border-radius:16px;padding:14px;display:grid;place-items:start center;max-height:560px;overflow:auto}
 .prprev img{width:min(100%,300px);background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.12);image-rendering:auto}
 @media (max-width:1100px){.prgrid{grid-template-columns:minmax(0,1fr)}}
+
+.drstat{display:flex;gap:12px;align-items:center;border-radius:14px;padding:12px 14px;background:var(--sunk)}
+.drstat.warn{background:var(--warn-soft,#FFF4D6)}.drstat.ok{background:var(--ok-soft)}
+.drstat .dot{width:12px;height:12px;border-radius:50%;background:#B7791F;flex:none}.drstat.ok .dot{background:#2F9E44}
+.drstat b{display:block}.drstat small{color:var(--muted);font-size:13px}
 /* settings navigation */
 .settings:has(.snav){grid-template-columns:260px minmax(0,1fr)}
 .snav{position:sticky;top:0;max-height:calc(100dvh - 110px);overflow-y:auto;scrollbar-width:thin;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 10px;box-shadow:0 1px 2px rgba(27,27,27,.04),0 8px 24px -18px rgba(27,27,27,.25)}
@@ -1097,6 +1102,7 @@ const ICON={
   up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
   phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  backup:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>',
   box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/><path d="M7.5 5.5l9 5"/>'
 };
 const ic=(k,sz)=>`<svg width="${sz||20}" height="${sz||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
@@ -1112,7 +1118,7 @@ const DEF_SHOP={name:'ร้านของคุณ',branch:'',address:'',phone
 const BANKS=[['KBANK','K','กสิกรไทย'],['SCB','SCB','ไทยพาณิชย์'],['BBL','BBL','กรุงเทพ'],['KTB','KTB','กรุงไทย'],['BAY','BAY','กรุงศรีอยุธยา'],['TTB','ttb','ทีทีบี'],['GSB','GSB','ออมสิน'],['BAAC','ธกส','ธ.ก.ส.'],['UOB','UOB','ยูโอบี'],['CIMB','CIMB','ซีไอเอ็มบี ไทย'],['KKP','KKP','เกียรตินาคินภัทร'],['LHB','LHB','แลนด์ แอนด์ เฮ้าส์'],['OTHER','','อื่น ๆ']];
 const bankShort=c=>{const b=BANKS.find(x=>x[0]===c);return b?(b[1]||b[2]):''};
 const bankName=c=>{const b=BANKS.find(x=>x[0]===c);return b?'ธนาคาร'+b[2]:''};
-const DWHEN={cash:'เมื่อรับ/ทอนเงินสด',always:'ทุกครั้งที่ชำระเงิน',manual:'กดเปิดเองเท่านั้น'};
+const DWHEN={cash:'รับหรือทอนเงินสดเท่านั้น',always:'ทุกบิล',manual:'ไม่เปิดอัตโนมัติ'};
 const KINDS={round:{l:'โต๊ะกลม',w:90,h:90,seats:2,table:1},square:{l:'โต๊ะเหลี่ยม',w:100,h:100,seats:4,table:1},rect:{l:'โต๊ะยาว',w:190,h:100,seats:6,table:1},
   counter:{l:'เคาน์เตอร์',w:300,h:70},wall:{l:'ผนัง',w:300,h:8},door:{l:'ประตู',w:90,h:90},window:{l:'หน้าต่าง',w:160,h:10},plant:{l:'ต้นไม้',w:60,h:60}};
 
@@ -1136,7 +1142,7 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   floorEdit:false,sel:null,zone:null,snap:true,tsel:null,addZone:false,
   hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},stock:[],stockLog:[],stk:{f:'all',q:'',cat:'',tab:'items'},rep:{date:dayKey(Date.now()),list:null},
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
-let PR={bridge:!!window.POS_STANDALONE,paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'},pmodel:'pr01w',conn:'file',font:22,density:150,cut:true,feed:4,baud:9600};
+let PR={bridge:!!window.POS_STANDALONE,paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash',t1:50,t2:500,needPin:true},pmodel:'pr01w',conn:'file',font:22,density:150,cut:true,feed:4,baud:9600};
 try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p&&!p.webPrint){p.auto=true;p.webPrint=1}if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
 try{let v=localStorage.getItem('pos.view');if(v==='bar')v='kds';if(v&&NAV.some(n=>n[0]===v))S.view=v}catch(e){}
 try{S.kst=localStorage.getItem('pos.kds')||'all'}catch(e){S.kst='all'}
@@ -1278,6 +1284,56 @@ async function saveFileNow(name,body,copies){
   catch(e){if(!e||e.code!=='declined')toast(e&&e.code==='rate_limited'?'มีหน้าต่างบันทึกเปิดอยู่ ลองใหม่อีกครั้ง':'บันทึกไฟล์ไม่สำเร็จ');return false}
 }
 
+
+/* ===== cash drawer (opened through the receipt printer) ===== */
+async function sha256(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
+const pinHash=pin=>sha256('easypos-drawer|'+(((window.POS_SESSION||{}).shop||{}).id||'demo')+'|'+pin);
+function drawerLog(){return (S.drawerLog||[]).slice(0,8)}
+async function drawerLogAdd(reason){const rec={at:Date.now(),by:(window.POS_ACCOUNT&&window.POS_ACCOUNT().login)||(S.canEdit?'ผู้จัดการ':'พนักงาน'),reason};
+  S.drawerLog=[rec].concat(S.drawerLog||[]).slice(0,50);if(S.db){try{await S.db.collection('drawerlog').add(rec)}catch(e){}}}
+function kickDrawerManual(){const dr=PR.drawer||{};const go=async by=>{const ok=await openDrawer();if(ok!==false){await drawerLogAdd('เปิดลิ้นชัก (ไม่มีการขาย)'+(by?' · อนุมัติโดย '+by:''));toast('เปิดลิ้นชักแล้ว · บันทึกในประวัติ');if(S.view==='settings')render(true)}};
+  if(dr.needPin&&!S.canEdit){if(!shop().drawerPin){toast('ผู้จัดการยังไม่ได้ตั้ง PIN ลิ้นชัก');return}S.ov={k:'drawerpin',go};renderOverlay();return}go('')}
+function drawerTab(){const dr=PR.drawer||{};const live=prDirect();const file=PR.conn==='file';
+  const st=file?['warn','เครื่องพิมพ์ตั้งเป็นแบบผ่านไดรเวอร์ หน้านี้สั่งเปิดลิ้นชักเองไม่ได้ ให้ตั้งในไดรเวอร์ (Cash Drawer › Open before printing) หรือเปลี่ยนเป็น USB ตรง / COM']:live?['ok','เครื่องพิมพ์เชื่อมต่อแล้ว · '+PRD.name]:['warn','เครื่องพิมพ์ยังไม่ได้เชื่อมต่อ'];
+  const log=drawerLog();
+  return `<h2>ลิ้นชักเก็บเงิน</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้</span><div class="form">
+    <div class="drstat ${st[0]}"><span class="dot"></span><div style="flex:1;min-width:0"><b>สั่งเปิดผ่านเครื่องพิมพ์ใบเสร็จ</b><small>${esc(st[1])}</small></div><button class="btn sm" type="button" data-act="stab" data-v="printer">เครื่องพิมพ์</button></div>
+    <label class="check" for="d_on"><input id="d_on" type="checkbox"${dr.on?' checked':''}> ใช้ลิ้นชักเก็บเงิน</label>
+    <span class="hint" style="font-size:13px">เสียบสาย RJ11 ของลิ้นชักเข้าช่อง <b>DK / Cash Drawer</b> ด้านหลังเครื่องพิมพ์ ไม่ใช่ช่อง LAN และไม่ต่อเข้าคอมพิวเตอร์ เครื่องพิมพ์เป็นตัวส่งไฟเปิดลิ้นชัก</span>
+    <label for="d_when">เปิดลิ้นชักอัตโนมัติเมื่อ<select id="d_when">${Object.entries(DWHEN).map(([k,l])=>`<option value="${k}"${dr.when===k?' selected':''}>${l}</option>`).join('')}</select></label>
+    <div class="three"><label for="d_pin">ขาสัญญาณ<select id="d_pin"><option value="2"${dr.pin!=='5'?' selected':''}>ขา 2 (มาตรฐาน)</option><option value="5"${dr.pin==='5'?' selected':''}>ขา 5 (ลิ้นชักที่ 2)</option></select></label>
+      <label for="d_t1">สัญญาณเปิด (ms)<input id="d_t1" type="number" min="10" max="500" step="10" value="${esc(dr.t1||50)}"></label>
+      <label for="d_t2">พักหลังเปิด (ms)<input id="d_t2" type="number" min="50" max="500" step="10" value="${esc(dr.t2||500)}"></label></div>
+    <label class="check" for="d_needpin"><input id="d_needpin" type="checkbox"${dr.needPin!==false?' checked':''}> แคชเชียร์เปิดลิ้นชักโดยไม่มีการขาย ต้องใช้ PIN ผู้จัดการ</label>
+    ${S.canEdit?`<div class="two" style="align-items:end"><label for="d_newpin">PIN ผู้จัดการ (4–6 หลัก)${shop().drawerPin?' · ตั้งไว้แล้ว':' · ยังไม่ได้ตั้ง'}<input id="d_newpin" type="password" inputmode="numeric" maxlength="6" autocomplete="new-password" placeholder="${shop().drawerPin?'ใส่ PIN ใหม่เพื่อเปลี่ยน':'ตั้ง PIN'}"></label><button class="btn" type="button" data-act="setdrawerpin">บันทึก PIN</button></div>`:''}
+    <div class="prrow"><button class="btn" type="button" data-act="opendrawer">ทดสอบเปิดลิ้นชัก</button><button class="btn" type="button" data-act="drawernosale">เปิดลิ้นชัก (ไม่มีการขาย)</button></div>
+    ${file?'<div class="note">แบบผ่านไดรเวอร์: ในไดรเวอร์เครื่องพิมพ์ ตั้ง Cash Drawer เป็น “เปิดก่อนพิมพ์” (Open before printing) และเลือก Drawer '+(dr.pin==='5'?'2 (ขา 5)':'1 (ขา 2)')+' เมื่อพิมพ์ใบเสร็จ ลิ้นชักจะเปิดเอง</div>':''}
+    <div><b style="font-size:14px">ประวัติการเปิดโดยไม่มีการขาย · ${esc(shop().name||'')}</b>${log.length?`<div class="htable" style="margin-top:6px"><table><tbody>${log.map(x=>`<tr><td class="num">${fmtDT(x.at)}</td><td style="white-space:normal">${esc(x.reason||'')}</td><td class="muted">${esc(String(x.by||'').replace(/@.*/,''))}</td></tr>`).join('')}</tbody></table></div>`:'<div class="muted" style="font-size:13px;margin-top:4px">ยังไม่มี</div>'}</div></div>`}
+
+/* ===== backup ===== */
+const BK_COLS=['categories','options','menu','promos','tables','members','stock'];
+function downloadText(name,text,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return true}catch(e){return false}}
+async function backupData(days){const out={app:'Easy POS Cafe',version:1,exportedAt:new Date().toISOString(),shop:Object.assign({},S.shop),data:{}};
+  const map={categories:S.cats,options:S.opts,menu:S.menu,promos:S.promos,tables:S.tables,members:S.members,stock:S.stock};
+  BK_COLS.forEach(c=>{out.data[c]=(map[c]||[]).map(x=>Object.assign({},x))});
+  out.data.stocklog=(S.stockLog||[]).slice();
+  if(days&&S.db){try{const since=days>9000?0:Date.now()-days*864e5;const snap=await S.db.collection('orders').where('createdAt','>=',since).limit(20000).get();out.data.orders=snap.docs.map(d=>Object.assign({id:d.id},d.data()))}catch(e){out.data.orders=[];toast('ดึงบิลย้อนหลังไม่สำเร็จ ไฟล์นี้ไม่รวมบิล')}}
+  else if(days)out.data.orders=Object.values(S.oToday||{}).map(o=>Object.assign({},o));
+  return out}
+function backupTab(){const live=!!S.db;const b=S.bk||{};const days=S.bkDays==null?90:S.bkDays;
+  return `<h2>ข้อมูลและสำรองไฟล์</h2><span class="hint">${live?'ข้อมูลร้านเก็บบนเซิร์ฟเวอร์ของ Easy POS และซิงก์ทุกเครื่องอัตโนมัติ ดาวน์โหลดไฟล์สำรองเก็บไว้เองได้ทุกเมื่อ':'ตอนนี้ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น'}</span>
+  <div class="form">
+    <div class="prsec"><b>ดาวน์โหลดไฟล์สำรอง</b><span class="hint">รวมการตั้งค่าร้าน หมวด เมนู ตัวเลือก โปรโมชัน ผังโต๊ะ สมาชิก และสต็อกวัตถุดิบ</span>
+      <label for="bk_days">รวมบิลขาย<select id="bk_days">${[[0,'ไม่รวมบิล'],[30,'ย้อนหลัง 30 วัน'],[90,'ย้อนหลัง 90 วัน'],[365,'ย้อนหลัง 1 ปี'],[99999,'ทั้งหมด']].map(([v,l])=>`<option value="${v}"${days===v?' selected':''}>${l}</option>`).join('')}</select></label>
+      <button class="btn primary" type="button" data-act="bkdown" style="align-self:stretch">${ic('backup',18)}ดาวน์โหลดไฟล์สำรองข้อมูล (JSON)</button>
+      <div class="prrow"><button class="btn sm" type="button" data-act="bkcsv" data-v="menu">เมนู (CSV)</button><button class="btn sm" type="button" data-act="bkcsv" data-v="members">สมาชิก (CSV)</button><button class="btn sm" type="button" data-act="bkcsv" data-v="stock">สต็อกวัตถุดิบ (CSV)</button></div></div>
+    ${S.canEdit?`<div class="prsec"><b>นำเข้าจากไฟล์สำรอง</b><span class="hint">ใช้ย้ายข้อมูลจากเครื่องหรือร้านเดิม รายการที่มีรหัสเดียวกันจะถูกเขียนทับ รายการอื่นที่มีอยู่จะไม่ถูกลบ บิลขายจะไม่ถูกนำเข้า</span>
+      <label class="btn" for="bk_file" style="cursor:pointer;align-self:flex-start">เลือกไฟล์สำรอง (.json)<input id="bk_file" type="file" accept=".json,application/json" class="sr"></label>
+      ${b.data?`<div class="note"><b>${esc(b.name||'ไฟล์สำรอง')}</b> · สำรองเมื่อ ${esc(b.data.exportedAt?fmtDT(Date.parse(b.data.exportedAt)):'-')}<br>${BK_COLS.map(c=>`${({categories:'หมวด',options:'ตัวเลือก',menu:'เมนู',promos:'โปรโมชัน',tables:'โต๊ะ/ผัง',members:'สมาชิก',stock:'วัตถุดิบ'})[c]} ${((b.data.data||{})[c]||[]).length}`).join(' · ')}${b.data.shop?' · การตั้งค่าร้าน':''}</div>
+        <div class="prrow"><button class="btn primary" type="button" data-act="bkrestore">นำเข้าข้อมูลนี้</button><button class="btn" type="button" data-act="bkclear">ยกเลิก</button></div>`:''}</div>`:''}
+  </div>`}
+function csvOf(rows){return '﻿'+rows.map(r=>r.map(v=>{v=v==null?'':String(v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v}).join(',')).join('\r\n')}
+
 /* ===== direct thermal printing (ESC/POS over USB or COM): the receipt is drawn as an image so Thai prints exactly ===== */
 const PRMODEL={pr01w:{name:'BARIGAN PR-01W (80mm)',paper:80,dots:576},g80:{name:'เครื่องพิมพ์ความร้อน 80mm ทั่วไป',paper:80,dots:576},g58:{name:'เครื่องพิมพ์ความร้อน 58mm ทั่วไป',paper:58,dots:384}};
 const PRCONN={file:'ผ่านไดรเวอร์',usb:'USB ตรง',serial:'COM / Bluetooth'};
@@ -1321,7 +1377,7 @@ function testBlocks(){return headBlocks(shop()).concat([{t:'c',s:'พิมพ�
 function rasterBands(c){const W=c.width,H=c.height,d=c.getContext('2d').getImageData(0,0,W,H).data,bw=Math.ceil(W/8),th=+PR.density||150,out=[];
   for(let y0=0;y0<H;y0+=128){const hh=Math.min(128,H-y0),buf=new Uint8Array(8+bw*hh);buf.set([0x1d,0x76,0x30,0,bw&255,bw>>8,hh&255,hh>>8]);
     for(let y=0;y<hh;y++)for(let x=0;x<W;x++){const i=((y0+y)*W+x)*4;if((d[i]*299+d[i+1]*587+d[i+2]*114)/1000<th)buf[8+y*bw+(x>>3)]|=0x80>>(x&7)}out.push(buf)}return out}
-const drawerCmd=()=>[0x1b,0x70,(PR.drawer||{}).pin==='5'?1:0,25,250];
+const drawerCmd=()=>{const d=PR.drawer||{};return [0x1b,0x70,d.pin==='5'?1:0,Math.min(255,Math.max(1,Math.round((+d.t1||50)/2))),Math.min(255,Math.max(1,Math.round((+d.t2||500)/2)))]};
 function escJob(canvases,o){o=o||{};const parts=[Uint8Array.from([0x1b,0x40])];if(o.drawer)parts.push(Uint8Array.from(drawerCmd()));
   canvases.forEach(cv=>{rasterBands(cv).forEach(b=>parts.push(b));parts.push(Uint8Array.from([0x1b,0x64,Math.min(10,Math.max(0,+PR.feed||4))]));if(PR.cut)parts.push(Uint8Array.from([0x1d,0x56,0x42,0x00]))});
   const n=parts.reduce((a,p)=>a+p.length,0),out=new Uint8Array(n);let k=0;parts.forEach(p=>{out.set(p,k);k+=p.length});return out}
@@ -1964,7 +2020,7 @@ function roundView(){
   if(!S.round)return `<div class="pad-view"><div class="panel" style="max-width:480px"><h2>เปิดรอบการขาย</h2><form class="form" id="openRoundForm"><label for="rStart">ระบุจำนวนเงิน (เงินทอนในถาด)<input id="rStart" type="number" min="0" step="1" inputmode="numeric" value="${esc(sh.roundStart||'')}"></label><button class="btn primary big" type="submit">เปิดรอบ</button></form></div><section class="panel"><h2>รอบที่ผ่านมา</h2>${hist}</section></div>`;
   const rd=S.round,st=roundStats(rd);
   return `<div class="pad-view"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">รอบการขายปัจจุบัน</h2><span class="muted" style="font-size:13px">เปิดเมื่อ ${fmtDT(rd.openedAt)}</span></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">${(PR.drawer||{}).on?'<button class="btn" data-act="drawernow">เปิดลิ้นชัก</button>':''}<button class="btn" data-act="move" data-v="in">นำเงินเข้า</button><button class="btn" data-act="move" data-v="out">นำเงินออก</button><button class="btn" data-act="printround" data-id="${esc(rd.id)}">${ic('print',18)}พิมพ์สรุปยอด</button><button class="btn dark" data-act="closeround">ปิดรอบ</button></div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${(PR.drawer||{}).on?'<button class="btn" data-act="drawernosale">เปิดลิ้นชัก</button>':''}<button class="btn" data-act="move" data-v="in">นำเงินเข้า</button><button class="btn" data-act="move" data-v="out">นำเงินออก</button><button class="btn" data-act="printround" data-id="${esc(rd.id)}">${ic('print',18)}พิมพ์สรุปยอด</button><button class="btn dark" data-act="closeround">ปิดรอบ</button></div></div>
     <div class="kpis"><div class="kpi"><small>ยอดขายสุทธิ</small><span class="num">${baht(st.sales)}</span></div><div class="kpi"><small>จำนวนบิล</small><span class="num">${st.bills}</span></div><div class="kpi"><small>เงินสดที่ควรมีในถาด</small><span class="num">${baht(st.expected)}</span></div><div class="kpi"><small>ทำลายบิล</small><span class="num">${st.voids}</span></div></div>
     <div class="panels"><section class="panel"><h2>แยกตามวิธีชำระ</h2><div class="htable"><table><tbody>${METHODS.map(m=>`<tr><td>${esc(MLABEL[m.v])}</td><td class="r num">${baht(st.by[m.v]||0)}</td></tr>`).join('')}</tbody></table></div></section>
       <section class="panel"><h2>ถาดเก็บเงิน</h2><div class="htable"><table><tbody><tr><td>เงินเริ่มต้น</td><td class="r num">${baht(rd.startCash)}</td></tr><tr><td>รับเงินสด</td><td class="r num">${baht(st.by.cash||0)}</td></tr><tr><td>นำเงินเข้า</td><td class="r num">${baht(st.ins)}</td></tr><tr><td>นำเงินออก</td><td class="r num">-${baht(st.outs)}</td></tr><tr><th>ควรมี</th><th class="r num">${baht(st.expected)}</th></tr></tbody></table></div></section>
@@ -2052,8 +2108,9 @@ const SET_ICO={
   printer:'<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
   kprinter:'<path d="M6 14a4 4 0 0 1 1.3-7.8 5 5 0 0 1 9.4 0A4 4 0 0 1 18 14v6H6z"/><path d="M6 17h12"/>',
   stations:'<path d="M12 2.5s5.5 4.5 5.5 10.5a5.5 5.5 0 0 1-11 0c0-2.6 1.6-4.4 1.6-4.4S9 11.5 11 11.5c0-4.3 1-9 1-9z"/>',
-  drawer:'<rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>'};
-const SET_GROUPS=[['หน้าตาและการแสดงผล',['ui','look','receipt','display']],['ร้านและบัญชี',['shop','billing','staff','payment','round']],['หน้าร้านและลูกค้า',['app','tables','queue']],['รับชำระเงิน',['banks','qrs']],['อุปกรณ์',['devices','printer','kprinter','stations','drawer']]];
+  drawer:'<rect x="3" y="4" width="18" height="5" rx="1.2"/><path d="M5 9v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9M10 13h4"/>',
+  backup:'<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/>'};
+const SET_GROUPS=[['หน้าตาและการแสดงผล',['ui','look','receipt','display']],['ร้านและบัญชี',['shop','billing','staff','payment','round','backup']],['หน้าร้านและลูกค้า',['app','tables','queue']],['รับชำระเงิน',['banks','qrs']],['อุปกรณ์',['devices','printer','kprinter','stations','drawer']]];
 function setNav(tabs,tab){const lbl=Object.fromEntries(tabs),used=new Set();
   const btn=v=>{used.add(v);return `<button data-act="stab" data-v="${v}" aria-current="${tab===v}"><span class="si" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SET_ICO[v]||'<circle cx="12" cy="12" r="3"/>'}</svg></span><span class="sl">${lbl[v]}</span></button>`};
   let h=SET_GROUPS.map(([g,keys])=>{const k=keys.filter(v=>lbl[v]);return k.length?`<div class="sgrp"><h4>${g}</h4>${k.map(btn).join('')}</div>`:''}).join('');
@@ -2063,7 +2120,7 @@ function setNav(tabs,tab){const lbl=Object.fromEntries(tabs),used=new Set();
   return h}
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','ปรับแต่งรูปแบบ Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
+  const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['app','แอปลูกค้า (QR สั่ง)'],['look','ปรับแต่งรูปแบบ Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['backup','ข้อมูลและสำรองไฟล์'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2>
@@ -2138,13 +2195,8 @@ function settingsView(){
     <div class="htable"><table><thead><tr><th>สถานี</th><th>หมวดหมู่</th><th></th></tr></thead><tbody>${ss.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td style="white-space:normal">${esc(S.cats.filter(c=>stationOfCat(c.id)===x.id).map(c=>c.name).join(', ')||'—')}</td><td>${ro||ss.length<2||x.id==='main'&&!(shop().stations||[]).length?'':S.confirm==='sdel:'+x.id?`<button class="btn sm danger" data-act="sdel" data-id="${esc(x.id)}">ยืนยันลบ</button> <button class="btn sm" data-act="unconfirm">ไม่ลบ</button>`:`<button class="btn sm" data-act="asksdel" data-id="${esc(x.id)}">ลบ</button>`}</td></tr>`).join('')}</tbody></table></div>
     ${ro?'':`<form class="form" id="stAddForm" style="flex-direction:row;gap:8px"><label for="stName" class="sr">ชื่อสถานีใหม่</label><input id="stName" maxlength="30" placeholder="เพิ่มสถานี เช่น ครัวร้อน" style="flex:1"><button class="btn" type="submit">เพิ่มสถานี</button></form>
     <h3>ส่งหมวดหมู่ไปสถานี</h3><div class="form">${S.cats.map(c=>`<label for="sc_${esc(c.id)}" style="flex-direction:row;align-items:center;justify-content:space-between;gap:10px;color:var(--ink);font-size:15px">${esc(c.name)}<select id="sc_${esc(c.id)}" data-sc="${esc(c.id)}" style="max-width:220px">${ss.map(x=>`<option value="${esc(x.id)}"${stationOfCat(c.id)===x.id?' selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`).join('')}</div>`}`}
-  else if(tab==='drawer'){const dr=PR.drawer||{};body=`<h2>ลิ้นชักเก็บเงิน</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้</span><div class="form">
-    <label class="check" for="d_on"><input id="d_on" type="checkbox"${dr.on?' checked':''}> ใช้ลิ้นชักเก็บเงิน</label>
-    <div class="three"><label for="d_conn">การเชื่อมต่อ<select id="d_conn"><option value="rj11" selected>สาย RJ11 ต่อที่เครื่องพิมพ์</option></select></label>
-    <label for="d_pin">ขาสัญญาณ<select id="d_pin"><option value="2"${dr.pin==='2'?' selected':''}>ขา 2</option><option value="5"${dr.pin==='5'?' selected':''}>ขา 5</option></select></label>
-    <label for="d_when">เปิดอัตโนมัติ<select id="d_when">${Object.entries(DWHEN).map(([k,l])=>`<option value="${k}"${dr.when===k?' selected':''}>${l}</option>`).join('')}</select></label></div>
-    <button class="btn primary" data-act="opendrawer" type="button" style="align-self:flex-start">ทดสอบเปิดลิ้นชัก</button>
-    <div class="note">ลิ้นชักเปิดผ่านเครื่องพิมพ์: ในไดรเวอร์เครื่องพิมพ์ ตั้ง Cash Drawer เป็น “เปิดก่อนพิมพ์” (Open before printing) และเลือก Drawer ${dr.pin==='5'?'2 (ขา 5)':'1 (ขา 2)'} เมื่อพิมพ์ใบเสร็จ ลิ้นชักจะเปิดเอง ถ้าไม่ได้เปิดพิมพ์ใบเสร็จอัตโนมัติ ระบบจะสั่งเปิดลิ้นชักผ่านเครื่องพิมพ์หลังรับเงินตามเงื่อนไขที่เลือก</div></div>`}
+  else if(tab==='drawer')body=drawerTab();
+  else if(tab==='backup')body=backupTab();
   else if(tab==='banks'){const bl=bankList();body=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>บัญชีรับโอนเงิน</h2>${ro?'':'<button class="btn primary" data-act="editbank" data-id="">'+ic('plus',18)+'เพิ่มบัญชี</button>'}</div><span class="hint">แสดงในหน้าชำระเงินเมื่อเลือก “โอนเงิน” และบนจอลูกค้าถ้าเปิดไว้</span>`+
     (bl.length?bl.map(b=>`<div class="mrow"><div class="info"><b>${esc(bankShort(b.bank))} ${esc(b.no)}</b> ${b.def?'<span class="pill ok">ค่าเริ่มต้น</span>':''}<small>${esc(bankName(b.bank))}${b.name?' · '+esc(b.name):''} · ${b.display?'แสดงบนจอลูกค้า':'ไม่แสดงบนจอลูกค้า'}</small></div>${ro?'':`${b.def?'':`<button class="btn sm" data-act="bankdef" data-id="${esc(b.id)}">ตั้งเป็นค่าเริ่มต้น</button>`}<button class="btn sm" data-act="editbank" data-id="${esc(b.id)}">แก้ไข</button>`}</div>`).join(''):'<div class="empty"><b>ยังไม่มีบัญชี</b>เพิ่มบัญชีธนาคารของร้านเพื่อรับโอนเงิน</div>');}
   else if(tab==='qrs'){const ql=qrList();body=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>QR รับชำระเงิน</h2>${ro?'':'<button class="btn primary" data-act="editqr" data-id="">'+ic('plus',18)+'เพิ่ม QR</button>'}</div><span class="hint">QR พร้อมเพย์ล็อกยอดตรงบิลอัตโนมัติ ใช้เบอร์มือถือ เลขผู้เสียภาษี 13 หลัก หรือเลข e-Wallet 15 หลัก ตั้ง QR เริ่มต้นได้ และเลือก QR อื่นได้ตอนชำระเงิน</span>`+
@@ -2257,6 +2309,7 @@ function ovHtml(){
     return wrap(head('โปรโมชัน')+`<div class="grp"><span class="grp-t">ลดท้ายบิล</span><div class="opts"><button class="opt" data-act="setpromo" data-id="" aria-pressed="${!S.bill.promo}">ไม่ใช้โปรโมชัน</button>${bp.map(p=>`<button class="opt" data-act="setpromo" data-id="${esc(p.id)}" aria-pressed="${!!S.bill.promo&&S.bill.promo.id===p.id}">${esc(p.name)}</button>`).join('')}</div></div><span class="hint">ลดรายเมนู: แตะรายการในบิลแล้วเลือกส่วนลด</span>`,'narrow');
   }
   if(/^stk/.test(v.k||'')){const r=stockOverlay(v,wrap,head);if(r!=null)return r}
+  if(v.k==='drawerpin')return wrap(head('PIN ผู้จัดการ')+`<form class="form" id="drawerPinForm"><span class="hint">เปิดลิ้นชักโดยไม่มีการขาย ต้องให้ผู้จัดการใส่ PIN</span><label for="dp_pin">PIN<input id="dp_pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" required autofocus></label><div class="dlg-actions"><button class="btn" type="button" data-act="close">ยกเลิก</button><button class="btn primary grow" type="submit">เปิดลิ้นชัก</button></div></form>`,'narrow');
   if(v.k==='memedit'){const m=v.id?memberOf(v.id)||{}:{};const ed=!!v.id;
     return wrap(head(ed?'ข้อมูลสมาชิก':'เพิ่มสมาชิก')+`<form class="form" id="memEditForm">
       <label for="me_phone">เบอร์โทร${ed?' (ใช้เป็นรหัสสมาชิก แก้ไม่ได้)':''}<input id="me_phone" inputmode="tel" maxlength="12" required value="${esc(m.phone||v.id||'')}" placeholder="08xxxxxxxx"${ed?' readonly':''}></label>
@@ -2691,6 +2744,21 @@ document.addEventListener('click',e=>{
     case 'payqr':S.ov.qrId=d.id;renderOverlay();syncDisplay();break;
     case 'paybank':S.ov.bankId=d.id;renderOverlay();syncDisplay();break;
     case 'testprint':testPrint();break;
+    case 'drawernosale':kickDrawerManual();break;
+    case 'setdrawerpin':{const v=($('#d_newpin')||{}).value||'';if(!/^\d{4,6}$/.test(v)){toast('PIN ต้องเป็นตัวเลข 4–6 หลัก');break}pinHash(v).then(h=>saveShop({drawerPin:h},'บันทึก PIN ลิ้นชักแล้ว'));break;}
+    case 'bkdown':backupData(S.bkDays==null?90:S.bkDays).then(d=>{const n='easypos-backup-'+String(shop().name||'shop').replace(/[\\/:*?"<>|\s]+/g,'-')+'-'+dayKey(Date.now())+'.json';if(downloadText(n,JSON.stringify(d,null,1)))toast('ดาวน์โหลดไฟล์สำรองแล้ว');else toast('ดาวน์โหลดไม่สำเร็จ')});break;
+    case 'bkcsv':{const v=d.v;let rows;
+      if(v==='menu')rows=[['ชื่อเมนู','หมวด','ราคา','หมด']].concat(S.menu.map(m=>{const c=S.cats.find(x=>x.id===(m.catId||m.cat));return [m.name,c?c.name:'',m.price,m.soldOut?'ใช่':'']}));
+      else if(v==='members')rows=[['เบอร์โทร','ชื่อ','แต้ม','มาแล้ว','ยอดซื้อสะสม','วันเกิด','หมายเหตุ']].concat(S.members.map(m=>[m.phone||m.id,m.name,m.points||0,m.visits||0,m.spent||0,m.birthday||'',m.note||'']));
+      else rows=[['วัตถุดิบ','หมวด','หน่วย','คงเหลือ','ขั้นต่ำ','ต้นทุน/หน่วย','หมดอายุเร็วสุด']].concat(S.stock.map(it=>[it.name,it.cat||'',it.unit||'',stkQty(it),it.min||0,it.cost||0,stkExp(it)||'']));
+      if(downloadText(v+'-'+dayKey(Date.now())+'.csv',csvOf(rows),'text/csv'))toast('ดาวน์โหลดแล้ว');break;}
+    case 'bkclear':S.bk=null;render(true);break;
+    case 'bkrestore':(async()=>{const b=S.bk&&S.bk.data;if(!b)return;if(!confirm('นำเข้าข้อมูลจากไฟล์สำรอง? รายการที่มีรหัสเดียวกันจะถูกเขียนทับ'))return;
+      if(!S.db){const map={categories:'cats',options:'opts',menu:'menu',promos:'promos',tables:'tables',members:'members',stock:'stock'};BK_COLS.forEach(c=>{const L=(b.data||{})[c]||[];const key=map[c];const cur=S[key]||[];L.forEach(x=>{const i=cur.findIndex(y=>y.id===x.id);if(i>=0)cur[i]=x;else cur.push(x)});S[key]=cur});if(b.shop)S.shop=Object.assign({},S.shop,b.shop);S.bk=null;render(true);toast('นำเข้าแล้ว (โหมดทดลอง)');return}
+      let n=0,fail=0;toast('กำลังนำเข้า…');
+      if(b.shop){const sh=Object.assign({},b.shop);try{await S.db.doc('settings/shop').set(sh);n++}catch(e){fail++}}
+      for(const c of BK_COLS){for(const x of ((b.data||{})[c]||[])){if(!x||!x.id)continue;const data=Object.assign({},x);delete data.id;try{await S.db.doc(c+'/'+x.id).set(data);n++}catch(e){fail++}}}
+      S.bk=null;render(true);toast('นำเข้าแล้ว '+n+' รายการ'+(fail?' · ไม่สำเร็จ '+fail+' รายการ (อาจเกินขีดจำกัดแพ็กเกจ)':''))})();break;
     case 'prcon':(async()=>{try{if(PR.conn==='usb')await usbConnect();else await serialPrConnect();toast('เชื่อมต่อเครื่องพิมพ์แล้ว')}catch(e){toast(prErr(e))}render(true)})();break;
     case 'prdis':prDisconnect().then(()=>render(true));break;
     case 'prpv':S.prPv=d.v;render(true);break;
@@ -2913,6 +2981,11 @@ document.addEventListener('change',async e=>{
   if(id==='d_on'){PR.drawer.on=e.target.checked;savePR();return}
   if(id==='d_pin'){PR.drawer.pin=e.target.value;savePR();render(true);return}
   if(id==='d_when'){PR.drawer.when=e.target.value;savePR();return}
+  if(id==='d_t1'){PR.drawer.t1=Math.min(500,Math.max(10,parseInt(e.target.value,10)||50));savePR();return}
+  if(id==='d_t2'){PR.drawer.t2=Math.min(500,Math.max(50,parseInt(e.target.value,10)||500));savePR();return}
+  if(id==='d_needpin'){PR.drawer.needPin=e.target.checked;savePR();return}
+  if(id==='bk_days'){S.bkDays=+e.target.value;return}
+  if(id==='bk_file'){const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{let d=null;try{d=JSON.parse(t)}catch(err){}if(!d||!d.data||d.app!=='Easy POS Cafe'){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Easy POS Cafe');return}S.bk={name:f.name,data:d};render(true)});return}
   if(id==='p_auto'){PR.auto=e.target.checked;savePR();return}
   if(e.target.name==='p_conn'){const prev=PR.conn;PR.conn=e.target.value;savePR();if(prev!==PR.conn)prDisconnect();render(true);return}
   if(id==='p_pmodel'){PR.pmodel=e.target.value;PR.paper=String((PRMODEL[PR.pmodel]||{}).paper||80);savePR();render(true);return}
@@ -2946,6 +3019,7 @@ document.addEventListener('submit',async e=>{
   if(id==='memberForm'){const ph=phoneKey($('#mPhone').value);if(ph&&ph.length<9){toast('เบอร์โทรไม่ถูกต้อง');return}const nm=(($('#mName')||{}).value||'').trim();
     if(ph&&nm&&!memberOf(ph))await memberUpsert(ph,{name:nm},'สมัครสมาชิกแล้ว');
     S.bill.member=ph;S.bill.dirty=true;S.ov=null;renderOverlay();setBill();return}
+  if(id==='drawerPinForm'){const v=S.ov;const h=await pinHash(($('#dp_pin')||{}).value||'');if(h!==shop().drawerPin){toast('PIN ไม่ถูกต้อง');return}S.ov=null;renderOverlay();if(v&&v.go)v.go('ผู้จัดการ');return}
   if(id==='stkEditForm'){const v=S.ov;const name=$('#sk_name').value.trim(),unit=$('#sk_unit').value.trim();if(!name||!unit){toast('ใส่ชื่อและหน่วย');return}
     const num=(sel,def)=>{const x=$(sel);if(!x||x.value==='')return def;const n=parseFloat(x.value);return isFinite(n)&&n>=0?n:def};
     const old=v.id?S.stock.find(x=>x.id===v.id)||{}:{};const data=Object.assign({},old,{name,cat:$('#sk_cat').value.trim(),unit,min:num('#sk_min',0),cost:num('#sk_cost',0),shelf:num('#sk_shelf',0),warnDays:num('#sk_warn',2),updatedAt:Date.now()});delete data.id;
@@ -3078,6 +3152,7 @@ function rerenderFor(kind){
   db.collection('menu').onSnapshot(s=>{S.menu=sorted(s);rerenderFor('menu')},fail);
   db.collection('promos').onSnapshot(s=>{S.promos=sorted(s);rerenderFor('menu')},fail);
   db.collection('members').onSnapshot(s=>{S.members=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='members'&&!S.ov)render();else if(S.ov&&/^mem|^member$/.test(S.ov.k||''))renderOverlay();else if(S.view==='sell')renderBill()},fail);
+  db.collection('drawerlog').orderBy('at','desc').limit(30).onSnapshot(s=>{S.drawerLog=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='settings'&&S.stab==='drawer'&&!S.ov)render()},fail);
   db.collection('stock').onSnapshot(s=>{S.stock=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderRail();if(S.view==='stock'&&!S.ov)render();else if(S.ov&&/^stk/.test(S.ov.k||''))renderOverlay()},fail);
   db.collection('stocklog').orderBy('at','desc').limit(300).onSnapshot(s=>{S.stockLog=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='stock'&&S.stk.tab==='log'&&!S.ov)render()},fail);
   db.collection('tables').onSnapshot(s=>{S.tables=s.docs.map(d=>{const t=Object.assign({id:d.id},d.data());const p=tSave[d.id];if(p)Object.assign(t,p);return t});rerenderFor('tables')},fail);
