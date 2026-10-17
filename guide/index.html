@@ -92,8 +92,8 @@ footer a{color:rgba(255,255,255,.8)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ===== Theme: warm neutral + black + amber ===== */
-:root{--bg:#F4F3F1;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#7C7A76;--line:#ECEBE8;--line2:#E0DED9;--b:#1B1B1B;--accent:#1B1B1B;--amber:#F6BE55;--amber-ink:#2B1F05;--amber-soft:#FDF3DC;--sunk:#F1F0EE;
-  --grad:linear-gradient(0deg,#1B1B1B,#1B1B1B);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+:root{--bg:#F4F3F1;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#7C7A76;--line:#ECEBE8;--line2:#E0DED9;--b:#1B1B1B;--accent:#F6BE55;--on-accent:#2B1F05;--amber:#F6BE55;--amber-ink:#2B1F05;--amber-soft:#FDF3DC;--sunk:#F1F0EE;
+  --grad:linear-gradient(135deg,#FFC56B,#F08A2C);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
 body{-webkit-font-smoothing:antialiased;font-size:15.5px}
 a{color:var(--ink)}
 h1,h2,h3{font-weight:600}
@@ -116,14 +116,14 @@ h1,h2,h3{font-weight:600}
 .toc a.on i{background:var(--amber);color:var(--amber-ink)}
 section.s{border-radius:16px}
 section.s>h2{font-size:23px}
-section.s>h2 i{background:var(--ink);color:#fff;border-radius:10px}
+section.s>h2 i{background:linear-gradient(135deg,#FFC56B,#F08A2C);color:#fff;border-radius:10px}
 ol.steps>li{background:var(--sunk);border-radius:12px}
 ol.steps>li::before{color:var(--ink);border-radius:8px}
 ul.ck li::before{background:var(--amber)}
 .path{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
-.vid{border-radius:14px;background:#1B1B1B;box-shadow:0 14px 34px -20px rgba(27,27,27,.45)}
+.vid{border-radius:14px;background:#2A2522;box-shadow:0 14px 34px -20px rgba(27,27,27,.45)}
 .vid video{background:#1B1B1B}
-.vid figcaption{background:#232323}
+.vid figcaption{background:#FFFFFF;color:var(--ink2);border-top:1px solid var(--line)}
 .tip{border-radius:12px;background:var(--amber-soft);border-color:#F3DDAA;color:#5C4208}
 .tip.info{background:var(--sunk);border-color:var(--line2);color:var(--ink2)}
 .tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#19663F}

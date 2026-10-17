@@ -6,12 +6,12 @@
 /* Layout: restaurant-POS shell. Dark left rail of sections; working area right. Sell = menu grid + bill panel. */
 :root{
   --bg:#F4F3F1; --surface:#FFFFFF; --sunk:#F1F0EE; --ink:#1B1B1B; --muted:#7C7A76; --line:#ECEBE8; --line2:#E0DED9;
-  --accent:#1B1B1B; --accent-hover:#000000; --on-accent:#FFFFFF; --accent-fill:#F4B740; --accent-soft:#F1F0EE; --accent-soft-ink:#1B1B1B;
+  --accent:#F6BE55; --accent-hover:#F0AE34; --on-accent:#2B1F05; --accent-fill:#F4B740; --accent-soft:#FDF3DC; --accent-soft-ink:#7A5200;
   --amber:#F6BE55; --amber-hover:#F0AE34; --amber-ink:#2B1F05; --amber-soft:#FDF3DC;
-  --dark:#1B1B1B; --on-dark:#FFFFFF; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#F1F0EE; --rail-on-ink:#1B1B1B;
+  --dark:#FDF0D5; --on-dark:#6B4500; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#F1F0EE; --rail-on-ink:#1B1B1B;
   --ok:#2E9D62; --ok-soft:#E7F5EC; --ok-ink:#19663F;
   --warn:#F4B740; --warn-soft:#FDF3DC; --warn-ink:#7A5200; --bad:#EF5B5B; --bad-soft:#FDECEC; --bad-ink:#B42323;
-  --ch-store:#1B1B1B; --ch-take:#B9B6B0; --ch-deli:#F4B740;
+  --ch-store:#F0A23B; --ch-take:#B9B6B0; --ch-deli:#F4B740;
   --t-0:#F2F1EF; --i-0:#8C6A4C; --t-1:#F2F1EF; --i-1:#6F7A52; --t-2:#F2F1EF; --i-2:#A0743A; --t-3:#F2F1EF; --i-3:#7A6070; --t-4:#F2F1EF; --i-4:#9A5A4A; --t-5:#F2F1EF; --i-5:#4F6E6E;
   --scrim:rgba(27,27,27,.38); --shadow:0 1px 2px rgba(27,27,27,.08),0 4px 14px rgba(27,27,27,.05);
   --f-body:'Inter','IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;
@@ -505,7 +505,7 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .btn.primary{background:var(--amber);border-color:var(--amber);color:var(--amber-ink);font-weight:600;box-shadow:none}
 .btn.primary:hover:not(:disabled){background:var(--amber-hover);border-color:var(--amber-hover)}
 .btn.primary:disabled{background:#F8DDA5;border-color:#F8DDA5;opacity:1;color:#8C7A55}
-.btn.dark{background:var(--dark);border-color:var(--dark);color:var(--on-dark)}
+.btn.dark{background:var(--dark);border-color:#F3D9A6;color:var(--on-dark);font-weight:600}
 .btn.danger{color:var(--bad);border-color:#F6C9C9;background:var(--surface)}
 .btn.big{height:52px;font-size:16px;border-radius:12px}
 .btn.sm{height:34px;border-radius:9px;font-size:13.5px}
@@ -531,13 +531,13 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .item .pic{height:auto;aspect-ratio:4/3;border-radius:10px;background:var(--sunk) !important;overflow:hidden}
 .item .pic svg{width:40px;height:40px}
 .item .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.item .tag{top:6px;left:6px;border-radius:6px;font-weight:600;background:rgba(27,27,27,.85)}
+.item .tag{top:6px;left:6px;border-radius:6px;font-weight:600;background:var(--surface);color:#8A5A00;box-shadow:0 1px 2px rgba(27,27,27,.08)}
 .item .meta{padding:8px 4px 2px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:8px;row-gap:1px}
 .item .meta .nm,.item .meta .en{grid-column:1/-1}
 .item .nm{font-weight:500;font-size:14px;line-height:1.3}
 .item .en{font-size:11.5px}
 .item .pr{color:var(--ink);font-weight:600;font-size:14px;margin-top:4px}
-.item .plus{width:28px;height:28px;border-radius:7px;background:var(--dark);color:var(--on-dark);display:grid;place-items:center}
+.item .plus{width:28px;height:28px;border-radius:8px;background:var(--amber);color:var(--amber-ink);display:grid;place-items:center}
 .item:disabled .plus{opacity:.35}
 .bill{background:var(--surface);border-left:1px solid var(--line)}
 .bill-head{border-bottom:0}
@@ -622,6 +622,13 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
   .chrow{grid-template-columns:minmax(0,1fr) 80px auto}
 }
 @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+
+/* soft, no black blocks */
+.toast{background:var(--surface) !important;color:var(--ink) !important;border:1px solid var(--line2);box-shadow:0 10px 30px rgba(27,27,27,.14);border-left:4px solid var(--amber)}
+.rail .logo{box-shadow:0 6px 16px rgba(240,138,44,.28)}
+.chip[aria-selected="true"],.chip[aria-pressed="true"]{border-color:#F3D9A6;background:var(--amber-soft)}
+.disp-total{background:var(--amber-soft);color:var(--ink)}
+.d-counter{background:var(--sunk);color:var(--muted);border-color:var(--line2)}
 </style>
 
 <div class="app">
@@ -670,7 +677,7 @@ function dbErr(e){const c=e&&e.code;
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';
   return 'เชื่อมต่อไม่สำเร็จ ลองใหม่อีกครั้ง'}
 
-const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2E2E2E"/><stop offset="1" stop-color="#151515"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#F6BE55" stroke-width="2.2" stroke-linecap="round"/></svg>';
+const BRAND_SVG='<svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="POS คาเฟ่"><defs><linearGradient id="bmG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFC56B"/><stop offset="1" stop-color="#F08A2C"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#bmG)"/><circle cx="18" cy="14" r="22" fill="#fff" opacity=".08"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 22c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 22c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 27h26v8.5A10.5 10.5 0 0 1 32.5 46h-5A10.5 10.5 0 0 1 17 35.5z" fill="#fff"/><path d="M43 30.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48.5" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/><path d="M27.5 33.5c1.4-1.6 3.6-1.6 5 0" fill="none" stroke="#F08A2C" stroke-width="2.2" stroke-linecap="round"/></svg>';
 function shopLogoUrl(){const id=shop().lookLogo;return id?imgUrl(id):''}
 function railLogo(){const u=shopLogoUrl();return u?`<img src="${esc(u)}" alt="${esc(shop().name||'โลโก้ร้าน')}">`:BRAND_SVG}
 const ICON={
@@ -1736,9 +1743,9 @@ function b64Rows(r){
   const m=txt.match(/"b"\s*:\s*"([A-Za-z0-9+\/=]*)"/);if(!m)return null;
   const bin=atob(m[1]);const bytes=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
   try{return JSON.parse(new TextDecoder().decode(bytes))}catch(e){return null}}
-const LOOK_COLORS=[['#1B1B1B','ดำ'],['#2F6FB0','ฟ้า'],['#1E7A4B','เขียว'],['#D1450A','ส้ม'],['#B03A6B','ชมพู'],['#6A44A8','ม่วง'],['#7A4A2A','น้ำตาลกาแฟ'],['#1F2A37','ดำ']];
+const LOOK_COLORS=[['#E39B2D','คาราเมล'],['#1B1B1B','ดำ'],['#2F6FB0','ฟ้า'],['#1E7A4B','เขียว'],['#D1450A','ส้ม'],['#B03A6B','ชมพู'],['#6A44A8','ม่วง'],['#7A4A2A','น้ำตาลกาแฟ'],['#1F2A37','ดำ']];
 function lookImg(id){return id&&window.POS_IMG?window.POS_IMG(id):''}
-function lookOf(sh){return {color:/^#[0-9a-f]{6}$/i.test(sh.lookColor||'')?sh.lookColor:'#1B1B1B',tagline:sh.lookTagline||'',notice:sh.lookNotice||'',layout:sh.lookLayout==='grid'?'grid':'list',showImg:sh.lookShowImg!==false,logo:lookImg(sh.lookLogo),cover:lookImg(sh.lookCover)}}
+function lookOf(sh){return {color:/^#[0-9a-f]{6}$/i.test(sh.lookColor||'')?sh.lookColor:'#E39B2D',tagline:sh.lookTagline||'',notice:sh.lookNotice||'',layout:sh.lookLayout==='grid'?'grid':'list',showImg:sh.lookShowImg!==false,logo:lookImg(sh.lookLogo),cover:lookImg(sh.lookCover)}}
 function onColor(hex){const n=parseInt(hex.slice(1),16);const ch=[n>>16&255,n>>8&255,n&255].map(v=>{v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});const L=0.2126*ch[0]+0.7152*ch[1]+0.0722*ch[2];return L>0.36?'#111111':'#FFFFFF'}
 function lookPreview(L){const sh=shop();const on=onColor(L.color);const items=S.menu.filter(m=>!m.soldOut).slice(0,4);
   return `<div class="phone" aria-hidden="true"><div class="ph-top"><div class="ph-logo" style="background:${L.color};color:${on}">${L.logo?`<img src="${esc(L.logo)}" alt="">`:esc((sh.name||'C').charAt(0))}</div><div><b style="font-size:13px">${esc(sh.name||'ร้านของคุณ')}</b><div style="color:#5B6B7D">${esc(L.tagline||sh.branch||'สั่งอาหารออนไลน์')}</div></div></div>
