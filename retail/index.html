@@ -725,7 +725,6 @@ var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(func
 var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();
 window.POS_ACCOUNT=function(){return {login:displayLogin(email),email:email,role:role,admin:!!(SESS&&SESS.admin),shop:SESS&&SESS.shop}};
 window.POS_SESSION=null;
-window.POS_FREE_LIM=function(){var x=window.POS_SESSION&&window.POS_SESSION.shop;return x&&x.free&&x.freeLimits?x.freeLimits:null};
 window.POS_BRANCH_LIMIT=function(){var x=window.POS_SESSION&&window.POS_SESSION.shop;return x&&x.branchLimit!=null?+x.branchLimit:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 
@@ -1045,7 +1044,7 @@ const LKEY='simbat-pos-v1';
 function loadLocal(){const d=loc.get(LKEY);if(d)COLS.forEach(c=>(d[c]||[]).forEach(o=>S[c].set(o.id,o)))}
 let saveT;function saveLocal(){clearTimeout(saveT);saveT=setTimeout(()=>{const o={};COLS.forEach(c=>o[c]=[...S[c].values()]);loc.set(LKEY,o)},250)}
 const chains=new Map();
-function freeLim(){return window.POS_FREE_LIM?window.POS_FREE_LIM():null}function freeBillsFull(){const L=freeLim();if(!L)return false;const d=new Date();const m0=new Date(d.getFullYear(),d.getMonth(),1).getTime();return all('sales').filter(x=>x.ts>=m0).length>=L.bills}function freeItemsLeft(){const L=freeLim();return L?L.items-all('products').length:Infinity}function chain(p,fn){const n=(chains.get(p)||Promise.resolve()).then(fn).catch(e=>{toast(e&&e.code==='free_limit'?e.message:e&&e.code==='quota_exceeded'?'พื้นที่เก็บข้อมูลเต็ม ลบข้อมูลเก่าก่อน':'บันทึกไม่สำเร็จ ('+(e&&e.code||'error')+')','bad')});chains.set(p,n);return n}
+function chain(p,fn){const n=(chains.get(p)||Promise.resolve()).then(fn).catch(e=>{toast(e&&e.code==='quota_exceeded'?'พื้นที่เก็บข้อมูลเต็ม ลบข้อมูลเก่าก่อน':'บันทึกไม่สำเร็จ ('+(e&&e.code||'error')+')','bad')});chains.set(p,n);return n}
 /* website plans: the admin sets how many products and bills a month a shop may have (free plan: 50 / 500) */
 function planLimits(){const s=window.POS_SESSION&&window.POS_SESSION.shop;if(!s||s.product==='cafe')return null;const free=s.planFree!=null?!!s.planFree:!!(s.trial||s.free);
   return {products:s.productLimit!==undefined?s.productLimit:(free?50:null),bills:s.billLimit!==undefined?s.billLimit:(free?500:null)}}
@@ -1292,7 +1291,7 @@ function viewPOS(){const c=calc(ST.cart),m=get('members',ST.cart.memberId),shopP
 const PAYM={cash:'เงินสด',qr:'QR พร้อมเพย์',transfer:'โอนเงิน',card:'บัตร',wallet:'กระเป๋าสมาชิก',credit:'ติดหนี้ไว้'};
 const NOTES=[[1000,'n1000'],[500,'n500'],[100,'n100'],[50,'n50'],[20,'n20'],[10,'nc'],[5,'nc'],[1,'nc']];
 const PAYTABS=[['cash','เงินสด'],['qr','QR'],['transfer','โอนเงิน'],['credit','ติดหนี้']];
-function payModal(){const c=calc(ST.cart);if(!c.lines.length)return;if(freeBillsFull())return toast(window.POS_FREE_MSG('bills'),'bad');if(limitHit('bills'))return;
+function payModal(){const c=calc(ST.cart);if(!c.lines.length)return;if(limitHit('bills'))return;
   if(!openShift())return toast('เปิดกะก่อนรับเงิน (เมนู กะ/ลิ้นชัก)','bad');
   if(c.lines.some(l=>(get('products',l.pid)||{}).kind==='package')&&!ST.cart.memberId)return toast('ขายแพคเกจต้องเลือกสมาชิกก่อน','bad');
   const T=c.total;let m=get('members',ST.cart.memberId);let dSel=m?m.id:null,dName='',dPhone='',dq='';let method='cash',recv=0,typed='',qSel=null,bSel=null;const split=[];let sm='cash';
@@ -2016,7 +2015,6 @@ function productForm(p){p=p||{kind:'goods',unit:'ชิ้น',stock:{},units:[]
   const bc=v.barcode.trim()||('20'+Date.now().toString().slice(-10));if(all('products').some(x=>x.barcode===bc&&x.id!==p.id))return toast('บาร์โค้ดนี้มีสินค้าอื่นใช้แล้ว','bad');
   const chosen=boxes.filter(x=>x.checked).map(x=>x.dataset.shop);if(!allB.checked&&!chosen.length)return toast('เลือกร้านที่จะขายสินค้านี้','bad');const shops=allB.checked?null:chosen;
   const st=Object.assign({},p.stock||{});if(!p.id)document.querySelectorAll('#pf [data-st0]').forEach(x=>{if(+x.value&&(!shops||shops.includes(x.dataset.st0)))st[x.dataset.st0]=+x.value});
-  if(!p.id&&freeItemsLeft()<=0)return toast(window.POS_FREE_MSG('items'),'bad');
   put('products',Object.assign({},p,{id:p.id||uid(),name:v.name.trim(),barcode:bc,cat:v.cat.trim(),shops,kind:v.kind,price:+v.price||0,price2:v.price2===''?null:+v.price2,price3:v.price3===''?null:+v.price3,cost:+v.cost||0,unit:v.unit||'ชิ้น',min:+v.min||0,pin:v.pin,openPrice:v.openPrice,weighed:v.weighed,serial:v.serial,track:v.notrack?false:(v.kind==='goods'),plu:v.plu.trim(),group:v.group.trim()||null,variant:v.variant.trim(),units,tiers,sessions:+v.sessions||null,days:+v.days||null,stock:st,img:img.id||null,imgData:img.data||null}));
   img.saved=true;if(p.img&&p.img!==img.id)dropAsset(p.img);closeModal();toast('บันทึกสินค้าแล้ว')}}})}
 function poForm(){const lines=[];const draw=()=>{$('#poL').innerHTML=lines.length?`<table><tr><th>สินค้า</th><th class="r">จำนวน (หน่วยหลัก)</th><th class="r">ต้นทุน/หน่วย</th><th class="r">รวม</th><th></th></tr>${lines.map((l,i)=>`<tr><td>${h(l.name)}</td><td class="r">${num(l.qty)}</td><td class="r">${money(l.cost)}</td><td class="r">${money(l.qty*l.cost)}</td><td><button class="btn sm ghost" data-rmpo="${i}">ลบ</button></td></tr>`).join('')}</table>`:'<p class="muted">ยังไม่มีรายการ</p>';
@@ -2375,9 +2373,9 @@ const A={
  lblSave(){const html=`<div class="labels">${(ST.lblSel||[]).flatMap(x=>{const p=get('products',x.pid);return p?Array.from({length:x.n},()=>`<div class="lbl"><div>${h(p.name)}</div>${barcodeSvg(p.barcode)}<b>฿${money(p.price)}</b></div>`):[]}).join('')}</div>`;saveFile('barcode-labels.html',html,'ฉลากบาร์โค้ด')},
  doImport(){const t=$('#impText').value.trim();if(!t)return toast('วางข้อมูลหรือเลือกไฟล์ก่อน','bad');let n=0,u=0;const sel=($('#impShop')||{}).value||curBranch();const b=sel==='*'?curBranch():sel;
   const shopsFor=ex=>sel==='*'?null:ex&&(!ex.shops||!ex.shops.length)?null:[...new Set(((ex&&ex.shops)||[]).concat([sel]))];
-  t.split(/\r?\n/).forEach((row,i)=>{const c=row.split(/,|\t/).map(x=>x.trim().replace(/^"|"$/g,''));if(c.length<5||!c[1]||(i===0&&isNaN(+c[4])))return;const ex=all('products').find(p=>c[0]&&p.barcode===c[0]);if(!ex&&freeItemsLeft()<=0){ST.freeSkip=(ST.freeSkip||0)+1;return}const st=Object.assign({},ex?ex.stock:{});if(c[6]!==undefined&&c[6]!=='')st[b]=+c[6];
+  t.split(/\r?\n/).forEach((row,i)=>{const c=row.split(/,|\t/).map(x=>x.trim().replace(/^"|"$/g,''));if(c.length<5||!c[1]||(i===0&&isNaN(+c[4])))return;const ex=all('products').find(p=>c[0]&&p.barcode===c[0]);const st=Object.assign({},ex?ex.stock:{});if(c[6]!==undefined&&c[6]!=='')st[b]=+c[6];
    put('products',Object.assign({kind:'goods',units:[],tiers:[],track:true},ex||{},{id:ex?ex.id:uid(),barcode:c[0]||('20'+Date.now().toString().slice(-8)+i),name:c[1],cat:c[2]||'',unit:c[3]||'ชิ้น',price:+c[4]||0,cost:+c[5]||0,stock:st,shops:shopsFor(ex),price2:c[7]?+c[7]:(ex?ex.price2:null)}));ex?u++:n++});
-  toast(`นำเข้าใหม่ ${n} · อัปเดต ${u} รายการ`+(ST.freeSkip?` · ข้าม ${ST.freeSkip} รายการ (ใช้งานฟรีจำกัดสินค้า ${freeLim().items} รายการ)`:''),ST.freeSkip?'bad':undefined);ST.freeSkip=0;$('#impText').value=''},
+  toast(`นำเข้าใหม่ ${n} · อัปเดต ${u} รายการ`);$('#impText').value=''},
  memberForm(){memberForm()},memberView(el){memberView(get('members',el.dataset.id))},memberEdit(el){memberForm(get('members',el.dataset.id))},
  memberToCart(el){const m=get('members',el.dataset.id);ST.cart.memberId=m.id;ST.cart.level=m.level||'member';ST.route='pos';closeModal();cartChanged()},
  walletTop(el){const m=get('members',el.dataset.id);modal('เติมเงิน · '+m.name,`<div class="grid2"><label class="f">จำนวน<input id="wt" type="number" value="500"></label><label class="f">รับโดย<select id="wm"><option value="cash">เงินสด</option><option value="transfer">โอน</option><option value="qr">QR</option></select></label></div>`,{foot:`<button class="btn pri" id="wok2">เติมเงิน</button>`,onMount(){$('#wok2').onclick=()=>{const a=+$('#wt').value;if(!(a>0))return;if(!openShift())return toast('เปิดกะก่อนรับเงิน','bad');put('members',Object.assign({},m,{wallet:r2((+m.wallet||0)+a)}));cashIn('topup',a,'เติมกระเป๋า '+m.name,$('#wm').value);closeModal();toast('เติมเงินแล้ว')}}})},

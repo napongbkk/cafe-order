@@ -16,9 +16,9 @@ as $function$
   select case when s.product <> 'retail' then jsonb_build_object('products', null, 'bills', null) else
     jsonb_build_object(
       'plan_free', (coalesce(s.trial, false) or public.pos_free_mode()),
-      'products', case when s.product_limit is null then (case when coalesce(s.trial, false) or public.pos_free_mode() then 50 end)
+      'products', case when s.product_limit is null then (case when coalesce(s.trial, false) or public.pos_free_mode() then (public.pos_free_limits()->>'items')::int end)
                        when s.product_limit = 0 then null else s.product_limit end,
-      'bills', case when s.bill_limit is null then (case when coalesce(s.trial, false) or public.pos_free_mode() then 500 end)
+      'bills', case when s.bill_limit is null then (case when coalesce(s.trial, false) or public.pos_free_mode() then (public.pos_free_limits()->>'bills')::int end)
                     when s.bill_limit = 0 then null else s.bill_limit end) end
   from public.pos_shops s where s.id = p_sid
 $function$;
@@ -43,7 +43,6 @@ begin
   end if;
   return new;
 end $function$;
-drop trigger if exists pos_data_limit_guard on public.pos_data;
 create trigger pos_data_limit_guard before insert on public.pos_data for each row execute function public.pos_data_limit_guard();
 
 -- Session: limits and usage for the POS, sheet link for the shop.
@@ -68,7 +67,9 @@ begin
       'price', s.price, 'staffLimit', case when fm then greatest(coalesce(s.staff_limit, 0), public.pos_free_staff()) else s.staff_limit end,
       'branchLimit', case when s.product = 'retail' then s.branch_limit end,
       'branchUsed', (select count(*) from public.pos_data where shop_id = s.id and col = 'branches'),
-      'productLimit', lim->'products', 'billLimit', lim->'bills', 'planFree', coalesce((lim->>'plan_free')::boolean, false),
+      'productLimit', lim->'products', 'billLimit', lim->'bills',
+      'freeLimits', case when fm and s.product = 'cafe' then public.pos_free_limits() end,
+      'freeUsage', case when fm and s.product = 'cafe' then public.pos_free_usage(s.id) end, 'planFree', coalesce((lim->>'plan_free')::boolean, false),
       'sheet', s.sheet_id is not null and s.sheet_id <> '', 'sheetSyncedAt', s.sheet_synced_at,
       'expiresAt', s.expires_at, 'graceUntil', s.expires_at + make_interval(days => grace),
       'locked', public.pos_shop_locked(s.id), 'userPrefix', s.user_prefix, 'trial', coalesce(s.trial, false) and not fm, 'free', fm,

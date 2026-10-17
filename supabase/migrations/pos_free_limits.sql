@@ -1,4 +1,4 @@
--- Free mode limits: products per shop and bills per calendar month (Asia/Bangkok).
+-- Easy POS Cafe free mode limits (Retail uses pos_retail_limits): menu items per shop and bills per calendar month (Asia/Bangkok).
 -- Admin sets billing.freeItems (default 50) and billing.freeBills (default 500).
 
 create or replace function public.pos_free_limits()
@@ -15,8 +15,8 @@ returns bigint language sql stable set search_path = public, pg_temp as $$
 create or replace function public.pos_free_usage(p_shop uuid)
 returns jsonb language sql stable security definer set search_path = public, pg_temp as $$
   select jsonb_build_object(
-    'items', (select count(*) from public.pos_data where shop_id = p_shop and col in ('menu', 'products')),
-    'bills', (select count(*) from public.pos_data where shop_id = p_shop and col in ('orders', 'sales')
+    'items', (select count(*) from public.pos_data where shop_id = p_shop and col = 'menu'),
+    'bills', (select count(*) from public.pos_data where shop_id = p_shop and col = 'orders'
                and case when jsonb_typeof(coalesce(data->'createdAt', data->'ts')) = 'number'
                         then (coalesce(data->>'createdAt', data->>'ts'))::numeric >= public.pos_month_start_ms() else false end)) $$;
 
@@ -24,14 +24,15 @@ create or replace function public.pos_free_guard()
 returns trigger language plpgsql security definer set search_path = public, pg_temp as $$
 declare lim jsonb; u jsonb;
 begin
-  if new.col not in ('menu', 'products', 'orders', 'sales') then return new; end if;
+  if new.col not in ('menu', 'orders') then return new; end if;
+  if not exists (select 1 from public.pos_shops where id = new.shop_id and product = 'cafe') then return new; end if;
   if not public.pos_free_mode() then return new; end if;
   if exists (select 1 from public.pos_data where shop_id = new.shop_id and col = new.col and id = new.id) then return new; end if;
   lim := public.pos_free_limits(); u := public.pos_free_usage(new.shop_id);
-  if new.col in ('menu', 'products') and (u->>'items')::int >= (lim->>'items')::int then
+  if new.col = 'menu' and (u->>'items')::int >= (lim->>'items')::int then
     raise exception 'free_items_limit' using errcode = 'P0001';
   end if;
-  if new.col in ('orders', 'sales') and (u->>'bills')::int >= (lim->>'bills')::int then
+  if new.col = 'orders' and (u->>'bills')::int >= (lim->>'bills')::int then
     raise exception 'free_bills_limit' using errcode = 'P0001';
   end if;
   return new;
@@ -88,3 +89,4 @@ begin
 end $$;
 grant execute on function public.pos_my_free_usage() to authenticated;
 revoke execute on function public.pos_free_usage(uuid) from public, anon, authenticated;
+-- Superseded: pos_session is now defined in pos_retail_limits_sheets.sql (includes freeLimits/freeUsage for Cafe shops).
