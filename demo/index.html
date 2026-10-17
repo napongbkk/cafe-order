@@ -748,7 +748,7 @@ function receiptBody(o,kind,copy,st){
   }else{
     h+=`<div class="c b">${sh.vatMode!=='none'?'ใบเสร็จรับเงิน / ใบกำกับภาษีอย่างย่อ':'ใบเสร็จรับเงิน'}</div>${copy?'<div class="c sm">(สำเนา)</div>':''}<div class="r"><span>เลขที่</span><span>${esc(o.rno||o.no)}</span></div><div class="r"><span>วันที่</span><span>${fmtDT(o.paidAt||o.createdAt)}</span></div>`;
   }
-  h+=`<div class="r"><span>ออเดอร์</span><span class="b">${esc(o.no||'')} · ${esc(whereOf(o))}</span></div><hr>`;
+  h+=`<hr><div style="text-align:center;margin:4px 0 2px"><div class="sm">หมายเลขออเดอร์</div><div style="font-size:34px;font-weight:800;line-height:1.15;letter-spacing:1px">${esc(o.no||'-')}</div><div class="b">${esc(whereOf(o))}</div></div><hr>`;
   h+=items.map(i=>`<div class="r it"><span>${i.qty} × ${esc(i.name)}</span><span>${money(i.unit*i.qty)}</span></div>${i.opts?`<div class="op">${esc(i.opts)}</div>`:''}${i.disc?`<div class="r op"><span>ส่วนลด ${esc(i.disc.name)}</span><span>-${money(lineDisc(i))}</span></div>`:''}`).join('')+'<hr>';
   h+=`<div class="r"><span>รวม ${s.count} รายการ</span><span>${money(s.sub)}</span></div>`;
   if(s.idisc)h+=`<div class="r"><span>ส่วนลดรายเมนู</span><span>-${money(s.idisc)}</span></div>`;
