@@ -1,11 +1,11 @@
 // Shop sign-up: create the login, store the application, take the payment slip, and send e-mails.
-// E-mail goes out through Resend when RESEND_API_KEY is set (MAIL_FROM optional); otherwise it is skipped.
+// E-mail goes out through Gmail SMTP (GMAIL_USER/GMAIL_APP_PASSWORD) or Resend (RESEND_API_KEY); otherwise it is skipped.
 import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SB_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const RESEND = Deno.env.get("RESEND_API_KEY") || "";
-const FROM = Deno.env.get("MAIL_FROM") || "POS คาเฟ่ <onboarding@resend.dev>";
+const RESEND_ENV = Deno.env.get("RESEND_API_KEY") || "";
+const FROM = Deno.env.get("MAIL_FROM") || "Easy POS <onboarding@resend.dev>";
 const APP = (Deno.env.get("APP_URL") || "https://cafe-order-umber.vercel.app").replace(/\/$/, "");
 const db = createClient(SB_URL, SERVICE, { auth: { persistSession: false } });
 
@@ -20,16 +20,40 @@ const esc = (s: unknown) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 const baht = (n: number) => "฿" + Number(n || 0).toLocaleString("en-US");
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+// Mail goes out through Gmail SMTP when GMAIL_USER + GMAIL_APP_PASSWORD are in pos_secrets (most reliable:
+// the shop owner's own Gmail sends it), otherwise through Resend. Keys come from env or the private pos_secrets table.
+let RESEND = RESEND_ENV, GUSER = "", GPASS = "";
+let keyLoaded = false;
+async function secret(k: string) { const { data } = await db.from("pos_secrets").select("value").eq("key", k).maybeSingle(); return (data?.value as string) || ""; }
+async function mailOn() {
+  if (!keyLoaded) {
+    if (!RESEND) RESEND = await secret("RESEND_API_KEY");
+    GUSER = Deno.env.get("GMAIL_USER") || await secret("GMAIL_USER");
+    GPASS = (Deno.env.get("GMAIL_APP_PASSWORD") || await secret("GMAIL_APP_PASSWORD")).replace(/\s+/g, "");
+    keyLoaded = true;
+  }
+  return !!(RESEND || (GUSER && GPASS));
+}
+async function viaGmail(to: string[], subject: string, html: string) {
+  const nm = (await import("npm:nodemailer@6.9.16")).default;
+  const t = nm.createTransport({ host: "smtp.gmail.com", port: 465, secure: true, auth: { user: GUSER, pass: GPASS } });
+  await t.sendMail({ from: `"Easy POS" <${GUSER}>`, to: to.join(", "), subject, html });
+}
 async function mail(to: string | string[], subject: string, body: string): Promise<boolean> {
+  if (!(await mailOn())) return false;
+  const list = Array.isArray(to) ? to : [to];
+  const subj = subject.replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) || "Easy POS";
+  // Keep the layout plain: a styled wrapper made Gmail silently drop the message.
+  const html = `<div><h3>Easy POS</h3>${body}</div>`;
+  if (GUSER && GPASS) {
+    try { await viaGmail(list, subj, html); return true; } catch (e) { console.log("gmail smtp error", String(e)); }
+  }
   if (!RESEND) return false;
-  const html = `<div style="font-family:Tahoma,sans-serif;font-size:15px;line-height:1.6;color:#1F2A37;max-width:560px;margin:auto">
-    <div style="background:#2F6FB0;color:#fff;padding:14px 18px;border-radius:12px 12px 0 0;font-weight:700">POS คาเฟ่</div>
-    <div style="border:1px solid #E1E8F0;border-top:0;padding:18px;border-radius:0 0 12px 12px">${body}</div></div>`;
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${RESEND}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: FROM, to: Array.isArray(to) ? to : [to], subject, html }),
+      body: JSON.stringify({ from: FROM, to: list, subject: subj, html }),
     });
     if (!r.ok) console.log("resend", r.status, await r.text());
     return r.ok;
@@ -147,16 +171,16 @@ async function apply(req: Request, b: Record<string, string>) {
   if (error) { console.log("insert", error.message); return fail("save_failed", 500); }
 
   const free = !Number(pk.price);
-  await mail(f.email, `ได้รับคำขอเปิดร้าน ${f.shop} แล้ว`,
+  await mail(f.email, `Easy POS - ได้รับคำขอเปิดร้าน ${f.shop}`,
     `<p>สวัสดีคุณ ${esc(f.first)}</p><p>เราได้รับคำขอเปิดร้าน <b>${esc(f.shop)}</b> แล้ว</p>
      <p>แพ็กเกจ: <b>${esc(pk.name)}</b>${free ? "" : ` · ยอดชำระ <b>${baht(Number(pk.price))}</b>`}</p>
      ${free ? "" : `<p>หากยังไม่ได้แนบสลิป เข้าไปแนบได้ที่ <a href="${APP}/signup?id=${app.id}&t=${app.token}">${APP}/signup</a></p>`}
      <p>เมื่อผู้ดูแลระบบอนุมัติ เราจะส่งอีเมลยืนยันอีกครั้ง จากนั้นเข้าใช้งานที่ <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>`);
   const ad = await admins();
-  if (ad.length) await mail(ad, `คำขอเปิดร้านใหม่: ${f.shop}${free ? " (ทดลองใช้ฟรี)" : ""}`,
+  if (ad.length) await mail(ad, `Easy POS - ร้านสมัครใหม่${free ? " (ทดลองฟรี)" : ""}: ${f.shop}`,
     `<p><b>${esc(f.shop)}</b> · ${esc(f.first)} ${esc(f.last)} · ${esc(f.phone)} · ${esc(f.email)}</p><p>${esc(f.address)}</p>
      <p>แพ็กเกจ ${esc(pk.name)} · ${free ? "ฟรี" : baht(Number(pk.price))}</p><p><a href="${APP}/admin#apps">เปิดแดชบอร์ดผู้ดูแลระบบ</a></p>`);
-  return json({ id: app.id, token: app.token, amount: app.amount, package: app.package, mail: !!RESEND });
+  return json({ id: app.id, token: app.token, amount: app.amount, package: app.package, mail: await mailOn() });
 }
 
 async function slip(b: Record<string, string>) {
@@ -172,7 +196,7 @@ async function slip(b: Record<string, string>) {
   if (up.error) { console.log("upload", up.error.message); return fail("upload_failed", 500); }
   await db.from("pos_applications").update({ slip: path }).eq("id", a.id);
   const ad = await admins();
-  if (ad.length) await mail(ad, `สลิปคำขอเปิดร้าน: ${a.shop_name}`, `<p>ร้าน <b>${esc(a.shop_name)}</b> แนบสลิป ${baht(Number(a.amount))} แล้ว</p><p><a href="${APP}/admin#apps">ตรวจและอนุมัติ</a></p>`);
+  if (ad.length) await mail(ad, `Easy POS - แนบสลิปสมัคร ${baht(Number(a.amount))}: ${a.shop_name}`, `<p>ร้าน <b>${esc(a.shop_name)}</b> แนบสลิป ${baht(Number(a.amount))} แล้ว</p><p><a href="${APP}/admin#apps">ตรวจและอนุมัติ</a></p>`);
   return json({ ok: true });
 }
 
@@ -188,15 +212,15 @@ async function notify(req: Request, b: Record<string, string>) {
   let sent = false;
   if (a.status === "approved") {
     const { data: s } = await db.from("pos_shops").select("slug,expires_at").eq("id", a.shop_id).maybeSingle();
-    sent = await mail(a.email, `อนุมัติเปิดร้าน ${a.shop_name} แล้ว`,
+    sent = await mail(a.email, `Easy POS - ร้าน ${a.shop_name} ได้รับการอนุมัติแล้ว`,
       `<p>สวัสดีคุณ ${esc(a.first_name)}</p><p>ร้าน <b>${esc(a.shop_name)}</b> ได้รับการอนุมัติแล้ว ใช้งานได้ถึง ${new Date(s?.expires_at || Date.now()).toLocaleDateString("th-TH", { dateStyle: "long" })}</p>
        <p>เข้าใช้งาน POS: <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมล ${esc(a.email)} และรหัสผ่านที่ตั้งไว้ตอนสมัคร</p>
        <p>ลิงก์สั่งอาหารของลูกค้า: <a href="${APP}/s/${s?.slug}">${APP}/s/${esc(s?.slug)}</a></p>${a.admin_note ? `<p>หมายเหตุ: ${esc(a.admin_note)}</p>` : ""}`);
   } else if (a.status === "rejected") {
-    sent = await mail(a.email, `คำขอเปิดร้าน ${a.shop_name} ยังไม่ได้รับการอนุมัติ`,
+    sent = await mail(a.email, `Easy POS - ผลคำขอเปิดร้าน ${a.shop_name}`,
       `<p>สวัสดีคุณ ${esc(a.first_name)}</p><p>คำขอเปิดร้าน <b>${esc(a.shop_name)}</b> ยังไม่ได้รับการอนุมัติ</p>${a.admin_note ? `<p>เหตุผล: ${esc(a.admin_note)}</p>` : ""}<p>ติดต่อผู้ดูแลระบบหากมีข้อสงสัย</p>`);
   }
-  return json({ sent, mail: !!RESEND });
+  return json({ sent, mail: await mailOn() });
 }
 
 // Admin sets a new password for a shop account; an encrypted copy is kept for the admin.
@@ -315,12 +339,12 @@ async function payNotify(req: Request, b: Record<string, string>) {
   if (p.status !== "pending" || Date.now() - new Date(p.created_at).getTime() > 3600e3) return json({ sent: false });
   const { data: sh } = await db.from("pos_shops").select("name,slug,expires_at").eq("id", p.shop_id).maybeSingle();
   const ad = await admins();
-  const sent = ad.length ? await mail(ad, `แจ้งชำระค่าบริการ: ${sh?.name || ""} ${baht(Number(p.amount))}`,
+  const sent = ad.length ? await mail(ad, `Easy POS - แจ้งชำระค่าบริการ ${baht(Number(p.amount))}: ${sh?.name || ""}`,
     `<p>ร้าน <b>${esc(sh?.name)}</b> (${esc(sh?.slug)}) แจ้งชำระค่าบริการ <b>${baht(Number(p.amount))}</b> · ${esc(p.months)} เดือน</p>
      <p>ผู้แจ้ง: ${esc(me.replace("@staff.cafe-pos.app", ""))}${p.note ? ` · หมายเหตุ: ${esc(p.note)}` : ""}</p>
      <p>หมดอายุเดิม: ${new Date(sh?.expires_at || Date.now()).toLocaleDateString("th-TH", { dateStyle: "long" })}</p>
      <p><a href="${APP}/admin#pays">ตรวจสลิปและอนุมัติ</a></p>`) : false;
-  return json({ sent, mail: !!RESEND });
+  return json({ sent, mail: await mailOn() });
 }
 
 Deno.serve(async (req) => {
@@ -340,6 +364,13 @@ Deno.serve(async (req) => {
     if (b.action === "remember") return await rememberLogin(req, b);
     if (b.action === "my_pw") return await myPw(req, b);
     if (b.action === "pay_notify") return await payNotify(req, b);
+    if (b.action === "test_mail") {
+      const tok = await secret("TEST_TOKEN");
+      if (!tok || b.token !== tok) return fail("forbidden", 403);
+      const ad = await admins();
+      const sent = await mail(ad, `Easy POS - ทดสอบอีเมลแจ้งเตือน ${new Date().toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })}`, "<p>อีเมลแจ้งเตือนผู้ดูแลระบบใช้งานได้แล้ว</p><p>คุณจะได้รับอีเมลเมื่อมีร้านสมัครใหม่ แนบสลิป หรือแจ้งชำระค่าบริการ</p>");
+      return json({ sent, to: ad, via: GUSER && GPASS ? "gmail" : "resend" });
+    }
     return fail("bad_action");
   } catch (e) {
     console.error(e);
