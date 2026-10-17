@@ -128,8 +128,8 @@ R("  $('#appPill').innerHTML=",
 R("    case 'apptoggle':", "    case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;\n    case 'apptoggle':")
 
 # Staff management (shop manager) and monthly billing in Settings.
-R("const tabs=[['ui','รูปแบบหน้าตาระบบ'],['devices','อุปกรณ์และการรับเงิน'],",
-  "const tabs=[['ui','รูปแบบหน้าตาระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),")
+R("const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],",
+  "const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),")
 R("  else if(tab==='app'){",
   r"""  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
   else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};

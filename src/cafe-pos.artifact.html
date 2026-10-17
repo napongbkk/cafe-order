@@ -587,6 +587,27 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .floor .fi.d-counter small{font-weight:600;letter-spacing:.02em}
 .fi svg.dv{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
 .floor.edit .fi.deco:hover{outline:1.5px dashed var(--line2);outline-offset:3px}
+/* floor plan: vintage style */
+.floor.vintage{--vw:#B98B5C;--vw2:#94673E;--vedge:#6A4529;--vink:#3B2616;--vcream:#FBF1DE;
+  background-color:#EBDCC2;
+  background-image:radial-gradient(120% 90% at 50% 45%,transparent 55%,rgba(92,60,30,.20)),repeating-linear-gradient(0deg,rgba(110,74,40,.16) 0 1px,transparent 1px 4.1cqw),repeating-linear-gradient(90deg,rgba(110,74,40,.07) 0 1px,transparent 1px 13.3cqw),linear-gradient(90deg,rgba(255,255,255,.12),rgba(160,110,60,.06),rgba(255,255,255,.1));
+  border:1px solid #9C7A55;box-shadow:inset 0 0 0 .6cqw #F4E8D2,inset 0 0 0 calc(.6cqw + 1px) #9C7A55,0 10px 30px -18px rgba(70,45,20,.5);
+  --chair:#6E4A2E;--chair-back:#43291A;--door-leaf:#5A3A22;font-family:Georgia,'Noto Serif Thai','Times New Roman',serif}
+.floor.vintage.edit{background-image:radial-gradient(rgba(90,60,30,.22) 1.1px,transparent 1.2px),repeating-linear-gradient(0deg,rgba(110,74,40,.12) 0 1px,transparent 1px 4.1cqw);background-size:calc(100%/24) calc(100%/16),auto}
+.floor.vintage .fi.t-round,.floor.vintage .fi.t-square,.floor.vintage .fi.t-rect{background:radial-gradient(120% 120% at 30% 25%,#C99B69,var(--vw) 45%,var(--vw2));border:2px solid var(--vedge);color:var(--vcream);box-shadow:inset 0 0 0 3px rgba(255,236,200,.18),0 8px 14px -8px rgba(60,35,15,.55)}
+.floor.vintage .fi .tn{font-family:Georgia,'Noto Serif Thai',serif;letter-spacing:.03em;text-shadow:0 1px 0 rgba(0,0,0,.25)}
+.floor.vintage .fi small{font-style:italic;opacity:.92}
+.floor.vintage .fi.st-busy{background:radial-gradient(120% 120% at 30% 25%,#E9C46A,#C99A3C 50%,#A87A24);border-color:#6E4F14;color:#2E1F06}
+.floor.vintage .fi.st-busy .ch{background:#9A6B21;box-shadow:inset 0 .32cqw 0 #5E3F10}
+.floor.vintage .fi .ch{border-radius:.6cqw .6cqw .35cqw .35cqw}
+.floor.vintage .fi.d-counter{background:linear-gradient(180deg,#5C3B24,#3F2716);border:2px solid #B8925A;color:#F3DFB4;box-shadow:inset 0 2px 0 rgba(255,220,160,.2),0 8px 16px -10px rgba(0,0,0,.6)}
+.floor.vintage .fi.d-counter small{font-family:Georgia,'Noto Serif Thai',serif;font-style:italic;letter-spacing:.08em}
+.floor.vintage .fi.d-wall{background:repeating-linear-gradient(45deg,#4A3324 0 3px,#5E4230 3px 6px)}
+.floor.vintage .fi.d-window{background:color-mix(in srgb,#9DB8A8 55%,#F4E8D2);border-color:#5C4630}
+.floor.vintage .fi.d-window::after{background:#5C4630}
+.floor.vintage .fi.d-door:not(.swing){border-color:#7A5A3A;color:#5A3A22;background:rgba(255,245,225,.5)}
+.floor.vintage .fi.sel{outline-color:#B8862E}
+
 
 .tpick{border:1px solid var(--line2);border-radius:12px;background:var(--sunk)}
 .hrow[aria-current="true"]{background:var(--sunk);color:var(--ink);box-shadow:inset 3px 0 0 var(--amber)}
@@ -1353,6 +1374,7 @@ function renderFloor(){
     ${S.floorEdit&&!ro?(S.addZone?'<label class="search" for="zoneName" style="height:42px"><input id="zoneName" maxlength="30" placeholder="ชื่อโซนใหม่"></label><button class="btn" data-act="savezone">เพิ่ม</button><button class="btn" data-act="cancelzone">ยกเลิก</button>':'<button class="chip" data-act="addzone">+ โซน</button>'):''}</div>
     <span class="sep"></span>${ro?'<span class="muted" style="font-size:13px">จัดผังได้เฉพาะเจ้าของร้าน</span>':`<button class="btn ${S.floorEdit?'primary':''}" data-act="floormode">${S.floorEdit?'เสร็จสิ้นการจัดผัง':'จัดผังร้าน'}</button>`}`;
   fl.classList.toggle('edit',S.floorEdit);
+  fl.classList.toggle('vintage',(shop().floorStyle||'vintage')==='vintage');
   const items=S.tables.filter(t=>t.zone===zone);
   fl.innerHTML=items.length?items.map(itemHtml).join(''):`<div class="empty" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><b>โซนนี้ยังไม่มีโต๊ะ</b>${ro?'':S.floorEdit?'เพิ่มโต๊ะจากแผงด้านขวา แล้วลากไปวางตรงไหนก็ได้':'กด “จัดผังร้าน” เพื่อเริ่มวางโต๊ะ'}</div>`;
   const tabs=S.tables.filter(isTable);const busy=tabs.filter(t=>tableBill(t.id)).length;
@@ -1366,6 +1388,7 @@ function renderFloorSide(){
     const t=S.tables.find(x=>x.id===S.sel);
     const add=`<h2>เพิ่มลงผัง</h2><div class="opts">${['round','square','rect'].map(k=>`<button class="opt" data-act="addfloor" data-k="${k}">${KINDS[k].l}</button>`).join('')}</div>
       <div class="opts">${['counter','wall','door','window','plant'].map(k=>`<button class="opt" data-act="addfloor" data-k="${k}" style="min-width:0">${KINDS[k].l}</button>`).join('')}</div>
+      <div><span class="grp-t">สไตล์ผังร้าน</span><div class="opts">${[['vintage','วินเทจ'],['minimal','มินิมอล']].map(([v,l])=>`<button class="opt" type="button" data-act="floorstyle" data-v="${v}" aria-pressed="${(shop().floorStyle||'vintage')===v}" style="min-width:0">${l}</button>`).join('')}</div></div>
       <label class="check" for="snap" style="display:flex"><input id="snap" type="checkbox"${S.snap?' checked':''}> จัดชิดกริด</label><span class="hint">ลากเพื่อย้าย ลากมุมขวาล่างเพื่อปรับขนาด บันทึกอัตโนมัติ</span>`;
     if(!t){el.innerHTML=add+'<div class="hint" style="border-top:1px solid var(--line);padding-top:12px">แตะชิ้นในผังเพื่อแก้ชื่อ จำนวนที่นั่ง หรือลบ</div>';return}
     const tb=isTable(t);const del=S.confirm==='tdel:'+t.id;
@@ -1583,12 +1606,12 @@ function setNav(tabs,tab){const lbl=Object.fromEntries(tabs),used=new Set();
   const btn=v=>{used.add(v);return `<button data-act="stab" data-v="${v}" aria-current="${tab===v}"><span class="si" aria-hidden="true"><svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${SET_ICO[v]||'<circle cx="12" cy="12" r="3"/>'}</svg></span><span class="sl">${lbl[v]}</span></button>`};
   let h=SET_GROUPS.map(([g,keys])=>{const k=keys.filter(v=>lbl[v]);return k.length?`<div class="sgrp"><h4>${g}</h4>${k.map(btn).join('')}</div>`:''}).join('');
   const rest=tabs.map(t=>t[0]).filter(v=>!used.has(v));if(rest.length)h+=`<div class="sgrp"><h4>อื่น ๆ</h4>${rest.map(btn).join('')}</div>`;
-  setTimeout(()=>{const n=document.querySelector('.snav'),a=n&&n.querySelector('[aria-current="true"]');if(!a)return;const nr=n.getBoundingClientRect(),ar=a.getBoundingClientRect();
+  setTimeout(()=>{const n=document.querySelector('.snav'),a=n&&n.querySelector('[aria-current="true"]');if(!n)return;n.scrollTop=setNav.top||0;n.scrollLeft=setNav.left||0;n.onscroll=()=>{setNav.top=n.scrollTop;setNav.left=n.scrollLeft};if(!a)return;const nr=n.getBoundingClientRect(),ar=a.getBoundingClientRect();
     if(ar.top<nr.top||ar.bottom>nr.bottom)n.scrollTop+=ar.top-nr.top-nr.height/2+ar.height/2;if(ar.left<nr.left||ar.right>nr.right)n.scrollLeft+=ar.left-nr.left-12},0);
   return h}
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['ui','รูปแบบหน้าตาระบบ'],['devices','อุปกรณ์และการรับเงิน'],['app','แอปลูกค้า (QR สั่ง)'],['look','หน้าตา Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
+  const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],['app','แอปลูกค้า (QR สั่ง)'],['look','ปรับแต่งรูปแบบ Mobile Order'],['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2>
@@ -1605,7 +1628,7 @@ function settingsView(){
   else if(tab==='receipt')body=`<h2>รูปแบบใบเสร็จ</h2><form class="form" data-stab="receipt"><label for="s_footer">ข้อความท้ายใบเสร็จ<input id="s_footer" maxlength="80" placeholder="ขอบคุณที่อุดหนุน" value="${esc(sh.footer)}"${dis}></label><span class="hint">ชื่อร้าน ที่อยู่ เบอร์โทร และเลขผู้เสียภาษีมาจาก “ข้อมูลร้าน” · หัวใบเสร็จเปลี่ยนเป็นใบกำกับภาษีอย่างย่อเมื่อคิด VAT</span>${save}</form>
     <div class="paper${PR.paper==='58'?' p58':''}" style="max-width:360px">${receiptBody({no:'A-001',type:'dine',items:[{name:'ลาเต้',opts:'เย็น · กลาง',unit:80,qty:1},{name:'ครัวซองต์เนยสด',opts:'',unit:75,qty:1}],sums:calc([{unit:80,qty:1},{unit:75,qty:1}],null),method:'cash',received:200,change:200-calc([{unit:80,qty:1},{unit:75,qty:1}],null).total,createdAt:Date.now(),paidAt:Date.now(),rno:'R'+ymd(Date.now())+'-0001'},'receipt')}</div>`;
   else if(tab==='ui'){const u=uiEffective(),dev=!!uiDevice(),P=UI_PALS[u.pal]||UI_PALS.caramel;const F=UI_FONTS[u.font]||UI_FONTS.modern;const lab=(k)=>((UI_OPTS[k].find(x=>x[0]===u[k])||[])[1]||'');
-    body=`<h2>รูปแบบหน้าตาระบบ</h2><span class="hint">เลือกชุดสี ฟอนต์ ขนาดตัวอักษร มุมปุ่ม ความหนาแน่น รูปแบบเมนู และตำแหน่งบิล ปรับได้ทั้งเฉพาะเครื่องนี้ หรือใช้กับทุกเครื่องของร้าน</span>
+    body=`<h2>ปรับแต่งรูปแบบระบบ</h2><span class="hint">เลือกชุดสี ฟอนต์ ขนาดตัวอักษร มุมปุ่ม ความหนาแน่น รูปแบบเมนู และตำแหน่งบิล ปรับได้ทั้งเฉพาะเครื่องนี้ หรือใช้กับทุกเครื่องของร้าน</span>
     <div class="dcards"><div class="dcard"><div class="dcard-h"><h3><span class="ui-dots" style="display:inline-flex;vertical-align:-3px;margin:0 6px 0 0"><i style="background:${P[1]}"></i><i style="background:${P[4]}"></i></span>${esc(P[0])} · ${esc(F[0])}</h3><button class="btn sm primary" data-act="uiopen">ปรับรูปแบบหน้าตา</button></div>
     <p>${lab('mode')} · ตัวอักษร${lab('size')} · มุม${lab('radius')} · ${lab('density')} · เมนู${lab('menu')} · ${lab('bill')}</p><p class="hint" style="margin:0">${dev?'เครื่องนี้ตั้งค่าเอง (ไม่ตามค่าของร้าน)':'ใช้ค่าของร้าน'}</p></div></div>`}
   else if(tab==='devices'){
@@ -1630,7 +1653,7 @@ function settingsView(){
     <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” หน้าเว็บส่งคำสั่งตรงถึงเครื่องพิมพ์ไม่ได้ จึงต้องเปิดไฟล์ที่บันทึกเพื่อพิมพ์</div></div>`;
   else if(tab==='look'){const L=lookOf(sh);
     const imgField=(k,label,hint)=>{const id=sh[k];return `<div class="grp"><span class="grp-t">${label}</span><div class="imgrow"><div class="ph">${id&&lookImg(id)?`<img src="${esc(lookImg(id))}" alt="">`:ic('cup',22)}</div>${S.assets&&!ro?`<label class="btn" for="lk_${k}">${id?'เปลี่ยนรูป':'เลือกรูป'}<input id="lk_${k}" data-lookimg="${k}" type="file" accept="image/*" class="sr"></label>${id?`<button class="btn danger" type="button" data-act="lookimgdel" data-k="${k}">ลบ</button>`:''}`:`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดรูปได้บน POS เว็บ'}</span>`}<span class="hint">${hint}</span></div></div>`};
-    body=`<h2>หน้าตา Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>
+    body=`<h2>ปรับแต่งรูปแบบ Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>
     <div class="lookwrap"><form class="form" data-stab="look" id="lookForm">
       <div class="grp"><span class="grp-t">สีหลัก</span><div class="swatches">${LOOK_COLORS.map(([c,n])=>`<button type="button" class="swatch" data-act="lookswatch" data-v="${c}" aria-pressed="${L.color.toLowerCase()===c.toLowerCase()}" aria-label="${n}" title="${n}" style="background:${c}"></button>`).join('')}<label for="s_lookColor" class="check" style="min-height:40px">กำหนดเอง <input id="s_lookColor" type="color" value="${esc(L.color)}"${dis} style="width:44px;height:40px;padding:0;border:0;background:none"></label></div></div>
       ${imgField('lookLogo','โลโก้ร้าน','สี่เหลี่ยมจัตุรัส')}
@@ -2272,6 +2295,7 @@ document.addEventListener('click',e=>{
     case 'addfloor':addFloorItem(d.k);break;
     case 'dup':{const t=S.tables.find(x=>x.id===S.sel);if(t)addFloorItem(t.kind,isTable(t)?Object.assign({},t,{name:t.name+'-2'}):t);break;}
     case 'rotate':{const t=S.tables.find(x=>x.id===S.sel);if(!t)return;if(t.kind==='plant'||(t.kind==='door'&&Math.min(t.w,t.h)>=40))saveTable(t.id,{rot:((+t.rot||0)+90)%360});else saveTable(t.id,{w:Math.min(t.h,1200-t.x),h:Math.min(t.w,800-t.y)});renderFloor();break;}
+    case 'floorstyle':{S.shop=Object.assign({},S.shop,{floorStyle:d.v});if(S.db)dbDo(db=>db.doc('settings/shop').set(Object.assign({},S.shop)),null);renderFloor();break;}
     case 'thick':{const t=S.tables.find(x=>x.id===S.sel);if(!t)return;const v=+d.v;saveTable(t.id,t.h>t.w?{w:v}:{h:v});renderFloor();break;}
     case 'asktdel':S.confirm='tdel:'+S.sel;renderFloorSide();break;
     case 'tdel':{const id=S.sel;S.confirm=null;S.sel=null;S.tables=S.tables.filter(x=>x.id!==id);if(S.db)dbDo(db=>db.doc('tables/'+id).delete());renderFloor();break;}
