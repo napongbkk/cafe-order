@@ -604,6 +604,21 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .hrow[aria-current="true"]{background:var(--sunk);color:var(--ink);box-shadow:inset 3px 0 0 var(--amber)}
 .subnav button{font-weight:500;border-radius:9px}
 .subnav button[aria-current="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(27,27,27,.06),inset 0 0 0 1px var(--line2)}
+
+/* fresh stock */
+.stk-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 10px}
+.stk-tools .chips{display:flex;gap:6px;flex-wrap:wrap}
+.stk-tools select{height:40px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);padding:0 10px;font:inherit;color:var(--ink)}
+.stk-tools .chip b{margin-left:4px;font-weight:700;opacity:.75}
+.stk-tools .chip.warn[aria-pressed="true"]{background:var(--warn-soft,#FFF4D6);border-color:#E5B53A;color:#7A5300}
+.stk-tools .chip.bad[aria-pressed="true"]{background:var(--bad-soft,#FDECEC);border-color:var(--bad);color:var(--bad)}
+.stk-bar{display:block;margin-left:auto;margin-top:5px;width:96px;height:5px;border-radius:99px;background:var(--sunk);overflow:hidden}
+.stk-bar i{display:block;height:100%;border-radius:99px;background:#3BA55C}.stk-bar i.warn{background:#E5A92A}.stk-bar i.bad{background:var(--bad)}
+.stk-expc{display:flex;flex-direction:column;gap:1px}.stk-expc small{font-size:12px}
+.stk-exp{font-weight:600}.stk-exp.warn{color:#9A6700}.stk-exp.bad{color:var(--bad)}
+.stk-tbl tr.is-bad td:first-child{box-shadow:inset 3px 0 0 var(--bad)}.stk-tbl tr.is-warn td:first-child{box-shadow:inset 3px 0 0 #E5A92A}
+.pill.warn{background:var(--warn-soft,#FFF4D6);color:#7A5300}.pill.bad{background:var(--bad-soft,#FDECEC);color:var(--bad)}
+.pad-view .seg{margin-bottom:8px}
 /* settings navigation */
 .settings:has(.snav){grid-template-columns:260px minmax(0,1fr)}
 .snav{position:sticky;top:0;max-height:calc(100dvh - 110px);overflow-y:auto;scrollbar-width:thin;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:12px 10px;box-shadow:0 1px 2px rgba(27,27,27,.04),0 8px 24px -18px rgba(27,27,27,.25)}
@@ -827,11 +842,12 @@ const ICON={
   tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
   up:'<path d="M6 15l6-6 6 6"/>',down:'<path d="M6 9l6 6 6-6"/>',
   plus:'<path d="M12 5v14M5 12h14"/>',
-  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>'
+  phone:'<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  box:'<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/><path d="M7.5 5.5l9 5"/>'
 };
 const ic=(k,sz)=>`<svg width="${sz||20}" height="${sz||20}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
 
-const NAV=[['sell','หน้าขาย','sell'],['open','Mobile Order','phone'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],['members','สมาชิก','user'],
+const NAV=[['sell','หน้าขาย','sell'],['open','Mobile Order','phone'],['tables','โต๊ะ','tables'],['kds','จอครัว','cup'],['history','ประวัติใบเสร็จ','history'],['members','สมาชิก','user'],['stock','สต็อกวัตถุดิบ','box'],
   ['round','รอบการขาย','round'],['reports','รายงาน','reports'],['menu','เมนูและโปรโมชั่น','menu'],['settings','ตั้งค่า','settings'],['display','จอลูกค้า','display']];
 const TYPES=[{v:'dine',l:'ทานที่ร้าน'},{v:'take',l:'กลับบ้าน'},{v:'deli',l:'เดลิเวอรี'}];
 const METHODS=[{v:'cash',l:'เงินสด'},{v:'qr',l:'QR Code'},{v:'card',l:'บัตรเครดิต'},{v:'wallet',l:'โอนเงิน'}];
@@ -864,7 +880,7 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   shop:Object.assign({},DEF_SHOP),cats:[],opts:[],menu:[],promos:[],tables:[],oToday:{},oOpen:{},round:null,display:null,
   cat:'all',q:'',bill:null,sheet:false,ov:null,
   floorEdit:false,sel:null,zone:null,snap:true,tsel:null,addZone:false,
-  hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},rep:{date:dayKey(Date.now()),list:null},
+  hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},stock:[],stockLog:[],stk:{f:'all',q:'',cat:'',tab:'items'},rep:{date:dayKey(Date.now()),list:null},
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
 let PR={paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'}};
 try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p&&!p.webPrint){p.auto=true;p.webPrint=1}if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
@@ -1043,7 +1059,7 @@ function needRound(){return shop().roundOn&&!S.round}
 function renderRail(){
   const nOpen=openBills().filter(isAppOrder).length,nBar=allOrders().filter(o=>o.state!=='void'&&!o.hold&&o.items.length&&['waiting','making'].includes(overallK(o))).length;
   $('#rail').innerHTML=`<div class="logo${shopLogoUrl()?' has-img':''}" title="${esc(shop().name||'')}">${railLogo()}</div>`+NAV.filter(([v])=>!(v==='kds'&&shop().kdsOff)).map(([v,l,k])=>{
-    const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:0;
+    const b=v==='open'&&nOpen?nOpen:v==='kds'&&nBar?nBar:v==='stock'?stockAlerts():0;
     return `<button class="nav${v==='open'&&S.mobNew.length?' blink':''}" data-act="view" data-v="${v}"${S.view===v?' aria-current="page"':''}>${ic(k)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`}).join('');
 }
 function renderTop(){
@@ -1326,6 +1342,93 @@ function membersView(){const q=S.mem.q.trim().toLowerCase();const qd=phoneKey(q)
       ${list.length?`<div class="htable memtbl"><table><thead><tr><th>ชื่อ</th><th>เบอร์โทร</th><th class="r">แต้ม</th><th class="r">มาแล้ว</th><th class="r">ยอดซื้อสะสม</th><th>มาล่าสุด</th><th></th></tr></thead><tbody>${list.map(m=>`<tr><td><b>${esc(m.name||'—')}</b>${m.note?`<div class="muted" style="font-size:12px">${esc(m.note)}</div>`:''}</td><td class="num">${esc(m.phone||m.id)}</td><td class="r num"><b>${m.points||0}</b></td><td class="r num">${m.visits||0}</td><td class="r num">${baht(m.spent||0)}</td><td>${m.lastAt?fmtDT(m.lastAt):'—'}</td>
         <td><div class="acts"><button class="btn sm" data-act="memsell" data-id="${esc(m.id)}" title="ใส่สมาชิกในบิลหน้าขาย">ขาย</button><button class="btn sm" data-act="mempts" data-id="${esc(m.id)}">แต้ม</button><button class="btn sm" data-act="memedit" data-id="${esc(m.id)}">แก้ไข</button></div></td></tr>`).join('')}</tbody></table></div>`
       :`<div class="empty"><b>${S.members.length?'ไม่พบสมาชิกที่ค้นหา':'ยังไม่มีสมาชิก'}</b>${S.members.length?'':'กด เพิ่มสมาชิก หรือใส่เบอร์โทรในบิลที่หน้าขาย'}</div>`}</section></div>`}
+
+
+/* ===== fresh stock (ingredients) ===== */
+const STK_UNITS=['กก.','กรัม','ลิตร','มล.','ชิ้น','ฟอง','แพ็ค','ขวด','ถุง','กล่อง','ลูก','หวี','กำ'];
+const STK_TYPE={in:['รับเข้า','ok'],use:['เบิกใช้',''],waste:['ทิ้ง/เสีย','bad'],count:['ปรับยอดนับ','warn']};
+const dayISO=t=>{const d=new Date(t);return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)};
+const daysTo=iso=>{if(!iso)return null;const [y,m,d]=iso.split('-').map(Number);return Math.round((new Date(y,m-1,d).getTime()-dayStart(dayKey(Date.now())))/864e5)};
+const stkQty=it=>r2((it.lots||[]).reduce((a,l)=>a+(+l.qty||0),0));
+const stkExp=it=>{const e=(it.lots||[]).filter(l=>l.qty>0&&l.exp).map(l=>l.exp).sort();return e[0]||null};
+const stkExpired=it=>r2((it.lots||[]).filter(l=>l.qty>0&&l.exp&&daysTo(l.exp)<0).reduce((a,l)=>a+(+l.qty||0),0));
+function stkState(it){const q=stkQty(it),d=daysTo(stkExp(it));return {q,low:(+it.min||0)>0&&q<=(+it.min||0),out:q<=0,exp:d!=null&&d<0,soon:d!=null&&d>=0&&d<=(+it.warnDays||2),d}}
+function stockAlerts(){return S.stock.filter(it=>{const x=stkState(it);return x.low||x.exp||x.soon}).length}
+const stkFmt=n=>{n=r2(n);return Number.isInteger(n)?n.toLocaleString():n.toLocaleString(undefined,{maximumFractionDigits:2})};
+function demoStock(){const t=Date.now(),D=864e5,lot=(q,dd)=>({id:uid(),qty:q,exp:dayISO(t+dd*D),at:t-D});
+  return [['นมสด','นม/ครีม','ลิตร',6,52,[lot(4,1),lot(8,5)]],['วิปปิ้งครีม','นม/ครีม','ลิตร',2,180,[lot(3,4)]],['ไข่ไก่','ไข่','ฟอง',30,4.5,[lot(60,9)]],['เนยสด','นม/ครีม','กก.',1,420,[lot(2.5,12)]],
+    ['สตรอว์เบอร์รี','ผลไม้','กก.',1,280,[lot(0.6,-1),lot(1,3)]],['มะนาว','ผลไม้','ลูก',20,3,[lot(15,6)]],['ใบมิ้นต์','ผัก/สมุนไพร','กำ',3,15,[lot(6,4)]],['ขนมปังโฮลวีท','เบเกอรี่','แพ็ค',4,65,[lot(8,3)]]]
+    .map((r,i)=>({id:'demo-s'+i,name:r[0],cat:r[1],unit:r[2],min:r[3],cost:r[4],shelf:5,lots:r[5],updatedAt:t}))}
+async function stockSave(id,data,msg){
+  if(S.db){const ok=await dbDo(db=>id?db.doc('stock/'+id).set(data):db.collection('stock').add(data),msg);return ok}
+  if(id){const i=S.stock.findIndex(x=>x.id===id);if(i>=0)S.stock[i]=Object.assign({id},data)}else S.stock.push(Object.assign({id:'local-s'+Date.now()},data));
+  toast((msg||'บันทึกแล้ว')+' (โหมดทดลอง)');return true}
+async function stockLogAdd(e){const rec=Object.assign({at:Date.now(),by:(window.POS_ACCOUNT&&window.POS_ACCOUNT().login)||''},e);
+  if(S.db){try{await S.db.collection('stocklog').add(rec)}catch(err){}}else S.stockLog.unshift(Object.assign({id:uid()},rec))}
+/* take qty out, earliest expiry first */
+function stkTake(lots,qty,onlyExpired){let left=qty;const out=lots.map(l=>Object.assign({},l)).sort((a,b)=>String(a.exp||'9999').localeCompare(String(b.exp||'9999')));
+  for(const l of out){if(left<=0)break;if(onlyExpired&&!(l.exp&&daysTo(l.exp)<0))continue;const t=Math.min(l.qty,left);l.qty=r2(l.qty-t);left=r2(left-t)}
+  return {lots:out.filter(l=>l.qty>0),taken:r2(qty-left)}}
+async function stockMove(it,mode,qty,opt){opt=opt||{};let lots=(it.lots||[]).slice(),logQty=qty;
+  if(mode==='in')lots.push({id:uid(),qty:r2(qty),exp:opt.exp||null,at:Date.now(),cost:opt.cost!=null?opt.cost:(+it.cost||0)});
+  else if(mode==='count'){const cur=stkQty(it);const diff=r2(qty-cur);logQty=diff;if(diff<0)lots=stkTake(lots,-diff).lots;else if(diff>0)lots.push({id:uid(),qty:diff,exp:null,at:Date.now()})}
+  else{const r=stkTake(lots,qty,opt.expiredOnly);lots=r.lots;logQty=r.taken;if(!r.taken){toast('ไม่มีของให้ตัดออก');return false}}
+  const data=Object.assign({},it,{lots,updatedAt:Date.now()});delete data.id;
+  if(mode==='in'&&opt.cost!=null&&opt.cost>0)data.cost=opt.cost;
+  const ok=await stockSave(it.id,data,{in:'รับเข้า',use:'เบิกใช้',waste:'บันทึกของเสีย',count:'ปรับยอดนับ'}[mode]+' '+it.name+' แล้ว');if(!ok)return false;
+  await stockLogAdd({item:it.id,name:it.name,unit:it.unit||'',type:mode,qty:r2(logQty),exp:opt.exp||null,cost:mode==='in'?(opt.cost||+it.cost||0):(+it.cost||0),note:opt.note||''});
+  return true}
+function stockView(){const f=S.stk;const cats=[...new Set(S.stock.map(x=>x.cat||'').filter(Boolean))].sort((a,b)=>a.localeCompare(b,'th'));
+  const all=S.stock.map(it=>Object.assign({it},stkState(it)));
+  const n={all:all.length,low:all.filter(x=>x.low).length,soon:all.filter(x=>x.soon).length,exp:all.filter(x=>x.exp).length};
+  const value=r2(S.stock.reduce((a,it)=>a+stkQty(it)*(+it.cost||0),0));
+  const q=f.q.trim().toLowerCase();
+  let list=all.filter(x=>(f.f==='all'||x[f.f])&&(!f.cat||x.it.cat===f.cat)&&(!q||(x.it.name||'').toLowerCase().includes(q)));
+  list.sort((a,b)=>(b.exp-a.exp)||(b.soon-a.soon)||(b.low-a.low)||String(a.it.name).localeCompare(String(b.it.name),'th'));
+  const expTxt=x=>x.d==null?'<span class="muted">—</span>':`<span class="stk-exp ${x.exp?'bad':x.soon?'warn':''}">${x.d<0?'หมดอายุ '+(-x.d)+' วัน':x.d===0?'หมดอายุวันนี้':'อีก '+x.d+' วัน'}</span><small class="muted">${fmtDate(stkExp(x.it))}</small>`;
+  const bar=x=>{const m=+x.it.min||0;const pct=m>0?Math.min(100,Math.round(x.q/(m*2)*100)):100;return `<span class="stk-bar"><i style="width:${pct}%" class="${x.out?'bad':x.low?'warn':''}"></i></span>`};
+  const chip=(v,l,c)=>`<button class="chip${c?' '+c:''}" data-act="stkf" data-v="${v}" aria-pressed="${f.f===v}">${l} <b class="num">${n[v]}</b></button>`;
+  const head=`<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><div><h2 style="margin:0;font-size:20px">สต็อกวัตถุดิบ</h2><span class="muted" style="font-size:13px">ของสด นม ผลไม้ ไข่ ขนมปัง · ตัดของที่หมดอายุก่อนให้อัตโนมัติ (เข้าก่อน-หมดก่อน)</span></div>
+    <div class="acts"><button class="btn" data-act="stkmove" data-m="in">${ic('plus',18)}รับเข้า</button>${S.canEdit?`<button class="btn primary" data-act="stknew">${ic('box',18)}เพิ่มวัตถุดิบ</button>`:''}</div></div>`;
+  const stats=`<div class="memstats"><div class="panel"><span class="muted">วัตถุดิบทั้งหมด</span><b class="num">${n.all}</b></div><div class="panel"><span class="muted">ใกล้หมด</span><b class="num" style="color:${n.low?'var(--warn-ink,#9a6700)':'inherit'}">${n.low}</b></div><div class="panel"><span class="muted">ใกล้หมดอายุ</span><b class="num" style="color:${n.soon?'var(--warn-ink,#9a6700)':'inherit'}">${n.soon}</b></div><div class="panel"><span class="muted">หมดอายุแล้ว</span><b class="num" style="color:${n.exp?'var(--bad)':'inherit'}">${n.exp}</b></div><div class="panel"><span class="muted">มูลค่าคงเหลือ</span><b class="num">${baht(value)}</b></div></div>`;
+  const tabs=`<div class="seg" role="tablist"><button role="tab" data-act="stktab" data-v="items" aria-selected="${f.tab==='items'}" aria-pressed="${f.tab==='items'}">รายการวัตถุดิบ</button><button role="tab" data-act="stktab" data-v="log" aria-selected="${f.tab==='log'}" aria-pressed="${f.tab==='log'}">ประวัติเข้า-ออก</button></div>`;
+  if(f.tab==='log'){const L=S.stockLog;
+    return `<div class="pad-view">${head}${stats}<section class="panel">${tabs}${L.length?`<div class="htable"><table><thead><tr><th>เวลา</th><th>วัตถุดิบ</th><th>รายการ</th><th class="r">จำนวน</th><th>หมดอายุ</th><th>หมายเหตุ</th><th>โดย</th></tr></thead><tbody>${L.map(x=>{const t=STK_TYPE[x.type]||[x.type,''];return `<tr><td>${fmtDT(x.at)}</td><td><b>${esc(x.name||'')}</b></td><td><span class="pill ${t[1]}">${t[0]}</span></td><td class="r num">${x.type==='in'||(x.type==='count'&&x.qty>0)?'+':x.type==='count'?'':'−'}${stkFmt(Math.abs(x.qty))} ${esc(x.unit||'')}</td><td>${x.exp?fmtDate(x.exp):'—'}</td><td style="white-space:normal">${esc(x.note||'')}</td><td class="muted">${esc(String(x.by||'').replace(/@.*/,''))}</td></tr>`}).join('')}</tbody></table></div>`:'<div class="empty"><b>ยังไม่มีประวัติ</b>รับเข้า เบิกใช้ หรือทิ้งของเสีย จะบันทึกไว้ที่นี่</div>'}</section></div>`}
+  return `<div class="pad-view">${head}${stats}
+    <section class="panel">${tabs}
+      <div class="stk-tools"><div class="chips">${chip('all','ทั้งหมด')}${chip('low','ใกล้หมด','warn')}${chip('soon','ใกล้หมดอายุ','warn')}${chip('exp','หมดอายุ','bad')}</div>
+        <label class="search" for="stkQ" style="height:40px;flex:1 1 200px"><input id="stkQ" type="search" placeholder="ค้นหาวัตถุดิบ" value="${esc(f.q)}"></label>
+        ${cats.length?`<select id="stkCat" aria-label="หมวด" style="flex:0 1 180px"><option value="">ทุกหมวด</option>${cats.map(c=>`<option${c===f.cat?' selected':''}>${esc(c)}</option>`).join('')}</select>`:''}</div>
+      ${list.length?`<div class="htable stk-tbl"><table><thead><tr><th>วัตถุดิบ</th><th class="r">คงเหลือ</th><th>หมดอายุเร็วสุด</th><th class="r">มูลค่า</th><th></th></tr></thead><tbody>${list.map(x=>{const it=x.it;const ex=stkExpired(it);
+        return `<tr class="${x.exp?'is-bad':x.low||x.soon?'is-warn':''}"><td><b>${esc(it.name)}</b>${x.out?' <span class="pill bad">หมด</span>':x.low?' <span class="pill warn">ใกล้หมด</span>':''}<div class="muted" style="font-size:12px">${esc(it.cat||'ไม่มีหมวด')}${+it.min?' · ขั้นต่ำ '+stkFmt(it.min)+' '+esc(it.unit||''):''}</div></td>
+          <td class="r"><b class="num" style="font-size:16px">${stkFmt(x.q)}</b> <span class="muted">${esc(it.unit||'')}</span>${bar(x)}</td><td><div class="stk-expc">${expTxt(x)}</div></td><td class="r num">${baht(r2(x.q*(+it.cost||0)))}</td>
+          <td><div class="acts"><button class="btn sm" data-act="stkmove" data-m="in" data-id="${esc(it.id)}">รับเข้า</button><button class="btn sm" data-act="stkmove" data-m="use" data-id="${esc(it.id)}"${x.q>0?'':' disabled'}>เบิกใช้</button>${ex>0?`<button class="btn sm danger" data-act="stkwasteexp" data-id="${esc(it.id)}">ทิ้งของหมดอายุ ${stkFmt(ex)}</button>`:`<button class="btn sm" data-act="stkmove" data-m="waste" data-id="${esc(it.id)}"${x.q>0?'':' disabled'}>ทิ้ง/เสีย</button>`}<button class="btn sm" data-act="stkmove" data-m="count" data-id="${esc(it.id)}">นับ</button>${S.canEdit?`<button class="btn sm" data-act="stkedit" data-id="${esc(it.id)}">แก้ไข</button>`:''}</div></td></tr>`}).join('')}</tbody></table></div>`
+      :`<div class="empty"><b>${S.stock.length?'ไม่พบวัตถุดิบที่ตรงกับตัวกรอง':'ยังไม่มีวัตถุดิบ'}</b>${S.stock.length?'':(S.canEdit?'กด เพิ่มวัตถุดิบ เพื่อเริ่มติดตามของสด':'ผู้จัดการร้านเพิ่มรายการวัตถุดิบได้')}</div>`}</section></div>`}
+const fmtDate=iso=>{if(!iso)return '';const [y,m,d]=iso.split('-').map(Number);return pad(d,2)+'/'+pad(m,2)+'/'+(y+543)};
+function stockOverlay(v,wrap,head){
+  if(v.k==='stkedit'){const it=v.id?S.stock.find(x=>x.id===v.id)||{}:{unit:'กก.',warnDays:2,shelf:3};const cats=[...new Set(S.stock.map(x=>x.cat).filter(Boolean))];
+    return wrap(head(v.id?'แก้ไขวัตถุดิบ':'เพิ่มวัตถุดิบ')+`<form class="form" id="stkEditForm">
+      <label for="sk_name">ชื่อวัตถุดิบ<input id="sk_name" maxlength="50" required value="${esc(it.name||'')}" placeholder="เช่น นมสด"></label>
+      <div class="two"><label for="sk_cat">หมวด<input id="sk_cat" maxlength="30" list="sk_cats" value="${esc(it.cat||'')}" placeholder="เช่น นม/ครีม ผลไม้"><datalist id="sk_cats">${cats.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></label>
+        <label for="sk_unit">หน่วย<input id="sk_unit" maxlength="12" list="sk_units" required value="${esc(it.unit||'')}"><datalist id="sk_units">${STK_UNITS.map(u=>`<option value="${u}">`).join('')}</datalist></label></div>
+      <div class="two"><label for="sk_min">แจ้งเตือนเมื่อเหลือไม่เกิน<input id="sk_min" type="number" min="0" step="any" inputmode="decimal" value="${esc(it.min==null?'':it.min)}"></label>
+        <label for="sk_cost">ต้นทุนต่อหน่วย (บาท)<input id="sk_cost" type="number" min="0" step="any" inputmode="decimal" value="${esc(it.cost==null?'':it.cost)}"></label></div>
+      <div class="two"><label for="sk_shelf">อายุการเก็บ (วัน)<input id="sk_shelf" type="number" min="0" max="365" step="1" inputmode="numeric" value="${esc(it.shelf==null?'':it.shelf)}"><small class="hint">ใช้เติมวันหมดอายุให้อัตโนมัติตอนรับเข้า</small></label>
+        <label for="sk_warn">เตือนก่อนหมดอายุ (วัน)<input id="sk_warn" type="number" min="0" max="60" step="1" inputmode="numeric" value="${esc(it.warnDays==null?2:it.warnDays)}"></label></div>
+      ${v.id?'':`<label for="sk_qty">ยอดตั้งต้น (ไม่บังคับ)<input id="sk_qty" type="number" min="0" step="any" inputmode="decimal" placeholder="0"></label>`}
+      <div class="dlg-actions">${v.id&&S.canEdit?(v.del?`<button class="btn danger" type="button" data-act="stkdel">ยืนยันลบ</button><button class="btn" type="button" data-act="stkdelno">ไม่ลบ</button>`:`<button class="btn" type="button" data-act="stkdelask">ลบวัตถุดิบ</button>`):''}<button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow')}
+  if(v.k==='stkmove'){const it=v.id?S.stock.find(x=>x.id===v.id):null;const m=v.m;const T={in:'รับวัตถุดิบเข้า',use:'เบิกใช้',waste:'บันทึกของเสีย / ทิ้ง',count:'นับสต็อก (ปรับยอดจริง)'}[m];
+    const shelf=it&&+it.shelf>0?dayISO(Date.now()+it.shelf*864e5):'';
+    return wrap(head(T)+`<form class="form" id="stkMoveForm">
+      ${it?`<div class="memhit"><b>${esc(it.name)}</b> · คงเหลือ <b class="num">${stkFmt(stkQty(it))}</b> ${esc(it.unit||'')}${stkExp(it)?' · หมดอายุเร็วสุด '+fmtDate(stkExp(it)):''}</div>`
+        :`<label for="sm_item">วัตถุดิบ<select id="sm_item" required><option value="">เลือกวัตถุดิบ</option>${S.stock.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name),'th')).map(x=>`<option value="${esc(x.id)}">${esc(x.name)} (${esc(x.unit||'')})</option>`).join('')}</select></label>`}
+      <label for="sm_qty">${m==='count'?'จำนวนที่นับได้จริง':'จำนวน'}${it?' ('+esc(it.unit||'')+')':''}<input id="sm_qty" type="number" min="0" step="any" inputmode="decimal" required${m==='count'&&it?` value="${stkQty(it)}"`:''}></label>
+      ${m==='in'?`<div class="two"><label for="sm_exp">วันหมดอายุ<input id="sm_exp" type="date" value="${shelf}"></label><label for="sm_cost">ต้นทุนต่อหน่วย (บาท)<input id="sm_cost" type="number" min="0" step="any" inputmode="decimal" value="${esc(it&&it.cost!=null?it.cost:'')}"></label></div>`:''}
+      ${m==='waste'?`<label for="sm_why">สาเหตุ<select id="sm_why"><option>หมดอายุ</option><option>เสีย/เน่า</option><option>หก/ตกหล่น</option><option>อื่น ๆ</option></select></label>`:''}
+      <label for="sm_note">หมายเหตุ<input id="sm_note" maxlength="80" placeholder="${m==='in'?'เช่น ร้านค้าส่ง / เลขบิล':m==='use'?'เช่น เตรียมของเช้า':''}"></label>
+      ${m==='use'||m==='waste'?'<span class="hint">ระบบตัดล็อตที่หมดอายุเร็วที่สุดก่อน</span>':''}
+      <div class="dlg-actions"><button class="btn" type="button" data-act="close">ยกเลิก</button><button class="btn primary grow" type="submit">บันทึก</button></div></form>`,'narrow')}
+  return null}
 
 /* ===== tables ===== */
 function zones(){const z=(shop().zones&&shop().zones.length)?shop().zones.slice():['ในร้าน'];S.tables.forEach(t=>{if(t.zone&&!z.includes(t.zone))z.push(t.zone)});return z}
@@ -1800,6 +1903,7 @@ function ovHtml(){
     const bp=S.promos.filter(p=>p.active&&p.scope==='bill');
     return wrap(head('โปรโมชัน')+`<div class="grp"><span class="grp-t">ลดท้ายบิล</span><div class="opts"><button class="opt" data-act="setpromo" data-id="" aria-pressed="${!S.bill.promo}">ไม่ใช้โปรโมชัน</button>${bp.map(p=>`<button class="opt" data-act="setpromo" data-id="${esc(p.id)}" aria-pressed="${!!S.bill.promo&&S.bill.promo.id===p.id}">${esc(p.name)}</button>`).join('')}</div></div><span class="hint">ลดรายเมนู: แตะรายการในบิลแล้วเลือกส่วนลด</span>`,'narrow');
   }
+  if(/^stk/.test(v.k||'')){const r=stockOverlay(v,wrap,head);if(r!=null)return r}
   if(v.k==='memedit'){const m=v.id?memberOf(v.id)||{}:{};const ed=!!v.id;
     return wrap(head(ed?'ข้อมูลสมาชิก':'เพิ่มสมาชิก')+`<form class="form" id="memEditForm">
       <label for="me_phone">เบอร์โทร${ed?' (ใช้เป็นรหัสสมาชิก แก้ไม่ได้)':''}<input id="me_phone" inputmode="tel" maxlength="12" required value="${esc(m.phone||v.id||'')}" placeholder="08xxxxxxxx"${ed?' readonly':''}></label>
@@ -2014,7 +2118,7 @@ function saveQrSheet(){
 }
 
 /* ===== render ===== */
-const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,members:membersView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
+const VIEWS={sell:sellShell,open:openView,tables:tablesShell,kds:kdsView,history:historyView,members:membersView,stock:stockView,round:roundView,reports:reportsView,menu:menuView,settings:settingsView,display:displayView};
 function render(force){
   applyUI();renderTop();renderMobAlert();
   if(S.view==='round'&&S.rounds==null&&!loadRounds.busy){loadRounds.busy=true;loadRounds().finally(()=>{loadRounds.busy=false})}
@@ -2239,6 +2343,15 @@ document.addEventListener('click',e=>{
       if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(v).then(ok,()=>{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}});
       else{inp.select();try{document.execCommand('copy');ok()}catch(e){toast('คัดลอกไม่ได้ เลือกข้อความแล้วคัดลอกเอง')}}break;}
     case 'moback':mobAck();break;
+    case 'stknew':S.ov={k:'stkedit',id:null};renderOverlay();break;
+    case 'stkedit':S.ov={k:'stkedit',id:d.id};renderOverlay();break;
+    case 'stkdelask':S.ov.del=true;renderOverlay();break;
+    case 'stkdelno':S.ov.del=false;renderOverlay();break;
+    case 'stkdel':(async()=>{const id=S.ov.id;const it=S.stock.find(x=>x.id===id);if(S.db){const ok=await dbDo(db=>db.doc('stock/'+id).delete(),'ลบ '+(it?it.name:'')+' แล้ว');if(!ok)return}else S.stock=S.stock.filter(x=>x.id!==id);S.ov=null;renderOverlay();render(true)})();break;
+    case 'stkmove':if(!S.stock.length&&!d.id){toast('เพิ่มวัตถุดิบก่อน');break}S.ov={k:'stkmove',m:d.m,id:d.id||null};renderOverlay();break;
+    case 'stkwasteexp':{const it=S.stock.find(x=>x.id===d.id);if(!it)break;const ex=stkExpired(it);stockMove(it,'waste',ex,{expiredOnly:true,note:'หมดอายุ'}).then(ok=>{if(ok)render(true)});break;}
+    case 'stkf':S.stk.f=d.v;render(true);break;
+    case 'stktab':S.stk.tab=d.v;render(true);break;
     case 'memnew':S.ov={k:'memedit',id:null};renderOverlay();break;
     case 'memedit':S.ov={k:'memedit',id:d.id};renderOverlay();break;
     case 'mempts':S.ov={k:'mempts',id:d.id,mode:d.mode||'redeem'};renderOverlay();break;
@@ -2354,6 +2467,7 @@ document.addEventListener('input',e=>{
   if(e.target.closest&&e.target.closest('#lookForm')){updateLookPreview()}
   const id=e.target.id;
   if(id==='q'){S.q=e.target.value;renderGrid()}
+  else if(id==='stkQ'){S.stk.q=e.target.value;const pos=e.target.selectionStart;render(true);const i=$('#stkQ');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
   else if(id==='memQ'){S.mem.q=e.target.value;const pos=e.target.selectionStart;render(true);const i=$('#memQ');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
   else if(id==='mPhone'&&S.ov&&S.ov.k==='member'){S.ov.ph=e.target.value;const n=$('#mName');if(n)S.ov.nm=n.value;const pos=e.target.selectionStart;renderOverlay(true);const i=$('#mPhone');if(i){i.focus();try{i.setSelectionRange(pos,pos)}catch(err){}}}
   else if(id==='mName'&&S.ov&&S.ov.k==='member'){S.ov.nm=e.target.value}
@@ -2366,6 +2480,7 @@ document.addEventListener('change',async e=>{
   if(id==='rDate'){S.rep.date=e.target.value||dayKey(Date.now());e.target.blur();loadRep();render(true);return}
   if(id==='snap'){S.snap=e.target.checked;return}
   if(id==='p_paper'){PR.paper=e.target.value;savePR();return}
+  if(id==='stkCat'){S.stk.cat=e.target.value;e.target.blur();render(true);return}
   if(id==='memSort'){S.mem.sort=e.target.value;e.target.blur();render(true);return}
   if(e.target.dataset&&e.target.dataset.adup){const files=[...(e.target.files||[])];if(!files.length||!S.assets)return;S.adUp=true;render(true);
     let ads=validAds().slice(),n=0;
@@ -2422,6 +2537,17 @@ document.addEventListener('submit',async e=>{
   if(id==='memberForm'){const ph=phoneKey($('#mPhone').value);if(ph&&ph.length<9){toast('เบอร์โทรไม่ถูกต้อง');return}const nm=(($('#mName')||{}).value||'').trim();
     if(ph&&nm&&!memberOf(ph))await memberUpsert(ph,{name:nm},'สมัครสมาชิกแล้ว');
     S.bill.member=ph;S.bill.dirty=true;S.ov=null;renderOverlay();setBill();return}
+  if(id==='stkEditForm'){const v=S.ov;const name=$('#sk_name').value.trim(),unit=$('#sk_unit').value.trim();if(!name||!unit){toast('ใส่ชื่อและหน่วย');return}
+    const num=(sel,def)=>{const x=$(sel);if(!x||x.value==='')return def;const n=parseFloat(x.value);return isFinite(n)&&n>=0?n:def};
+    const old=v.id?S.stock.find(x=>x.id===v.id)||{}:{};const data=Object.assign({},old,{name,cat:$('#sk_cat').value.trim(),unit,min:num('#sk_min',0),cost:num('#sk_cost',0),shelf:num('#sk_shelf',0),warnDays:num('#sk_warn',2),updatedAt:Date.now()});delete data.id;
+    if(!v.id){data.lots=[];const q0=num('#sk_qty',0);if(q0>0)data.lots.push({id:uid(),qty:q0,exp:data.shelf>0?dayISO(Date.now()+data.shelf*864e5):null,at:Date.now(),cost:data.cost})}
+    if(await stockSave(v.id,data,v.id?'บันทึกวัตถุดิบแล้ว':'เพิ่ม '+name+' แล้ว')){S.ov=null;renderOverlay();render(true)}return}
+  if(id==='stkMoveForm'){const v=S.ov;const it=S.stock.find(x=>x.id===(v.id||($('#sm_item')||{}).value));if(!it){toast('เลือกวัตถุดิบ');return}
+    const qty=parseFloat($('#sm_qty').value);if(!(qty>=0)||(v.m!=='count'&&!(qty>0))){toast('ใส่จำนวน');return}
+    if((v.m==='use'||v.m==='waste')&&qty>stkQty(it)+1e-9){toast('มีไม่พอ คงเหลือ '+stkFmt(stkQty(it))+' '+(it.unit||''));return}
+    const why=($('#sm_why')||{}).value;const note=[why,$('#sm_note').value.trim()].filter(Boolean).join(' · ');
+    const cost=$('#sm_cost')&&$('#sm_cost').value!==''?parseFloat($('#sm_cost').value):null;
+    if(await stockMove(it,v.m,qty,{exp:($('#sm_exp')||{}).value||null,cost,note})){S.ov=null;renderOverlay();render(true)}return}
   if(id==='memEditForm'){const v=S.ov;const ph=v.id||phoneKey($('#me_phone').value);if(ph.length<9||ph.length>10){toast('เบอร์โทร 9–10 หลัก');return}
     if(!v.id&&memberOf(ph)){toast('เบอร์นี้เป็นสมาชิกอยู่แล้ว');return}
     const patch={name:$('#me_name').value.trim(),birthday:$('#me_bd').value||'',note:$('#me_note').value.trim()};
@@ -2512,7 +2638,7 @@ render();
 function startDemo(){
   if(S.mode!=='loading')return;S.mode='demo';
   S.cats=clone(DEMO.cats);S.opts=clone(DEMO.opts);S.menu=clone(DEMO.menu);S.promos=clone(DEMO.promos);S.tables=clone(DEMO.tables);
-  S.members=[['0812345678','คุณนก',42,9,1850,1],['0898765432','คุณต้น',15,3,640,3],['0861112222','คุณแพร',120,24,5210,0]].map(r=>({id:r[0],phone:r[0],name:r[1],points:r[2],visits:r[3],spent:r[4],createdAt:Date.now()-86400000*30*r[5],lastAt:Date.now()-3600000*(r[5]*20+2),log:[]}));S.rounds=[];render(true);
+  S.members=[['0812345678','คุณนก',42,9,1850,1],['0898765432','คุณต้น',15,3,640,3],['0861112222','คุณแพร',120,24,5210,0]].map(r=>({id:r[0],phone:r[0],name:r[1],points:r[2],visits:r[3],spent:r[4],createdAt:Date.now()-86400000*30*r[5],lastAt:Date.now()-3600000*(r[5]*20+2),log:[]}));S.rounds=[];S.stock=demoStock();render(true);
 }
 function rerenderFor(kind){
   if(drag)return;
@@ -2535,6 +2661,8 @@ function rerenderFor(kind){
   db.collection('menu').onSnapshot(s=>{S.menu=sorted(s);rerenderFor('menu')},fail);
   db.collection('promos').onSnapshot(s=>{S.promos=sorted(s);rerenderFor('menu')},fail);
   db.collection('members').onSnapshot(s=>{S.members=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='members'&&!S.ov)render();else if(S.ov&&/^mem|^member$/.test(S.ov.k||''))renderOverlay();else if(S.view==='sell')renderBill()},fail);
+  db.collection('stock').onSnapshot(s=>{S.stock=s.docs.map(d=>Object.assign({id:d.id},d.data()));renderRail();if(S.view==='stock'&&!S.ov)render();else if(S.ov&&/^stk/.test(S.ov.k||''))renderOverlay()},fail);
+  db.collection('stocklog').orderBy('at','desc').limit(300).onSnapshot(s=>{S.stockLog=s.docs.map(d=>Object.assign({id:d.id},d.data()));if(S.view==='stock'&&S.stk.tab==='log'&&!S.ov)render()},fail);
   db.collection('tables').onSnapshot(s=>{S.tables=s.docs.map(d=>{const t=Object.assign({id:d.id},d.data());const p=tSave[d.id];if(p)Object.assign(t,p);return t});rerenderFor('tables')},fail);
   db.collection('orders').where('createdAt','>=',startToday()).onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=norm(Object.assign({id:d.id},d.data()))});S.oToday=m;kdsArrive();mobArrive();rerenderFor('orders')},fail);
   db.collection('orders').where('state','==','open').onSnapshot(s=>{const m={};s.docs.forEach(d=>{m[d.id]=norm(Object.assign({id:d.id},d.data()))});S.oOpen=m;kdsArrive();mobArrive();rerenderFor('orders')},fail);
