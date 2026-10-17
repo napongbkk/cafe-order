@@ -106,6 +106,7 @@ function check(){
           if(a&&a.status==='pending')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” รอผู้ดูแลระบบอนุมัติ'+(a.has_slip?' เราจะแจ้งทางอีเมลเมื่ออนุมัติแล้ว':' · ยังไม่ได้แนบสลิป <a href="/signup?id='+encodeURIComponent(a.id)+'&t='+encodeURIComponent(a.token)+'">แนบสลิป</a>'),true,true);
           else if(a&&a.status==='rejected')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” ไม่ได้รับการอนุมัติ'+(a.admin_note?' · '+esc(a.admin_note):'')+' <a href="/signup">สมัครใหม่</a>',true,true);
           else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน · ถ้าต้องการเปิดร้านใหม่ <a href="/signup">สมัครเปิดร้าน</a>',true,true)});return}
+      if(d.shop.product==='retail'&&!d.admin){location.replace('/retail');return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
       if(d.shop.locked&&!d.admin){showLock();return}

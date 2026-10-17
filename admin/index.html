@@ -213,12 +213,13 @@ function homeView(){
 function shopsView(){
   var q=S.q.trim().toLowerCase();var list=S.shops.filter(function(s){
     if(q&&(s.name+' '+s.slug+' '+(s.manager?s.manager.email:'')).toLowerCase().indexOf(q)<0)return false;
-    var c=st(s)[1];if(S.filter==='ok')return c==='';if(S.filter==='warn')return c==='warn';if(S.filter==='bad')return c==='bad';return true});
+    if(S.prod&&S.prod!=='all'&&(s.product||'cafe')!==S.prod)return false;var c=st(s)[1];if(S.filter==='ok')return c==='';if(S.filter==='warn')return c==='warn';if(S.filter==='bad')return c==='bad';return true});
   return '<div class="head"><h1>ร้านค้า</h1><span class="sp"></span><input class="search" id="shopQ" type="search" placeholder="ค้นหาชื่อร้าน รหัส หรืออีเมล" value="'+esc(S.q)+'" aria-label="ค้นหาร้าน"><button class="btn primary" data-act="newshop">+ สร้างร้านใหม่</button></div>'+
-  '<div class="seg" role="group" aria-label="กรองสถานะ">'+[['all','ทั้งหมด'],['ok','ใช้งานได้'],['warn','ใกล้หมดอายุ'],['bad','เลยกำหนด/ล็อก']].map(function(f){return '<button data-act="filter" data-v="'+f[0]+'" aria-pressed="'+(S.filter===f[0])+'">'+f[1]+'</button>'}).join('')+'</div>'+
-  '<section class="panel"><div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th>ผู้จัดการ</th><th>สถานะ</th><th>หมดอายุ</th><th>ค่าบริการ</th><th>พนักงาน</th><th>ออเดอร์ 30 วัน</th><th></th></tr></thead><tbody>'+
-  (list.length?list.map(function(s){var c=st(s);return '<tr><td><b>'+esc(s.name)+'</b><div class="muted small num">'+esc(s.slug)+'</div></td><td class="small">'+esc(s.manager?(s.manager.name||'')+' '+s.manager.email:'— ยังไม่มี —')+'</td><td><span class="chip '+c[1]+'">'+c[0]+'</span>'+(s.pending?' <span class="chip warn">สลิป '+s.pending+'</span>':'')+'</td><td class="small">'+dTh(s.expires_at)+'</td><td class="num">'+baht(s.price)+'</td><td class="num">'+s.staff_used+'/'+s.staff_limit+'</td><td class="num">'+s.orders_30d+'</td>'+
-    '<td><div class="acts"><a class="btn sm" href="/pos?shop='+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">เปิด POS</a><button class="btn sm" data-act="editshop" data-id="'+s.id+'">จัดการ</button></div></td></tr>'}).join(''):'<tr><td colspan="8"><div class="empty">ไม่พบร้าน</div></td></tr>')+
+  '<div style="display:flex;gap:10px;flex-wrap:wrap"><div class="seg" role="group" aria-label="กรองสถานะ">'+[['all','ทั้งหมด'],['ok','ใช้งานได้'],['warn','ใกล้หมดอายุ'],['bad','เลยกำหนด/ล็อก']].map(function(f){return '<button data-act="filter" data-v="'+f[0]+'" aria-pressed="'+(S.filter===f[0])+'">'+f[1]+'</button>'}).join('')+'</div>'+
+  '<div class="seg" role="group" aria-label="ประเภทร้าน">'+[['all','ทุกระบบ'],['cafe','Cafe'],['retail','Retail']].map(function(f){return '<button data-act="prodf" data-v="'+f[0]+'" aria-pressed="'+((S.prod||'all')===f[0])+'">'+f[1]+'</button>'}).join('')+'</div></div>'+
+  '<section class="panel"><div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th>ผู้จัดการ</th><th>สถานะ</th><th>หมดอายุ</th><th>ค่าบริการ</th><th>พนักงาน</th><th>บิล/ออเดอร์ 30 วัน</th><th></th></tr></thead><tbody>'+
+  (list.length?list.map(function(s){var c=st(s);return '<tr><td><b>'+esc(s.name)+'</b> '+prodChip(s)+'<div class="muted small num">'+esc(s.slug)+'</div></td><td class="small">'+esc(s.manager?(s.manager.name||'')+' '+s.manager.email:'— ยังไม่มี —')+'</td><td><span class="chip '+c[1]+'">'+c[0]+'</span>'+(s.pending?' <span class="chip warn">สลิป '+s.pending+'</span>':'')+'</td><td class="small">'+dTh(s.expires_at)+'</td><td class="num">'+baht(s.price)+'</td><td class="num">'+s.staff_used+'/'+s.staff_limit+'</td><td class="num">'+s.orders_30d+'</td>'+
+    '<td><div class="acts"><a class="btn sm" href="'+posUrl(s)+'" target="_blank" rel="noopener">เปิด POS</a><button class="btn sm" data-act="editshop" data-id="'+s.id+'">จัดการ</button></div></td></tr>'}).join(''):'<tr><td colspan="8"><div class="empty">ไม่พบร้าน</div></td></tr>')+
   '</tbody></table></div></section>';
 }
 function appsView(){
@@ -288,18 +289,22 @@ function settingsView(){var b=S.plat;
 /* ---------- drawers ---------- */
 function closeDrawer(){$('#drawer').innerHTML=''}
 function drawer(title,body){$('#drawer').innerHTML='<div class="drawer" data-act="dclose"><div class="pane" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><div class="ph"><h2>'+esc(title)+'</h2><button class="btn sm" data-act="close" aria-label="ปิด">ปิด</button></div>'+body+'</div></div>';var f=$('#drawer input');if(f)f.focus()}
+function posUrl(s){return (s.product==='retail'?'/retail?shop=':'/pos?shop=')+encodeURIComponent(s.slug)}
+function prodChip(s){return s.product==='retail'?'<span class="chip" style="background:#E3F0FB;color:#1D5F99">Retail</span>':'<span class="chip" style="background:#FDF0DC;color:#7A4E00">Cafe</span>'}
 function slugify(t){return String(t||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,31)}
 function newShop(){drawer('สร้างร้านใหม่','<form class="form" id="newShopForm">'+
+  '<label for="ns_prod">ระบบที่ใช้<select id="ns_prod"><option value="cafe">Easy POS Cafe · คาเฟ่ ร้านอาหาร (เข้าสู่ระบบที่ /pos)</option><option value="retail">Easy POS Retail · ร้านค้า ร้านของชำ (เข้าสู่ระบบที่ /retail)</option></select></label>'+
   '<label for="ns_name">ชื่อร้าน<input id="ns_name" required maxlength="80"></label>'+
   '<label for="ns_slug">รหัสร้าน (ใช้ในลิงก์ เช่น /s/aroi-cafe)<input id="ns_slug" required pattern="[a-z0-9][a-z0-9-]{1,30}" maxlength="31" placeholder="ภาษาอังกฤษตัวเล็ก ตัวเลข และ -"></label>'+
   '<div class="two"><label for="ns_mgr">อีเมลผู้จัดการร้าน<input id="ns_mgr" type="email" required></label><label for="ns_mgrname">ชื่อผู้จัดการ<input id="ns_mgrname" maxlength="60"></label></div>'+
   '<div class="three"><label for="ns_price">ค่าบริการ/เดือน<input id="ns_price" type="number" min="0" value="'+esc(S.plat.price||299)+'"></label><label for="ns_staff">บัญชีพนักงาน<input id="ns_staff" type="number" min="0" max="200" value="5"></label><label for="ns_days">ทดลองใช้ (วัน)<input id="ns_days" type="number" min="0" max="365" value="30"></label></div>'+
-  '<span class="hint">ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+esc(location.origin)+'/pos แล้วกด “สมัคร” ด้วยอีเมลนี้ จากนั้นจัดการเมนูและเพิ่มพนักงานเองได้</span>'+
+  '<span class="hint" id="ns_hint">ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+esc(location.origin)+'/pos แล้วกด “สมัคร” ด้วยอีเมลนี้ จากนั้นจัดการเมนูและเพิ่มพนักงานเองได้</span>'+
   '<button class="btn primary" type="submit">สร้างร้าน</button></form>');
   $('#ns_name').addEventListener('input',function(){var s=$('#ns_slug');if(!s.dataset.touched)s.value=slugify(this.value)});
-  $('#ns_slug').addEventListener('input',function(){this.dataset.touched='1'})}
+  $('#ns_slug').addEventListener('input',function(){this.dataset.touched='1'});
+  $('#ns_prod').addEventListener('change',function(){var r=this.value==='retail';$('#ns_hint').textContent=r?'ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+location.origin+'/retail กด “ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน” ด้วยอีเมลนี้ จากนั้นเพิ่มสินค้าและสร้างบัญชีพนักงานเองได้':'ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+location.origin+'/pos แล้วกด “สมัคร” ด้วยอีเมลนี้ จากนั้นจัดการเมนูและเพิ่มพนักงานเองได้'})}
 function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expires_at);var ds=exp.getFullYear()+'-'+('0'+(exp.getMonth()+1)).slice(-2)+'-'+('0'+exp.getDate()).slice(-2);
-  drawer(s.name,'<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn sm" href="/pos?shop='+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">เปิด POS ร้านนี้</a><a class="btn sm" href="/s/'+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">หน้าสั่งอาหารลูกค้า</a></div>'+
+  drawer(s.name,'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+prodChip(s)+'<a class="btn sm" href="'+posUrl(s)+'" target="_blank" rel="noopener">เปิด POS ร้านนี้</a>'+(s.product==='retail'?'':'<a class="btn sm" href="/s/'+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">หน้าสั่งอาหารลูกค้า</a>')+'</div>'+
   '<section class="panel"><h2>ข้อมูลและแพ็กเกจ</h2><form class="form" id="editShopForm" data-id="'+s.id+'">'+
   '<label for="es_name">ชื่อร้าน<input id="es_name" required maxlength="80" value="'+esc(s.name)+'"></label>'+
   '<div class="three"><label for="es_price">ค่าบริการ/เดือน<input id="es_price" type="number" min="0" value="'+esc(s.price)+'"></label><label for="es_staff">บัญชีพนักงาน<input id="es_staff" type="number" min="0" max="200" value="'+esc(s.staff_limit)+'"></label><label for="es_status">สถานะ<select id="es_status"><option value="active"'+(s.status==='active'?' selected':'')+'>ใช้งาน</option><option value="suspended"'+(s.status==='suspended'?' selected':'')+'>ระงับ</option></select></label></div>'+
@@ -352,6 +357,7 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='editshop'){editShop(d.id);return}
   if(a==='gopays'){S.view='pays';S.payTab='pending';render();return}
   if(a==='filter'){S.filter=d.v;render();return}
+  if(a==='prodf'){S.prod=d.v;render();return}
   if(a==='paytab'){S.payTab=d.v;render();return}
   if(a==='apptab'){S.appTab=d.v;render();return}
   if(a==='appok'||a==='appno'){var note=($('#an_'+d.id)||{}).value||null;b.disabled=true;
@@ -378,9 +384,9 @@ document.addEventListener('input',function(e){if(e.target.id==='userQ'){S.uq=e.t
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var z=document.querySelector('.zoom');if(z){z.remove();return}closeDrawer()}});
 document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.preventDefault();var btn=f.querySelector('[type=submit]');
   function done(){if(btn)btn.disabled=false}if(btn)btn.disabled=true;
-  if(f.id==='newShopForm'){sb.rpc('pos_admin_create_shop',{p_slug:$('#ns_slug').value.trim(),p_name:$('#ns_name').value.trim(),p_manager:$('#ns_mgr').value.trim(),p_manager_name:$('#ns_mgrname').value.trim()||null,
-      p_price:+$('#ns_price').value||0,p_staff_limit:+$('#ns_staff').value||0,p_days:+$('#ns_days').value||0,p_app_url:location.origin+'/s/'+$('#ns_slug').value.trim()})
-    .then(function(r){done();if(r.error){toast(err(r.error));return}closeDrawer();toast('สร้างร้านแล้ว');loadAll().then(function(){editShop(r.data)})});return}
+  if(f.id==='newShopForm'){var nsArgs={p_slug:$('#ns_slug').value.trim(),p_name:$('#ns_name').value.trim(),p_manager:$('#ns_mgr').value.trim(),p_manager_name:$('#ns_mgrname').value.trim()||null,
+      p_price:+$('#ns_price').value||0,p_staff_limit:+$('#ns_staff').value||0,p_days:+$('#ns_days').value||0,p_app_url:location.origin+'/s/'+$('#ns_slug').value.trim()};if($('#ns_prod').value==='retail')nsArgs.p_product='retail';sb.rpc('pos_admin_create_shop',nsArgs)
+    .then(function(r){done();if(r.error){toast(nsArgs.p_product&&/function|p_product|schema cache/i.test(r.error.message||'')?'ฐานข้อมูลยังไม่รองรับร้าน Retail · รัน supabase/migrations/pos_retail_product.sql ก่อน':err(r.error));return}closeDrawer();toast('สร้างร้านแล้ว');loadAll().then(function(){editShop(r.data)})});return}
   if(f.id==='editShopForm'){var id=f.dataset.id;var dt=$('#es_exp').value;
     sb.from('pos_shops').update({name:$('#es_name').value.trim(),price:+$('#es_price').value||0,staff_limit:+$('#es_staff').value||0,status:$('#es_status').value,note:$('#es_note').value.trim()||null,expires_at:new Date(dt+'T23:59:00').toISOString()}).eq('id',id)
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('บันทึกแล้ว');loadAll().then(function(){editShop(id)})});return}

@@ -1,0 +1,194 @@
+<!-- Easy POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
+     tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Easy POS Cafe). -->
+<style>
+.auth,.lockwrap,.bill,.acctui{--sunk:var(--surface2,#f2f4f7);--warn-soft:#FFF4D6;--warn-ink:#7A4E00;--ok-soft:#E3F6EA;--ok-ink:#1D6B3A;--bad-soft:#FDE4E1;--bad-ink:#A12020}
+.auth{position:fixed;inset:0;z-index:200;background:var(--bg,#eef3f8);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.auth .box{width:100%;max-width:420px;background:var(--surface,#fff);border:1px solid var(--line,#dde3ea);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 60px -30px rgba(15,40,70,.35)}
+.auth h1{margin:0;font-size:22px;color:var(--ink,#13202c)}
+.auth p{margin:0;color:var(--muted,#5b6875);font-size:14px}
+.auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
+.auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.auth .msg a{color:inherit;font-weight:700}
+.auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.auth .links button{border:0;background:none;color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;cursor:pointer}
+.auth .foot{display:flex;justify-content:center;gap:16px;font-size:14px}
+.auth .foot a{color:var(--accent,#1f7fc0)}
+.auth .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#2a9df4,#1d6fb8);flex-shrink:0}
+.shim-form{display:flex;flex-direction:column;gap:12px}
+.shim-form label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500;color:var(--ink,#13202c)}
+.shim-form input,.shim-form select{min-height:44px;font-size:16px}
+.sbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line,#dde3ea);background:var(--surface,#fff);color:var(--ink,#13202c);font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
+.sbtn.pri{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff)}
+.sbtn.sm{min-height:36px;padding:0 12px;font-size:14px;border-radius:10px}
+.sbtn.danger{color:#A12020;border-color:#f1c4bf}
+.sbtn:disabled{opacity:.55;cursor:default}
+.lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg,#eef3f8);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+.lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+/* billing panel (markup from the shared cafe renderer) */
+.bill{display:flex;flex-direction:column;gap:14px}
+.bill-card{background:var(--surface,#fff);border:1px solid var(--line,#dde3ea);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bill-card h3{margin:0;font-size:16px}
+.bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bill-stat>div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.bill-stat small{color:var(--muted,#5b6875);font-size:12px}
+.bill-stat b{font-size:18px}
+.bchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ok-soft);color:var(--ok-ink)}
+.bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted,#5b6875)}
+.bill-pay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
+.bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center;border:1px solid var(--line,#dde3ea)}
+.bill-months{display:flex;gap:6px;flex-wrap:wrap}
+.bill .chip{border:1px solid var(--line,#dde3ea);background:var(--surface,#fff);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;color:var(--ink,#13202c)}
+.bill .chip[aria-pressed=true]{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff)}
+.bill .form{display:flex;flex-direction:column;gap:10px}
+.bill .form label{display:flex;flex-direction:column;gap:5px;font-size:14px}
+.bill .btn.primary{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff);min-height:46px;font-weight:600}
+.bill .hint,.acctui .hint{font-size:13px;color:var(--muted,#5b6875)}
+.bill .note,.acctui .note{padding:10px 12px;border-radius:12px;background:var(--sunk);font-size:14px}
+.bill .grp-t{display:block;font-size:13px;color:var(--muted,#5b6875);margin-bottom:4px}
+.bill-hist{display:flex;flex-direction:column}
+.bill-hist .r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#dde3ea);font-size:14px;flex-wrap:wrap}
+.bill-hist .r:last-child{border-bottom:0}
+.bill-hist .r .sp{flex:1}
+@media (max-width:640px){.bill-pay{grid-template-columns:minmax(0,1fr)}}
+/* staff accounts */
+.acctui{display:flex;flex-direction:column;gap:12px}
+.acctui .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:640px){.acctui .row3{grid-template-columns:minmax(0,1fr)}}
+.acctui .ugrp{display:flex;align-items:stretch;border:1px solid var(--line,#dde3ea);border-radius:var(--rb,10px);overflow:hidden;background:var(--surface,#fff)}
+.acctui .ugrp b{display:flex;align-items:center;padding:0 10px;background:var(--sunk);font-family:ui-monospace,Menlo,monospace;border-right:1px solid var(--line,#dde3ea)}
+.acctui .ugrp input{border:0!important;border-radius:0!important}
+.acctui .mrow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#dde3ea);flex-wrap:wrap}
+.acctui .mrow .info{flex:1;min-width:160px;display:flex;flex-direction:column}
+.acctui .mrow small{color:var(--muted,#5b6875)}
+.adminbar{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:150;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#13202c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.adminbar a{color:#9fd3ff}
+</style>
+<div class="auth" id="auth" hidden><form class="box shim-form" id="authForm" novalidate>
+  <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><h1>Easy POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
+  <div class="msg" id="authMsg" hidden></div>
+  <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+  <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
+  <button class="sbtn pri" type="submit" id="authBtn">เข้าสู่ระบบ</button>
+  <div class="links"><button type="button" id="authMode">ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
+  <button class="sbtn" type="button" id="authOut" hidden>ออกจากระบบ</button>
+  <p style="text-align:center;font-size:13px">ร้านใหม่ติดต่อผู้ดูแลระบบเพื่อเปิดบัญชีร้าน · พนักงานใช้ชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
+  <div class="foot"><a href="/indexpos">หน้าแรก Easy POS</a><a href="/pos">ร้านคาเฟ่? Easy POS Cafe</a></div>
+</form></div>
+<div class="lockwrap" id="lockScreen" hidden><div class="inner">
+  <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="sbtn" type="button" id="lockOut">ออกจากระบบ</button></div>
+  <div id="lockBilling"></div>
+</div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4"></script>
+<script>
+(function(){
+'use strict';
+window.POS_STANDALONE=true;
+var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
+var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
+var $=function(s){return document.querySelector(s)};
+if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#A12020">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
+var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
+var STAFF_DOMAIN='staff.cafe-pos.app';
+function loginEmail(v){v=String(v||'').trim().toLowerCase();return v.indexOf('@')>=0?v:(v?v+'@'+STAFF_DOMAIN:'')}
+function displayLogin(e){e=String(e||'');var d='@'+STAFF_DOMAIN;if(e.slice(-d.length)!==d)return e;e=e.slice(0,-d.length);return e.slice(0,3).toUpperCase()+e.slice(3)}
+window.POS_IMG=function(id){return sb.storage.from('pos-menu').getPublicUrl(id).data.publicUrl};
+var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
+var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();
+window.POS_ACCOUNT=function(){return {login:displayLogin(email),email:email,role:role,admin:!!(SESS&&SESS.admin),shop:SESS&&SESS.shop}};
+window.POS_SESSION=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ---------- login screen ---------- */
+var signup=false;
+function msg(t,ok,html){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;if(html)m.innerHTML=t;else m.textContent=t;m.className='msg'+(ok?' ok':'')}
+function showAuth(text,signedIn,html){$('#auth').hidden=false;msg(text||'',false,html);$('#authOut').hidden=!signedIn}
+function setMode(s){signup=s;$('#authBtn').textContent=s?'ตั้งรหัสผ่านและสมัคร':'เข้าสู่ระบบ';$('#authMode').textContent=s?'มีรหัสผ่านแล้ว? เข้าสู่ระบบ':'ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน';$('#authSub').textContent=s?'ใช้อีเมลที่ผู้ดูแลระบบลงทะเบียนเป็นผู้จัดการร้าน':'เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ';$('#authPass').autocomplete=s?'new-password':'current-password'}
+$('#authMode').addEventListener('click',function(){setMode(!signup);msg('')});
+$('#authReset').addEventListener('click',function(){var e=$('#authEmail').value.trim();if(!e){msg('ใส่อีเมลก่อน แล้วกดลืมรหัสผ่านอีกครั้ง');return}
+  if(e.indexOf('@')<0){msg('บัญชีพนักงาน (ชื่อผู้ใช้) ให้ผู้จัดการร้านเปลี่ยนรหัสผ่านให้ที่ ตั้งค่า › บัญชีเข้าสู่ระบบของพนักงาน');return}
+  sb.auth.resetPasswordForEmail(e,{redirectTo:location.origin+location.pathname}).then(function(r){msg(r.error?'ส่งอีเมลไม่สำเร็จ: '+r.error.message:'ส่งลิงก์ตั้งรหัสผ่านใหม่ไปที่อีเมลแล้ว',!r.error)})});
+function out(){sb.auth.signOut().then(function(){location.reload()})}
+$('#authOut').addEventListener('click',out);$('#lockOut').addEventListener('click',out);
+$('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var raw=$('#authEmail').value.trim(),e=loginEmail(raw),p=$('#authPass').value;
+  if(!e||p.length<6){msg('ใส่อีเมลหรือชื่อผู้ใช้ และรหัสผ่านอย่างน้อย 6 ตัวอักษร');return}
+  if(signup&&raw.indexOf('@')<0){msg('การตั้งรหัสผ่านครั้งแรกใช้อีเมลผู้จัดการร้าน · พนักงานไม่ต้องสมัคร ให้ผู้จัดการร้านสร้างชื่อผู้ใช้ให้');return}
+  $('#authBtn').disabled=true;
+  var job=signup?sb.auth.signUp({email:e,password:p,options:{emailRedirectTo:location.origin+location.pathname}}):sb.auth.signInWithPassword({email:e,password:p});
+  job.then(function(r){$('#authBtn').disabled=false;
+    if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':/already registered/i.test(r.error.message)?'อีเมลนี้ตั้งรหัสผ่านแล้ว กด “เข้าสู่ระบบ” แทน':r.error.message);return}
+    if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
+    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);
+    check()})});
+function fn(body,tok){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
+function syncCred(tok,p){try{fn({action:'remember',password:p},tok).catch(function(){})}catch(e){}}
+sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
+function loadSession(){return sb.rpc('pos_session',{p_slug:askSlug||null}).then(function(x){if(x.error)throw x.error;return x.data})}
+function check(){
+  sb.auth.getSession().then(function(r){var s=r.data&&r.data.session;if(!s){showAuth('');return}
+    email=s.user.email;
+    loadSession().then(function(d){SESS=d;window.POS_SESSION=d;
+      if(!d.shop){
+        if(d.admin){location.replace('/admin');return}
+        showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ ติดต่อผู้ดูแลระบบ',true,true);return}
+      if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Easy POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Easy POS Cafe</a>',true,true);return}
+      SID=d.shop.id;role=d.role||'staff';
+      $('#auth').hidden=true;
+      if(d.admin){document.body.insertAdjacentHTML('beforeend','<span class="adminbar">ผู้ดูแลระบบ · '+esc(d.shop.name)+' <a href="/admin">กลับแดชบอร์ด</a></span>')}
+      if(d.shop.locked&&!d.admin){showLock();return}
+      startRealtime();resolveReady();setInterval(refreshSession,10*60*1000)})
+    .catch(function(){showAuth('เชื่อมต่อระบบไม่สำเร็จ ลองรีเฟรชอีกครั้ง',true)})});
+}
+function refreshSession(){loadSession().then(function(d){if(!d||!d.shop)return;var was=SESS&&SESS.shop&&SESS.shop.locked;SESS=d;window.POS_SESSION=d;
+  if(d.shop.locked&&!d.admin&&!was){location.reload();return}}).catch(function(){})}
+
+/*@@BILLING@@*/
+
+/* ---------- staff login accounts (shop manager) ---------- */
+function staffFn(body){return sb.auth.getSession().then(function(s){var tok=s.data.session&&s.data.session.access_token;return fn(body,tok).then(function(r){return r.json().catch(function(){return {error:'server_error'}})})})}
+var STAFF_ERR={bad_username:'ชื่อผู้ใช้ (ต่อจากรหัสร้าน) ใช้ได้ a-z 0-9 . _ - ยาวไม่เกิน 27 ตัว',weak_password:'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',username_taken:'ชื่อผู้ใช้นี้มีในร้านแล้ว ลองชื่ออื่น',staff_limit:'เกินจำนวนบัญชีพนักงานที่ร้านใช้ได้ ติดต่อผู้ดูแลระบบเพื่อเพิ่ม',locked:'ร้านถูกล็อก ชำระค่าบริการก่อน',forbidden:'เฉพาะผู้จัดการร้าน'};
+function uname(u){return u?String(u).slice(0,3).toUpperCase()+String(u).slice(3):''}
+function renderStaff(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop;
+  if(role!=='manager'){el.innerHTML='<div class="acctui"><div class="note">เฉพาะผู้จัดการร้านจัดการบัญชีพนักงานได้</div></div>';return}
+  var pfx=sh.userPrefix||'???',blocked=sh.trial||!(sh.staffLimit>0);
+  el.innerHTML='<div class="acctui"><div class="note" id="auQuota">บัญชีพนักงาน '+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</div>'+
+    (blocked?'<div class="note" style="background:var(--warn-soft);color:var(--warn-ink)">'+(sh.trial?'แพ็กเกจทดลองใช้ฟรีเพิ่มบัญชีพนักงานไม่ได้ ชำระค่าบริการแล้วจะเพิ่มได้ทันที':'แพ็กเกจของร้านยังไม่มีโควตาบัญชีพนักงาน ติดต่อผู้ดูแลระบบเพื่อเพิ่ม')+'</div>':
+    '<form class="shim-form" id="auForm" autocomplete="off"><div class="row3"><label>ชื่อผู้ใช้<span class="ugrp"><b title="รหัสร้าน แก้ไขไม่ได้">'+esc(pfx)+'</b><input id="au_user" required maxlength="27" autocapitalize="none" spellcheck="false" placeholder="เช่น user1"></span></label><label>ชื่อพนักงาน<input id="au_name" maxlength="40"></label><label>รหัสผ่าน (อย่างน้อย 6 ตัว)<input id="au_pw" type="text" required minlength="6" autocomplete="new-password"></label></div>'+
+    '<span class="hint">พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ เช่น <b>'+esc(uname(pfx+'user1'))+'</b> · เข้าครั้งแรกจะเป็นแคชเชียร์ ผู้จัดการเปลี่ยนตำแหน่งได้ที่ ตั้งค่า › พนักงานและสิทธิ์</span><button class="sbtn pri" type="submit" style="align-self:flex-start">เพิ่มพนักงาน</button></form>')+
+    '<div id="auList"><p class="hint">กำลังโหลด…</p></div>'+
+    '<h3 style="margin:8px 0 0;font-size:16px">รหัสผ่านของฉัน</h3><form class="shim-form" id="auMine" autocomplete="off"><div class="row3"><label>รหัสผ่านใหม่<input id="au_my1" type="password" minlength="8" required autocomplete="new-password"></label><label>ยืนยันรหัสผ่านใหม่<input id="au_my2" type="password" minlength="8" required autocomplete="new-password"></label></div><button class="sbtn" type="submit" style="align-self:flex-start">เปลี่ยนรหัสผ่าน</button></form></div>';
+  var toast=function(t){if(window.POS_TOAST)window.POS_TOAST(t);else alert(t)};
+  var f=el.querySelector('#auForm');if(f)f.addEventListener('submit',function(e){e.preventDefault();var u=el.querySelector('#au_user').value.trim().toLowerCase(),pw=el.querySelector('#au_pw').value;
+    if(!/^[a-z0-9._-]{1,27}$/.test(u)){toast(STAFF_ERR.bad_username);return}if(pw.length<6){toast(STAFF_ERR.weak_password);return}
+    var b=f.querySelector('button');b.disabled=true;
+    staffFn({action:'staff_add',suffix:u,name:el.querySelector('#au_name').value.trim()||null,password:pw}).then(function(r){b.disabled=false;if(r.error){toast(STAFF_ERR[r.error]||('เพิ่มไม่สำเร็จ ('+r.error+')'));return}toast('เพิ่มพนักงานแล้ว · ชื่อผู้ใช้ '+uname(r.username||(pfx+u)));f.reset();loadList()})});
+  el.querySelector('#auMine').addEventListener('submit',function(e){e.preventDefault();var a1=el.querySelector('#au_my1').value,a2=el.querySelector('#au_my2').value;if(a1.length<8){toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}if(a1!==a2){toast('ยืนยันรหัสผ่านไม่ตรงกัน');return}
+    staffFn({action:'my_pw',password:a1}).then(function(r){if(!r||r.error){toast('เปลี่ยนรหัสผ่านไม่สำเร็จ'+(r&&r.error?' ('+r.error+')':''));return}e.target.reset();toast('เปลี่ยนรหัสผ่านแล้ว')})});
+  var confirmDel=null,pwFor=null;
+  function loadList(){var L=el.querySelector('#auList');if(!L)return;
+    sb.from('pos_members').select('*').eq('shop_id',SID).order('created_at').then(function(r){if(r.error){L.innerHTML='<div class="note">โหลดรายชื่อไม่สำเร็จ</div>';return}
+      var n=r.data.filter(function(x){return x.role==='staff'&&x.active}).length;sh.staffUsed=n;var q=el.querySelector('#auQuota');var lim=sh.staffLimit||0;
+      if(q)q.textContent=sh.trial?'บัญชีพนักงาน 0 / 0 · ทดลองใช้ฟรี':'บัญชีพนักงาน '+n+' / '+lim+(lim<=0?'':n>=lim?' · ครบจำนวนแล้ว ติดต่อผู้ดูแลระบบเพื่อเพิ่ม':' · เพิ่มได้อีก '+(lim-n)+' บัญชี');
+      L.innerHTML=r.data.length?r.data.map(function(x){var login=x.username?uname(x.username):x.email;var acts='';
+        if(x.role==='staff'){acts=pwFor===x.email?'<form class="aupw" data-email="'+esc(x.email)+'" style="display:flex;gap:6px;align-items:center"><input type="text" minlength="6" required placeholder="รหัสผ่านใหม่" aria-label="รหัสผ่านใหม่ของ '+esc(login)+'" style="max-width:180px"><button class="sbtn sm pri" type="submit">บันทึก</button><button class="sbtn sm" type="button" data-au="pwx">ยกเลิก</button></form>':
+          '<button class="sbtn sm" data-au="pw" data-id="'+esc(x.email)+'">เปลี่ยนรหัสผ่าน</button><button class="sbtn sm" data-au="active" data-id="'+esc(x.email)+'" data-v="'+(x.active?'0':'1')+'">'+(x.active?'ปิดใช้งาน':'เปิดใช้งาน')+'</button>'+
+          (confirmDel===x.email?'<button class="sbtn sm danger" data-au="del" data-id="'+esc(x.email)+'">ยืนยันลบ</button><button class="sbtn sm" data-au="undel">ไม่ลบ</button>':'<button class="sbtn sm" data-au="ask" data-id="'+esc(x.email)+'">ลบ</button>')}
+        return '<div class="mrow"><div class="info"><b>'+esc(x.name||login)+'</b><small>'+(x.username?'ชื่อผู้ใช้: ':'')+esc(login)+' · '+(x.role==='manager'?'ผู้จัดการร้าน':'พนักงาน')+(x.active?'':' · ปิดใช้งาน')+'</small></div>'+acts+'</div>'}).join(''):'<p class="hint">ยังไม่มี</p>';
+      var pf=L.querySelector('.aupw');if(pf){pf.querySelector('input').focus();pf.addEventListener('submit',function(e){e.preventDefault();var pw=pf.querySelector('input').value;if(pw.length<6){toast(STAFF_ERR.weak_password);return}
+        staffFn({action:'staff_pw',email:pf.dataset.email,password:pw}).then(function(r){if(r.error){toast(STAFF_ERR[r.error]||'เปลี่ยนไม่สำเร็จ');return}pwFor=null;toast('เปลี่ยนรหัสผ่านพนักงานแล้ว');loadList()})})}})}
+  el.addEventListener('click',function(e){var b=e.target.closest('[data-au]');if(!b)return;var k=b.dataset.au,id=b.dataset.id;
+    if(k==='pw'){pwFor=id;loadList()}else if(k==='pwx'){pwFor=null;loadList()}else if(k==='ask'){confirmDel=id;loadList()}else if(k==='undel'){confirmDel=null;loadList()}
+    else if(k==='active'){sb.from('pos_members').update({active:b.dataset.v==='1'}).eq('shop_id',SID).eq('email',id).then(function(r){if(r.error)toast(/staff_limit/.test(r.error.message)?STAFF_ERR.staff_limit:'บันทึกไม่สำเร็จ');loadList()})}
+    else if(k==='del'){confirmDel=null;staffFn({action:'staff_del',email:id}).then(function(r){toast(r.error?(STAFF_ERR[r.error]||'ลบไม่สำเร็จ'):'ลบบัญชีแล้ว');loadList()})}});
+  loadList()}
+window.POS_STAFF_UI={render:renderStaff};
+
+/*@@STORE@@*/
+var downloads={save:function(o){try{var blob=o.data instanceof Blob?o.data:new Blob([o.data],{type:o.mimeType||'application/octet-stream'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=o.filename||'file';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);return Promise.resolve({status:'saved'})}catch(e){return Promise.reject({code:'unavailable',message:String(e)})}}};
+window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
+window.claude={use:function(name){return readyP.then(function(){
+  if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;if(name==='downloads')return downloads;return null})}};
+check();
+})();
+</script>
