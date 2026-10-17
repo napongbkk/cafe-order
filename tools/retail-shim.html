@@ -186,12 +186,6 @@ function renderStaff(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop;
   loadList()}
 window.POS_STAFF_UI={render:renderStaff};
 
-/* ---------- Google Sheet copy of the shop's data (when the admin linked a sheet) ---------- */
-window.POS_SHEET_PING=function(force){if(!SESS||!SESS.shop||!SESS.shop.sheet)return;var k='posSheetPing:'+SID,last=0;try{last=+localStorage.getItem(k)||0}catch(e){}
-  if(!force&&Date.now()-last<10*60*1000)return;try{localStorage.setItem(k,String(Date.now()))}catch(e){}
-  sb.auth.getSession().then(function(x){var t=x.data.session&&x.data.session.access_token;if(!t)return;
-    return fetch(SB_URL+'/functions/v1/pos-sheets',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({action:'sync'})})}).catch(function(){})};
-
 /*@@STORE@@*/
 var downloads={save:function(o){try{var blob=o.data instanceof Blob?o.data:new Blob([o.data],{type:o.mimeType||'application/octet-stream'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=o.filename||'file';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);return Promise.resolve({status:'saved'})}catch(e){return Promise.reject({code:'unavailable',message:String(e)})}}};
 window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};

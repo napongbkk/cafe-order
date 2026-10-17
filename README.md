@@ -46,9 +46,7 @@ python3 tools/build_retail.py
 - ผู้จัดการร้าน = เจ้าของร้านในแอป ใช้ได้ทุกเมนู · พนักงานเข้าครั้งแรกเป็นแคชเชียร์ ผู้จัดการเปลี่ยนตำแหน่งได้ที่ ตั้งค่า › พนักงานและสิทธิ์
 - SQL: `supabase/migrations/pos_retail_product.sql`
 
-## Retail: แพ็กเกจฟรีและ Google Sheet
+## Retail: แพ็กเกจฟรี
 
 - ร้าน Retail ที่ใช้ฟรี/ทดลองใช้ มีสินค้าได้ 50 รายการ และบิล 500 บิลต่อเดือน (แพ็กเกจเสียเงินไม่จำกัด) · ผู้ดูแลระบบกำหนดเองรายร้านได้ (`pos_shops.product_limit` / `bill_limit`: ว่าง = ตามแพ็กเกจ, 0 = ไม่จำกัด) · บังคับทั้งใน POS และ trigger `pos_data_limit_guard`
-- Google Sheet: ผู้ดูแลระบบใส่คีย์ Service account ครั้งเดียวที่ `/admin` › ตั้งค่า แต่ละร้านสร้าง Sheet ในบัญชี Google ของร้าน แชร์สิทธิ์ผู้แก้ไขให้อีเมลบัญชีระบบ แล้วผู้ดูแลวางลิงก์ในหน้าร้าน
-- Edge function `pos-sheets` (supabase/functions/pos-sheets) เขียนแท็บ ข้อมูลร้าน สินค้า บิลขาย รายการขาย สมาชิก ทับทั้งหมด · POS เรียกเองหลังมีการขาย (ไม่เกินทุก 10 นาที)
-- ข้อมูลหลัก บัญชี รหัสผ่าน และค่าบริการยังอยู่ใน Supabase · SQL: `supabase/migrations/pos_retail_limits_sheets.sql`
+- ข้อมูลทั้งหมด (ร้าน บัญชี รหัสผ่าน ค่าบริการ) อยู่ใน Supabase · SQL: `supabase/migrations/pos_retail_limits_sheets.sql` (คอลัมน์ sheet_* ไม่ได้ใช้แล้ว)
