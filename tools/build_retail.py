@@ -40,6 +40,12 @@ R('<title>POS ร้านคุณสิมบัติ</title>', '<title>Easy 
 first = src.index('<script')
 src = src[:first] + shim + '\n' + src[first:]
 # Let the shim show messages with the app's toast.
+# Retail shops: the admin sets how many shops/warehouses this account may have.
+R(" branchForm(el){const b=el&&el.dataset&&el.dataset.id?get('branches',el.dataset.id):null;",
+  " branchForm(el){const b=el&&el.dataset&&el.dataset.id?get('branches',el.dataset.id):null;"
+  "if(!b&&window.POS_BRANCH_LIMIT){const lim=window.POS_BRANCH_LIMIT();if(lim!=null&&all('branches').length>=lim)return toast('แพ็กเกจนี้มีร้าน/สาขา/คลังได้ '+lim+' แห่ง · ติดต่อผู้ดูแลระบบเพื่อเพิ่มจำนวน','bad')}")
+R("(สลับร้านได้ที่แถบบน)</p>",
+  "(สลับร้านได้ที่แถบบน)${window.POS_BRANCH_LIMIT&&window.POS_BRANCH_LIMIT()!=null?` · ร้าน/สาขา/คลัง ${all('branches').length} / ${window.POS_BRANCH_LIMIT()} (ผู้ดูแลระบบกำหนด)`:''}</p>")
 R('function toast(msg,kind){', 'window.POS_TOAST=(m)=>toast(m);function toast(msg,kind){')
 
 page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
