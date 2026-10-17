@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Easy POS · ระบบขายหน้าร้านสำหรับคาเฟ่และร้านค้า</title>
 <meta name="description" content="Easy POS ระบบ POS ใช้ง่ายสำหรับคาเฟ่ ร้านอาหาร และร้านของชำ ขายหน้าร้าน รับออเดอร์ผ่านมือถือ จอครัว สมาชิกสะสมแต้ม เริ่มต้น 49 บาทต่อเดือน ทดลองใช้ฟรี 30 วัน">
-<meta name="theme-color" content="#2B1E16">
+<meta name="theme-color" content="#0B1024">
 <meta property="og:title" content="Easy POS · ระบบ POS สำหรับคาเฟ่และร้านค้า">
 <meta property="og:description" content="ขายหน้าร้าน รับออเดอร์ผ่าน QR จอครัว สมาชิกสะสมแต้ม · เริ่มต้น 49 บาท/เดือน · ทดลองใช้ฟรี 30 วัน">
 <link rel="icon" href="/easypos.svg" type="image/svg+xml">
@@ -16,7 +16,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Noto+Serif+Thai:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
 <style>
 :root{
   --bg:#F6F7FB;--surface:#FFFFFF;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;
@@ -286,94 +286,6 @@ footer a:hover{color:#fff}
   .menu{width:min(300px,calc(100vw - 32px))}
   footer nav{margin-left:0}
 }
-
-/* ===== vintage theme ===== */
-:root{
-  --bg:#F3EADA;--surface:#FBF6EC;--ink:#2B2118;--ink2:#4D3E31;--muted:#7C6B59;--line:#E0D2BA;
-  --night:#2B1E16;--night2:#3A2A1F;
-  --v:#C2603A;--b:#B4552F;--c:#D9A441;
-  --grad:linear-gradient(120deg,#B4552F 0%,#C9733F 55%,#D9A441 100%);
-  --cafe:#C2603A;--cafe2:#9E4227;--cafe-soft:#F6E2D2;
-  --retail:#5E8467;--retail2:#3F6A57;--retail-soft:#E3ECDF;
-  --r:16px;--sh:0 1px 0 rgba(43,33,24,.06),0 14px 30px -18px rgba(70,45,25,.45);
-  --fh:'Playfair Display','Noto Serif Thai',Georgia,serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;
-  --paper:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-body{background:var(--bg) var(--paper)}
-h1,h2,h3{letter-spacing:0}
-.btn{border-radius:10px;font-family:var(--fb);font-weight:600}
-.btn.grad{background:#B4552F;color:#FFF7EC;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18),0 10px 22px -12px rgba(120,50,20,.8);border:1px solid #8E3F20}
-.btn.grad:hover{background:#A64B27;box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 14px 28px -12px rgba(120,50,20,.9)}
-.btn.ghost{background:rgba(251,246,236,.06);border-color:rgba(243,226,196,.35);color:#F6EAD6}
-.btn.line{background:var(--surface);border-color:#D7C6A9}
-.gtext{background:linear-gradient(120deg,#B4552F,#D9A441);-webkit-background-clip:text;background-clip:text;color:transparent}
-.eyebrow{color:#B4552F;font-family:var(--fb);letter-spacing:.18em;font-size:12px}
-.eyebrow::before,.eyebrow::after{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
-:focus-visible{outline-color:#D9A441}
-/* nav */
-.nav.solid{background:rgba(43,30,22,.9);box-shadow:0 1px 0 rgba(217,164,65,.25)}
-.logo b{font-family:var(--fh);font-size:22px}
-.logo b span{background:linear-gradient(120deg,#E9C27A,#D9A441);-webkit-background-clip:text;background-clip:text}
-.links a,.gmenu>button{color:rgba(246,234,214,.8);font-family:var(--fb)}
-.links a:hover,.gmenu>button:hover,.gmenu.open>button{color:#FFF4E2;background:rgba(246,234,214,.07)}
-.login>button{border-color:rgba(243,226,196,.35);color:#F6EAD6;font-family:var(--fb)}
-.langsw{border-color:rgba(243,226,196,.3)}.langsw button{color:rgba(246,234,214,.7)}.langsw button[aria-pressed=true]{background:#F3E2C4;color:#2B1E16}
-.menu{background:#FBF6EC;border:1px solid #E6D7BD}.menu a:hover{background:#F2E7D4}.menu a b{font-family:var(--fb)}
-.mk.cafe{background:linear-gradient(135deg,#C9733F,#9E4227)}.mk.retail{background:linear-gradient(135deg,#6E9474,#3F6A57)}
-/* hero */
-.hero{background:radial-gradient(120% 90% at 20% 0%,#3D2B1F 0%,#2B1E16 55%,#22170F 100%);color:#F6EAD6}
-.hero::before{content:"";position:absolute;inset:0;background:var(--paper);opacity:.9;z-index:-1;mix-blend-mode:overlay}
-.hero::after{background:linear-gradient(to bottom,rgba(243,234,218,0),var(--bg))}
-.blob{filter:blur(80px)}
-.blob.a{background:#B4552F;opacity:.35}.blob.b{background:#D9A441;opacity:.22}.blob.c{background:#5E8467;opacity:.22}
-.grid-bg{background-image:linear-gradient(rgba(233,194,122,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(233,194,122,.06) 1px,transparent 1px)}
-.hero h1{font-weight:700}
-.hero h1 .gtext{background:linear-gradient(120deg,#F0C987,#D9A441 45%,#E07B4C);-webkit-background-clip:text;background-clip:text;font-style:italic}
-.hero p.lead{color:rgba(246,234,214,.78)}
-.hero .badge{background:rgba(233,194,122,.1);border-color:rgba(233,194,122,.3);color:#F3E2C4;font-family:var(--fb)}
-.hero .badge i{background:#9DBE8C;box-shadow:0 0 0 4px rgba(157,190,140,.22)}
-.trust{color:rgba(246,234,214,.66)}.trust svg{color:#D9A441}
-.tab{background:linear-gradient(180deg,#4A3526,#2E2018);box-shadow:0 40px 80px -30px rgba(0,0,0,.75),inset 0 0 0 1px rgba(233,194,122,.18)}
-.scr{background:#F6EEDF}.scr .rail{background:#FBF6EC;border-color:#E6D7BD}.scr .rail i{background:#EADFCB}.scr .rail i:first-child{background:var(--grad)}.scr .rail i.on{background:#F1D9C3}
-.chips span{background:#EADFCB}.chips span:first-child{background:#2B2118}
-.tile{background:#FFFBF3;box-shadow:0 1px 0 #E6D7BD}.tile b{background:#E3D6C0}.tile u{background:#E9B98F}
-.scr .bill{background:#FFFBF3;border-color:#E6D7BD}.scr .bill .ln i{background:#EADFCB}.scr .bill .tot{border-color:#D9C8AA}
-.phone{background:#2B1E16}.phone .in{background:#FFFBF3}.phone .it{background:#F4EBDB}.phone .it b{background:#E3D6C0}.phone .it u{background:#E9B98F}.phone .cta{background:#2B2118}
-.toast{background:#FFFBF3;border:1px solid #E6D7BD}
-/* sections and cards */
-.shead h2{font-weight:700}
-.shead p{color:var(--muted)}
-.prod{border-radius:20px;border:1px solid #DCCBAE;box-shadow:inset 0 0 0 6px var(--surface),inset 0 0 0 7px #EADCC4,var(--sh)}
-.prod::before{opacity:.2!important}
-.prod h3{font-weight:700}
-.st.live{background:#E3ECDF;color:#3F6A57}.st.live i{background:#5E8467}
-.prod .price{border-top:1px dashed #D7C6A9}
-.prod.cafe .btn.main{background:#B4552F;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);border:1px solid #8E3F20}
-.prod.retail .btn.main{background:#4F7A62;box-shadow:inset 0 -3px 0 rgba(0,0,0,.18);border:1px solid #3B6150}
-.prod.cafe .loginbox{background:#F4E1D0;color:#8A3A1F}.prod.retail .loginbox{background:#E3ECDF;color:#2F5444}
-.loginbox code{background:rgba(255,251,243,.85)}
-.feat{background:var(--surface);border-color:#E3D4BA;border-radius:16px}
-.feat:hover{border-color:#D3BE9A}
-.feat .ic{background:#F2E1CC;color:#A64B27;border-radius:50%;box-shadow:inset 0 0 0 1px #E3C9A8}
-.feat h3,.step h3{font-family:var(--fh)}
-.step{background:var(--surface);border-color:#E3D4BA;border-radius:16px}
-.step::before{background:#2B2118;color:#E9C27A;border-radius:50%;font-family:var(--fh)}
-/* pricing */
-.pricing{background:radial-gradient(120% 100% at 50% 0%,#3D2B1F,#24180F)}
-.pricing::before{content:"";position:absolute;inset:0;background:var(--paper);opacity:.9;z-index:-1;mix-blend-mode:overlay}
-.pricing .eyebrow{color:#E9C27A}.pricing .shead p{color:rgba(246,234,214,.72)}
-.plan{background:linear-gradient(180deg,rgba(246,234,214,.09),rgba(246,234,214,.03));border:1px solid rgba(233,194,122,.28);border-radius:22px;box-shadow:inset 0 0 0 6px rgba(43,30,22,.35),inset 0 0 0 7px rgba(233,194,122,.14)}
-.plan .tag{background:#D9A441;color:#2B1E16;box-shadow:none;font-family:var(--fb)}
-.plan .amt{font-family:var(--fh)}
-.plan .sub{color:#B9D3A8}
-.plan li{color:rgba(246,234,214,.86)}.plan li svg{color:#D9A441}
-.longs span{background:rgba(246,234,214,.07);border-color:rgba(233,194,122,.22);color:rgba(246,234,214,.88)}
-/* faq + footer */
-.faq details{background:var(--surface);border-color:#E3D4BA;border-radius:14px}
-.faq summary{font-family:var(--fh)}
-.faq summary::after{color:#B4552F}
-footer{background:#22170F;color:rgba(246,234,214,.6);border-top:3px double rgba(233,194,122,.35)}
-footer a:hover{color:#F3E2C4}
 </style>
 </head>
 <body class="no-js">
