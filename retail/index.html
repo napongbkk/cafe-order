@@ -757,6 +757,7 @@ function check(){
       if(!d.shop){
         if(d.admin){location.replace('/admin');return}
         showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ ติดต่อผู้ดูแลระบบ',true,true);return}
+      if(d.shop.product!=='retail'&&d.admin){showAuth('บัญชีผู้ดูแลระบบ: ร้านที่ผูกกับบัญชีนี้เป็นร้าน Cafe · เปิดร้าน Retail จากแดชบอร์ด <a href="/admin#shops">ไปแดชบอร์ดผู้ดูแลระบบ</a> (กด “เปิด POS” ที่ร้าน Retail) หรือสร้างร้าน Retail ใหม่ที่นั่น',true,true);return}
       if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Easy POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Easy POS Cafe</a>',true,true);return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
