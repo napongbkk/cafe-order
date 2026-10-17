@@ -100,6 +100,7 @@ var role=null,email=null,SID=null,SESS=null,resolveReady,readyP=new Promise(func
 var askSlug=(new URLSearchParams(location.search).get('shop')||'').trim().toLowerCase();
 window.POS_ACCOUNT=function(){return {login:displayLogin(email),email:email,role:role,admin:!!(SESS&&SESS.admin),shop:SESS&&SESS.shop}};
 window.POS_SESSION=null;
+window.POS_FREE_LIM=function(){var x=window.POS_SESSION&&window.POS_SESSION.shop;return x&&x.free&&x.freeLimits?x.freeLimits:null};
 window.POS_BRANCH_LIMIT=function(){var x=window.POS_SESSION&&window.POS_SESSION.shop;return x&&x.branchLimit!=null?+x.branchLimit:null};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 

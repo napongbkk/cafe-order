@@ -850,6 +850,12 @@ function crc16(s){var c=0xFFFF;for(var i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8
 function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(-2)+v}var target=String(id||'').replace(/\D/g,'');if(!target)return '';
   var sub=target.length===13?t('02',target):target.length===15?t('03',target):t('01',('0000000000000'+target.replace(/^0/,'66')).slice(-13));
   var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764');if(amount)p+=t('54',Number(amount).toFixed(2));p+='6304';return p+crc16(p)}
+window.POS_FREE_MSG=function(k){var l=(window.POS_SESSION&&window.POS_SESSION.shop&&window.POS_SESSION.shop.freeLimits)||{items:50,bills:500};
+  return k==='items'?'ใช้งานฟรีเพิ่มสินค้าได้สูงสุด '+l.items+' รายการ · ลบสินค้าที่ไม่ใช้ หรือติดต่อผู้ดูแลระบบเพื่ออัปเกรด':'ใช้งานฟรีเปิดบิลได้ '+l.bills+' บิลต่อเดือน · เดือนนี้ครบแล้ว ติดต่อผู้ดูแลระบบเพื่ออัปเกรด'};
+/* Free mode: ask the server before a new product or bill. Resolves to an error message, or null when allowed. */
+window.POS_FREE_CHECK=function(k,adding){if(!(window.POS_SESSION&&window.POS_SESSION.shop&&window.POS_SESSION.shop.free))return Promise.resolve(null);
+  return sb.rpc('pos_my_free_usage').then(function(r){var d=r.data;if(r.error||!d)return null;
+    var used=k==='items'?d.usedItems:d.usedBills,lim=k==='items'?d.items:d.bills;return used+(adding||1)>lim?window.POS_FREE_MSG(k):null},function(){return null})};
 function baht(n){return '฿'+Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2})}
 function dTh(iso){if(!iso)return '-';return new Date(iso).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
 function daysLeft(iso){return Math.ceil((new Date(iso).getTime()-Date.now())/86400000)}
@@ -861,7 +867,8 @@ window.POS_BILLSTATE=function(){return billState(SESS&&SESS.shop)};
 var PST={pending:['รอตรวจสอบ','warn'],approved:['อนุมัติแล้ว','' ],rejected:['ไม่อนุมัติ','bad']};
 function shrink(file){return new Promise(function(res){try{var img=new Image();img.onload=function(){var max=1600,r=Math.min(1,max/Math.max(img.width,img.height));var c=document.createElement('canvas');c.width=Math.round(img.width*r);c.height=Math.round(img.height*r);c.getContext('2d').drawImage(img,0,0,c.width,c.height);c.toBlob(function(b){res(b||file)},'image/jpeg',0.85)};img.onerror=function(){res(file)};img.src=URL.createObjectURL(file)}catch(e){res(file)}})}
 function renderBilling(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=el._m||1;
-  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Easy POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div></div></div></div>';return}
+  var fl=sh.freeLimits,fu=sh.freeUsage||{items:0,bills:0};
+  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Easy POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ'+(fl?' · จำกัดสินค้า '+fl.items+' รายการ และ '+fl.bills+' บิลต่อเดือน':'')+'</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+(fl?'<div><small>สินค้า</small><b>'+fu.items+' / '+fl.items+'</b></div><div><small>บิลเดือนนี้</small><b>'+fu.bills+' / '+fl.bills+'</b></div>':'')+'</div></div></div>';return}
   var amt=(+sh.price||0)*months;
   el.innerHTML='<div class="bill">'+
     '<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
@@ -902,7 +909,7 @@ function showLock(){var sh=SESS.shop;$('#lockScreen').hidden=false;
   setInterval(function(){loadSession().then(function(d){if(d&&d.shop&&!d.shop.locked)location.reload()}).catch(function(){})},60000)}
 
 /* ---------- data store (same API the POS uses inside Claude) ---------- */
-function E(e){var x={code:'unavailable',message:(e&&e.message)||String(e)};if(e&&(e.code==='42501'||e.code==='P0002'||/row-level|permission|policy|not_found/i.test(x.message)))x.code='invalid_argument';return x}
+function E(e){var x={code:'unavailable',message:(e&&e.message)||String(e)};if(/free_items_limit/.test(x.message)){x.code='free_limit';x.message=window.POS_FREE_MSG('items');return x}if(/free_bills_limit/.test(x.message)){x.code='free_limit';x.message=window.POS_FREE_MSG('bills');return x}if(e&&(e.code==='42501'||e.code==='P0002'||/row-level|permission|policy|not_found/i.test(x.message)))x.code='invalid_argument';return x}
 function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-6)}
 function snap(id,data){return {id:id,exists:data!=null,data:function(){return data==null?undefined:data},metadata:{fromCache:false,hasPendingWrites:false}}}
 var subs=new Set();
@@ -985,6 +992,7 @@ const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slic
 const clone=o=>JSON.parse(JSON.stringify(o));
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true},2800)}
 function dbErr(e){const c=e&&e.code;
+  if(c==='free_limit')return e.message;
   if(c==='quota_exceeded')return 'พื้นที่เก็บข้อมูลเต็ม ลบข้อมูลเก่าบางส่วนก่อน';
   if(c==='invalid_argument')return 'บันทึกไม่ได้ บัญชีนี้อาจไม่มีสิทธิ์แก้ไขส่วนนี้';
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';

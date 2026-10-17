@@ -1569,5 +1569,9 @@ window.EP_DICT={
 "ไม่ใช้จอครัว": "Don't use kitchen screen",
 "ไม่ใช้โปรโมชัน": "No promotion",
 "ไม่ได้รับการอนุมัติ": "Not approved",
-"ไว้ ติดต่อผู้ดูแลระบบ": "— contact the admin"
+"ไว้ ติดต่อผู้ดูแลระบบ": "— contact the admin",
+"สินค้า {n} รายการ · {n} บิล/เดือน": "{n} products · {n} bills/month",
+"ใช้งานฟรีเพิ่มสินค้าได้ {n} รายการ และเปิดบิลได้ {n} บิลต่อเดือนต่อร้าน": "The free plan allows {n} products and {n} bills per month per shop.",
+"จริง ตอนนี้เปิดให้ใช้ Easy POS Cafe และ Easy POS Retail ฟรีทุกฟีเจอร์ ไม่ต้องชำระเงินและไม่ต้องผูกบัตร สมัครแล้วรอทีมงานยืนยันเปิดร้านก็เริ่มขายได้ทันที": "Yes. Easy POS Cafe and Easy POS Retail are free right now with every feature. No payment or card needed. Sign up, wait for our team to confirm your shop, then start selling.",
+"ใช้งานฟรี ไม่มีค่าใช้จ่าย (สินค้า {n} รายการ · {n} บิล/เดือน) ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบอนุมัติ": "Free to use ({n} products · {n} bills/month). Your shop opens once the admin approves it."
 };

@@ -221,7 +221,7 @@ $('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textC
 
 /* start: resume an application from a link or this browser */
 rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];
-  if(S.bill.freeMode){$('#subPrice').textContent='ใช้งานฟรี · ';$('#pkHead').hidden=true;$('#pkList').hidden=true;$('#st2').hidden=true;$('#st3').textContent='2 รออนุมัติ';$('#goHint').textContent='ใช้งานฟรี ไม่มีค่าใช้จ่าย ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบอนุมัติ'}var want=new URLSearchParams(location.search).get('plan');
+  if(S.bill.freeMode){$('#subPrice').textContent='ใช้งานฟรี · ';$('#pkHead').hidden=true;$('#pkList').hidden=true;$('#st2').hidden=true;$('#st3').textContent='2 รออนุมัติ';$('#goHint').textContent='ใช้งานฟรี ไม่มีค่าใช้จ่าย (สินค้า '+(S.bill.freeItems!=null?S.bill.freeItems:50)+' รายการ · '+(S.bill.freeBills!=null?S.bill.freeBills:500)+' บิล/เดือน) ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบอนุมัติ'}var want=new URLSearchParams(location.search).get('plan');
   var wp=l.find(function(p){return p.id===want});if(wp)S.prod=prodOf(wp);var l3=l.filter(function(p){return prodOf(p)===S.prod});
   if(l3.length&&!S.pkg)S.pkg=(wp||l3.find(isFree)||l3[0]).id;setProd(S.prod);
   var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');

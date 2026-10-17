@@ -756,6 +756,7 @@ const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slic
 const clone=o=>JSON.parse(JSON.stringify(o));
 function toast(msg){const t=$('#toast');t.textContent=msg;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>{t.hidden=true},2800)}
 function dbErr(e){const c=e&&e.code;
+  if(c==='free_limit')return e.message;
   if(c==='quota_exceeded')return 'พื้นที่เก็บข้อมูลเต็ม ลบข้อมูลเก่าบางส่วนก่อน';
   if(c==='invalid_argument')return 'บันทึกไม่ได้ บัญชีนี้อาจไม่มีสิทธิ์แก้ไขส่วนนี้';
   if(c==='resource_exhausted')return 'ทำรายการถี่เกินไป รอสักครู่แล้วลองใหม่';

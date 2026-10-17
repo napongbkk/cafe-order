@@ -47,6 +47,20 @@ R(" branchForm(el){const b=el&&el.dataset&&el.dataset.id?get('branches',el.datas
 R("(สลับร้านได้ที่แถบบน)</p>",
   "(สลับร้านได้ที่แถบบน)${window.POS_BRANCH_LIMIT&&window.POS_BRANCH_LIMIT()!=null?` · ร้าน/สาขา/คลัง ${all('branches').length} / ${window.POS_BRANCH_LIMIT()} (ผู้ดูแลระบบกำหนด)`:''}</p>")
 R('function toast(msg,kind){', 'window.POS_TOAST=(m)=>toast(m);function toast(msg,kind){')
+# Free mode: up to N products and N bills per month (admin sets the numbers; the database enforces them too).
+R("function chain(p,fn){const n=(chains.get(p)||Promise.resolve()).then(fn).catch(e=>{toast(e&&e.code==='quota_exceeded'?",
+  "function freeLim(){return window.POS_FREE_LIM?window.POS_FREE_LIM():null}"
+  "function freeBillsFull(){const L=freeLim();if(!L)return false;const d=new Date();const m0=new Date(d.getFullYear(),d.getMonth(),1).getTime();return all('sales').filter(x=>x.ts>=m0).length>=L.bills}"
+  "function freeItemsLeft(){const L=freeLim();return L?L.items-all('products').length:Infinity}"
+  "function chain(p,fn){const n=(chains.get(p)||Promise.resolve()).then(fn).catch(e=>{toast(e&&e.code==='free_limit'?e.message:e&&e.code==='quota_exceeded'?")
+R("function payModal(){const c=calc(ST.cart);if(!c.lines.length)return;",
+  "function payModal(){const c=calc(ST.cart);if(!c.lines.length)return;if(freeBillsFull())return toast(window.POS_FREE_MSG('bills'),'bad');")
+R("  put('products',Object.assign({},p,{id:p.id||uid(),name:v.name.trim(),",
+  "  if(!p.id&&freeItemsLeft()<=0)return toast(window.POS_FREE_MSG('items'),'bad');\n  put('products',Object.assign({},p,{id:p.id||uid(),name:v.name.trim(),")
+R("const ex=all('products').find(p=>c[0]&&p.barcode===c[0]);const st=Object.assign({},ex?ex.stock:{});",
+  "const ex=all('products').find(p=>c[0]&&p.barcode===c[0]);if(!ex&&freeItemsLeft()<=0){ST.freeSkip=(ST.freeSkip||0)+1;return}const st=Object.assign({},ex?ex.stock:{});")
+R("  toast(`นำเข้าใหม่ ${n} · อัปเดต ${u} รายการ`);$('#impText').value=''},",
+  "  toast(`นำเข้าใหม่ ${n} · อัปเดต ${u} รายการ`+(ST.freeSkip?` · ข้าม ${ST.freeSkip} รายการ (ใช้งานฟรีจำกัดสินค้า ${freeLim().items} รายการ)`:''),ST.freeSkip?'bad':undefined);ST.freeSkip=0;$('#impText').value=''},")
 
 page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
