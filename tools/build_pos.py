@@ -26,7 +26,7 @@ src = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
        '<meta name="theme-color" content="#F4F3F1">\n<link rel="icon" href="/icon.svg" type="image/svg+xml">\n'
        '<meta name="robots" content="noindex">\n<style>[hidden]{display:none!important}:root{color-scheme:light;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}img{max-width:100%}.ugrp{display:flex;align-items:stretch;border:1px solid var(--line2);border-radius:10px;overflow:hidden;background:var(--surface)}.ugrp b{display:flex;align-items:center;padding:0 10px;background:var(--bg,#eef2f6);color:var(--ink);font-family:ui-monospace,Menlo,monospace;font-size:15px;letter-spacing:.5px;border-right:1px solid var(--line2);user-select:none}.form .ugrp input{border:0!important;border-radius:0!important;min-width:0}</style>\n</head>\n<body>\n' + src + '\n</body>\n</html>\n')
 R('html,body{height:100%}', 'html,body{height:100%;margin:0}')
-R('<title>POS คาเฟ่</title>', '<title>Easy POS Cafe</title>')
+R('<title>POS คาเฟ่</title>', '<title>Coconut POS Cafe</title>')
 
 # Runtime shim (login + Supabase store) loads before the app script.
 R('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
@@ -44,7 +44,7 @@ PRINT_JS = ("<script>window.POS_PRINT=window.POS_PRINT||function(html){var f=doc
 # Windows shortcut: opens the POS in Chrome (or Edge) with --kiosk-printing, so print jobs go straight to the
 # default printer with no dialog. Its own browser profile makes the flag work even while other Chrome windows are open.
 KIOSK_JS = r"""<script>window.POS_KIOSK_HREF=function(){var u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');
-var L=['@echo off','rem Easy POS: open the POS so receipts print straight to the default printer (no print dialog)',
+var L=['@echo off','rem Coconut POS: open the POS so receipts print straight to the default printer (no print dialog)',
 'set "U='+u+'"','set "D=%LOCALAPPDATA%\\EasyPOS-Print"',
 'set "C=%ProgramFiles%\\Google\\Chrome\\Application\\chrome.exe"',
 'if not exist "%C%" set "C=%ProgramFiles(x86)%\\Google\\Chrome\\Application\\chrome.exe"',
@@ -52,7 +52,7 @@ var L=['@echo off','rem Easy POS: open the POS so receipts print straight to the
 'if not exist "%C%" set "C=msedge"',
 'start "" "%C%" --kiosk-printing --user-data-dir="%D%" --no-first-run --app="%U%"'];
 return 'data:application/octet-stream;charset=utf-8,'+encodeURIComponent(L.join('\r\n')+'\r\n')};</script>"""
-KIOSK = ("`<a class=\\\"btn\\\" style=\\\"align-self:flex-start;text-decoration:none\\\" download=\\\"EasyPOS-AutoPrint.bat\\\" href=\\\"${window.POS_KIOSK_HREF?window.POS_KIOSK_HREF():'#'}\\\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`")
+KIOSK = ("`<a class=\\\"btn\\\" style=\\\"align-self:flex-start;text-decoration:none\\\" download=\\\"CoconutPOS-AutoPrint.bat\\\" href=\\\"${window.POS_KIOSK_HREF?window.POS_KIOSK_HREF():'#'}\\\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`")
 WEB_PRINT = [
   ("  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}",
    "  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return false}"),
@@ -192,7 +192,7 @@ open(os.path.join(ROOT, 'pos', 'index.html'), 'w', encoding='utf-8').write(src)
 print('built pos/index.html', len(src), 'bytes')
 
 # Public demo: the same app in its built-in demo mode (no login, nothing is saved).
-demo = orig.replace('<title>POS คาเฟ่</title>', '<title>เดโม Easy POS Cafe · ทดลองใช้ได้ทันที</title>', 1)
+demo = orig.replace('<title>POS คาเฟ่</title>', '<title>เดโม Coconut POS Cafe · ทดลองใช้ได้ทันที</title>', 1)
 demo = web_print(demo, 'demo')
 demo = demo.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
   PRINT_JS + KIOSK_JS + '\n<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', 1)
@@ -201,7 +201,7 @@ demo = demo.replace('<span id="appPill"></span>',
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
         '<meta name="theme-color" content="#F4F3F1">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
-        '<meta name="description" content="ลองใช้ Easy POS Cafe ได้ทันที ไม่ต้องสมัคร ข้อมูลในเดโมไม่ถูกบันทึก">\n'
+        '<meta name="description" content="ลองใช้ Coconut POS Cafe ได้ทันที ไม่ต้องสมัคร ข้อมูลในเดโมไม่ถูกบันทึก">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + demo + '\n<script src="/i18n-en.js"></script>\n<script src="/easypos-i18n.js"></script>\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'demo'), exist_ok=True)

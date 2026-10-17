@@ -1,4 +1,4 @@
-/* Easy POS: Thai / English switch for every page.
+/* Coconut POS: Thai / English switch for every page.
    Needs /i18n-en.js (window.EP_DICT, Thai -> English) loaded first.
    The pages are written in Thai; in English mode every Thai text node, a few attributes, the page title
    and alert/confirm/prompt messages are translated as they appear, so screens drawn later are covered too.

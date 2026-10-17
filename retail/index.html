@@ -6,11 +6,11 @@
 <meta name="theme-color" content="#1f7fc0">
 <link rel="icon" href="/easypos.svg" type="image/svg+xml">
 <meta name="robots" content="noindex">
-<meta name="description" content="Easy POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">
+<meta name="description" content="Coconut POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">
 <style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>
 </head>
 <body>
-<title>Easy POS Retail</title>
+<title>Coconut POS Retail</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
@@ -624,8 +624,8 @@ tr.click:hover td{background:var(--accent-soft)}
 <div id="scanner" hidden></div>
 <input type="file" id="camQuick" accept="image/*" capture="environment" hidden aria-hidden="true" tabindex="-1">
 
-<!-- Easy POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
-     tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Easy POS Cafe). -->
+<!-- Coconut POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
+     tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Coconut POS Cafe). -->
 <style>
 .auth,.lockwrap,.bill,.acctui{--sunk:var(--surface2,#f2f4f7);--warn-soft:#FFF4D6;--warn-ink:#7A4E00;--ok-soft:#E3F6EA;--ok-ink:#1D6B3A;--bad-soft:#FDE4E1;--bad-ink:#A12020}
 .auth{position:fixed;inset:0;z-index:200;background:var(--bg,#eef3f8);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
@@ -693,7 +693,7 @@ tr.click:hover td{background:var(--accent-soft)}
 .adminbar a{color:#9fd3ff}
 </style>
 <div class="auth" id="auth" hidden><form class="box shim-form" id="authForm" novalidate>
-  <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><h1>Easy POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
+  <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><h1>Coconut POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -702,7 +702,7 @@ tr.click:hover td{background:var(--accent-soft)}
   <button class="sbtn" type="button" id="authOut" hidden>ออกจากระบบ</button>
   <a class="sbtn" href="/retail/signup" style="color:var(--accent,#1f7fc0)">สมัครเปิดร้านใหม่</a>
   <p style="text-align:center;font-size:13px">พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
-  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos">ร้านคาเฟ่? Easy POS Cafe</a></div>
+  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos">ร้านคาเฟ่? Coconut POS Cafe</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="sbtn" type="button" id="lockOut">ออกจากระบบ</button></div>
@@ -762,7 +762,7 @@ function check(){
           else if(a&&a.status==='rejected')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” ไม่ได้รับการอนุมัติ'+(a.admin_note?' · '+esc(a.admin_note):'')+' <a href="/retail/signup">สมัครใหม่</a>',true,true);
           else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ <a href="/retail/signup">สมัครเปิดร้าน</a>',true,true)});return}
       if(d.shop.product!=='retail'&&d.admin){showAuth('บัญชีผู้ดูแลระบบ: ร้านที่ผูกกับบัญชีนี้เป็นร้าน Cafe · เปิดร้าน Retail จากแดชบอร์ด <a href="/admin#shops">ไปแดชบอร์ดผู้ดูแลระบบ</a> (กด “เปิด POS” ที่ร้าน Retail) หรือสร้างร้าน Retail ใหม่ที่นั่น',true,true);return}
-      if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Easy POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Easy POS Cafe</a>',true,true);return}
+      if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Coconut POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Coconut POS Cafe</a>',true,true);return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
       if(d.admin){document.body.insertAdjacentHTML('beforeend','<span class="adminbar">ผู้ดูแลระบบ · '+esc(d.shop.name)+' <a href="/admin">กลับแดชบอร์ด</a></span>')}
@@ -806,7 +806,7 @@ function lineCard(el){var bl=(SESS&&SESS.billing)||{},u=lineUrl(bl.line);if(!el|
 function renderBilling(el){renderBilling0(el)}
 function renderBilling0(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=el._m||1;
   var lim=function(n){return n==null?'ไม่จำกัด':n};var limStat=(sh.productLimit!=null||sh.billLimit!=null)?'<div><small>สินค้า</small><b>'+(sh.productsUsed||0)+' / '+lim(sh.productLimit)+'</b></div><div><small>บิลเดือนนี้</small><b>'+(sh.billsMonth||0)+' / '+lim(sh.billLimit)+'</b></div>':'';
-  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Easy POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';appendContact(el);return}
+  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Coconut POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';appendContact(el);return}
   var nf=function(v){return v?Number(v).toLocaleString('th-TH'):'ไม่จำกัด'};
   var pks=(bl.packages||[]).filter(function(p){return (p.product||'cafe')===(sh.product||'cafe')&&+p.price>0});
   var curPk=pks.filter(function(p){return (+p.months||1)===1&&+p.price===+sh.price&&(sh.productLimit==null||+p.items===+sh.productLimit)})[0];

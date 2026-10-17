@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Build Easy POS Retail (retail/index.html) from the Claude-artifact source.
+"""Build Coconut POS Retail (retail/index.html) from the Claude-artifact source.
 
 Usage: python3 tools/build_retail.py
 Reads  src/retail-pos.artifact.html   (the retail POS, also runs as a Claude artifact)
        tools/retail-shim.html         (login, per-shop data store, staff accounts, billing)
-       tools/standalone-shim.html     (billing + data-store code shared with Easy POS Cafe)
+       tools/standalone-shim.html     (billing + data-store code shared with Coconut POS Cafe)
 Writes retail/index.html
 """
 import os, sys
@@ -35,7 +35,7 @@ def R(a, b):
     src = src.replace(a, b, 1)
 
 
-R('<title>POS ร้านคุณสิมบัติ</title>', '<title>Easy POS Retail</title>')
+R('<title>POS ร้านคุณสิมบัติ</title>', '<title>Coconut POS Retail</title>')
 # Runtime shim loads before the app's own scripts, so window.claude exists when the app starts.
 first = src.index('<script')
 src = src[:first] + shim + '\n' + src[first:]
@@ -50,7 +50,7 @@ R('function toast(msg,kind){', 'window.POS_TOAST=(m)=>toast(m);function toast(ms
 page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
         '<meta name="theme-color" content="#1f7fc0">\n<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
-        '<meta name="robots" content="noindex">\n<meta name="description" content="Easy POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">\n'
+        '<meta name="robots" content="noindex">\n<meta name="description" content="Coconut POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + src + '\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail'), exist_ok=True)
@@ -58,9 +58,9 @@ open(os.path.join(ROOT, 'retail', 'index.html'), 'w', encoding='utf-8').write(pa
 print('built retail/index.html', len(page), 'bytes')
 
 # Public demo: the same app on its own, data stays in this browser (no login, nothing shared).
-demo = rd('src', 'retail-pos.artifact.html').replace('<title>POS ร้านคุณสิมบัติ</title>', '<title>เดโม Easy POS Retail · ทดลองใช้ได้ทันที</title>', 1)
+demo = rd('src', 'retail-pos.artifact.html').replace('<title>POS ร้านคุณสิมบัติ</title>', '<title>เดโม Coconut POS Retail · ทดลองใช้ได้ทันที</title>', 1)
 demo = demo.replace('ร้านคุณสิมบัติ', 'ร้านตัวอย่าง').replace('คุณสิมบัติ', 'เจ้าของร้าน')
-# The demo has no PIN screen: signing out goes to the Easy POS Retail login page.
+# The demo has no PIN screen: signing out goes to the Coconut POS Retail login page.
 if ' logout(){' not in demo:
     sys.exit('build_retail: demo logout patch point not found')
 demo = demo.replace(' logout(){', " logout(){location.href='/retail';return;", 1)
@@ -74,7 +74,7 @@ AUTO = ("<script>(function(){var n=0;function go(){if(typeof A==='undefined'||ty
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">\n'
         '<link rel="icon" href="/easypos.svg" type="image/svg+xml">\n'
-        '<meta name="description" content="ลองใช้ Easy POS Retail ได้ทันที ไม่ต้องสมัคร">\n'
+        '<meta name="description" content="ลองใช้ Coconut POS Retail ได้ทันที ไม่ต้องสมัคร">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
         + demo + '\n' + BAR + '\n' + AUTO + '\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail', 'demo'), exist_ok=True)

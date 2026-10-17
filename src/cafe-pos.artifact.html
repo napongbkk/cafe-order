@@ -1053,7 +1053,7 @@ function drawerTab(){const dr=PR.drawer||{};const live=prDirect();const file=PR.
 /* ===== backup ===== */
 const BK_COLS=['categories','options','menu','promos','tables','members','stock'];
 function downloadText(name,text,type){try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:type||'application/json'}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000);return true}catch(e){return false}}
-async function backupData(days){const out={app:'Easy POS Cafe',version:1,exportedAt:new Date().toISOString(),shop:Object.assign({},S.shop),data:{}};
+async function backupData(days){const out={app:'Coconut POS Cafe',version:1,exportedAt:new Date().toISOString(),shop:Object.assign({},S.shop),data:{}};
   const map={categories:S.cats,options:S.opts,menu:S.menu,promos:S.promos,tables:S.tables,members:S.members,stock:S.stock};
   BK_COLS.forEach(c=>{out.data[c]=(map[c]||[]).map(x=>Object.assign({},x))});
   out.data.stocklog=(S.stockLog||[]).slice();
@@ -1061,7 +1061,7 @@ async function backupData(days){const out={app:'Easy POS Cafe',version:1,exporte
   else if(days)out.data.orders=Object.values(S.oToday||{}).map(o=>Object.assign({},o));
   return out}
 function backupTab(){const live=!!S.db;const b=S.bk||{};const days=S.bkDays==null?90:S.bkDays;
-  return `<h2>ข้อมูลและสำรองไฟล์</h2><span class="hint">${live?'ข้อมูลร้านเก็บบนเซิร์ฟเวอร์ของ Easy POS และซิงก์ทุกเครื่องอัตโนมัติ ดาวน์โหลดไฟล์สำรองเก็บไว้เองได้ทุกเมื่อ':'ตอนนี้ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น'}</span>
+  return `<h2>ข้อมูลและสำรองไฟล์</h2><span class="hint">${live?'ข้อมูลร้านเก็บบนเซิร์ฟเวอร์ของ Coconut POS และซิงก์ทุกเครื่องอัตโนมัติ ดาวน์โหลดไฟล์สำรองเก็บไว้เองได้ทุกเมื่อ':'ตอนนี้ข้อมูลเก็บในเบราว์เซอร์เครื่องนี้เท่านั้น'}</span>
   <div class="form">
     <div class="prsec"><b>ดาวน์โหลดไฟล์สำรอง</b><span class="hint">รวมการตั้งค่าร้าน หมวด เมนู ตัวเลือก โปรโมชัน ผังโต๊ะ สมาชิก และสต็อกวัตถุดิบ</span>
       <label for="bk_days">รวมบิลขาย<select id="bk_days">${[[0,'ไม่รวมบิล'],[30,'ย้อนหลัง 30 วัน'],[90,'ย้อนหลัง 90 วัน'],[365,'ย้อนหลัง 1 ปี'],[99999,'ทั้งหมด']].map(([v,l])=>`<option value="${v}"${days===v?' selected':''}>${l}</option>`).join('')}</select></label>
@@ -1164,7 +1164,7 @@ function printerTab(){const c=PR;const live=prDirect();const pv=S.prPv||'receipt
     <div class="prprev"><img id="prImg" alt="ตัวอย่างใบเสร็จ"></div>
     <span class="hint">พิมพ์เป็นภาพขนาดเท่าหัวพิมพ์จริง ภาษาไทยจึงออกครบทุกสระและวรรณยุกต์ ไม่ต้องตั้ง code page</span>
     <details class="hint"><summary><b>Wi-Fi / LAN และ iPhone</b></summary><p>หน้าเว็บส่งข้อมูลถึงเครื่องพิมพ์ผ่าน Wi-Fi หรือ LAN โดยตรงไม่ได้ ให้ตั้ง IP เครื่องพิมพ์ด้วยโปรแกรมของผู้ผลิต แล้วเพิ่มเครื่องพิมพ์ใน Windows ด้วย IP นั้น (พอร์ต 9100) จากนั้นใช้แบบ "ผ่านไดรเวอร์" ใน Windows ตั้งให้เปิดลิ้นชักได้ที่ Printing Preferences › Cash Drawer › Open before printing</p><p>บน iPhone/iPad พิมพ์ตรงจากหน้านี้ไม่ได้ ใช้คอมพิวเตอร์หรือ Android ที่ต่อเครื่องพิมพ์เป็นเครื่องคิดเงินหลัก</p></details>
-    ${c.conn==='file'&&window.POS_KIOSK_HREF?`<div class="note">พิมพ์ออกเองไม่ต้องกดยืนยัน: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง)</div><a class="btn" style="align-self:flex-start;text-decoration:none" download="EasyPOS-AutoPrint.bat" href="${window.POS_KIOSK_HREF()}">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`:''}
+    ${c.conn==='file'&&window.POS_KIOSK_HREF?`<div class="note">พิมพ์ออกเองไม่ต้องกดยืนยัน: ตั้งเครื่องพิมพ์ใบเสร็จเป็น “ค่าเริ่มต้น” ของ Windows แล้วเปิด POS จากทางลัดนี้ทุกครั้ง (ครั้งแรกต้องเข้าสู่ระบบใหม่หนึ่งครั้ง)</div><a class="btn" style="align-self:flex-start;text-decoration:none" download="CoconutPOS-AutoPrint.bat" href="${window.POS_KIOSK_HREF()}">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`:''}
   </div></div>`}
 if(PR.conn==='usb'&&navigator.usb&&navigator.usb.getDevices){navigator.usb.getDevices().then(ds=>{if(ds[0])usbConnect(ds[0]).catch(()=>{})}).catch(()=>{});try{navigator.usb.addEventListener('disconnect',e=>{if(PRD.usb&&e.device===PRD.usb){PRD.usb=null;PRD.name='';toast('เครื่องพิมพ์ USB ถูกถอดออก')}})}catch(e){}}
 if(PR.conn==='serial'&&navigator.serial&&navigator.serial.getPorts){navigator.serial.getPorts().then(ps=>{const p=ps[0];if(p)p.open({baudRate:+PR.baud||9600}).then(()=>{PRD.port=p;PRD.writer=p.writable.getWriter();PRD.name='COM'}).catch(()=>{})}).catch(()=>{})}
@@ -2436,7 +2436,7 @@ document.addEventListener('click',e=>{
     case 'testprint':testPrint();break;
     case 'drawernosale':kickDrawerManual();break;
     case 'setdrawerpin':{const v=($('#d_newpin')||{}).value||'';if(!/^\d{4,6}$/.test(v)){toast('PIN ต้องเป็นตัวเลข 4–6 หลัก');break}pinHash(v).then(h=>saveShop({drawerPin:h},'บันทึก PIN ลิ้นชักแล้ว'));break;}
-    case 'bkdown':backupData(S.bkDays==null?90:S.bkDays).then(d=>{const n='easypos-backup-'+String(shop().name||'shop').replace(/[\\/:*?"<>|\s]+/g,'-')+'-'+dayKey(Date.now())+'.json';if(downloadText(n,JSON.stringify(d,null,1)))toast('ดาวน์โหลดไฟล์สำรองแล้ว');else toast('ดาวน์โหลดไม่สำเร็จ')});break;
+    case 'bkdown':backupData(S.bkDays==null?90:S.bkDays).then(d=>{const n='coconutpos-backup-'+String(shop().name||'shop').replace(/[\\/:*?"<>|\s]+/g,'-')+'-'+dayKey(Date.now())+'.json';if(downloadText(n,JSON.stringify(d,null,1)))toast('ดาวน์โหลดไฟล์สำรองแล้ว');else toast('ดาวน์โหลดไม่สำเร็จ')});break;
     case 'bkcsv':{const v=d.v;let rows;
       if(v==='menu')rows=[['ชื่อเมนู','หมวด','ราคา','หมด']].concat(S.menu.map(m=>{const c=S.cats.find(x=>x.id===(m.catId||m.cat));return [m.name,c?c.name:'',m.price,m.soldOut?'ใช่':'']}));
       else if(v==='members')rows=[['เบอร์โทร','ชื่อ','แต้ม','มาแล้ว','ยอดซื้อสะสม','วันเกิด','หมายเหตุ']].concat(S.members.map(m=>[m.phone||m.id,m.name,m.points||0,m.visits||0,m.spent||0,m.birthday||'',m.note||'']));
@@ -2667,7 +2667,7 @@ document.addEventListener('change',async e=>{
   if(id==='d_t2'){PR.drawer.t2=Math.min(500,Math.max(50,parseInt(e.target.value,10)||500));savePR();return}
   if(id==='d_needpin'){PR.drawer.needPin=e.target.checked;savePR();return}
   if(id==='bk_days'){S.bkDays=+e.target.value;return}
-  if(id==='bk_file'){const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{let d=null;try{d=JSON.parse(t)}catch(err){}if(!d||!d.data||d.app!=='Easy POS Cafe'){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Easy POS Cafe');return}S.bk={name:f.name,data:d};render(true)});return}
+  if(id==='bk_file'){const f=e.target.files&&e.target.files[0];if(!f)return;f.text().then(t=>{let d=null;try{d=JSON.parse(t)}catch(err){}if(!d||!d.data||d.app!=='Coconut POS Cafe'){toast('ไฟล์นี้ไม่ใช่ไฟล์สำรองของ Coconut POS Cafe');return}S.bk={name:f.name,data:d};render(true)});return}
   if(id==='p_auto'){PR.auto=e.target.checked;savePR();return}
   if(e.target.name==='p_conn'){const prev=PR.conn;PR.conn=e.target.value;savePR();if(prev!==PR.conn)prDisconnect();render(true);return}
   if(id==='p_pmodel'){PR.pmodel=e.target.value;PR.paper=String((PRMODEL[PR.pmodel]||{}).paper||80);savePR();render(true);return}

@@ -1,5 +1,5 @@
-<!-- Easy POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
-     tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Easy POS Cafe). -->
+<!-- Coconut POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
+     tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Coconut POS Cafe). -->
 <style>
 .auth,.lockwrap,.bill,.acctui{--sunk:var(--surface2,#f2f4f7);--warn-soft:#FFF4D6;--warn-ink:#7A4E00;--ok-soft:#E3F6EA;--ok-ink:#1D6B3A;--bad-soft:#FDE4E1;--bad-ink:#A12020}
 .auth{position:fixed;inset:0;z-index:200;background:var(--bg,#eef3f8);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
@@ -67,7 +67,7 @@
 .adminbar a{color:#9fd3ff}
 </style>
 <div class="auth" id="auth" hidden><form class="box shim-form" id="authForm" novalidate>
-  <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><h1>Easy POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
+  <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><h1>Coconut POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
   <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
@@ -76,7 +76,7 @@
   <button class="sbtn" type="button" id="authOut" hidden>ออกจากระบบ</button>
   <a class="sbtn" href="/retail/signup" style="color:var(--accent,#1f7fc0)">สมัครเปิดร้านใหม่</a>
   <p style="text-align:center;font-size:13px">พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
-  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos">ร้านคาเฟ่? Easy POS Cafe</a></div>
+  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos">ร้านคาเฟ่? Coconut POS Cafe</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="sbtn" type="button" id="lockOut">ออกจากระบบ</button></div>
@@ -136,7 +136,7 @@ function check(){
           else if(a&&a.status==='rejected')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” ไม่ได้รับการอนุมัติ'+(a.admin_note?' · '+esc(a.admin_note):'')+' <a href="/retail/signup">สมัครใหม่</a>',true,true);
           else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ <a href="/retail/signup">สมัครเปิดร้าน</a>',true,true)});return}
       if(d.shop.product!=='retail'&&d.admin){showAuth('บัญชีผู้ดูแลระบบ: ร้านที่ผูกกับบัญชีนี้เป็นร้าน Cafe · เปิดร้าน Retail จากแดชบอร์ด <a href="/admin#shops">ไปแดชบอร์ดผู้ดูแลระบบ</a> (กด “เปิด POS” ที่ร้าน Retail) หรือสร้างร้าน Retail ใหม่ที่นั่น',true,true);return}
-      if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Easy POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Easy POS Cafe</a>',true,true);return}
+      if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Coconut POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Coconut POS Cafe</a>',true,true);return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
       if(d.admin){document.body.insertAdjacentHTML('beforeend','<span class="adminbar">ผู้ดูแลระบบ · '+esc(d.shop.name)+' <a href="/admin">กลับแดชบอร์ด</a></span>')}
