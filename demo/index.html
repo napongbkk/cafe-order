@@ -558,6 +558,7 @@ td.r,th.r{text-align:right}
 <div id="toast" class="toast" role="status" hidden></div>
 <div id="malert" class="malert" role="alert" hidden></div>
 
+<script>window.POS_PRINT=window.POS_PRINT||function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
 (function(){
@@ -648,8 +649,8 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   floorEdit:false,sel:null,zone:null,snap:true,tsel:null,addZone:false,
   hist:{date:dayKey(Date.now()),q:'',sel:null,list:null},members:[],mem:{q:'',sort:'last'},rep:{date:dayKey(Date.now()),list:null},
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
-let PR={paper:'80',auto:false,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'}};
-try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
+let PR={paper:'80',auto:true,webPrint:1,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash'}};
+try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p&&!p.webPrint){p.auto=true;p.webPrint=1}if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
 try{let v=localStorage.getItem('pos.view');if(v==='bar')v='kds';if(v&&NAV.some(n=>n[0]===v))S.view=v}catch(e){}
 try{S.kst=localStorage.getItem('pos.kds')||'all'}catch(e){S.kst='all'}
 S.ktab='active';S.sound=false;
@@ -668,7 +669,7 @@ const KRANK={waiting:0,making:1,ready:2,done:3};const KNEXT={waiting:'making',ma
 function stStatus(o,st){return (o.kst&&o.kst[st])||o.kitchen||'done'}
 function overallK(o){const ss=stationsOf(o);if(!ss.length)return 'done';return ss.map(st=>stStatus(o,st)).sort((a,b)=>KRANK[a]-KRANK[b])[0]}
 function kprintOn(st){return !!(PR.kprint&&(PR.kprint[st]||PR.kprint['*']))}
-function shop(){const s=Object.assign({},DEF_SHOP,S.shop);if(!S.shop.vatMode&&S.shop.vatReg)s.vatMode='included';return s}
+function shop(){const s=Object.assign({},DEF_SHOP,S.shop);if(!S.shop.vatMode&&S.shop.vatReg)s.vatMode='included';if(/แก้ได้ใน/.test(s.branch||''))s.branch='';return s}
 let lineSeq=1;
 function newBill(){return {id:null,no:null,type:'dine',table:null,guests:0,items:[],promo:null,member:'',batch:0}}
 S.bill=newBill();
@@ -779,12 +780,13 @@ let printQ=Promise.resolve();
 function saveFile(name,body,copies){const r=printQ.then(()=>saveFileNow(name,body,copies));printQ=r.catch(()=>{});return r}
 async function saveFileNow(name,body,copies){
   if(copies>1)body=Array(copies).fill(body).join('<div style="break-after:page"></div>');
-  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}
+  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return false}
   const page=PR.paper==='58'?'58mm':'80mm',w=PR.paper==='58'?'48mm':'72mm';
   const html='<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(name)+'</title>'+
     '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;700&display=swap">'+
     '<style>@page{size:'+page+' auto;margin:0}html,body{margin:0;background:#fff}'+RCSS+'.rcpt{--pw:'+w+'}@media screen{body{padding:16px;background:#e9e9e9}.rcpt{box-shadow:0 1px 4px rgba(0,0,0,.2)}}</style></head><body>'+
     body+'<script>window.addEventListener("load",function(){setTimeout(function(){window.print()},400)});<\/script></body></html>';
+  if(window.POS_PRINT){window.POS_PRINT(html);toast('กำลังพิมพ์ '+name);return true}
   try{await S.downloads.save({filename:name+'.html',data:html});toast('บันทึกไฟล์แล้ว เปิดไฟล์เพื่อสั่งพิมพ์');return true}
   catch(e){if(!e||e.code!=='declined')toast(e&&e.code==='rate_limited'?'มีหน้าต่างบันทึกเปิดอยู่ ลองใหม่อีกครั้ง':'บันทึกไฟล์ไม่สำเร็จ');return false}
 }
@@ -1241,12 +1243,12 @@ function docPanel(o,done){
       <label for="tiAddr">ที่อยู่<input id="tiAddr" maxlength="200"></label><div class="dlg-actions"><button class="btn" type="button" data-act="canceltax">ยกเลิก</button><button class="btn primary grow" type="submit">ออกใบกำกับภาษีและพิมพ์</button></div></form>`;
   }else{
     const vc=S.confirm==='void:'+o.id;
-    left+=(S.downloads?'':'<div class="note">อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้ ดูตัวอย่างได้อย่างเดียว</div>')+
+    left+=(S.downloads||window.POS_PRINT?'':'<div class="note">อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้ ดูตัวอย่างได้อย่างเดียว</div>')+
       `<div style="display:flex;flex-direction:column;gap:8px"><button class="btn primary big" data-act="print" data-id="${esc(o.id)}" data-k="receipt">${ic('print')}${done?'พิมพ์ใบเสร็จ':'พิมพ์ใบเสร็จ (สำเนา)'}</button>
       <button class="btn" data-act="print" data-id="${esc(o.id)}" data-k="bar">${ic('print',18)}พิมพ์ใบสั่งครัว/บาร์</button>
       ${o.taxInvoice?`<button class="btn" data-act="print" data-id="${esc(o.id)}" data-k="tax">${ic('print',18)}พิมพ์ใบกำกับภาษี ${esc(o.taxInvoice.no)}</button>`:`<button class="btn" data-act="taxform"${o.state==='void'?' disabled':''}>ออกใบกำกับภาษีเต็มรูป</button>`}
       ${done&&(PR.drawer||{}).on?'<button class="btn" data-act="drawernow">เปิดลิ้นชัก</button>':''}${done?'<button class="btn dark big" data-act="paiddone" id="doneBtn">เสร็จ</button>':o.state==='void'?'':S.canEdit?(vc?`<div class="note">ทำลายบิลนี้? ยอดจะถูกหักออกจากรายงานและรอบการขาย</div><div style="display:flex;gap:8px"><button class="btn danger" style="flex:1" data-act="void" data-id="${esc(o.id)}">ยืนยันทำลายบิล</button><button class="btn" style="flex:1" data-act="unconfirm">ไม่ทำลาย</button></div>`:`<button class="btn danger" data-act="askvoid" data-id="${esc(o.id)}">ทำลายบิล (Void)</button>`):'<span class="hint">ทำลายบิลได้เฉพาะผู้จัดการ (ผู้มีสิทธิ์แก้ไข)</span>'}</div>
-      <span class="hint">ระบบจะบันทึกไฟล์ เปิดไฟล์แล้วหน้าต่างพิมพ์จะขึ้นเอง เลือกเครื่องพิมพ์ใบเสร็จของร้าน</span>`;
+      <span class="hint">กดพิมพ์แล้วส่งเข้าเครื่องพิมพ์ค่าเริ่มต้นทันที ถ้าเปิดผ่านทางลัดพิมพ์อัตโนมัติ จะไม่มีหน้าต่างให้กดยืนยัน</span>`;
   }
   return `<div class="rv"><div class="rv-left">${left}</div><div style="display:flex;flex-direction:column;gap:8px;min-width:0"><div class="chips" role="tablist" aria-label="ตัวอย่างเอกสาร">${kinds.map(k=>`<button class="chip" role="tab" data-act="dockind" data-v="${k}" aria-selected="${st.kind===k}" style="height:36px">${KLABEL[k]}</button>`).join('')}</div>
     <div class="paper${PR.paper==='58'?' p58':''}">${receiptBody(o,st.kind,!done)}</div></div></div>`;
@@ -1356,7 +1358,7 @@ function settingsView(){
     const card=(t,sub,btn,v)=>`<div class="dcard"><div class="dcard-h"><h3>${t}</h3><button class="btn sm primary" data-act="stab" data-v="${v}">${btn}</button></div><p>${sub}</p></div>`;
     body=`<h2>อุปกรณ์และการรับเงิน</h2><div class="dcards">`+
       card('แอปลูกค้า (สแกน QR สั่ง)',`${sh.appOpen?'เปิดรับออเดอร์':'ปิดรับออเดอร์'} · ${PR.bridge?'เครื่องนี้เป็นตัวรับออเดอร์':'เครื่องนี้ไม่ได้รับออเดอร์จากแอป'}`,'ตั้งค่า / QR','app')+
-      card('เครื่องพิมพ์ใบเสร็จ',`${esc(PR.model||'ยังไม่ระบุรุ่น')} (${PR.paper}mm) · ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์) · ${PR.auto?'พิมพ์อัตโนมัติหลังชำระ':'กดพิมพ์เอง'}`,'ตั้งค่า / ทดสอบ','printer')+
+      card('เครื่องพิมพ์ใบเสร็จ',`${esc(PR.model||'ยังไม่ระบุรุ่น')} (${PR.paper}mm) · พิมพ์ตรงจากหน้าเว็บ · ${PR.auto?'พิมพ์อัตโนมัติหลังชำระ':'กดพิมพ์เอง'}`,'ตั้งค่า / ทดสอบ','printer')+
       card('ลิ้นชักเก็บเงิน',dr.on?`สาย RJ11 ต่อที่เครื่องพิมพ์ · เปิดอัตโนมัติ: ${DWHEN[dr.when]||''} · ขา ${esc(dr.pin)}`:'ยังไม่เปิดใช้งาน','ตั้งค่า / ทดสอบ','drawer')+
       card('เครื่องพิมพ์ครัว',(()=>{const on=stations().filter(x=>kprintOn(x.id)).map(x=>esc(x.name));return on.length?`${esc(PR.kmodel||'ไม่ระบุรุ่น')} · พิมพ์ใบสั่ง ${on.join(', ')} · ${PR.kmode==='arrive'?'เมื่อออเดอร์เข้าจอครัว':'เมื่อส่งออเดอร์จากเครื่องนี้'}`:'เครื่องนี้ไม่พิมพ์ใบสั่งครัว'})(),'ตั้งค่า / ทดสอบ','kprinter')+
       card('จอครัว (KDS)',`${stations().length} สถานี: ${stations().map(x=>esc(x.name)).join(', ')} · เปิดเมนู “จอครัว” บนแท็บเล็ตในครัวหรือบาร์`,'ตั้งค่าสถานี','stations')+
@@ -1366,11 +1368,11 @@ function settingsView(){
   else if(tab==='printer')body=`<h2>เครื่องพิมพ์ใบเสร็จ</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้</span><div class="form">
     <label for="p_model">รุ่นเครื่องพิมพ์<input id="p_model" list="pmodels" maxlength="40" placeholder="เช่น BARIGAN PR-01W" value="${esc(PR.model)}"></label><datalist id="pmodels"><option value="BARIGAN PR-01W"></option><option value="Xprinter XP-Q80"></option><option value="Epson TM-T82X"></option><option value="Gprinter GP-L80250"></option><option value="Sunmi (เครื่องพิมพ์ในตัว)"></option></datalist>
     <div class="three"><label for="p_paper">ขนาดกระดาษ<select id="p_paper"><option value="80"${PR.paper==='80'?' selected':''}>80 มม.</option><option value="58"${PR.paper==='58'?' selected':''}>58 มม.</option></select></label>
-    <label for="p_conn">การเชื่อมต่อ<select id="p_conn"><option>ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์)</option></select></label>
+    <label for="p_conn">การเชื่อมต่อ<select id="p_conn"><option>พิมพ์ตรงจากหน้าเว็บ (เครื่องพิมพ์ค่าเริ่มต้น)</option></select></label>
     <label for="p_copies">จำนวนสำเนาใบเสร็จ<input id="p_copies" type="number" min="1" max="3" value="${esc(PR.copies||1)}"></label></div>
     <label class="check" for="p_auto"><input id="p_auto" type="checkbox"${PR.auto?' checked':''}> พิมพ์ใบเสร็จทันทีหลังชำระเงิน</label><span class="hint">ใบสั่งครัว/บาร์ตั้งค่าที่ “เครื่องพิมพ์ครัว”</span>
     <button class="btn primary" data-act="testprint" type="button" style="align-self:flex-start">${ic('print',18)}ทดสอบพิมพ์</button>
-    <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” หน้าเว็บส่งคำสั่งตรงถึงเครื่องพิมพ์ไม่ได้ จึงต้องเปิดไฟล์ที่บันทึกเพื่อพิมพ์</div></div>`;
+    <div class="note">วิธีตั้งค่า: 1) ติดตั้งไดรเวอร์ของเครื่องพิมพ์บนเครื่องนี้ 2) ตั้งเป็นเครื่องพิมพ์ค่าเริ่มต้น 3) ตอนพิมพ์ครั้งแรก เลือกขนาดกระดาษ ${PR.paper} มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ต้องกดยืนยัน: ดาวน์โหลดทางลัดด้านล่าง ปิด Chrome ทุกหน้าต่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${(()=>{const u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');const bat='@echo off\r\nstart \"\" chrome --kiosk-printing --app='+u+'\r\n';return `<a class=\"btn\" style=\"align-self:flex-start;text-decoration:none\" download=\"EasyPOS-AutoPrint.bat\" href=\"data:application/octet-stream;charset=utf-8,${encodeURIComponent(bat)}\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`})()}</div>`;
   else if(tab==='look'){const L=lookOf(sh);
     const imgField=(k,label,hint)=>{const id=sh[k];return `<div class="grp"><span class="grp-t">${label}</span><div class="imgrow"><div class="ph">${id&&lookImg(id)?`<img src="${esc(lookImg(id))}" alt="">`:ic('cup',22)}</div>${S.assets&&!ro?`<label class="btn" for="lk_${k}">${id?'เปลี่ยนรูป':'เลือกรูป'}<input id="lk_${k}" data-lookimg="${k}" type="file" accept="image/*" class="sr"></label>${id?`<button class="btn danger" type="button" data-act="lookimgdel" data-k="${k}">ลบ</button>`:''}`:`<span class="hint">${ro?'แก้ได้เฉพาะเจ้าของร้าน':'อัปโหลดรูปได้บน POS เว็บ'}</span>`}<span class="hint">${hint}</span></div></div>`};
     body=`<h2>หน้าตา Mobile Order</h2><span class="hint">ปรับสี โลโก้ รูปปก และรูปแบบเมนูของหน้าสั่งอาหารบนมือถือลูกค้า บันทึกแล้วหน้าลูกค้าจะเปลี่ยนภายในไม่เกิน 1 นาที</span>
@@ -1387,18 +1389,18 @@ function settingsView(){
     body=`<h2>แอปลูกค้า (สแกน QR สั่งอาหาร)</h2><div id="appStatus">${appStatusHtml()}</div>
     <form class="form" data-stab="app"><label class="check" for="s_appOpen"><input id="s_appOpen" type="checkbox"${sh.appOpen?' checked':''}${dis}> เปิดรับออเดอร์จากแอป</label>
       <label class="check" for="s_appTake"><input id="s_appTake" type="checkbox"${sh.appTake!==false?' checked':''}${dis}> รับสั่งกลับบ้านผ่านแอป</label>
-      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร</label><div class="linkrow"><input id="s_appUrl" type="url" value="${esc(url)}"${dis}${window.POS_STANDALONE?' readonly':''}><button class="btn" type="button" data-act="copylink">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">เปิด</a></div>${window.POS_STANDALONE?'<span class="hint">ลิงก์นี้เป็นของร้านคุณโดยเฉพาะ ส่งให้ลูกค้าหรือพิมพ์เป็น QR ได้เลย</span>':''}${save}</form>
+      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร</label><div class="linkrow"><input id="s_appUrl" type="url" value="${esc(url)}"${dis}${window.POS_STANDALONE?' readonly':''}><button class="btn" type="button" data-act="copylink">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">เปิดลิงก์</a></div>${window.POS_STANDALONE?'<span class="hint">ลิงก์นี้เป็นของร้านคุณโดยเฉพาะ ส่งให้ลูกค้าหรือพิมพ์เป็น QR ได้เลย</span>':''}${save}</form>
     <div class="form"><label class="check" for="pr_bridge"><input id="pr_bridge" type="checkbox"${PR.bridge?' checked':''}> เครื่องนี้เป็นตัวรับออเดอร์จากแอปเข้าระบบ</label>
       <span class="hint">เปิดบนเครื่องแคชเชียร์ 1 เครื่องที่เปิดหน้า POS ค้างไว้ บัญชีบนเครื่องนั้นต้องเชื่อม Supabase ไว้ ระบบจะส่งเมนูขึ้นแอป ดึงออเดอร์ใหม่ทุก 10 วินาที และส่งสถานะกลับให้ลูกค้าเห็น</span>
       ${PR.bridge?'<button class="btn" type="button" data-act="appsync" style="align-self:flex-start">ซิงก์ตอนนี้</button>':''}</div>
     <h3>QR สำหรับลูกค้า</h3><span class="hint">QR หลักใช้ได้ทุกจุด ลูกค้าเลือกเองว่าทานที่ร้าน (แล้วเลือกโต๊ะ) หรือกลับบ้าน · QR รายโต๊ะจะข้ามขั้นเลือกโต๊ะให้</span><div class="qrgrid"><div class="qrc" style="border-color:var(--accent)"><div class="qrwrap"><div data-qr="${esc(url)}"></div></div><b>QR หลักของร้าน</b><a href="${esc(url)}" target="_blank" rel="noopener">${esc(url)}</a></div>${sh.appTake!==false?`<div class="qrc"><div class="qrwrap"><div data-qr="${esc(url+'?type=take')}"></div></div><b>สั่งกลับบ้าน</b><a href="${esc(url+'?type=take')}" target="_blank" rel="noopener">${esc(url+'?type=take')}</a></div>`:''}${tb.map(t=>{const l=url+'?t='+encodeURIComponent(t.id);return `<div class="qrc"><div class="qrwrap"><div data-qr="${esc(l)}"></div></div><b>โต๊ะ ${esc(t.name)}</b><span class="hint">${esc(t.zone||'')}</span></div>`}).join('')}</div>
-    <button class="btn primary" data-act="appqrfile" style="align-self:flex-start">${ic('print',18)}บันทึกไฟล์ QR ทุกโต๊ะสำหรับพิมพ์</button>`}
+    <button class="btn primary" data-act="appqrfile" style="align-self:flex-start">${ic('print',18)}พิมพ์ QR ทุกโต๊ะ</button>`}
   else if(tab==='kprinter'){body=`<h2>เครื่องพิมพ์ครัว</h2><span class="hint">ตั้งค่าเฉพาะเครื่องนี้ ใช้กับเครื่องแคชเชียร์ หรือแท็บเล็ตในครัวที่ต่อเครื่องพิมพ์ไว้</span><div class="form">
     <label for="k_model">รุ่นเครื่องพิมพ์<input id="k_model" list="pmodels" maxlength="40" placeholder="เช่น Xprinter XP-Q80" value="${esc(PR.kmodel)}"></label><datalist id="pmodels"><option value="BARIGAN PR-01W"></option><option value="Xprinter XP-Q80"></option><option value="Epson TM-T82X"></option></datalist>
     <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:2px"><legend class="grp-t" style="margin-bottom:4px">พิมพ์ใบสั่งของสถานี</legend>${stations().map(x=>`<label class="check" for="kp_${esc(x.id)}"><input id="kp_${esc(x.id)}" type="checkbox" data-kp="${esc(x.id)}"${kprintOn(x.id)?' checked':''}> ${esc(x.name)}</label>`).join('')}</fieldset>
     <label for="k_mode">พิมพ์เมื่อ<select id="k_mode"><option value="send"${PR.kmode!=='arrive'?' selected':''}>ส่งออเดอร์จากเครื่องนี้ (เครื่องแคชเชียร์)</option><option value="arrive"${PR.kmode==='arrive'?' selected':''}>มีออเดอร์ใหม่เข้ามา (เครื่องในครัว เปิดหน้าจอครัวค้างไว้)</option></select></label>
     <div class="opts">${stations().map(x=>`<button class="btn" type="button" data-act="ktest" data-v="${esc(x.id)}">${ic('print',18)}ทดสอบใบสั่ง${esc(x.name)}</button>`).join('')}</div>
-    <div class="note">ใบสั่งแยกตามสถานีอัตโนมัติ เช่น เครื่องดื่มไปบาร์ ขนมไปครัว ตามที่ผูกหมวดหมู่ไว้ใน “สถานีครัว/บาร์” เหมือนใบเสร็จ ระบบจะบันทึกไฟล์แล้วเปิดเพื่อพิมพ์ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์</div></div>`}
+    <div class="note">ใบสั่งแยกตามสถานีอัตโนมัติ เช่น เครื่องดื่มไปบาร์ ขนมไปครัว ตามที่ผูกหมวดหมู่ไว้ใน “สถานีครัว/บาร์” เหมือนใบเสร็จ ระบบส่งพิมพ์ตรงจากหน้าเว็บ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์ และเปิด POS จากทางลัดพิมพ์อัตโนมัติเพื่อไม่ต้องกดยืนยัน</div></div>`}
   else if(tab==='stations'){const ss=stations();body=`<h2>สถานีครัว/บาร์</h2><span class="hint">แบ่งออเดอร์ไปแต่ละจุดทำตามหมวดหมู่เมนู แต่ละสถานีเห็นเฉพาะรายการของตัวเองบนจอครัวและใบสั่ง</span>
     <div class="htable"><table><thead><tr><th>สถานี</th><th>หมวดหมู่</th><th></th></tr></thead><tbody>${ss.map(x=>`<tr><td><b>${esc(x.name)}</b></td><td style="white-space:normal">${esc(S.cats.filter(c=>stationOfCat(c.id)===x.id).map(c=>c.name).join(', ')||'—')}</td><td>${ro||ss.length<2||x.id==='main'&&!(shop().stations||[]).length?'':S.confirm==='sdel:'+x.id?`<button class="btn sm danger" data-act="sdel" data-id="${esc(x.id)}">ยืนยันลบ</button> <button class="btn sm" data-act="unconfirm">ไม่ลบ</button>`:`<button class="btn sm" data-act="asksdel" data-id="${esc(x.id)}">ลบ</button>`}</td></tr>`).join('')}</tbody></table></div>
     ${ro?'':`<form class="form" id="stAddForm" style="flex-direction:row;gap:8px"><label for="stName" class="sr">ชื่อสถานีใหม่</label><input id="stName" maxlength="30" placeholder="เพิ่มสถานี เช่น ครัวร้อน" style="flex:1"><button class="btn" type="submit">เพิ่มสถานี</button></form>
@@ -1409,7 +1411,7 @@ function settingsView(){
     <label for="d_pin">ขาสัญญาณ<select id="d_pin"><option value="2"${dr.pin==='2'?' selected':''}>ขา 2</option><option value="5"${dr.pin==='5'?' selected':''}>ขา 5</option></select></label>
     <label for="d_when">เปิดอัตโนมัติ<select id="d_when">${Object.entries(DWHEN).map(([k,l])=>`<option value="${k}"${dr.when===k?' selected':''}>${l}</option>`).join('')}</select></label></div>
     <button class="btn primary" data-act="opendrawer" type="button" style="align-self:flex-start">ทดสอบเปิดลิ้นชัก</button>
-    <div class="note">ลิ้นชักเปิดผ่านเครื่องพิมพ์: ในไดรเวอร์เครื่องพิมพ์ ตั้ง Cash Drawer เป็น “เปิดก่อนพิมพ์” (Open before printing) และเลือก Drawer ${dr.pin==='5'?'2 (ขา 5)':'1 (ขา 2)'} เมื่อพิมพ์ใบเสร็จ ลิ้นชักจะเปิดเอง ถ้าไม่ได้เปิดพิมพ์ใบเสร็จอัตโนมัติ ระบบจะบันทึกไฟล์เปิดลิ้นชักให้หลังรับเงินตามเงื่อนไขที่เลือก</div></div>`}
+    <div class="note">ลิ้นชักเปิดผ่านเครื่องพิมพ์: ในไดรเวอร์เครื่องพิมพ์ ตั้ง Cash Drawer เป็น “เปิดก่อนพิมพ์” (Open before printing) และเลือก Drawer ${dr.pin==='5'?'2 (ขา 5)':'1 (ขา 2)'} เมื่อพิมพ์ใบเสร็จ ลิ้นชักจะเปิดเอง ถ้าไม่ได้เปิดพิมพ์ใบเสร็จอัตโนมัติ ระบบจะสั่งเปิดลิ้นชักผ่านเครื่องพิมพ์หลังรับเงินตามเงื่อนไขที่เลือก</div></div>`}
   else if(tab==='banks'){const bl=bankList();body=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>บัญชีรับโอนเงิน</h2>${ro?'':'<button class="btn primary" data-act="editbank" data-id="">'+ic('plus',18)+'เพิ่มบัญชี</button>'}</div><span class="hint">แสดงในหน้าชำระเงินเมื่อเลือก “โอนเงิน” และบนจอลูกค้าถ้าเปิดไว้</span>`+
     (bl.length?bl.map(b=>`<div class="mrow"><div class="info"><b>${esc(bankShort(b.bank))} ${esc(b.no)}</b> ${b.def?'<span class="pill ok">ค่าเริ่มต้น</span>':''}<small>${esc(bankName(b.bank))}${b.name?' · '+esc(b.name):''} · ${b.display?'แสดงบนจอลูกค้า':'ไม่แสดงบนจอลูกค้า'}</small></div>${ro?'':`${b.def?'':`<button class="btn sm" data-act="bankdef" data-id="${esc(b.id)}">ตั้งเป็นค่าเริ่มต้น</button>`}<button class="btn sm" data-act="editbank" data-id="${esc(b.id)}">แก้ไข</button>`}</div>`).join(''):'<div class="empty"><b>ยังไม่มีบัญชี</b>เพิ่มบัญชีธนาคารของร้านเพื่อรับโอนเงิน</div>');}
   else if(tab==='qrs'){const ql=qrList();body=`<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><h2>QR รับชำระเงิน</h2>${ro?'':'<button class="btn primary" data-act="editqr" data-id="">'+ic('plus',18)+'เพิ่ม QR</button>'}</div><span class="hint">QR พร้อมเพย์ล็อกยอดตรงบิลอัตโนมัติ ใช้เบอร์มือถือ เลขผู้เสียภาษี 13 หลัก หรือเลข e-Wallet 15 หลัก ตั้ง QR เริ่มต้นได้ และเลือก QR อื่นได้ตอนชำระเงิน</span>`+
@@ -1620,11 +1622,11 @@ function renderOverlay(force){
 
 /* ===== customer app bridge (Supabase) ===== */
 const SB_PROJECT='roggqmvmgfxsxynulpvk';
-const APP_URL_DEFAULT='https://napongbkk.github.io/cafe-order/';
+const APP_URL_DEFAULT=(/^https?:$/.test(location.protocol)&&/(^|\.)vercel\.app$|easypos/i.test(location.hostname)?location.origin:'https://cafe-order-umber.vercel.app')+'/order/';
 const UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const deviceId=(()=>{try{let d=localStorage.getItem('pos.dev');if(!d){d=uid();localStorage.setItem('pos.dev',d)}return d}catch(e){return uid()}})();
 S.app={state:'off',msg:'',last:0,count:0};let bridgeT=null,lastSnap='',pushed={};
-function appBase(){let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
+function appBase(){let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u)||/github\.io/i.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
 function drawQrs(){if(typeof QRCode==='undefined')return;document.querySelectorAll('[data-qr]').forEach(el=>{if(el.childNodes.length)return;try{new QRCode(el,{text:el.dataset.qr,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}})}
 function appStatusHtml(){const a=S.app;
   if(!PR.bridge)return '<div class="appst off">เครื่องนี้ไม่ได้รับออเดอร์จากแอป</div>';
@@ -1722,13 +1724,14 @@ async function bridgeTick(){
   renderAppStatus();renderTop();scheduleBridge(wait);
 }
 function saveQrSheet(){
-  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์ไม่ได้');return}
+  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return}
   const url=appBase(),sh=shop();const cards=[{t:'สแกนเพื่อสั่งอาหาร',l:url}].concat(sh.appTake!==false?[{t:'สั่งกลับบ้าน',l:url+'?type=take'}]:[]).concat(S.tables.filter(isTable).map(t=>({t:'โต๊ะ '+t.name,l:url+'?t='+encodeURIComponent(t.id)})));
   const html='<!doctype html><html lang="th"><head><meta charset="utf-8"><title>QR สั่งอาหาร</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;700&display=swap">'+
     '<style>@page{size:A4;margin:10mm}body{font-family:"IBM Plex Sans Thai",sans-serif;margin:0}.g{display:grid;grid-template-columns:repeat(3,1fr);gap:6mm}.c{border:1px dashed #999;border-radius:4mm;padding:5mm;text-align:center;break-inside:avoid}.c h2{margin:0;font-size:14pt}.c h3{margin:2mm 0;font-size:20pt}.c p{margin:0;font-size:10pt;color:#444}.q{display:flex;justify-content:center;margin:3mm 0}</style>'+
     '<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script></head><body><div class="g">'+
     cards.map((c,i)=>'<div class="c"><h2>'+esc(sh.name)+'</h2><p>สแกนเพื่อสั่งอาหาร</p><div class="q" id="q'+i+'" data-l="'+esc(c.l)+'"></div><h3>'+esc(c.t)+'</h3></div>').join('')+
     '</div><script>document.querySelectorAll("[data-l]").forEach(function(e){new QRCode(e,{text:e.dataset.l,width:180,height:180,correctLevel:QRCode.CorrectLevel.M})});setTimeout(function(){window.print()},800);<\/script></body></html>';
+  if(window.POS_PRINT){window.POS_PRINT(html);return}
   S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html}).then(()=>toast('บันทึกไฟล์แล้ว เปิดไฟล์เพื่อพิมพ์')).catch(e=>{if(!e||e.code!=='declined')toast('บันทึกไฟล์ไม่สำเร็จ')});
 }
 

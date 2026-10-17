@@ -36,16 +36,46 @@ R('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min
 R("function imgUrl(id){return '/_blob/'+encodeURIComponent(id)}",
   "function imgUrl(id){return window.POS_IMG?window.POS_IMG(id):'/_blob/'+encodeURIComponent(id)}")
 
-# Printing: print straight to the printer instead of saving a file.
-R("  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}",
-  "  if(!S.downloads&&!window.POS_STANDALONE){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}")
-R("  try{await S.downloads.save({filename:name+'.html',data:html})",
-  "  if(window.POS_STANDALONE){window.POS_PRINT(html);toast('กำลังพิมพ์ '+name);return true}\n  try{await S.downloads.save({filename:name+'.html',data:html})")
-R("function saveQrSheet(){\n  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์ไม่ได้');return}",
-  "function saveQrSheet(){\n  if(!S.downloads&&!window.POS_STANDALONE){toast('อุปกรณ์นี้บันทึกไฟล์ไม่ได้');return}")
-R("  S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html})",
-  "  if(window.POS_STANDALONE){window.POS_PRINT(html);return}\n  S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html})")
-R("(S.downloads?'':'<div class=\"note\">", "(S.downloads||window.POS_STANDALONE?'':'<div class=\"note\">")
+# Printing: on the web the page prints straight to the printer (hidden frame + print), no file to open.
+# With Chrome/Edge started with --kiosk-printing the print dialog is skipped, so receipts come out by themselves.
+PRINT_JS = ("<script>window.POS_PRINT=window.POS_PRINT||function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');"
+            "f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;"
+            "setTimeout(function(){f.remove()},120000);return true};</script>")
+KIOSK = ("(()=>{const u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');"
+         "const bat='@echo off\\r\\nstart \\\"\\\" chrome --kiosk-printing --app='+u+'\\r\\n';"
+         "return `<a class=\\\"btn\\\" style=\\\"align-self:flex-start;text-decoration:none\\\" download=\\\"EasyPOS-AutoPrint.bat\\\" href=\\\"data:application/octet-stream;charset=utf-8,${encodeURIComponent(bat)}\\\">${ic('print',18)}ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)</a>`})()")
+WEB_PRINT = [
+  ("  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์สำหรับพิมพ์ไม่ได้');return false}",
+   "  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return false}"),
+  ("  try{await S.downloads.save({filename:name+'.html',data:html})",
+   "  if(window.POS_PRINT){window.POS_PRINT(html);toast('กำลังพิมพ์ '+name);return true}\n  try{await S.downloads.save({filename:name+'.html',data:html})"),
+  ("function saveQrSheet(){\n  if(!S.downloads){toast('อุปกรณ์นี้บันทึกไฟล์ไม่ได้');return}",
+   "function saveQrSheet(){\n  if(!S.downloads&&!window.POS_PRINT){toast('อุปกรณ์นี้พิมพ์ไม่ได้');return}"),
+  ("  S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html})",
+   "  if(window.POS_PRINT){window.POS_PRINT(html);return}\n  S.downloads.save({filename:'QR-สั่งอาหาร.html',data:html})"),
+  ("(S.downloads?'':'<div class=\"note\">", "(S.downloads||window.POS_PRINT?'':'<div class=\"note\">"),
+  ("ระบบจะบันทึกไฟล์ เปิดไฟล์แล้วหน้าต่างพิมพ์จะขึ้นเอง เลือกเครื่องพิมพ์ใบเสร็จของร้าน",
+   "กดพิมพ์แล้วส่งเข้าเครื่องพิมพ์ค่าเริ่มต้นทันที ถ้าเปิดผ่านทางลัดพิมพ์อัตโนมัติ จะไม่มีหน้าต่างให้กดยืนยัน"),
+  ("ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์) · ${PR.auto", "พิมพ์ตรงจากหน้าเว็บ · ${PR.auto"),
+  ("<option>ผ่านไดรเวอร์ (บันทึกไฟล์แล้วสั่งพิมพ์)</option>", "<option>พิมพ์ตรงจากหน้าเว็บ (เครื่องพิมพ์ค่าเริ่มต้น)</option>"),
+  ("ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” หน้าเว็บส่งคำสั่งตรงถึงเครื่องพิมพ์ไม่ได้ จึงต้องเปิดไฟล์ที่บันทึกเพื่อพิมพ์</div>",
+   "ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ต้องกดยืนยัน: ดาวน์โหลดทางลัดด้านล่าง ปิด Chrome ทุกหน้าต่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที</div>${" + KIOSK + "}"),
+  ("ระบบจะบันทึกไฟล์แล้วเปิดเพื่อพิมพ์ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์",
+   "ระบบส่งพิมพ์ตรงจากหน้าเว็บ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์ และเปิด POS จากทางลัดพิมพ์อัตโนมัติเพื่อไม่ต้องกดยืนยัน"),
+  ("ระบบจะบันทึกไฟล์เปิดลิ้นชักให้หลังรับเงินตามเงื่อนไขที่เลือก", "ระบบจะสั่งเปิดลิ้นชักผ่านเครื่องพิมพ์หลังรับเงินตามเงื่อนไขที่เลือก"),
+  ("บันทึกไฟล์ QR ทุกโต๊ะสำหรับพิมพ์", "พิมพ์ QR ทุกโต๊ะ"),
+  # Receipts print by themselves after payment unless the device turned it off after this change.
+  ("try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p){",
+   "try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p&&!p.webPrint){p.auto=true;p.webPrint=1}if(p){"),
+  ("let PR={paper:'80',auto:false,", "let PR={paper:'80',auto:true,webPrint:1,"),
+]
+def web_print(t, label):
+    for a, b in WEB_PRINT:
+        if a not in t:
+            sys.exit('build_pos: print patch point not found (' + label + '): ' + a[:80])
+        t = t.replace(a, b, 1)
+    return t
+src = web_print(src, 'pos')
 
 # Customer-app bridge talks to Supabase through RPCs (no connector needed).
 R("async function bridgeTick(){",
@@ -156,6 +186,9 @@ print('built pos/index.html', len(src), 'bytes')
 
 # Public demo: the same app in its built-in demo mode (no login, nothing is saved).
 demo = orig.replace('<title>POS คาเฟ่</title>', '<title>เดโม Easy POS Cafe · ทดลองใช้ได้ทันที</title>', 1)
+demo = web_print(demo, 'demo')
+demo = demo.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>',
+  PRINT_JS + '\n<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', 1)
 demo = demo.replace('<span id="appPill"></span>',
   '<span data-eplang></span><a class="btn sm" href="/signup" style="text-decoration:none">สมัครทดลองใช้ฟรี</a><span id="appPill"></span>', 1)
 demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'

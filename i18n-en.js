@@ -1,5 +1,16 @@
 /* Easy POS English dictionary: Thai text -> English. Generated; edit freely. */
 window.EP_DICT={
+"เปิดลิงก์": "Open link",
+"มม. ระยะขอบ “ไม่มี” และปิด “หัวกระดาษและท้ายกระดาษ” (เบราว์เซอร์จำไว้ให้) 4) ให้พิมพ์ออกเองโดยไม่ต้องกดยืนยัน: ดาวน์โหลดทางลัดด้านล่าง ปิด Chrome ทุกหน้าต่าง แล้วเปิด POS จากทางลัดนี้ทุกครั้ง ใบเสร็จและใบสั่งครัวจะออกเครื่องพิมพ์ทันที": "mm, margins “None” and turn off “Headers and footers” (the browser remembers) 4) To print without confirming: download the shortcut below, close every Chrome window, then always open the POS from this shortcut. Receipts and kitchen tickets will print right away",
+"ดาวน์โหลดทางลัดพิมพ์อัตโนมัติ (Windows)": "Download auto-print shortcut (Windows)",
+"กดพิมพ์แล้วส่งเข้าเครื่องพิมพ์ค่าเริ่มต้นทันที ถ้าเปิดผ่านทางลัดพิมพ์อัตโนมัติ จะไม่มีหน้าต่างให้กดยืนยัน": "Prints to the default printer right away. When opened from the auto-print shortcut, no confirmation dialog appears",
+"พิมพ์ตรงจากหน้าเว็บ (เครื่องพิมพ์ค่าเริ่มต้น)": "Print directly from the web page (default printer)",
+"พิมพ์ตรงจากหน้าเว็บ": "Print directly from the web page",
+"ใบสั่งแยกตามสถานีอัตโนมัติ เช่น เครื่องดื่มไปบาร์ ขนมไปครัว ตามที่ผูกหมวดหมู่ไว้ใน “สถานีครัว/บาร์” เหมือนใบเสร็จ ระบบส่งพิมพ์ตรงจากหน้าเว็บ ตั้งเครื่องพิมพ์ครัวเป็นค่าเริ่มต้นของเครื่องที่ใช้พิมพ์ และเปิด POS จากทางลัดพิมพ์อัตโนมัติเพื่อไม่ต้องกดยืนยัน": "Tickets are split by station automatically, e.g. drinks to the bar and desserts to the kitchen, based on the categories linked in “Kitchen/bar stations”. Like receipts, they print directly from the web page. Set the kitchen printer as the default printer on the printing device and open the POS from the auto-print shortcut to skip confirmation",
+"เมื่อพิมพ์ใบเสร็จ ลิ้นชักจะเปิดเอง ถ้าไม่ได้เปิดพิมพ์ใบเสร็จอัตโนมัติ ระบบจะสั่งเปิดลิ้นชักผ่านเครื่องพิมพ์หลังรับเงินตามเงื่อนไขที่เลือก": "When a receipt prints, the drawer opens automatically. If auto-print receipts is off, the system opens the drawer through the printer after payment based on the selected condition",
+"พิมพ์ QR ทุกโต๊ะ": "Print QR for all tables",
+"อุปกรณ์นี้พิมพ์ไม่ได้": "This device can't print",
+"กำลังพิมพ์": "Printing",
 "คู่มือ": "Guide",
 "ลองเดโม": "Try the demo",
 "คู่มือการใช้งาน": "User guide",

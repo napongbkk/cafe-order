@@ -657,7 +657,7 @@ const KRANK={waiting:0,making:1,ready:2,done:3};const KNEXT={waiting:'making',ma
 function stStatus(o,st){return (o.kst&&o.kst[st])||o.kitchen||'done'}
 function overallK(o){const ss=stationsOf(o);if(!ss.length)return 'done';return ss.map(st=>stStatus(o,st)).sort((a,b)=>KRANK[a]-KRANK[b])[0]}
 function kprintOn(st){return !!(PR.kprint&&(PR.kprint[st]||PR.kprint['*']))}
-function shop(){const s=Object.assign({},DEF_SHOP,S.shop);if(!S.shop.vatMode&&S.shop.vatReg)s.vatMode='included';return s}
+function shop(){const s=Object.assign({},DEF_SHOP,S.shop);if(!S.shop.vatMode&&S.shop.vatReg)s.vatMode='included';if(/แก้ได้ใน/.test(s.branch||''))s.branch='';return s}
 let lineSeq=1;
 function newBill(){return {id:null,no:null,type:'dine',table:null,guests:0,items:[],promo:null,member:'',batch:0}}
 S.bill=newBill();
@@ -1376,7 +1376,7 @@ function settingsView(){
     body=`<h2>แอปลูกค้า (สแกน QR สั่งอาหาร)</h2><div id="appStatus">${appStatusHtml()}</div>
     <form class="form" data-stab="app"><label class="check" for="s_appOpen"><input id="s_appOpen" type="checkbox"${sh.appOpen?' checked':''}${dis}> เปิดรับออเดอร์จากแอป</label>
       <label class="check" for="s_appTake"><input id="s_appTake" type="checkbox"${sh.appTake!==false?' checked':''}${dis}> รับสั่งกลับบ้านผ่านแอป</label>
-      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร</label><div class="linkrow"><input id="s_appUrl" type="url" value="${esc(url)}"${dis}${window.POS_STANDALONE?' readonly':''}><button class="btn" type="button" data-act="copylink">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">เปิด</a></div>${window.POS_STANDALONE?'<span class="hint">ลิงก์นี้เป็นของร้านคุณโดยเฉพาะ ส่งให้ลูกค้าหรือพิมพ์เป็น QR ได้เลย</span>':''}${save}</form>
+      <label for="s_appUrl">ลิงก์หน้าเว็บสั่งอาหาร</label><div class="linkrow"><input id="s_appUrl" type="url" value="${esc(url)}"${dis}${window.POS_STANDALONE?' readonly':''}><button class="btn" type="button" data-act="copylink">${ic('copy',18)}คัดลอก</button><a class="btn" href="${esc(url)}" target="_blank" rel="noopener">เปิดลิงก์</a></div>${window.POS_STANDALONE?'<span class="hint">ลิงก์นี้เป็นของร้านคุณโดยเฉพาะ ส่งให้ลูกค้าหรือพิมพ์เป็น QR ได้เลย</span>':''}${save}</form>
     <div class="form"><label class="check" for="pr_bridge"><input id="pr_bridge" type="checkbox"${PR.bridge?' checked':''}> เครื่องนี้เป็นตัวรับออเดอร์จากแอปเข้าระบบ</label>
       <span class="hint">เปิดบนเครื่องแคชเชียร์ 1 เครื่องที่เปิดหน้า POS ค้างไว้ บัญชีบนเครื่องนั้นต้องเชื่อม Supabase ไว้ ระบบจะส่งเมนูขึ้นแอป ดึงออเดอร์ใหม่ทุก 10 วินาที และส่งสถานะกลับให้ลูกค้าเห็น</span>
       ${PR.bridge?'<button class="btn" type="button" data-act="appsync" style="align-self:flex-start">ซิงก์ตอนนี้</button>':''}</div>
@@ -1609,11 +1609,11 @@ function renderOverlay(force){
 
 /* ===== customer app bridge (Supabase) ===== */
 const SB_PROJECT='roggqmvmgfxsxynulpvk';
-const APP_URL_DEFAULT='https://napongbkk.github.io/cafe-order/';
+const APP_URL_DEFAULT=(/^https?:$/.test(location.protocol)&&/(^|\.)vercel\.app$|easypos/i.test(location.hostname)?location.origin:'https://cafe-order-umber.vercel.app')+'/order/';
 const UUIDRE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const deviceId=(()=>{try{let d=localStorage.getItem('pos.dev');if(!d){d=uid();localStorage.setItem('pos.dev',d)}return d}catch(e){return uid()}})();
 S.app={state:'off',msg:'',last:0,count:0};let bridgeT=null,lastSnap='',pushed={};
-function appBase(){let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
+function appBase(){let u=(shop().appUrl||APP_URL_DEFAULT).trim();if(!/^https?:\/\//.test(u)||/github\.io/i.test(u))u=APP_URL_DEFAULT;return u.replace(/\?.*$/,'').replace(/\/?$/,'/')}
 function drawQrs(){if(typeof QRCode==='undefined')return;document.querySelectorAll('[data-qr]').forEach(el=>{if(el.childNodes.length)return;try{new QRCode(el,{text:el.dataset.qr,width:120,height:120,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M})}catch(e){}})}
 function appStatusHtml(){const a=S.app;
   if(!PR.bridge)return '<div class="appst off">เครื่องนี้ไม่ได้รับออเดอร์จากแอป</div>';
