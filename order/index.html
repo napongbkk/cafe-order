@@ -254,7 +254,7 @@ function renderHeader(){applyLook();var L=look();
   var nt=$('#notice');nt.hidden=!L.notice||S.view==='status';nt.textContent=L.notice||'';
   $('#shopName').textContent=S.shop.name||'ร้านกาแฟ';
   $('#shopSub').textContent=S.shop.open?(L.tagline||S.shop.branch||'สั่งอาหารออนไลน์'):'ปิดรับออเดอร์ออนไลน์';
-  var lu=safeUrl(L.logo),lg=$('#logo');if(lu){if(lg.dataset.u!==lu){lg.dataset.u=lu;lg.innerHTML='<img src="'+esc(lu)+'" alt="">'}}else{lg.dataset.u='';lg.textContent=(S.shop.name||'C').trim().charAt(0).toUpperCase()}
+  var lu=safeUrl(L.logo),lg=$('#logo');if(lu){if(lg.dataset.u!==lu){lg.dataset.u=lu;lg.innerHTML='<img src="'+esc(lu)+'" alt="">'}}else if(lg.dataset.u!=='def'){lg.dataset.u='def';lg.innerHTML='<img src="/easypos.svg?v=2" alt="">'}
   document.title='สั่งอาหาร · '+(S.shop.name||'');
   var w=$('#where');
   if(S.type==='dine'&&tableName()){w.hidden=false;w.textContent='โต๊ะ '+tableName()+' · เปลี่ยน';w.setAttribute('aria-label','โต๊ะ '+tableName()+' แตะเพื่อเปลี่ยน')}
