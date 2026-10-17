@@ -336,6 +336,71 @@ async function staffDel(req: Request, b: Record<string, string>) {
   return json({ ok: true });
 }
 
+// Admin deletes a shop and everything in it: login accounts, files, menu/products, bills, payments, applications.
+async function rmFolder(bucket: string, prefix: string): Promise<number> {
+  let n = 0;
+  for (let round = 0; round < 50; round++) {
+    const { data, error } = await db.storage.from(bucket).list(prefix, { limit: 1000 });
+    if (error || !data || !data.length) break;
+    const files = data.filter((f: { id: string | null }) => f.id).map((f: { name: string }) => `${prefix}/${f.name}`);
+    const dirs = data.filter((f: { id: string | null }) => !f.id).map((f: { name: string }) => `${prefix}/${f.name}`);
+    for (const d of dirs) n += await rmFolder(bucket, d);
+    if (!files.length) break;
+    const r = await db.storage.from(bucket).remove(files);
+    if (r.error) { console.log("rm", bucket, r.error.message); break; }
+    n += files.length;
+    if (data.length < 1000) break;
+  }
+  return n;
+}
+async function shopDelete(req: Request, b: Record<string, string>) {
+  if (!(await isAdmin(req))) return fail("forbidden", 403);
+  const { data: shop } = await db.from("pos_shops").select("id,slug,name").eq("id", String(b.sid || "")).maybeSingle();
+  if (!shop) return fail("not_found", 404);
+  if (String(b.confirm || "").trim().toLowerCase() !== String(shop.slug).toLowerCase()) return fail("confirm_mismatch");
+  const sid = shop.id as string;
+  const { data: mem } = await db.from("pos_members").select("email").eq("shop_id", sid);
+  const { data: adm } = await db.from("pos_admins").select("email");
+  const admins = new Set((adm || []).map((x: { email: string }) => x.email.toLowerCase()));
+  const { data: apps } = await db.from("pos_applications").select("id").eq("shop_id", sid);
+  // All rows first, in one transaction; files and logins only after that succeeded.
+  const DB_URL = Deno.env.get("SUPABASE_DB_URL");
+  if (!DB_URL) return fail("no_db_url", 500);
+  const postgres = (await import("npm:postgres@3.4.4")).default;
+  const sql = postgres(DB_URL, { max: 1, prepare: false });
+  let counts: Record<string, number> = {};
+  try {
+    counts = await sql.begin(async (t: any) => {
+      const c: Record<string, number> = {};
+      c.data = (await t`delete from public.pos_data where shop_id = ${sid}`).count;
+      c.members = (await t`delete from public.pos_members where shop_id = ${sid}`).count;
+      c.payments = (await t`delete from public.pos_payments where shop_id = ${sid}`).count;
+      c.applications = (await t`delete from public.pos_applications where shop_id = ${sid}`).count;
+      c.onlineOrders = (await t`delete from cafe.orders where shop_id = ${sid}`).count;
+      await t`delete from cafe.shop_state where shop_id = ${sid}`;
+      await t`delete from public.pos_shops where id = ${sid}`;
+      return c;
+    });
+  } catch (e) { console.log("shop delete", String(e)); await sql.end(); return fail("delete_failed", 500); }
+  await sql.end();
+  // Uploaded files (menu/product pictures, payment and sign-up slips).
+  let files = await rmFolder("pos-menu", sid) + await rmFolder("pos-slips", sid);
+  for (const a of apps || []) files += await rmFolder("pos-slips", `apply/${a.id}`);
+  // Login accounts of the shop's people (never a platform admin's).
+  let accounts = 0;
+  for (const m of mem || []) {
+    const em = String(m.email).toLowerCase();
+    if (admins.has(em)) continue;
+    const { data: other } = await db.from("pos_members").select("email").eq("email", em).limit(1);
+    if (other && other.length) continue;
+    const id = await authId(em);
+    if (id) { const r = await db.auth.admin.deleteUser(id); if (!r.error) accounts++; }
+    await db.from("pos_creds").delete().eq("email", em);
+  }
+  console.log("shop deleted", shop.slug, JSON.stringify(counts), "files", files, "accounts", accounts);
+  return json({ ok: true, name: shop.name, ...counts, files, accounts });
+}
+
 // A shop has sent a renewal slip: tell the platform admins.
 async function payNotify(req: Request, b: Record<string, string>) {
   const me = await caller(req);
@@ -371,6 +436,7 @@ Deno.serve(async (req) => {
     if (b.action === "remember") return await rememberLogin(req, b);
     if (b.action === "my_pw") return await myPw(req, b);
     if (b.action === "pay_notify") return await payNotify(req, b);
+    if (b.action === "shop_delete") return await shopDelete(req, b);
     if (b.action === "test_mail") {
       const tok = await secret("TEST_TOKEN");
       if (!tok || b.token !== tok) return fail("forbidden", 403);
