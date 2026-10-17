@@ -1,5 +1,17 @@
 /* Easy POS English dictionary: Thai text -> English. Generated; edit freely. */
 window.EP_DICT={
+"คู่มือ Easy POS Cafe": "Easy POS Cafe guide",
+"คู่มือ Easy POS Retail": "Easy POS Retail guide",
+"คาเฟ่ ร้านอาหาร ร้านเครื่องดื่ม · มีวิดีโอสอน": "Cafés, restaurants, drink shops · with videos",
+"มีคู่มือละเอียดแยกตามระบบ:": "Yes, a detailed guide for each system:",
+"(มีวิดีโอสอนทีละขั้น) และ": "(with step-by-step videos) and",
+"· ลองใช้ระบบจริงได้ที่": "· Try the real system in the",
+"เดโม Cafe": "Cafe demo",
+"เดโม Retail": "Retail demo",
+"โดยไม่ต้องสมัคร": "without signing up",
+"คู่มือการใช้งาน": "User guide",
+"คู่มือ": "Guide",
+
 "ทดลองใช้ฟรี {n} วัน · จากนั้น {n} บาท/เดือน ·": "Free for {n} days · then ฿{n}/month ·",
 "ทดลองใช้ฟรี {n} วัน ·": "Free for {n} days ·",
 "เลือกระบบ": "Choose a system",
