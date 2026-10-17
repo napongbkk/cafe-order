@@ -77,10 +77,10 @@ a{color:var(--accent)}
     <h2 style="margin-top:6px">บัญชีเข้าใช้งาน</h2>
     <label for="f_email">อีเมล (ใช้เป็นชื่อผู้ใช้)<input id="f_email" type="email" autocomplete="email" required></label>
     <div class="two"><label for="f_pass">รหัสผ่าน (อย่างน้อย 8 ตัว)<input id="f_pass" type="password" autocomplete="new-password" required minlength="8"></label><label for="f_pass2">ยืนยันรหัสผ่าน<input id="f_pass2" type="password" autocomplete="new-password" required minlength="8"></label></div>
-    <h2 style="margin-top:6px">เลือกแพ็กเกจ</h2>
+    <h2 style="margin-top:6px" id="pkHead">เลือกแพ็กเกจ</h2>
     <div class="pk" id="pkList" role="radiogroup" aria-label="แพ็กเกจ"><div class="hint">กำลังโหลดแพ็กเกจ…</div></div>
     <button class="btn primary" type="submit" id="goBtn">ถัดไป · ชำระเงิน</button>
-    <div class="links"><span class="hint">ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบตรวจสอบการชำระเงินและอนุมัติ</span><a href="/pos">มีบัญชีแล้ว? เข้าสู่ระบบ</a></div>
+    <div class="links"><span class="hint" id="goHint">ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบตรวจสอบการชำระเงินและอนุมัติ</span><a href="/pos">มีบัญชีแล้ว? เข้าสู่ระบบ</a></div>
   </form>
 
   <section class="card" id="payView" hidden>
@@ -130,10 +130,11 @@ function remember(a){try{localStorage.setItem('posApply',JSON.stringify({id:a.id
 
 /* packages */
 function isFree(p){return p&&Number(p.price)===0}
+function goText(){return S.bill.freeMode?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':goText()}
 function curPk(){return (S.bill.packages||[]).find(function(p){return p.id===S.pkg})}
 function renderPk(){var l=S.bill.packages||[];$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';var free=isFree(p);
   return '<button type="button" class="pkc'+(free?' free':'')+'" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+(free?'ฟรี':baht(p.price))+'</span><small>'+(p.days?p.days+' วัน · ไม่ต้องชำระเงิน':p.months+' เดือน'+per)+'</small><small>'+(p.staff>0?'พนักงานได้ '+p.staff+' บัญชี':'ไม่รวมบัญชีพนักงาน')+'</small></button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>';
-  var b=$('#goBtn');if(b&&!b.disabled)b.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน'}
+  var b=$('#goBtn');if(b&&!b.disabled)b.textContent=goText()}
 $('#pkList').addEventListener('click',function(e){var b=e.target.closest('[data-pk]');if(!b)return;S.pkg=b.dataset.pk;renderPk()});
 
 /* step 1 */
@@ -148,7 +149,7 @@ $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
   if(v.password!==$('#f_pass2').value){msg('ยืนยันรหัสผ่านไม่ตรงกัน');$('#f_pass2').focus();return}
   if(!v.package){msg('เลือกแพ็กเกจ');return}
   var btn=$('#goBtn');btn.disabled=true;btn.textContent='กำลังส่ง…';
-  function done(r){btn.disabled=false;btn.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน';
+  function done(r){btn.disabled=false;btn.textContent=goText();
     if(r.error==='missing_fields'&&r.field){var F={first_name:['f_first','ใส่ชื่อ'],last_name:['f_last','ใส่นามสกุล'],phone:['f_phone','เบอร์โทรต้องมีอย่างน้อย 9 หลัก'],shop_name:['f_shop','ใส่ชื่อร้าน'],address:['f_addr','ที่อยู่ร้านสั้นเกินไป ใส่อย่างน้อย 5 ตัวอักษร']}[r.field];if(F){msg(F[1]);$('#'+F[0]).focus();return}}
     if(r.error){msg(ERR[r.error]||'ส่งไม่สำเร็จ ลองใหม่อีกครั้ง ('+r.error+')');return}
     S.app={id:r.id,token:r.token,amount:r.amount,package:r.package};
@@ -160,8 +161,8 @@ $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
     sb.auth.signInWithPassword({email:v.email,password:v.password}).then(function(s){
       if(s.error||!s.data.session){done({error:'x'});msg('อีเมลนี้มีบัญชีอยู่แล้ว ใส่รหัสผ่านเดิมของบัญชีนี้ หรือใช้อีเมลอื่น');return}
       fn(Object.assign({action:'apply'},v),s.data.session.access_token).then(function(r2){sb.auth.signOut();done(r2)})})
-  }).catch(function(){btn.disabled=false;btn.textContent=isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน';msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
-function showTrialDone(name){step(3);$('#doneTitle').textContent='ส่งคำขอทดลองใช้ฟรีแล้ว';$('#doneText').textContent='ได้รับคำขอทดลองใช้ฟรี 30 วันของร้าน '+(name||'')+' แล้ว ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ Easy POS Cafe ด้วยอีเมลและรหัสผ่านที่ตั้งไว้'}
+  }).catch(function(){btn.disabled=false;btn.textContent=goText();msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
+function showTrialDone(name){step(3);if(S.bill.freeMode){$('#doneTitle').textContent='ส่งคำขอเปิดร้านแล้ว';$('#doneText').textContent='ได้รับคำขอเปิดร้าน '+(name||'')+' แล้ว ใช้งานฟรี ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ Easy POS Cafe ด้วยอีเมลและรหัสผ่านที่ตั้งไว้';return}$('#doneTitle').textContent='ส่งคำขอทดลองใช้ฟรีแล้ว';$('#doneText').textContent='ได้รับคำขอทดลองใช้ฟรี 30 วันของร้าน '+(name||'')+' แล้ว ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ Easy POS Cafe ด้วยอีเมลและรหัสผ่านที่ตั้งไว้'}
 
 /* step 2 */
 function showPay(){var a=S.app,b=S.bill;step(2);msg('');
@@ -177,7 +178,8 @@ $('#slipBtn').addEventListener('click',function(){var f=$('#f_slip').files[0];if
 $('#laterBtn').addEventListener('click',function(){step(3);$('#doneTitle').textContent='บันทึกคำขอแล้ว';$('#doneText').textContent='ยังไม่ได้แนบสลิป กลับมาที่หน้านี้ (หรือใช้ลิงก์ในอีเมล) เพื่อแนบสลิป ผู้ดูแลระบบจะอนุมัติเมื่อตรวจสอบการชำระเงินแล้ว';});
 
 /* start: resume an application from a link or this browser */
-rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];var want=new URLSearchParams(location.search).get('plan');
+rpc('pos_public_billing').then(function(b){S.bill=b||{};var l=S.bill.packages||[];
+  if(S.bill.freeMode){$('#pkHead').hidden=true;$('#pkList').hidden=true;$('#st2').hidden=true;$('#st3').textContent='2 รออนุมัติ';$('#goHint').textContent='ใช้งานฟรี ไม่มีค่าใช้จ่าย ร้านจะเปิดใช้งานได้หลังผู้ดูแลระบบอนุมัติ'}var want=new URLSearchParams(location.search).get('plan');
   if(l.length&&!S.pkg)S.pkg=(l.find(function(p){return p.id===want})||l.find(isFree)||l[0]).id;renderPk();
   var q=new URLSearchParams(location.search),id=q.get('id'),t=q.get('t');
   var fromLink=!!id;

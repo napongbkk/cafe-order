@@ -142,8 +142,9 @@ async function apply(req: Request, b: Record<string, string>) {
   if (miss) { console.log("apply missing field", miss); return json({ error: "missing_fields", field: miss }, 400); }
   if (!EMAIL.test(f.email)) return fail("bad_email");
   if (f.password.length < 8) return fail("weak_password");
-  const { data: plat } = await db.from("pos_platform").select("data").eq("key", "billing").maybeSingle();
-  const pk = ((plat?.data?.packages || []) as Record<string, unknown>[]).find((p) => p.id === f.pkg);
+  // Same packages the sign-up page shows (only the free package while the admin has payments switched off).
+  const { data: pub } = await db.rpc("pos_public_billing");
+  const pk = ((pub?.packages || []) as Record<string, unknown>[]).find((p) => p.id === f.pkg);
   if (!pk) return fail("bad_package");
   const { data: mem } = await db.from("pos_members").select("email").eq("email", f.email).maybeSingle();
   if (mem) return fail("already_member");
@@ -171,13 +172,14 @@ async function apply(req: Request, b: Record<string, string>) {
   if (error) { console.log("insert", error.message); return fail("save_failed", 500); }
 
   const free = !Number(pk.price);
+  const freeUse = pk.id === "free";
   await mail(f.email, `Easy POS - ได้รับคำขอเปิดร้าน ${f.shop}`,
     `<p>สวัสดีคุณ ${esc(f.first)}</p><p>เราได้รับคำขอเปิดร้าน <b>${esc(f.shop)}</b> แล้ว</p>
      <p>แพ็กเกจ: <b>${esc(pk.name)}</b>${free ? "" : ` · ยอดชำระ <b>${baht(Number(pk.price))}</b>`}</p>
      ${free ? "" : `<p>หากยังไม่ได้แนบสลิป เข้าไปแนบได้ที่ <a href="${APP}/signup?id=${app.id}&t=${app.token}">${APP}/signup</a></p>`}
      <p>เมื่อผู้ดูแลระบบอนุมัติ เราจะส่งอีเมลยืนยันอีกครั้ง จากนั้นเข้าใช้งานที่ <a href="${APP}/pos">${APP}/pos</a> ด้วยอีเมลและรหัสผ่านที่ตั้งไว้</p>`);
   const ad = await admins();
-  if (ad.length) await mail(ad, `Easy POS - ร้านสมัครใหม่${free ? " (ทดลองฟรี)" : ""}: ${f.shop}`,
+  if (ad.length) await mail(ad, `Easy POS - ร้านสมัครใหม่${freeUse ? " (ใช้ฟรี)" : free ? " (ทดลองฟรี)" : ""}: ${f.shop}`,
     `<p><b>${esc(f.shop)}</b> · ${esc(f.first)} ${esc(f.last)} · ${esc(f.phone)} · ${esc(f.email)}</p><p>${esc(f.address)}</p>
      <p>แพ็กเกจ ${esc(pk.name)} · ${free ? "ฟรี" : baht(Number(pk.price))}</p><p><a href="${APP}/admin#apps">เปิดแดชบอร์ดผู้ดูแลระบบ</a></p>`);
   return json({ id: app.id, token: app.token, amount: app.amount, package: app.package, mail: await mailOn() });

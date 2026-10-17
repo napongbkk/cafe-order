@@ -196,6 +196,7 @@ section{padding:96px 0}
 .step h3{font-size:19px;margin-bottom:6px}
 .step p{margin:0;color:var(--muted);font-size:15px}
 
+.freeonly{display:none!important}html.freemode .freeonly{display:revert!important}html.freemode .paidonly{display:none!important}
 /* pricing */
 .pricing{background:var(--night);color:#fff;position:relative;overflow:hidden;isolation:isolate}
 .pricing .blob.a{top:auto;bottom:-260px;left:-160px;opacity:.35}
@@ -282,7 +283,7 @@ footer a:hover{color:#fff}
 <header class="nav" id="nav">
   <div class="wrap">
     <a class="logo" href="/indexpos" aria-label="Easy POS หน้าแรก"><img src="/easypos.svg" alt="" width="38" height="38"><b>Easy<span>POS</span></b></a>
-    <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a><a href="/guide">คู่มือ</a></nav>
+    <nav class="links" aria-label="เมนูหลัก"><a href="#products">ผลิตภัณฑ์</a><a href="#features">ฟีเจอร์</a><a class="paidonly" href="#pricing">ราคา</a><a href="#faq">คำถามที่พบบ่อย</a><a href="/guide">คู่มือ</a></nav>
     <span class="sp"></span>
     <div class="langsw" role="group" aria-label="ภาษา"><button type="button" data-lang="th" aria-pressed="true">TH</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div>
     <div class="login" id="login">
@@ -292,7 +293,7 @@ footer a:hover{color:#fff}
         <a href="/retail" role="menuitem"><span class="mk retail"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><span><b>Easy POS Retail</b><small>ร้านค้า ร้านของชำ มินิมาร์ท</small></span><span class="soon">เร็ว ๆ นี้</span></a>
       </div>
     </div>
-    <a class="btn grad sm cta-top" href="/signup">ทดลองฟรี 30 วัน</a>
+    <a class="btn grad sm cta-top" href="/signup" data-free="สมัครใช้ฟรี">ทดลองฟรี 30 วัน</a>
   </div>
 </header>
 
@@ -301,10 +302,10 @@ footer a:hover{color:#fff}
   <div class="blob a"></div><div class="blob b"></div><div class="blob c"></div><div class="grid-bg"></div>
   <div class="wrap">
     <div>
-      <span class="pill badge fx"><i></i>ทดลองใช้ฟรี 30 วัน · ไม่ต้องผูกบัตร</span>
+      <span class="pill badge fx"><i></i><span data-free="ใช้งานฟรี · ไม่มีค่าใช้จ่าย">ทดลองใช้ฟรี 30 วัน · ไม่ต้องผูกบัตร</span></span>
       <h1 id="heroT" class="fx d1"><span class="nw">ขายง่าย</span> <span class="nw">จบในเครื่องเดียว</span><br><span class="gtext"><span class="nw">POS สำหรับ</span><span class="nw">ร้านของคุณ</span></span></h1>
-      <p class="lead fx d2">Easy POS รวมหน้าขาย รับออเดอร์ผ่าน QR บนมือถือลูกค้า จอครัว จอลูกค้า และสมาชิกสะสมแต้มไว้ในที่เดียว ใช้บนแท็บเล็ต คอมพิวเตอร์ หรือมือถือก็ได้ เริ่มต้นเพียง <b style="color:#fff">299 บาท/เดือน</b></p>
-      <div class="ctas fx d3"><a class="btn grad" href="/signup">เริ่มทดลองใช้ฟรี <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn ghost" href="/demo">ลองเดโม</a></div>
+      <p class="lead fx d2">Easy POS รวมหน้าขาย รับออเดอร์ผ่าน QR บนมือถือลูกค้า จอครัว จอลูกค้า และสมาชิกสะสมแต้มไว้ในที่เดียว ใช้บนแท็บเล็ต คอมพิวเตอร์ หรือมือถือก็ได้ <span class="paidonly">เริ่มต้นเพียง <b style="color:#fff">299 บาท/เดือน</b></span><b class="freeonly" style="color:#fff">ใช้งานได้ฟรี</b></p>
+      <div class="ctas fx d3"><a class="btn grad" href="/signup"><span data-free="สมัครใช้งานฟรี">เริ่มทดลองใช้ฟรี</span> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn ghost" href="/demo">ลองเดโม</a></div>
       <div class="trust fx d4">
         <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>ไม่ต้องติดตั้งโปรแกรม</span>
         <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR</span>
@@ -354,9 +355,9 @@ footer a:hover{color:#fff}
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>จอลูกค้าพร้อมโฆษณารูป/วิดีโอ</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>สมาชิกสะสมแต้มด้วยเบอร์โทร</li>
         </ul>
-        <div class="price"><b>฿299</b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div>
+        <div class="price paidonly"><b>฿299</b><span>/ เดือน · ทดลองฟรี 30 วัน</span></div><div class="price freeonly"><b>ฟรี</b><span>ไม่มีค่าใช้จ่าย</span></div>
         <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>เข้าสู่ระบบร้านคาเฟ่ที่ <code>/pos</code></span></div>
-        <div class="acts"><a class="btn main" href="/signup">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/pos">เข้าสู่ระบบ Cafe</a></div>
+        <div class="acts"><a class="btn main" href="/signup" data-free="สมัครใช้งานฟรี">ทดลองใช้ฟรี 30 วัน</a><a class="btn line" href="/pos">เข้าสู่ระบบ Cafe</a></div>
       </article>
       <article class="prod retail fx d2">
         <div class="top"><span class="mk retail"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span>
@@ -369,7 +370,7 @@ footer a:hover{color:#fff}
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รับพร้อมเพย์ QR พิมพ์ใบเสร็จ</li>
           <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>รายงานยอดขายรายวัน/สินค้าขายดี</li>
         </ul>
-        <div class="price"><b>฿299</b><span>/ เดือน · เมื่อเปิดให้บริการ</span></div>
+        <div class="price paidonly"><b>฿299</b><span>/ เดือน · เมื่อเปิดให้บริการ</span></div>
         <div class="loginbox"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><span>ระบบเข้าสู่ระบบแยกที่ <code>/retail</code> · เปิดเร็ว ๆ นี้</span></div>
         <div class="acts"><a class="btn main" href="/retail">ดูรายละเอียด</a><a class="btn line" href="/retail">เข้าสู่ระบบ Retail</a></div>
       </article>
@@ -379,7 +380,7 @@ footer a:hover{color:#fff}
 
 <section id="features" style="padding-top:24px" aria-labelledby="featT">
   <div class="wrap">
-    <div class="shead"><span class="eyebrow fx">ฟีเจอร์ Easy POS Cafe</span><h2 id="featT" class="fx d1">ครบทุกอย่างที่ร้านต้องใช้<br><span class="gtext">ในราคาเดียว</span></h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีค่าโมดูลเพิ่ม ใช้ได้ทุกฟีเจอร์ตั้งแต่วันแรก</p></div>
+    <div class="shead"><span class="eyebrow fx">ฟีเจอร์ Easy POS Cafe</span><h2 id="featT" class="fx d1">ครบทุกอย่างที่ร้านต้องใช้<br><span class="gtext" data-free="ในระบบเดียว">ในราคาเดียว</span></h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีค่าโมดูลเพิ่ม ใช้ได้ทุกฟีเจอร์ตั้งแต่วันแรก</p></div>
     <div class="feats">
       <div class="feat fx"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div><h3>หน้าขายใช้ง่าย</h3><p>แตะเมนู เลือกตัวเลือก รับเงินสด QR บัตร หรือโอน ทอนเงินอัตโนมัติ พิมพ์ใบเสร็จได้ทันที</p></div>
       <div class="feat fx d1"><div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div><h3>Mobile Order ผ่าน QR</h3><p>ลูกค้าสแกนสั่งเองจากโต๊ะหรือสั่งกลับบ้าน ออเดอร์เข้าครัวเมื่อชำระที่เคาน์เตอร์แล้ว</p></div>
@@ -398,14 +399,14 @@ footer a:hover{color:#fff}
   <div class="wrap">
     <div class="shead"><span class="eyebrow fx">เริ่มใช้งาน</span><h2 id="howT" class="fx d1">เปิดร้านได้ใน 3 ขั้นตอน</h2></div>
     <div class="steps">
-      <div class="step fx"><h3>สมัครทดลองใช้</h3><p>กรอกข้อมูลร้าน ชื่อ เบอร์โทร และอีเมลสำหรับเข้าสู่ระบบ เลือกทดลองฟรี 30 วัน</p></div>
+      <div class="step fx"><h3 data-free="สมัครใช้งาน">สมัครทดลองใช้</h3><p data-free="กรอกข้อมูลร้าน ชื่อ เบอร์โทร และอีเมลสำหรับเข้าสู่ระบบ">กรอกข้อมูลร้าน ชื่อ เบอร์โทร และอีเมลสำหรับเข้าสู่ระบบ เลือกทดลองฟรี 30 วัน</p></div>
       <div class="step fx d1"><h3>รอยืนยันเปิดร้าน</h3><p>ทีมงานตรวจสอบและเปิดร้านให้ พร้อมลิงก์หน้าสั่งอาหารเฉพาะร้านของคุณ</p></div>
       <div class="step fx d2"><h3>ใส่เมนูแล้วเริ่มขาย</h3><p>เพิ่มเมนู รูปภาพ ราคา ตั้งค่าพร้อมเพย์ เพิ่มพนักงาน แล้วเริ่มรับออเดอร์ได้เลย</p></div>
     </div>
   </div>
 </section>
 
-<section class="pricing" id="pricing" aria-labelledby="priceT">
+<section class="pricing paidonly" id="pricing" aria-labelledby="priceT">
   <div class="blob a"></div><div class="blob b"></div>
   <div class="wrap">
     <div class="shead"><span class="eyebrow fx">ราคา</span><h2 id="priceT" class="fx d1">ราคาเดียว ใช้ได้ทุกฟีเจอร์</h2><p class="fx d2">ไม่มีค่าติดตั้ง ไม่มีสัญญาผูกมัด ทดลองใช้ฟรีก่อนตัดสินใจ</p></div>
@@ -430,12 +431,13 @@ footer a:hover{color:#fff}
   <div class="wrap">
     <div class="shead"><span class="eyebrow fx">คำถามที่พบบ่อย</span><h2 id="faqT" class="fx d1">มีคำถาม? เรามีคำตอบ</h2></div>
     <div class="faq">
-      <details class="fx"><summary>ทดลองใช้ฟรี 30 วัน ต้องจ่ายเงินก่อนไหม</summary><p>ไม่ต้อง เลือกแพ็กเกจ “ทดลองใช้ฟรี 30 วัน” ตอนสมัคร เมื่อร้านได้รับการยืนยันก็ใช้งานได้ทุกฟีเจอร์ทันที ยกเว้นบัญชีพนักงานซึ่งเพิ่มได้หลังชำระค่าบริการ ใกล้ครบกำหนดค่อยชำระผ่านพร้อมเพย์จากหน้าตั้งค่าของร้าน</p></details>
+      <details class="fx freeonly"><summary>ใช้งานฟรีจริงไหม</summary><p>จริง ตอนนี้เปิดให้ใช้ Easy POS Cafe ฟรีทุกฟีเจอร์ ไม่ต้องชำระเงินและไม่ต้องผูกบัตร สมัครแล้วรอทีมงานยืนยันเปิดร้านก็เริ่มขายได้ทันที</p></details>
+      <details class="fx paidonly"><summary>ทดลองใช้ฟรี 30 วัน ต้องจ่ายเงินก่อนไหม</summary><p>ไม่ต้อง เลือกแพ็กเกจ “ทดลองใช้ฟรี 30 วัน” ตอนสมัคร เมื่อร้านได้รับการยืนยันก็ใช้งานได้ทุกฟีเจอร์ทันที ยกเว้นบัญชีพนักงานซึ่งเพิ่มได้หลังชำระค่าบริการ ใกล้ครบกำหนดค่อยชำระผ่านพร้อมเพย์จากหน้าตั้งค่าของร้าน</p></details>
       <details class="fx d1"><summary>ต้องใช้อุปกรณ์อะไรบ้าง</summary><p>ใช้แท็บเล็ต คอมพิวเตอร์ หรือมือถือที่มีเบราว์เซอร์และอินเทอร์เน็ตก็พอ ต่อเครื่องพิมพ์ใบเสร็จและลิ้นชักเก็บเงินเพิ่มได้ถ้าต้องการ</p></details>
       <details class="fx d2"><summary>Easy POS Cafe กับ Easy POS Retail ต่างกันอย่างไร</summary><p>Cafe ออกแบบสำหรับร้านที่ขายเมนูมีตัวเลือก มีโต๊ะ ครัว และออเดอร์จากมือถือ ส่วน Retail สำหรับร้านค้าที่ขายสินค้าด้วยบาร์โค้ดและต้องคุมสต็อก ทั้งสองระบบมีบัญชีและหน้าเข้าสู่ระบบแยกกัน ตอนนี้ Retail กำลังพัฒนา</p></details>
       <details class="fx d3"><summary>พนักงานเข้าใช้งานอย่างไร</summary><p>ผู้จัดการร้านสร้างบัญชีให้พนักงานในหน้าตั้งค่า ชื่อผู้ใช้ขึ้นต้นด้วยรหัสร้านของคุณ พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล</p></details>
       <details class="fx d4"><summary>มีคู่มือหรือวิดีโอสอนไหม</summary><p>มี <a href="/guide">คู่มือการใช้งานแบบละเอียด</a> พร้อมวิดีโอสอนทีละขั้น และลองใช้ระบบจริงได้ที่ <a href="/demo">เดโม</a> โดยไม่ต้องสมัคร</p></details>
-      <details class="fx d4"><summary>ถ้าไม่ต่ออายุ ข้อมูลจะหายไหม</summary><p>ไม่หาย หลังครบกำหนดมีช่วงผ่อนผัน 7 วัน จากนั้นการขายจะถูกล็อกไว้ชั่วคราว เมื่อชำระและได้รับการยืนยัน ร้านกลับมาใช้งานต่อได้พร้อมข้อมูลเดิม</p></details>
+      <details class="fx d4 paidonly"><summary>ถ้าไม่ต่ออายุ ข้อมูลจะหายไหม</summary><p>ไม่หาย หลังครบกำหนดมีช่วงผ่อนผัน 7 วัน จากนั้นการขายจะถูกล็อกไว้ชั่วคราว เมื่อชำระและได้รับการยืนยัน ร้านกลับมาใช้งานต่อได้พร้อมข้อมูลเดิม</p></details>
     </div>
   </div>
 </section>
@@ -443,8 +445,8 @@ footer a:hover{color:#fff}
 <div class="final">
   <div class="wrap"><div class="finalbox fx">
     <h2>พร้อมให้ร้านของคุณขายง่ายขึ้นหรือยัง</h2>
-    <p>ทดลองใช้ Easy POS Cafe ฟรี 30 วัน จากนั้นเพียง 299 บาทต่อเดือน</p>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn white" href="/signup">เริ่มทดลองใช้ฟรี</a><a class="btn ghost" href="/pos">เข้าสู่ระบบ Cafe</a></div>
+    <p data-free="สมัครแล้วใช้ Easy POS Cafe ได้ฟรี ไม่มีค่าใช้จ่าย">ทดลองใช้ Easy POS Cafe ฟรี 30 วัน จากนั้นเพียง 299 บาทต่อเดือน</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap"><a class="btn white" href="/signup" data-free="สมัครใช้งานฟรี">เริ่มทดลองใช้ฟรี</a><a class="btn ghost" href="/pos">เข้าสู่ระบบ Cafe</a></div>
   </div></div>
 </div>
 </main>
@@ -453,7 +455,7 @@ footer a:hover{color:#fff}
   <div class="wrap">
     <a class="logo" href="/indexpos" aria-label="Easy POS"><img src="/easypos.svg" alt="" width="30" height="30"><b style="font-size:18px">Easy<span>POS</span></b></a>
     <span>© <span id="yr">2026</span> Easy POS</span>
-    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/guide">คู่มือการใช้งาน</a><a href="/demo">ลองเดโม</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a href="#pricing">ราคา</a></nav>
+    <nav aria-label="ลิงก์ท้ายหน้า"><a href="/guide">คู่มือการใช้งาน</a><a href="/demo">ลองเดโม</a><a href="/pos">เข้าสู่ระบบ Cafe</a><a href="/retail">เข้าสู่ระบบ Retail</a><a href="/signup">สมัครทดลองใช้</a><a class="paidonly" href="#pricing">ราคา</a></nav>
   </div>
 </footer>
 
@@ -488,8 +490,10 @@ function drawLongs(){if(!PK)return;var en=window.EP_LANG==='en';
     var name=en?(mo===12?'Yearly':mo+' months'):String(p.name).replace(/[<>&]/g,'');
     return '<span>'+name+' <b>฿'+money(p.price)+'</b> · '+(en?'avg ฿'+money(Math.round(p.price/mo))+'/mo':'เฉลี่ย ฿'+money(Math.round(p.price/mo))+'/เดือน')+'</span>'}).join('')}
 document.addEventListener('ep-lang',drawLongs);
+/* Admin turned payments off: the service is free, so no prices anywhere. */
+function freeMode(){document.documentElement.classList.add('freemode');document.querySelectorAll('[data-free]').forEach(function(e){e.textContent=e.getAttribute('data-free')})}
 fetch(SB+'/rest/v1/rpc/pos_public_billing',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+KEY,'Content-Type':'application/json'},body:'{}'})
-.then(function(r){return r.json()}).then(function(b){var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;PK=l;drawLongs()}).catch(function(){});
+.then(function(r){return r.json()}).then(function(b){if(b&&b.freeMode){freeMode();return}var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;PK=l;drawLongs()}).catch(function(){});
 })();
 </script>
 </body>
