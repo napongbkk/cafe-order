@@ -1,5 +1,8 @@
 /* Easy POS English dictionary: Thai text -> English. Generated; edit freely. */
 window.EP_DICT={
+"เวลานับตั้งแต่รับออเดอร์:": "Time since the order was received:",
+"รับออเดอร์": "Received",
+"เวลาตั้งแต่รับออเดอร์": "Time since the order was received",
 "ใช้งานฟรี ·": "Free to use ·",
 "ทดลองใช้ฟรี 30 วัน · จากนั้น 299 บาท/เดือน ·": "Free for 30 days · then ฿299/month ·",
 "สมัครใช้ฟรี": "Sign up free",

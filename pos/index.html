@@ -1186,9 +1186,11 @@ function sellShell(){
     <div class="mobq" id="mobq" aria-label="Mobile Order รอชำระ" hidden></div><div class="unpaid" id="unpaid" aria-label="บิลที่ยังไม่ชำระ" hidden></div><div class="kstrip" id="kstrip" aria-label="สถานะครัว/บาร์"></div><div class="chips" id="cats" role="tablist" aria-label="หมวดหมู่"></div><div class="grid" id="grid"></div></section>
     <aside class="bill" id="bill" aria-label="บิล"></aside><button class="cartbar" id="cartbar" data-act="sheet"></button></div>`;
 }
-const KLIM={waiting:[5,10],making:[5,10],ready:[3,5]};
+// Minutes since the order was received: yellow, red. Ready orders get a little longer before they turn red.
+const KLIM={waiting:[5,10],making:[5,10],ready:[10,15]};
 const KLBL={waiting:'รอทำ',making:'กำลังทำ',ready:'รอเสิร์ฟ'};
-function kSince(o,s){return s==='waiting'?(o.batchAt||o.createdAt):s==='making'?(o.makingAt||o.batchAt||o.createdAt):(o.readyAt||o.batchAt||o.createdAt)}
+// Ticket timers count from when the kitchen received the order (latest round of items), whatever its status now.
+function kSince(o){return o.batchAt||o.createdAt}
 function kLevel(s,m){const l=KLIM[s];return !l?'':m>=l[1]?'bad':m>=l[0]?'warn':''}
 function overdueList(){return allOrders().filter(o=>o.state!=='void'&&o.items.length).map(o=>{const k=overallK(o);const m=ageMin(kSince(o,k));return {o,k,m,key:o.id+'|'+k}}).filter(x=>KLIM[x.k]&&kLevel(x.k,x.m)==='bad').sort((a,b)=>b.m-a.m)}
 let alertSeen=new Set(),alertDismissed=new Set();
@@ -1375,14 +1377,14 @@ function kdsView(){
       :s==='making'?`<button class="btn primary" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสร็จ · พร้อมเสิร์ฟ</button>`
       :s==='ready'?`<button class="btn dark" data-act="kadv" data-id="${esc(o.id)}" data-st="${esc(st)}">เสิร์ฟแล้ว</button>`
       :`<button class="btn" data-act="krecall" data-id="${esc(o.id)}" data-st="${esc(st)}">เรียกคืน</button>`;
-    return `<article class="kt${cls}${lock?' locked':''}"><header class="kt-h"><b>${esc(o.no||'')}</b><span>(${esc(o.table?'โต๊ะ '+o.table.name:(tl?tl.l:''))})</span><span class="kt-age">${a} นาที</span></header>
-      <div class="kt-meta"><span>สั่ง ${hm(o.createdAt)}</span>${nb>1?`<span class="pill warn">สั่งเพิ่มครั้งที่ ${nb-1}</span>`:''}${s==='making'?'<span class="pill ok">กำลังทำ</span>':''}${o.source==='app'||(o.appIds||[]).length?'<span class="pill ok">สั่งผ่านแอป</span>':''}${o.custName?`<span>${esc(o.custName)}</span>`:''}${o.state==='open'?`<span class="pill${lock?' bad':''}">ยังไม่ชำระ${lock?' · ห้ามเริ่มทำ':''}</span>`:''}${o.guests?`<span>${o.guests} ท่าน</span>`:''}</div>
+    return `<article class="kt${cls}${lock?' locked':''}"><header class="kt-h"><b>${esc(o.no||'')}</b><span>(${esc(o.table?'โต๊ะ '+o.table.name:(tl?tl.l:''))})</span><span class="kt-age" title="เวลาตั้งแต่รับออเดอร์">${a} นาที</span></header>
+      <div class="kt-meta"><span>รับออเดอร์ ${hm(kSince(o))}</span>${nb>1?`<span class="pill warn">สั่งเพิ่มครั้งที่ ${nb-1}</span>`:''}${s==='making'?'<span class="pill ok">กำลังทำ</span>':''}${o.source==='app'||(o.appIds||[]).length?'<span class="pill ok">สั่งผ่านแอป</span>':''}${o.custName?`<span>${esc(o.custName)}</span>`:''}${o.state==='open'?`<span class="pill${lock?' bad':''}">ยังไม่ชำระ${lock?' · ห้ามเริ่มทำ':''}</span>`:''}${o.guests?`<span>${o.guests} ท่าน</span>`:''}</div>
       <ul>${itemsOf(o).map(({i,idx})=>`<li><button${lock?' disabled':''} class="ki${idone[idx]?' done':''}${nb>1&&i.batch===nb?' new':''}" data-act="kitem" data-id="${esc(o.id)}" data-i="${idx}" aria-pressed="${!!idone[idx]}">${i.qty} × ${esc(i.name)}${st==='all'&&stations().length>1?`<span class="st">${esc(stName(itemSt(i)))}</span>`:''}${nb>1&&i.batch===nb?' <span class="st">ใหม่</span>':''}${i.opts?`<small>${esc(i.opts)}</small>`:''}</button></li>`).join('')}</ul>
       <footer>${btn}<button class="btn icon" data-act="kprint" data-id="${esc(o.id)}" data-st="${esc(st)}" aria-label="พิมพ์ใบสั่ง ${esc(o.no)}">${ic('print',18)}</button></footer></article>`};
   const col=(t,l,empty)=>`<section class="ocol" aria-label="${t}"><h2>${t}<span>${l.length}</span></h2>${l.length?l.map(tile).join(''):`<div class="empty" style="padding:20px 8px">${empty}</div>`}</section>`;
   return `<div class="pad-view"><div class="ktool"><div class="chips" role="tablist" aria-label="สถานี">${[{id:'all',name:'ทุกสถานี'}].concat(stations()).map(x=>`<button class="chip" role="tab" data-act="kst" data-v="${esc(x.id)}" aria-selected="${st===x.id}">${esc(x.name)}</button>`).join('')}</div>
     <span class="sp"></span><button class="btn${S.sound?' primary':''}" data-act="ksound" aria-pressed="${S.sound}">เสียงแจ้งเตือน: ${S.sound?'เปิด':'ปิด'}</button><button class="btn" data-act="kfull">เต็มจอ</button></div>
-    <div class="legend"><span><i style="background:var(--ok)"></i>ไม่ถึง 5 นาที</span><span><i style="background:var(--warn)"></i>5–10 นาที</span><span><i style="background:var(--bad)"></i>เกิน 10 นาที</span><span>แตะรายการเพื่อขีดว่าทำเสร็จ</span></div>
+    <div class="legend"><span>เวลานับตั้งแต่รับออเดอร์:</span><span><i style="background:var(--ok)"></i>ไม่ถึง 5 นาที</span><span><i style="background:var(--warn)"></i>5–10 นาที</span><span><i style="background:var(--bad)"></i>เกิน 10 นาที</span><span>แตะรายการเพื่อขีดว่าทำเสร็จ</span></div>
     <div class="ocols">${col('รอทำ',wai,'ไม่มีออเดอร์รอ')}${col('กำลังทำ',mak,'ยังไม่มีที่กำลังทำ')}${col('พร้อมเสิร์ฟ',rdy,'ยังไม่มีที่รอเสิร์ฟ')}</div>
     <details class="history"${S.kdone?' open':''}><summary data-act="kdone">เสร็จแล้ววันนี้ (${done.length}) · กดเรียกคืนได้</summary>${done.length?`<div class="ktiles" style="padding-bottom:12px">${done.map(tile).join('')}</div>`:'<div class="empty">ยังไม่มี</div>'}</details></div>`;
 }
