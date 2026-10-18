@@ -785,6 +785,7 @@ html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .devlogo{filter:invert(1)}}
 :root[data-theme="dark"] .devlogo{filter:invert(1)}
 @media (max-width:700px){.devlogo{display:none}}
+.optpick{border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}.optpick .optrow{display:flex;align-items:center;gap:8px}.optpick .optrow .check{flex:1;min-width:0}.optpick .optrow .btn{flex-shrink:0}
 </style>
 
 <div class="app">
@@ -2142,13 +2143,13 @@ function ovHtml(){
       ${diff==null?'':`<div class="okbox${diff<0?' bad':''}"><span>${diff===0?'เงินตรง':diff>0?'เงินเกิน':'เงินขาด'}</span><span class="num">${baht(diff)}</span></div>`}
       ${openBills().length?`<div class="note">ยังมีบิลเปิดอยู่ ${openBills().length} บิล ปิดรอบได้แต่บิลเหล่านั้นจะไปอยู่ในรอบถัดไปเมื่อชำระ</div>`:''}
       <div class="dlg-actions"><button class="btn" data-act="close">ยกเลิก</button><button class="btn dark grow big" data-act="docloseround"${diff==null||S.busy?' disabled':''}>ยืนยันปิดรอบและพิมพ์สรุป</button></div>`,'narrow')}
-  if(v.k==='editmenu'){const m=v.id?S.menu.find(x=>x.id===v.id)||{}:{optionIds:[]};const del=S.confirm==='mdel:'+v.id;
+  if(v.k==='editmenu'){const m0=v.id?S.menu.find(x=>x.id===v.id)||{}:{optionIds:[]};const m=v.draft?Object.assign({},m0,v.draft):m0;const del=S.confirm==='mdel:'+v.id;
     return wrap(head(v.id?'แก้ไขเมนู':'เพิ่มเมนู')+`<form class="form" id="menuForm"><div class="two"><label for="m_name">ชื่อเมนู<input id="m_name" required maxlength="60" value="${esc(m.name||'')}"></label><label for="m_en">ชื่อภาษาอังกฤษ<input id="m_en" maxlength="60" value="${esc(m.en||'')}"></label></div>
       <div class="grp"><span class="grp-t">รูปเมนู</span><div class="imgpick" id="imgpick">${imgPickHtml(v)}</div></div>
       <div class="catpick"><label for="m_cat" style="flex:1">หมวดหมู่<select id="m_cat" required><option value="">เลือกหมวดหมู่</option>${S.cats.map(c=>`<option value="${esc(c.id)}"${menuCat(m)===c.id?' selected':''}>${esc(c.name)}</option>`).join('')}</select></label><button type="button" class="btn" data-act="newcatshow">+ หมวดหมู่ใหม่</button></div>
       <div class="newcatrow" id="newCatRow" hidden><label for="m_newcat" class="sr">ชื่อหมวดหมู่ใหม่</label><input id="m_newcat" maxlength="30" placeholder="ชื่อหมวดหมู่ใหม่ เช่น ของหวาน"><button type="button" class="btn primary" data-act="newcatadd">เพิ่ม</button><button type="button" class="btn" data-act="newcathide">ยกเลิก</button></div>
       <div class="two"><label for="m_price">ราคาหน้าร้าน (บาท)<input id="m_price" type="number" min="0" step="0.25" required value="${esc(m.price!=null?m.price:'')}"></label><label for="m_deli">ราคาเดลิเวอรี (ไม่บังคับ)<input id="m_deli" type="number" min="0" step="0.25" value="${esc(m.priceDeli||'')}"></label></div>
-      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:4px"><legend class="grp-t" style="margin-bottom:4px">ตัวเลือกที่ใช้กับเมนูนี้</legend>${S.opts.length?S.opts.map(o=>`<label class="check" for="mo_${esc(o.id)}"><input id="mo_${esc(o.id)}" type="checkbox" data-opt="${esc(o.id)}"${(m.optionIds||[]).includes(o.id)?' checked':''}> ${esc(o.name)} <span class="hint">${(o.choices||[]).map(c=>esc(c.name)).join(' · ')}</span></label>`).join(''):'<span class="hint">ยังไม่มีตัวเลือก</span>'}</fieldset>
+      <fieldset class="optpick"><legend class="grp-t" style="margin-bottom:4px">ตัวเลือกที่ใช้กับเมนูนี้</legend>${S.opts.length?S.opts.map(o=>`<div class="optrow"><label class="check" for="mo_${esc(o.id)}"><input id="mo_${esc(o.id)}" type="checkbox" data-opt="${esc(o.id)}"${(m.optionIds||[]).includes(o.id)?' checked':''}> ${esc(o.name)} <span class="hint">${(o.choices||[]).map(c=>esc(c.name)).join(' · ')}</span></label><button type="button" class="btn sm" data-act="editopt" data-id="${esc(o.id)}" data-back="1" aria-label="แก้ไขตัวเลือก ${esc(o.name)}">แก้ไข</button></div>`).join(''):'<span class="hint">ยังไม่มีตัวเลือก เช่น ระดับความหวาน ขนาดแก้ว ท็อปปิ้ง</span>'}<button type="button" class="btn sm" data-act="editopt" data-back="1" style="align-self:flex-start;margin-top:4px">${ic('plus',16)}สร้างตัวเลือกใหม่</button></fieldset>
       <label class="check" for="m_best"><input id="m_best" type="checkbox"${m.best?' checked':''}> แสดงป้าย “ขายดี”</label>
       <div class="dlg-actions">${v.id?(del?`<button class="btn danger" type="button" data-act="mdel">ยืนยันลบ</button><button class="btn" type="button" data-act="unconfirm">ไม่ลบ</button>`:'<button class="btn danger" type="button" data-act="askmdel">ลบเมนู</button>'):''}<button class="btn primary grow" type="submit">บันทึก</button></div></form>`)}
   if(v.k==='editopt'){const o=v.draft;const del=S.confirm==='odel:'+v.id;
@@ -2654,12 +2655,12 @@ document.addEventListener('click',e=>{
     case 'editmenu':S.confirm=null;S.ov={k:'editmenu',id:d.id};renderOverlay();break;
     case 'askmdel':S.confirm='mdel:'+S.ov.id;S.ov.focus=false;renderOverlay();break;
     case 'mdel':{const id=S.ov.id;S.ov=null;S.confirm=null;if(S.db)dbDo(db=>db.doc('menu/'+id).delete(),'ลบเมนูแล้ว');else{S.menu=S.menu.filter(x=>x.id!==id);render(true)}renderOverlay();break;}
-    case 'editopt':{S.confirm=null;const back=d.back&&S.ov&&S.ov.k==='item'?(()=>{const n=$('#itNote');if(n)S.ov.note=n.value;return S.ov})():null;const o=d.id?S.opts.find(x=>x.id===d.id):null;S.ov={k:'editopt',back,id:d.id,draft:o?clone(o):{name:'',required:false,max:1,choices:[{id:uid(),name:'',price:0}]}};renderOverlay();break;}
+    case 'editopt':{S.confirm=null;const back=d.back&&S.ov&&S.ov.k==='item'?(()=>{const n=$('#itNote');if(n)S.ov.note=n.value;return S.ov})():d.back&&S.ov&&S.ov.k==='editmenu'?(()=>{const f=$('#menuForm');if(f){const nc=$('#m_cat');S.ov.draft={name:$('#m_name').value,en:$('#m_en').value,catId:nc?nc.value:'',price:$('#m_price').value,priceDeli:$('#m_deli').value,best:$('#m_best').checked,optionIds:[...f.querySelectorAll('[data-opt]')].filter(x=>x.checked).map(x=>x.dataset.opt)}}return S.ov})():null;const o=d.id?S.opts.find(x=>x.id===d.id):null;S.ov={k:'editopt',back,id:d.id,draft:o?clone(o):{name:'',required:false,max:1,choices:[{id:uid(),name:'',price:0}]}};renderOverlay();break;}
     case 'chadd':readOptDraft();S.ov.draft.choices.push({id:uid(),name:'',price:0});S.ov.focus=false;renderOverlay();{const i=document.getElementById('oc_n'+(S.ov.draft.choices.length-1));i&&i.focus()}break;
     case 'chdel':readOptDraft();S.ov.draft.choices.splice(+d.i,1);S.ov.focus=false;renderOverlay();break;
     case 'chsold':readOptDraft();{const c=S.ov.draft.choices[+d.i];c.soldOut=!c.soldOut}S.ov.focus=false;renderOverlay();break;
     case 'askodel':readOptDraft();S.confirm='odel:'+S.ov.id;S.ov.focus=false;renderOverlay();break;
-    case 'odel':{const id=S.ov.id;S.ov=S.ov.back?Object.assign(S.ov.back,{focus:false}):null;S.confirm=null;if(S.db)dbDo(db=>db.doc('options/'+id).delete(),'ลบตัวเลือกแล้ว');else{S.opts=S.opts.filter(x=>x.id!==id);render(true)}renderOverlay();break;}
+    case 'odel':{const id=S.ov.id;S.ov=S.ov.back?Object.assign(S.ov.back,{focus:false}):null;if(S.ov&&S.ov.draft&&S.ov.draft.optionIds)S.ov.draft.optionIds=S.ov.draft.optionIds.filter(x=>x!==id);S.confirm=null;if(S.db)dbDo(db=>db.doc('options/'+id).delete(),'ลบตัวเลือกแล้ว');else{S.opts=S.opts.filter(x=>x.id!==id);render(true)}renderOverlay();break;}
     case 'editpromo':S.confirm=null;S.ov={k:'editpromo',id:d.id};renderOverlay();break;
     case 'askpdel':S.confirm='pdel:'+S.ov.id;S.ov.focus=false;renderOverlay();break;
     case 'pdel':{const id=S.ov.id;S.ov=null;S.confirm=null;if(S.db)dbDo(db=>db.doc('promos/'+id).delete(),'ลบโปรโมชันแล้ว');else{S.promos=S.promos.filter(x=>x.id!==id);render(true)}renderOverlay();break;}
@@ -2764,7 +2765,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&e.target&&e.target.id==='m_newcat'){e.preventDefault();addCatInline();return}
-  if(e.key==='Escape'&&S.ov&&S.ov.k!=='paid'){S.ov=null;S.confirm=null;renderOverlay();syncDisplay();return}
+  if(e.key==='Escape'&&S.ov&&S.ov.k!=='paid'){if(S.ov.back){S.ov=Object.assign(S.ov.back,{focus:false});S.confirm=null;renderOverlay(true);return}S.ov=null;S.confirm=null;renderOverlay();syncDisplay();return}
   if(!S.floorEdit||!S.sel||S.view!=='tables')return;
   if(['INPUT','SELECT'].includes((document.activeElement||{}).tagName))return;
   const t=S.tables.find(x=>x.id===S.sel);if(!t)return;
@@ -2827,11 +2828,11 @@ document.addEventListener('submit',async e=>{
   if(id==='optForm'){
     readOptDraft();const dr=S.ov.draft;dr.choices=dr.choices.filter(c=>c.name.trim()).map(c=>({id:c.id,name:c.name.trim(),price:+c.price||0,soldOut:!!c.soldOut}));
     if(!dr.name.trim()||!dr.choices.length){toast('ใส่ชื่อตัวเลือกและช้อยส์อย่างน้อย 1 รายการ');return}
-    const data={name:dr.name.trim(),required:!!dr.required,max:Math.min(dr.max||1,dr.choices.length),choices:dr.choices};const oid=S.ov.id;
-    if(S.db){const ok=await dbDo(db=>oid?db.doc('options/'+oid).set(data):db.collection('options').add(data),'บันทึกตัวเลือกแล้ว');if(!ok)return}
-    else{if(oid)Object.assign(S.opts.find(x=>x.id===oid),data);else S.opts.push(Object.assign({id:'local-o'+Date.now()},data));render(true)}
-    if(oid&&S.db){const i=S.opts.findIndex(x=>x.id===oid);if(i>=0)S.opts[i]=Object.assign({id:oid},data)}
-    const back=S.ov.back;S.ov=back?Object.assign(back,{focus:false}):null;renderOverlay(true);return;
+    const data={name:dr.name.trim(),required:!!dr.required,max:Math.min(dr.max||1,dr.choices.length),choices:dr.choices};const oid=S.ov.id,nid=oid||(S.db?'o'+uid():'local-o'+Date.now());
+    if(S.db){const ok=await dbDo(db=>db.doc('options/'+nid).set(data),'บันทึกตัวเลือกแล้ว');if(!ok)return}
+    else{if(oid)Object.assign(S.opts.find(x=>x.id===oid),data);else S.opts.push(Object.assign({id:nid},data));render(true)}
+    if(S.db){const i=S.opts.findIndex(x=>x.id===nid);if(i>=0)S.opts[i]=Object.assign({id:nid},data);else S.opts.push(Object.assign({id:nid},data))}
+    const back=S.ov.back;if(back&&back.k==='editmenu'&&!oid){back.draft=back.draft||{};back.draft.optionIds=(back.draft.optionIds||[]).concat(nid)}S.ov=back?Object.assign(back,{focus:false}):null;renderOverlay(true);return;
   }
   if(id==='promoForm'){
     const data={name:$('#pr_name').value.trim(),scope:$('#pr_scope').value,type:$('#pr_type').value,value:parseFloat($('#pr_value').value)||0,active:$('#pr_active').checked};
