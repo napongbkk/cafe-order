@@ -1398,7 +1398,7 @@ function renderGrid(){
   if(!items.length){el.innerHTML='<div class="empty" style="grid-column:1/-1"><b>ไม่พบเมนู</b>ลองค้นด้วยคำอื่น หรือเลือกหมวด “ทั้งหมด”</div>';return}
   el.innerHTML=items.map(m=>{const c=catColor(menuCat(m));const drink=hasOptions(m);
     return `<button class="item" data-act="item" data-id="${esc(m.id)}"${m.soldOut?' disabled':''}><div class="pic${m.imgId?' photo':''}" style="background:var(--t-${c});color:var(--i-${c})">${m.imgId?`<img src="${imgUrl(m.imgId)}" alt="" loading="lazy">`:defPic(m,drink)}${m.soldOut?'<span class="tag out">หมด</span>':m.best?'<span class="tag">ขายดี</span>':''}</div>
-      <div class="meta"><span class="nm">${esc(m.name)}</span>${m.en?`<span class="en">${esc(m.en)}</span>`:''}<span class="pr">${baht(priceFor(m,S.bill.type))}${drink?'+':''}</span><span class="plus" aria-hidden="true">${ic('plus',16)}</span></div></button>`}).join('');
+      <div class="meta"><span class="nm">${esc(m.name)}</span>${m.en?`<span class="en">${esc(m.en)}</span>`:''}<span class="pr">${baht(priceFor(m,S.bill.type))}${drink?'+':''}</span></div></button>`}).join('');
 }
 function renderBill(){
   const el=$('#bill');if(!el)return;
