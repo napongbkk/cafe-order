@@ -1,0 +1,268 @@
+<!-- Coconut POS Stand alone runtime: online sign-in with a 7-day offline allowance, data on the shop's own machine (local server API), LAN sharing -->
+<script src="/vendor/sb-lite.js"></script>
+<style>
+.auth{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
+.auth .box{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
+.auth h1{margin:0;font-size:22px}
+.auth p{margin:0;color:var(--muted);font-size:14px}
+.auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
+.auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.auth .msg a{color:inherit;font-weight:700}
+.offst{display:flex;flex-wrap:wrap;gap:6px;font-size:12.5px}
+.offst span{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--sunk);color:var(--muted);font-weight:600}
+.offst span i{width:8px;height:8px;border-radius:50%;background:#9AA5B1}
+.offst span.on i{background:#2E9D62}.offst span.off i{background:#EF5B5B}
+.offbadge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:var(--dark);color:var(--on-dark);font-size:12.5px;font-weight:700;border:0;cursor:pointer;font-family:inherit}
+.offbadge i{width:8px;height:8px;border-radius:50%;background:#2E9D62}.offbadge.warn i{background:#F4B740}.offbadge.bad i{background:#EF5B5B}
+.lanov{position:fixed;inset:0;z-index:250;background:rgba(10,20,30,.45);display:grid;place-items:center;padding:16px}
+.lanov[hidden]{display:none}
+.lanbox{width:min(460px,100%);max-height:calc(100vh - 32px);overflow:auto;background:var(--surface);border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.lanbox h2{margin:0;font-size:19px}
+.lanbox .addr{font:700 18px/1.3 ui-monospace,Menlo,monospace;padding:10px 12px;border-radius:12px;background:var(--sunk);word-break:break-all}
+.lanbox .qr{align-self:center;background:#fff;padding:10px;border-radius:14px;border:1px solid var(--line)}
+.lanbox .row{display:flex;justify-content:space-between;gap:10px;font-size:14px;border-bottom:1px solid var(--line);padding:6px 0}
+.lanbox .row:last-child{border-bottom:0}
+.lanbox .row span{color:var(--muted)}
+.srvdown{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:300;background:#B42323;color:#fff;padding:8px 14px;border-radius:999px;font-weight:700;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.srvdown[hidden]{display:none}
+.bill-card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.bill-stat > div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.bill-stat small{color:var(--muted);font-size:12px}.bill-stat b{font-size:18px}
+#acct{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+.billpill{border:0;border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;background:var(--warn-soft);color:var(--warn-ink);cursor:pointer}
+.billpill.bad{background:var(--bad-soft);color:var(--bad-ink)}
+</style>
+<div class="srvdown" id="srvDown" hidden>ติดต่อเครื่องหลักไม่ได้ · กำลังลองใหม่</div>
+<div class="auth" id="auth" hidden><form class="box form" id="authForm" novalidate style="position:relative"><span data-eplang style="position:absolute;top:14px;right:14px"></span>
+  <div style="display:flex;align-items:center;gap:12px"><img src="/easypos.svg" alt="" width="52" height="52" style="border-radius:15px"><div><img src="/coconut-logo-dark.png" alt="coconut" style="height:22px;width:auto;display:block;margin:0 0 4px"><h1>Coconut POS Cafe</h1><p>Stand alone · ข้อมูลเก็บในเครื่องของร้าน</p></div></div>
+  <div class="offst" id="authSt"></div>
+  <div class="msg" id="authMsg" hidden></div>
+  <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
+  <label for="authPass">รหัสผ่าน<input id="authPass" type="password" autocomplete="current-password" minlength="6" required></label>
+  <button class="btn primary big" type="submit" id="authBtn">เข้าสู่ระบบ</button>
+  <p class="small" id="authHint">เข้าสู่ระบบครั้งแรกต้องต่ออินเทอร์เน็ต หลังจากนั้นใช้งานได้แม้เน็ตหลุด แต่ต้องต่อเน็ตอย่างน้อยทุก 7 วัน</p>
+  <button class="btn" type="button" id="lanBtn">เครื่องอื่นในร้านเข้าใช้ได้อย่างไร</button>
+</form></div>
+<div class="auth" id="lockScreen" hidden><div class="box">
+  <img src="/coconut-logo-dark.png" alt="coconut" style="height:22px;width:auto;align-self:flex-start">
+  <h1 id="lockT">ร้านถูกล็อกชั่วคราว</h1><p id="lockP"></p>
+  <a class="btn primary big" id="lockGo" href="https://coconutpos.vercel.app/pos" target="_blank" rel="noopener" style="display:grid;place-items:center;text-decoration:none">ต่ออายุออนไลน์</a>
+  <button class="btn" type="button" id="lockRe">ต่ออายุแล้ว ตรวจสอบอีกครั้ง</button>
+  <button class="btn" type="button" id="lockOut">ออกจากระบบ</button>
+</div></div>
+<div class="lanov" id="lanOv" hidden><div class="lanbox" role="dialog" aria-modal="true" aria-labelledby="lanT"><div style="display:flex;justify-content:space-between;align-items:center"><h2 id="lanT">ใช้งานหลายเครื่องในร้าน</h2><button class="btn sm" type="button" id="lanX">ปิด</button></div><div id="lanBody"></div></div></div>
+<script>
+(function(){
+'use strict';
+window.POS_STANDALONE=true;window.POS_OFFLINE=true;
+var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co',SB_KEY='__SB_KEY__',STAFF_DOMAIN='staff.cafe-pos.app',ONLINE_URL='https://coconutpos.vercel.app';
+var HOST=window.COCONUT_HOST||null; // set by the Windows/Android/iOS app on the main machine
+var $=function(s){return document.querySelector(s)};
+var sb=new SbLite(SB_URL,SB_KEY);window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
+window.POS_IMG=function(id){return '/assets/'+encodeURIComponent(id)};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function loginEmail(v){v=String(v||'').trim().toLowerCase();return v.indexOf('@')>=0?v:(v?v+'@'+STAFF_DOMAIN:'')}
+function displayLogin(e){e=String(e||'');var d='@'+STAFF_DOMAIN;if(e.slice(-d.length)!==d)return e;e=e.slice(0,-d.length);return e.slice(0,3).toUpperCase()+e.slice(3)}
+function dTh(t){if(!t)return '-';return new Date(t).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'})}
+function dtTh(t){if(!t)return '-';return new Date(t).toLocaleString('th-TH',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}
+function uid(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-6)}
+var DEV=(function(){try{var d=localStorage.getItem('cp_dev');if(!d){d='dev'+uid()+uid();localStorage.setItem('cp_dev',d)}return d}catch(e){return 'dev'+uid()}})();
+
+/* ---------- local server API ---------- */
+var down=false;
+function setDown(v){if(v===down)return;down=v;$('#srvDown').hidden=!v}
+function api(method,path,body,raw){
+  return fetch(path,{method:method,headers:raw?{'Content-Type':raw}:(body!=null?{'Content-Type':'application/json'}:{}),body:raw?body:(body!=null?JSON.stringify(body):undefined),cache:'no-store'})
+    .then(function(r){setDown(false);return r.json().catch(function(){return {}}).then(function(j){if(!r.ok){var e=new Error(j.error||('HTTP '+r.status));e.status=r.status;e.code=j.error;throw e}return j})},
+          function(e){setDown(true);var x=new Error('เชื่อมต่อเครื่องหลักไม่ได้');x.code='unavailable';throw x})}
+var P=function(s){return encodeURIComponent(s)};
+var INFO=null;
+function getInfo(){return api('GET','/api/info').then(function(i){INFO=i;return i})}
+
+/* ---------- password hash (works on plain http too: no crypto.subtle) ---------- */
+function sha256(ascii){function rr(v,a){return (v>>>a)|(v<<(32-a))}var mp=Math.pow,maxWord=mp(2,32),result='',words=[],abl=ascii.length*8,hash=sha256.h=sha256.h||[],k=sha256.k=sha256.k||[],pl=k.length,ic={};
+  for(var c=2;pl<64;c++){if(!ic[c]){for(var i=0;i<313;i+=c)ic[i]=c;hash[pl]=(mp(c,.5)*maxWord)|0;k[pl++]=(mp(c,1/3)*maxWord)|0}}
+  hash=hash.slice(0,8);ascii+='\x80';while(ascii.length%64-56)ascii+='\x00';
+  for(i=0;i<ascii.length;i++){var j=ascii.charCodeAt(i);words[i>>2]|=j<<((3-i)%4)*8}
+  words[words.length]=((abl/maxWord)|0);words[words.length]=(abl);
+  for(j=0;j<words.length;){var w=words.slice(j,j+=16),oh=hash;hash=hash.slice(0,8);
+    for(i=0;i<64;i++){var w15=w[i-15],w2=w[i-2],a=hash[0],e=hash[4];
+      var t1=hash[7]+(rr(e,6)^rr(e,11)^rr(e,25))+((e&hash[5])^((~e)&hash[6]))+k[i]+(w[i]=(i<16)?w[i]:(w[i-16]+(rr(w15,7)^rr(w15,18)^(w15>>>3))+w[i-7]+(rr(w2,17)^rr(w2,19)^(w2>>>10)))|0);
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))+((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));hash=[(t1+t2)|0].concat(hash);hash[4]=(hash[4]+t1)|0}
+    for(i=0;i<8;i++)hash[i]=(hash[i]+oh[i])|0}
+  for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hash[i]>>(j*8))&255;result+=((b<16)?0:'')+b.toString(16)}return result}
+function utf8(s){return unescape(encodeURIComponent(s))}
+function pwHash(pw,salt){var h=utf8(salt+'|'+pw);for(var i=0;i<4000;i++)h=sha256(h+salt);return h}
+
+/* ---------- licence (kept on the main machine, shared by every device) ---------- */
+var LIC=null;
+function getLic(){return api('GET','/api/doc/_sys/license').then(function(r){LIC=r.data||null;return LIC})}
+function putLic(l){LIC=l;return api('PUT','/api/doc/_sys/license',{data:l})}
+function shopOf(){return LIC&&LIC.session&&LIC.session.shop}
+function offUntil(){return LIC?+LIC.offlineUntil||0:0}
+
+/* ---------- auth ---------- */
+var ME=null,resolveReady,readyP=new Promise(function(r){resolveReady=r});
+window.POS_ACCOUNT=function(){return {login:displayLogin(ME&&ME.email),email:ME&&ME.email,role:ME?ME.role:null,admin:false,shop:shopOf(),offline:true}};
+window.POS_SESSION=null;
+function msg(t,ok){var m=$('#authMsg');if(!t){m.hidden=true;return}m.hidden=false;m.innerHTML=t;m.className='msg'+(ok?' ok':'')}
+function authStatus(){var el=$('#authSt');if(!el)return;var sh=shopOf();
+  el.innerHTML='<span class="'+(navigator.onLine?'on':'off')+'"><i></i>'+(navigator.onLine?'ต่ออินเทอร์เน็ตอยู่':'ไม่มีอินเทอร์เน็ต')+'</span>'+
+    (INFO?'<span class="on"><i></i>เครื่องหลัก: '+esc(INFO.name||'')+'</span>':'<span class="off"><i></i>ติดต่อเครื่องหลักไม่ได้</span>')+
+    (sh?'<span><i></i>ร้าน '+esc(sh.name)+'</span>':'<span><i></i>ยังไม่ได้เปิดใช้งานเครื่องนี้</span>');
+  var h=$('#authHint');if(h&&LIC)h.textContent=offUntil()>Date.now()?'ใช้งานได้โดยไม่ต่อเน็ตถึง '+dtTh(offUntil())+' (ต่อเน็ตแล้วเข้าระบบเพื่อขยายเวลา)':'ครบกำหนดใช้งานแบบออฟไลน์แล้ว ต้องต่ออินเทอร์เน็ตเพื่อเข้าสู่ระบบ'}
+function showAuth(t,ok){$('#auth').hidden=false;$('#lockScreen').hidden=true;msg(t||'',ok);authStatus();setTimeout(function(){var e=$('#authEmail');if(e&&!e.value)e.focus()},50)}
+window.addEventListener('online',authStatus);window.addEventListener('offline',authStatus);
+function countUsage(){var ms=new Date();ms.setDate(1);ms.setHours(0,0,0,0);
+  return Promise.all([api('GET','/api/col/menu?l=50000'),api('GET','/api/col/orders?w='+P(JSON.stringify([['createdAt','>=',ms.getTime()]]))+'&l=50000')])
+    .then(function(x){return {products:x[0].docs.length,bills:x[1].docs.length}}).catch(function(){return {}})}
+function checkin(){
+  return Promise.all([countUsage(),INFO?Promise.resolve(INFO):getInfo().catch(function(){return null})]).then(function(x){var u=x[0],i=x[1]||{};
+    var dev=HOST?{id:i.deviceId,kind:'server',name:i.name,platform:HOST.platform||i.platform,version:i.version,lan:(i.lan&&i.lan[0]?i.lan[0]+':'+i.port:''),products:u.products,bills:u.bills}
+                :{id:DEV,kind:'client',name:(navigator.userAgentData&&navigator.userAgentData.platform)||(/Android/i.test(navigator.userAgent)?'Android':/iPhone|iPad/i.test(navigator.userAgent)?'iPhone/iPad':/Windows/i.test(navigator.userAgent)?'Windows':'Browser'),platform:'browser',version:i.version,lan:location.host};
+    return sb.rpc('pos_offline_checkin',{p_device:dev})})}
+function errText(e){var m=String(e&&e.message||e||'');
+  if(/not_offline/.test(m))return 'ร้านนี้ใช้ระบบออนไลน์ ไม่ใช่แบบ Stand alone · ใช้งานที่ <a href="'+ONLINE_URL+'/pos" target="_blank" rel="noopener">coconutpos.vercel.app/pos</a> หรือติดต่อผู้ดูแลระบบ';
+  if(/no_shop/.test(m))return 'บัญชีนี้ยังไม่ได้อยู่ในร้านใด';
+  if(/Invalid login|invalid_grant|invalid_credentials/i.test(m))return 'อีเมล/ชื่อผู้ใช้ หรือรหัสผ่านไม่ถูกต้อง';
+  return 'เข้าสู่ระบบไม่สำเร็จ: '+esc(m.slice(0,120))}
+function rememberUser(email,pw,ses,days){var salt=uid()+uid();var users=Object.assign({},(LIC&&LIC.users)||{});
+  users[email]={h:pwHash(pw,salt),s:salt,role:ses.role||'staff',name:ses.name||'',until:Date.now()+days*864e5,at:Date.now()};return users}
+function onlineLogin(email,pw){
+  return sb.auth.signInWithPassword({email:email,password:pw}).then(function(r){
+    if(r.error){if(r.error.network)return {net:true};throw r.error}
+    return checkin().then(function(x){if(x.error){if(x.error.network)return {net:true};throw x.error}var ses=x.data||{};
+      if(!ses.shop)throw new Error('no_shop');
+      if(LIC&&LIC.shopId&&LIC.shopId!==ses.shop.id)throw new Error('เครื่องนี้เก็บข้อมูลของร้าน “'+(LIC.session&&LIC.session.shop?LIC.session.shop.name:'')+'” อยู่แล้ว ใช้บัญชีของร้านนี้เข้าสู่ระบบ');
+      var days=+ses.offlineDays||7,lic=Object.assign({},LIC||{},{shopId:ses.shop.id,slug:ses.shop.slug,session:ses,checkedAt:Date.now(),offlineUntil:Date.now()+days*864e5,activatedAt:(LIC&&LIC.activatedAt)||Date.now()});
+      lic.users=rememberUser(email,pw,ses,days);return putLic(lic).then(seedShop.bind(null,ses)).then(function(){return {email:email,role:ses.role||'staff',name:ses.name||''}})})})}
+// First activation on a new machine: the shop name and a first category, like a new online shop.
+function seedShop(ses){return api('GET','/api/doc/settings/shop').then(function(r){if(r.data)return;
+  return api('PUT','/api/doc/settings/shop',{data:{name:ses.shop.name,appOpen:false,appTake:true,zones:['ในร้าน']}}).then(function(){return api('PUT','/api/doc/categories/c1',{data:{name:'เครื่องดื่ม',sort:0}})})}).catch(function(){})}
+function offlineLogin(email,pw){if(!LIC||!LIC.users||!LIC.users[email])throw new Error('ยังไม่เคยเข้าสู่ระบบด้วยบัญชีนี้บนเครื่องนี้ ต้องต่ออินเทอร์เน็ตเพื่อเข้าสู่ระบบครั้งแรก');
+  var u=LIC.users[email];if(pwHash(pw,u.s)!==u.h)throw new Error('รหัสผ่านไม่ถูกต้อง');
+  if(Date.now()>offUntil()||Date.now()>+u.until)throw new Error('ใช้งานแบบไม่ต่อเน็ตครบ '+((LIC.session&&LIC.session.offlineDays)||7)+' วันแล้ว ต่ออินเทอร์เน็ตแล้วเข้าสู่ระบบอีกครั้ง');
+  return {email:email,role:u.role,name:u.name}}
+$('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var e=loginEmail($('#authEmail').value),p=$('#authPass').value;if(!e||!p){msg('ใส่ชื่อผู้ใช้และรหัสผ่าน');return}
+  var b=$('#authBtn');b.disabled=true;msg('กำลังตรวจสอบ…',true);
+  getLic().then(function(){return navigator.onLine?onlineLogin(e,p):{net:true}}).then(function(r){if(r&&r.net)return offlineLogin(e,p);return r})
+    .then(function(me){b.disabled=false;$('#authPass').value='';enter(me,true)})
+    .catch(function(x){b.disabled=false;msg(x&&x.message&&/^[฀-๿]/.test(x.message)?esc(x.message):errText(x))})});
+function saveMe(me){try{localStorage.setItem('cp_off_me',JSON.stringify({email:me.email,role:me.role,name:me.name,at:Date.now()}))}catch(e){}}
+function logout(){try{localStorage.removeItem('cp_off_me')}catch(e){}sb.auth.signOut();location.reload()}
+window.POS_LOGOUT=logout;
+
+/* ---------- lock (expired / suspended / offline allowance used up) ---------- */
+function lockState(){var sh=shopOf();if(!sh)return null;var now=Date.now();
+  if(sh.status==='suspended')return ['ร้านถูกระงับโดยผู้ดูแลระบบ','ติดต่อผู้ดูแลระบบ Coconut POS'];
+  if(sh.locked||(sh.graceUntil&&now>new Date(sh.graceUntil).getTime()))return ['ร้านหมดอายุการใช้งาน','หมดอายุเมื่อ '+dTh(sh.expiresAt)+' ต่ออายุออนไลน์แล้วกด “ตรวจสอบอีกครั้ง” (ต้องต่ออินเทอร์เน็ต)'];
+  if(now>offUntil())return ['ต้องเชื่อมต่ออินเทอร์เน็ต','ใช้งานแบบไม่ต่อเน็ตครบกำหนดแล้ว ต่ออินเทอร์เน็ตแล้วกด “ตรวจสอบอีกครั้ง”'];
+  return null}
+function showLock(L){$('#auth').hidden=true;$('#lockScreen').hidden=false;$('#lockT').textContent=L[0];$('#lockP').textContent=L[1]+(ME&&ME.role!=='manager'?' · แจ้งผู้จัดการร้าน':'');}
+$('#lockOut').addEventListener('click',logout);
+$('#lockRe').addEventListener('click',function(){var b=this;b.disabled=true;refresh(true).then(function(){b.disabled=false;var L=lockState();if(L){showLock(L);var m=String(LAST_ERR||'');$('#lockP').textContent=L[1]+(m?' · '+m:'')}else location.reload()})});
+
+var LAST_ERR='';
+function refresh(force){if(!navigator.onLine&&!force)return Promise.resolve();
+  return sb.auth.getSession().then(function(s){if(!s.data.session){LAST_ERR='ต้องเข้าสู่ระบบออนไลน์บนเครื่องนี้อีกครั้ง';return}
+    return checkin().then(function(x){if(x.error){LAST_ERR=x.error.network?'ไม่มีอินเทอร์เน็ต':String(x.error.message||'');return}var ses=x.data||{};if(!ses.shop||ses.shop.id!==(LIC&&LIC.shopId))return;
+      return getLic().then(function(){var days=+ses.offlineDays||7;var l=Object.assign({},LIC,{session:ses,checkedAt:Date.now(),offlineUntil:Date.now()+days*864e5});
+        if(ME&&l.users&&l.users[ME.email])l.users[ME.email]=Object.assign({},l.users[ME.email],{until:Date.now()+days*864e5,role:ses.role||l.users[ME.email].role});
+        LAST_ERR='';return putLic(l).then(function(){window.POS_SESSION=LIC.session;if(window.POS_ONSESSION)window.POS_ONSESSION(LIC.session)})})})}).catch(function(e){LAST_ERR=String(e&&e.message||e)})}
+
+function enter(me,fresh){ME=me;saveMe(me);var L=lockState();window.POS_SESSION=LIC&&LIC.session;
+  if(L){showLock(L);return}
+  $('#auth').hidden=true;$('#lockScreen').hidden=true;
+  startChanges();resolveReady();
+  setInterval(function(){refresh().then(function(){var L2=lockState();if(L2)showLock(L2)})},30*60*1000);
+  if(!fresh)refresh()}
+function boot(){
+  getInfo().then(getLic).then(function(){var me=null;try{me=JSON.parse(localStorage.getItem('cp_off_me')||'null')}catch(e){}
+    if(me&&LIC&&LIC.users&&LIC.users[me.email]&&Date.now()<offUntil()&&Date.now()<+LIC.users[me.email].until){me.role=LIC.users[me.email].role||me.role;enter(me,false);return}
+    if(me&&LIC&&Date.now()>=offUntil()){ME=me;var L=lockState();if(L){showLock(L);return}}
+    showAuth(LIC?'':'เปิดใช้งานครั้งแรก: เข้าสู่ระบบด้วยบัญชีผู้จัดการร้าน (ต้องต่ออินเทอร์เน็ต)',true)})
+  .catch(function(){showAuth('ติดต่อเครื่องหลักไม่ได้ ตรวจว่าเครื่องหลักเปิดโปรแกรม Coconut POS อยู่และอยู่ใน Wi-Fi เดียวกัน');setTimeout(boot,4000)})}
+
+/* ---------- LAN info ---------- */
+function lanHtml(){var i=INFO||{};var addrs=(i.lan||[]).map(function(a){return 'http://'+a+(i.port&&i.port!==80?':'+i.port:'')});var main=addrs[0]||location.origin;
+  return '<p class="small" style="margin:0">เปิดโปรแกรม Coconut POS ไว้ที่เครื่องหลัก แล้วให้มือถือ แท็บเล็ต หรือคอมพิวเตอร์เครื่องอื่นที่ต่อ <b>Wi-Fi/LAN เดียวกัน</b> เปิดเบราว์เซอร์ไปที่ที่อยู่นี้ หรือสแกน QR</p>'+
+    '<div class="addr">'+esc(main)+'</div><div class="qr" id="lanQr"></div>'+(addrs.length>1?'<p class="small muted" style="margin:0">ที่อยู่อื่นของเครื่องหลัก: '+addrs.slice(1).map(esc).join(' · ')+'</p>':'')+
+    '<div><div class="row"><span>เครื่องหลัก</span><b>'+esc(i.name||'-')+'</b></div><div class="row"><span>เวอร์ชัน</span><b>'+esc(i.version||'-')+'</b></div>'+
+    (shopOf()?'<div class="row"><span>ร้าน</span><b>'+esc(shopOf().name)+'</b></div><div class="row"><span>ใช้ได้โดยไม่ต่อเน็ตถึง</span><b>'+dtTh(offUntil())+'</b></div><div class="row"><span>ตรวจสอบกับระบบออนไลน์ล่าสุด</span><b>'+dtTh(LIC.checkedAt)+'</b></div>':'')+'</div>'+
+    '<p class="small muted" style="margin:0">ข้อมูลทั้งหมดเก็บในเครื่องหลัก สำรองอัตโนมัติวันละครั้ง (เก็บ 14 วัน) · ดาวน์โหลดไฟล์สำรองได้ที่ ตั้งค่า › สำรองข้อมูล</p>'}
+function openLan(){var go=function(){$('#lanBody').innerHTML=lanHtml();$('#lanOv').hidden=false;var q=$('#lanQr'),i=INFO||{};var u=(i.lan&&i.lan[0])?'http://'+i.lan[0]+(i.port&&i.port!==80?':'+i.port:''):location.origin;if(q&&window.QRCode){try{new QRCode(q,{text:u,width:180,height:180,correctLevel:QRCode.CorrectLevel.M})}catch(e){}}};
+  getInfo().then(go,go)}
+window.POS_LANINFO=openLan;
+$('#lanBtn').addEventListener('click',openLan);$('#lanX').addEventListener('click',function(){$('#lanOv').hidden=true});
+$('#lanOv').addEventListener('click',function(e){if(e.target.id==='lanOv')$('#lanOv').hidden=true});
+window.POS_ACCT_EXTRA=function(){var t=offUntil()-Date.now(),d=Math.floor(t/864e5);var cls=t<864e5*2?(t<0?'bad':'warn'):'';
+  return '<button type="button" class="offbadge '+cls+'" onclick="POS_LANINFO()" title="ใช้งานหลายเครื่อง และสถานะ Stand alone"><i></i>Stand alone'+(t<864e5*2?' · '+(t<0?'ต้องต่อเน็ต':'ต่อเน็ตภายใน '+Math.max(0,Math.ceil(t/36e5))+' ชม.'):'')+'</button>'};
+
+/* ---------- billing summary (renewal happens on the online site) ---------- */
+window.POS_FREE_MSG=function(k){var sh=shopOf()||{};return k==='items'?'ครบจำนวนเมนูที่แพ็กเกจใช้ได้ ('+sh.productLimit+' รายการ) · อัปเกรดแพ็กเกจที่ coconutpos.vercel.app':'ครบจำนวนบิลเดือนนี้ที่แพ็กเกจใช้ได้ ('+sh.billLimit+' บิล) · อัปเกรดแพ็กเกจที่ coconutpos.vercel.app'};
+function daysLeft(t){return Math.ceil((new Date(t).getTime()-Date.now())/864e5)}
+window.POS_BILLSTATE=function(){var sh=shopOf();if(!sh)return {cls:'mute',t:'-'};var d=daysLeft(sh.expiresAt);if(d<0)return {cls:'bad',t:'หมดอายุแล้ว'};if(d<=7)return {cls:'warn',t:'เหลือ '+d+' วัน'};return {cls:'',t:''}};
+window.POS_BILLING={render:function(el){if(!el)return;var sh=shopOf()||{};var lim=function(n){return n==null?'ไม่จำกัด':n};
+  el.innerHTML='<div class="bill-card"><div class="bill-stat"><div><small>ใช้งานได้ถึง</small><b>'+dTh(sh.expiresAt)+'</b></div><div><small>ค่าบริการ</small><b>฿'+Number(sh.price||0).toLocaleString('th-TH')+'/เดือน</b></div><div><small>เมนูสูงสุด</small><b>'+lim(sh.productLimit)+'</b></div><div><small>บิลต่อเดือนสูงสุด</small><b>'+lim(sh.billLimit)+'</b></div></div>'+
+    '<p class="small" style="margin:0">ต่ออายุหรือเปลี่ยนแพ็กเกจทำออนไลน์ เข้าสู่ระบบที่ coconutpos.vercel.app/pos ด้วยบัญชีผู้จัดการ แล้วกลับมากด “ตรวจสอบสถานะ” (ต้องต่ออินเทอร์เน็ต)</p>'+
+    '<div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn primary" href="'+ONLINE_URL+'/pos" target="_blank" rel="noopener" style="text-decoration:none">ชำระเงิน / ต่ออายุออนไลน์</a><button class="btn" type="button" id="billRe">ตรวจสอบสถานะ</button></div><p class="small muted" id="billMsg" style="margin:0">ตรวจสอบกับระบบออนไลน์ล่าสุด '+dtTh(LIC&&LIC.checkedAt)+'</p></div>';
+  var b=el.querySelector('#billRe');if(b)b.addEventListener('click',function(){b.disabled=true;refresh(true).then(function(){b.disabled=false;window.POS_BILLING.render(el);var m=el.querySelector('#billMsg');if(m&&LAST_ERR)m.textContent='ตรวจสอบไม่สำเร็จ: '+LAST_ERR})})}};
+
+/* ---------- data store: same API the POS uses, backed by the local server ---------- */
+function E(e){var x={code:e&&e.code==='unavailable'?'unavailable':'invalid_argument',message:(e&&e.message)||String(e)};if(e&&e.code==='free_limit')x.code='free_limit';return x}
+function snap(id,data){return {id:id,exists:data!=null,data:function(){return data==null?undefined:data},metadata:{fromCache:false,hasPendingWrites:false}}}
+var subs=new Set();
+function notify(cols){subs.forEach(function(s){if(!cols||cols.indexOf(s.col)>=0)s.kick()})}
+function debounce(fn,ms){var t;return function(){clearTimeout(t);t=setTimeout(fn,ms)}}
+function cmp(a,op,b){if(typeof b==='number')a=Number(a);if(op==='==')return a===b;if(op==='!=')return a!==b;if(op==='>=')return a>=b;if(op==='>')return a>b;if(op==='<')return a<b;if(op==='<=')return a<=b;if(op==='in')return b.indexOf(a)>=0;return true}
+function monthStart(){var d=new Date();d.setDate(1);d.setHours(0,0,0,0);return d.getTime()}
+function limitCheck(col,id){var sh=shopOf()||{};var lim=col==='menu'?sh.productLimit:col==='orders'?sh.billLimit:null;if(lim==null)return Promise.resolve();
+  return api('GET','/api/doc/'+P(col)+'/'+P(id)).then(function(r){if(r.data)return;
+    var q=col==='menu'?'/api/col/menu?l=50000':'/api/col/orders?l=50000&w='+P(JSON.stringify([['createdAt','>=',monthStart()]]));
+    return api('GET',q).then(function(x){if(x.docs.length>=+lim){var e=new Error(window.POS_FREE_MSG(col==='menu'?'items':'bills'));e.code='free_limit';throw e}})})}
+function Doc(col,id){var base='/api/doc/'+P(col)+'/'+P(id);var ref={id:id,path:col+'/'+id,
+  get:function(){return api('GET',base).then(function(r){return snap(id,r.data)},function(e){throw E(e)})},
+  set:function(d){return limitCheck(col,id).then(function(){return api('PUT',base,{data:d})}).then(function(){notify([col])},function(e){throw E(e)})},
+  update:function(p){return api('PATCH',base,{patch:p}).then(function(){notify([col])},function(e){throw E(e)})},
+  delete:function(){return api('DELETE',base).then(function(){notify([col])},function(e){throw E(e)})},
+  acquire:function(o){return api('POST','/api/lease/'+P(col)+'/'+P(id),{holder:o.holder,ttlMs:o.ttlMs||30000}).catch(function(e){throw E(e)})},
+  onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){ref.get().then(next).catch(function(){})},80)};subs.add(s);s.kick();return function(){subs.delete(s)}}};
+  return ref}
+function Query(col,f,o,l){var q={
+  where:function(a,op,v){return Query(col,f.concat([[a,op,v]]),o,l)},
+  orderBy:function(a,dir){return Query(col,f,[a,dir||'asc'],l)},
+  limit:function(n){return Query(col,f,o,n)},
+  get:function(){var u='/api/col/'+P(col)+'?l='+(l||50000)+(f.length?'&w='+P(JSON.stringify(f)):'')+(o?'&o='+P(JSON.stringify(o)):'');
+    return api('GET',u).then(function(res){var rows=(res.docs||[]).filter(function(d){return f.every(function(x){return cmp(d.data[x[0]],x[1],x[2])})});
+      if(o)rows.sort(function(a,b){var A=a.data[o[0]],B=b.data[o[0]];var c=A==null?1:B==null?-1:A<B?-1:A>B?1:0;return o[1]==='desc'?-c:c});
+      if(l)rows=rows.slice(0,l);var docs=rows.map(function(d){return snap(d.id,d.data)});
+      return {docs:docs,size:docs.length,empty:!docs.length,docChanges:function(){return []},metadata:{fromCache:false,hasPendingWrites:false}}},function(e){throw E(e)})},
+  onSnapshot:function(next,err){var s={col:col,kick:debounce(function(){q.get().then(next).catch(function(){})},100)};subs.add(s);s.kick();return function(){subs.delete(s)}},
+  doc:function(id){return Doc(col,id||uid())},
+  add:function(d){var r=Doc(col,uid());return r.set(d).then(function(){return r})}};
+  return q}
+var db={doc:function(p){var a=p.split('/');return Doc(a[0],a[1])},collection:function(p){return Query(p,[],null,null)}};
+// Changes made on other devices arrive through a long-poll on the main machine.
+var started=false,SEQ=-1;
+function startChanges(){if(started)return;started=true;
+  (function loop(){fetch('/api/changes?since='+(SEQ<0?0:SEQ)+'&wait=25',{cache:'no-store'}).then(function(r){return r.json()}).then(function(j){setDown(false);
+      var first=SEQ<0;if(j.seq!==SEQ){SEQ=j.seq;if(!first)notify(j.cols||null)}setTimeout(loop,first?0:40)})
+    .catch(function(){setDown(true);setTimeout(loop,3000)})})();
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)notify(null)});
+}
+function isMgr(){return !!(ME&&ME.role==='manager')}
+var user={isOwner:function(){return Promise.resolve(isMgr())},canEdit:function(){return Promise.resolve(isMgr())},
+  id:function(){return Promise.resolve(ME&&ME.email)},can:function(){return Promise.resolve(null)},
+  me:function(){return Promise.resolve({id:ME&&ME.email,name:(ME&&(ME.name||ME.email))||'',email:ME&&ME.email,isOwner:isMgr(),canEdit:isMgr(),avatarUrl:'',color:'#2F6FB0'})}};
+var EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif','video/mp4':'mp4','video/webm':'webm','video/quicktime':'mov'};
+var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');if(!EXT[ty])return Promise.reject({code:'invalid_argument',message:'ไฟล์ชนิดนี้ใช้ไม่ได้'});
+    return api('POST','/api/asset',blob,ty).then(function(r){return {id:r.id,url:window.POS_IMG(r.id),sizeBytes:blob.size,contentType:ty}},function(e){throw E(e)})},
+  delete:function(id){return api('DELETE','/api/asset/'+P(id)).then(function(){},function(){})},list:function(){return Promise.resolve({assets:[],usage:{}})}};
+window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
+window.claude={use:function(name){return readyP.then(function(){if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
+boot();
+})();
+</script>
+<script src="/i18n-en.js"></script>
+<script src="/easypos-i18n.js"></script>

@@ -207,3 +207,50 @@ demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
 os.makedirs(os.path.join(ROOT, 'demo'), exist_ok=True)
 open(os.path.join(ROOT, 'demo', 'index.html'), 'w', encoding='utf-8').write(demo)
 print('built demo/index.html', len(demo), 'bytes')
+
+# ---------------------------------------------------------------------------
+# Coconut POS Stand alone (offline/www): same app, data on the shop's own machine through the local server API.
+off = src
+OFF_SHIM = open(os.path.join(ROOT, 'tools', 'offline-shim.html'), encoding='utf-8').read()
+import re as _re
+_key = _re.search(r"SB_KEY\s*=\s*'([^']+)'", shim) or _re.search(r"KEY\s*=\s*'(eyJ[^']+)'", shim)
+if not _key:
+    sys.exit('build_pos: anon key not found in standalone shim')
+OFF_SHIM = OFF_SHIM.replace('__SB_KEY__', _key.group(1))
+def O(a, b):
+    global off
+    if a not in off:
+        sys.exit('build_pos (offline): patch point not found: ' + a[:80])
+    off = off.replace(a, b, 1)
+O(shim, OFF_SHIM)
+O('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', '<script src="/vendor/qrcode.js"></script>')
+off = off.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>', '')
+off = off.replace('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\\/script>', '<script src="\'+location.origin+\'/vendor/qrcode.js"><\\/script>')
+O('<script src="/track.js" data-page="pos" defer></script>\n', '')
+O('<title>Coconut POS Cafe</title>', '<title>Coconut POS Cafe · Stand alone</title>')
+O('<link rel="icon" href="/icon.svg" type="image/svg+xml">', '<link rel="icon" href="/easypos.svg" type="image/svg+xml">')
+off = _re.sub(r'<link rel="(?:preconnect|stylesheet)" href="https://fonts\.[^"]+"[^>]*>\n?', '', off)
+# No customer app (needs the internet): hide its settings and the Mobile Order screen, never pull app orders.
+O("if(window.POS_STANDALONE){bridgeT=null;", "if(window.POS_STANDALONE){bridgeT=null;if(window.POS_OFFLINE)return;")
+O("let PR={bridge:!!window.POS_STANDALONE,", "let PR={bridge:!!window.POS_STANDALONE&&!window.POS_OFFLINE,")
+O("['app','แอปลูกค้า (QR สั่ง)'],['look','ปรับแต่งรูปแบบ Mobile Order'],", "")
+O("['open','Mobile Order','phone'],", "")
+O("    case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;",
+  "    case 'logout':if(window.POS_LOGOUT){window.POS_LOGOUT();break}if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;")
+O("$('#acct').innerHTML=a.email?`", "$('#acct').innerHTML=a.email?`${window.POS_ACCT_EXTRA?window.POS_ACCT_EXTRA():''}")
+O("\n  $('#appPill').innerHTML=", "\n  if(window.POS_OFFLINE)$('#appPill').innerHTML='';else $('#appPill').innerHTML=")
+O("function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return location.origin+'/s/'+window.POS_SESSION.shop.slug;",
+  "function appBase(){if(window.POS_SESSION&&window.POS_SESSION.shop)return 'https://coconutpos.vercel.app/s/'+window.POS_SESSION.shop.slug;")
+# Everything the page needs at start-up must come from the main machine (fonts fall back to the system's Thai font).
+for bad in ('<script src="https://', '<script src="http://', 'track.js'):
+    if bad in off:
+        sys.exit('build_pos (offline): still references ' + bad)
+import shutil as _sh
+WWW = os.path.join(ROOT, 'offline', 'www')
+os.makedirs(os.path.join(WWW, 'vendor'), exist_ok=True)
+open(os.path.join(WWW, 'index.html'), 'w', encoding='utf-8').write(off)
+for f in ('easypos.svg', 'coconut-logo-dark.png', 'coconut-logo-white.png', 'i18n-en.js', 'easypos-i18n.js'):
+    _sh.copyfile(os.path.join(ROOT, f), os.path.join(WWW, f))
+for f in os.listdir(os.path.join(ROOT, 'offline', 'web', 'vendor')):
+    _sh.copyfile(os.path.join(ROOT, 'offline', 'web', 'vendor', f), os.path.join(WWW, 'vendor', f))
+print('built offline/www/index.html', len(off), 'bytes')
