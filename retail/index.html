@@ -698,8 +698,56 @@ tr.click:hover td{background:var(--accent-soft)}
 .acctui .mrow small{color:var(--muted,#4A545F)}
 .adminbar{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:150;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#13202c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .adminbar a{color:#9fd3ff}
+/* ---- login: brand panel on the left (Coconut Group + admin announcement) ---- */
+.auth.split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(340px,440px);gap:28px;align-items:center;justify-content:stretch;padding:20px max(20px,env(safe-area-inset-right,0px)) 20px max(20px,env(safe-area-inset-left,0px))}
+.auth.split>form{justify-self:center;margin:auto 0}
+.ahero{position:relative;align-self:stretch;min-height:560px;border-radius:28px;overflow:hidden;color:#fff;background:radial-gradient(120% 90% at 85% 10%,#5EC2FF 0%,rgba(94,194,255,0) 55%),radial-gradient(90% 80% at 0% 100%,#0B2E52 0%,rgba(11,46,82,0) 60%),linear-gradient(150deg,#0F4A7E 0%,#1A73B8 55%,#2F8FDA 100%);display:flex;flex-direction:column;padding:36px 40px;gap:18px;isolation:isolate}
+.ahero .ah-logo{height:44px;width:auto;align-self:flex-start;display:block}
+.ahero .ah-tag{margin:6px 0 0;font-size:clamp(26px,2.6vw,38px);line-height:1.15;font-weight:700;letter-spacing:-.02em;max-width:16ch;color:#fff}
+.ahero .ah-th{margin:0;font-size:17px;line-height:1.5;color:#E3F2FD;max-width:30ch}
+.ahero .ah-art{position:absolute;right:-5%;top:24%;width:min(58%,480px);z-index:-1;pointer-events:none}
+.ahero .ah-ann{margin-top:auto;max-width:520px;background:rgba(255,255,255,.96);color:#1B2733;border-radius:18px;padding:16px 18px;box-shadow:0 18px 40px -18px rgba(5,25,45,.6);display:grid;grid-template-columns:40px minmax(0,1fr);gap:4px 12px;align-items:start}
+.ahero .ah-ann[hidden]{display:none}
+.ahero .ah-ann .ai{grid-row:span 3;width:40px;height:40px;border-radius:12px;background:#E3F2FD;color:#145C94;display:grid;place-items:center}
+.ahero .ah-ann.warn .ai{background:#FDEBD3;color:#8A5200}
+.ahero .ah-ann .ak{font-size:12.5px;font-weight:700;color:#145C94;letter-spacing:.02em}
+.ahero .ah-ann.warn .ak{color:#8A5200}
+.ahero .ah-ann b{font-size:16px;line-height:1.35}
+.ahero .ah-ann .at{font-size:14.5px;line-height:1.55;color:#3C4650;white-space:pre-line;overflow-wrap:anywhere}
+.ahero .ah-ann .at a{color:#145C94;font-weight:600}
+.ahero .ah-ann small{grid-column:2;font-size:12.5px;color:#5F5D59}
+.ahero .ah-foot{font-size:13px;color:#CFE6F8}
+@media (max-width:920px){
+  .auth.split{display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:16px}
+  .auth.split>form{align-self:center}
+  .ahero{flex-shrink:0;min-height:0;padding:22px 22px;border-radius:22px;gap:10px;width:100%;max-width:440px;align-self:center;box-sizing:border-box}
+  .ahero .ah-logo{height:32px}
+  .ahero .ah-tag{font-size:21px;max-width:none}
+  .ahero .ah-th{font-size:15px}
+  .ahero .ah-art,.ahero .ah-foot{display:none}
+  .ahero .ah-ann{margin-top:6px}
+}
 </style>
-<div class="auth" id="auth" hidden><form class="box shim-form" id="authForm" novalidate>
+<div class="auth split" id="auth" hidden><aside class="ahero" aria-label="Coconut Group">
+  <img class="ah-logo" src="/coconut-logo-white.png" alt="Coconut. Group" width="155" height="44">
+  <p class="ah-tag" lang="en" data-noi18n>Affordable Software, Unlimited Possibilities</p>
+  <p class="ah-th" data-noi18n>ซอฟต์แวร์ราคาจับต้องได้ ไร้ขีดจำกัด</p>
+  <svg class="ah-art" viewBox="0 0 560 420" aria-hidden="true"><defs><linearGradient id="ahScr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F7FBFF"/><stop offset="1" stop-color="#E6F1FB"/></linearGradient><linearGradient id="ahGl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity=".05"/></linearGradient></defs>
+    <circle cx="430" cy="90" r="120" fill="url(#ahGl)"/><circle cx="120" cy="330" r="80" fill="#fff" opacity=".07"/>
+    <g transform="rotate(-6 300 210)"><rect x="120" y="70" width="380" height="260" rx="26" fill="#0B2E52" opacity=".35" transform="translate(10 16)"/><rect x="120" y="70" width="380" height="260" rx="26" fill="#13283D"/><rect x="134" y="84" width="352" height="232" rx="16" fill="url(#ahScr)"/>
+      <rect x="148" y="98" width="214" height="16" rx="8" fill="#D6E6F5"/>
+      <g><rect x="148" y="126" width="64" height="64" rx="10" fill="#F3E2CF"/><circle cx="180" cy="160" r="15" fill="#fff"/><circle cx="180" cy="156" r="10" fill="#C8936A"/><rect x="223" y="126" width="64" height="64" rx="10" fill="#EEF4E4"/><rect x="246" y="140" width="18" height="38" rx="4" fill="#7FA35B"/><rect x="298" y="126" width="64" height="64" rx="10" fill="#FBEBD3"/><path d="M310 168c6-16 34-16 40 0z" fill="#E7A452"/>
+      <rect x="148" y="200" width="64" height="64" rx="10" fill="#FCE7EE"/><path d="M160 248l40-14v16h-40z" fill="#F7D9A8"/><rect x="223" y="200" width="64" height="64" rx="10" fill="#F6E6D4"/><circle cx="255" cy="232" r="17" fill="#D69B5E"/><rect x="298" y="200" width="64" height="64" rx="10" fill="#E3F4FA"/><rect x="321" y="214" width="18" height="38" rx="4" fill="#5BB7D9"/>
+      <rect x="148" y="274" width="214" height="28" rx="8" fill="#fff"/></g>
+      <rect x="374" y="98" width="98" height="204" rx="12" fill="#fff"/><g fill="#D6E6F5"><rect x="384" y="112" width="60" height="8" rx="4"/><rect x="384" y="132" width="78" height="7" rx="3.5"/><rect x="384" y="148" width="66" height="7" rx="3.5"/><rect x="384" y="164" width="72" height="7" rx="3.5"/></g><rect x="384" y="256" width="78" height="34" rx="10" fill="#1A73B8"/><rect x="398" y="269" width="50" height="8" rx="4" fill="#fff" opacity=".9"/></g>
+    <g transform="translate(70 250)"><ellipse cx="62" cy="122" rx="62" ry="10" fill="#0B2E52" opacity=".3"/><path d="M36 14c-6-8 6-10 0-18M56 14c-6-8 6-10 0-18" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" opacity=".7"/><path d="M14 34h96v34c0 26-21 44-48 44S14 94 14 68z" fill="#fff"/><path d="M110 46c22 0 22 30 0 30" stroke="#fff" stroke-width="9" fill="none"/><ellipse cx="62" cy="34" rx="48" ry="11" fill="#C8936A"/><path d="M62 42c-10-7-13-13-7-16 4-2 7 1 7 4 0-3 3-6 7-4 6 3 3 9-7 16z" fill="#F7E6D2"/></g>
+    <g transform="translate(450 236) rotate(8)"><path d="M0 28h76l-6 92H6z" fill="#FFB547"/><path d="M0 28h76l-1 12H1z" fill="#000" opacity=".08"/><path d="M22 28v-8a16 16 0 0 1 32 0v8" stroke="#13283D" stroke-width="5" fill="none" stroke-linecap="round"/></g>
+    <g transform="translate(470 20) rotate(10)"><path d="M0 0h70v104l-9-6-9 6-9-6-9 6-9-6-9 6-8-6-8 6z" fill="#fff"/><g fill="#C9DCEE"><rect x="10" y="14" width="40" height="6" rx="3"/><rect x="10" y="30" width="50" height="5" rx="2.5"/><rect x="10" y="42" width="44" height="5" rx="2.5"/><rect x="10" y="54" width="50" height="5" rx="2.5"/></g><rect x="10" y="72" width="50" height="8" rx="4" fill="#1A73B8"/></g>
+    <g fill="#fff"><path d="M90 60l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" opacity=".8"/><path d="M520 190l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" opacity=".7"/><circle cx="60" cy="170" r="4" opacity=".5"/><circle cx="380" cy="380" r="5" opacity=".4"/></g>
+  </svg>
+  <div class="ah-ann" id="ahAnn" role="region" aria-labelledby="ahAnnK" hidden><span class="ai"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span><span class="ak" id="ahAnnK">ประกาศจากผู้ดูแลระบบ</span><b id="ahAnnT" data-noi18n></b><span class="at" id="ahAnnX" data-noi18n></span><small id="ahAnnD"></small></div>
+  <span class="ah-foot">© Coconut Group · Coconut POS</span>
+</aside><form class="box shim-form" id="authForm" novalidate>
   <div style="display:flex;align-items:center;gap:12px"><span class="mk"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8h14l-1.2 11.2a2 2 0 0 1-2 1.8H8.2a2 2 0 0 1-2-1.8z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/></svg></span><div><img src="/coconut-logo-dark.png" alt="coconut" style="height:26px;width:auto;display:block;margin:0 0 4px"><h1>Coconut POS Retail</h1><p id="authSub">เข้าสู่ระบบสำหรับร้านค้า ร้านของชำ</p></div></div>
   <div class="msg" id="authMsg" hidden></div>
   <label for="authEmail">อีเมล หรือ ชื่อผู้ใช้<input id="authEmail" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" required></label>
@@ -967,6 +1015,19 @@ function sync(){var cover=IDS.some(function(id){var e=document.getElementById(id
 function arm(){var mo=new MutationObserver(sync);IDS.forEach(function(id){var e=document.getElementById(id);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});sync()}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arm);else arm()})();
 </script>
+<script>/* Login announcement from the platform admin (pos_platform key 'announce', public row) */
+(function(){var K='cp-announce';
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function show(a){var box=document.getElementById('ahAnn');if(!box)return;
+  if(!a||a.on===false||!(a.text||a.title)){box.hidden=true;return}
+  box.classList.toggle('warn',a.level==='warn');
+  document.getElementById('ahAnnT').textContent=a.title||'';document.getElementById('ahAnnT').hidden=!a.title;
+  document.getElementById('ahAnnX').innerHTML=esc(a.text||'').replace(/https?:\/\/[^\s<]+/g,function(u){return '<a href="'+u+'" target="_blank" rel="noopener">'+u+'</a>'});
+  var d=a.updated?new Date(a.updated):null;document.getElementById('ahAnnD').textContent=d&&!isNaN(d)?'อัปเดต '+d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'';
+  box.hidden=false}
+try{show(JSON.parse(localStorage.getItem(K)||'null'))}catch(e){}
+function load(){try{var c=window.sb||null;if(!c||!c.from)return;c.from('pos_platform').select('data').eq('key','announce').maybeSingle().then(function(r){if(r.error)return;var a=(r.data&&r.data.data)||{on:false};try{localStorage.setItem(K,JSON.stringify(a))}catch(e){}show(a)},function(){})}catch(e){}}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();})();</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>

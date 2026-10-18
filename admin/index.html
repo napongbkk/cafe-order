@@ -184,6 +184,7 @@ function loadAll(){return Promise.all([
   sb.from('pos_payments').select('*').order('created_at',{ascending:false}).limit(300).then(function(r){if(r.error)throw r.error;S.pays=r.data||[]}),
   sb.from('pos_platform').select('*').eq('key','billing').maybeSingle().then(function(r){S.plat=(r.data&&r.data.data)||{}}),
   sb.from('pos_platform').select('*').eq('key','contact').maybeSingle().then(function(r){S.contact=(r.data&&r.data.data)||{}}),
+  sb.from('pos_platform').select('*').eq('key','announce').maybeSingle().then(function(r){S.announce=(r.data&&r.data.data)||{on:false}}),
   sb.from('pos_admins').select('*').order('created_at').then(function(r){S.admins=r.data||[]}),
   sb.from('pos_applications').select('*').order('created_at',{ascending:false}).limit(300).then(function(r){S.apps=r.data||[]})
 ]).then(render).catch(function(e){toast('โหลดข้อมูลไม่สำเร็จ: '+err(e))})}
@@ -338,7 +339,7 @@ function settingsView(){var b=S.plat;
     '<button class="btn primary" type="submit">บันทึก</button></form></section>'+
   '<section class="panel"><h2>ผู้ดูแลระบบ</h2><div>'+S.admins.map(function(a){return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)"><span style="flex:1">'+esc(a.email)+'</span>'+(a.email.toLowerCase()===S.me?'<span class="chip mute">คุณ</span>':'<button class="btn sm danger" data-act="rmadmin" data-id="'+esc(a.email)+'">นำออก</button>')+'</div>'}).join('')+'</div>'+
     '<form class="form" id="adminForm" style="flex-direction:row;align-items:flex-end"><label for="ad_email" style="flex:1">เพิ่มอีเมลผู้ดูแลระบบ<input id="ad_email" type="email" required></label><button class="btn" type="submit">เพิ่ม</button></form>'+
-    '<span class="hint">ผู้ดูแลระบบเข้าทุกร้านได้ สร้าง/ระงับร้าน และอนุมัติการชำระเงิน ผู้ดูแลต้องสมัครบัญชีด้วยอีเมลนี้ที่หน้า POS ก่อน</span></section>'+contactPanel()+'</div>';
+    '<span class="hint">ผู้ดูแลระบบเข้าทุกร้านได้ สร้าง/ระงับร้าน และอนุมัติการชำระเงิน ผู้ดูแลต้องสมัครบัญชีด้วยอีเมลนี้ที่หน้า POS ก่อน</span></section>'+announcePanel()+contactPanel()+'</div>';
 
 }
 
@@ -452,6 +453,16 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='rmadmin'){if(!confirm('นำ '+d.id+' ออกจากผู้ดูแลระบบ?'))return;sb.from('pos_admins').delete().eq('email',d.id).then(function(r){toast(r.error?err(r.error):'นำออกแล้ว');loadAll()});return}
 });
 
+/* ---------- announcement shown on the Cafe and Retail sign-in pages (left brand panel) ---------- */
+function announcePanel(){var a=S.announce||{};
+  return '<section class="panel" id="annPanel"><h2>ประกาศหน้าเข้าสู่ระบบ</h2><span class="hint">แสดงในกล่อง “ประกาศจากผู้ดูแลระบบ” ทางซ้ายของหน้าเข้าสู่ระบบ Cafe และ Retail ทุกคนเห็นได้โดยไม่ต้องเข้าสู่ระบบ ลิงก์ที่ขึ้นต้นด้วย https:// จะกดได้</span>'+
+  '<form class="form" id="announceForm">'+
+  '<label for="an_title">หัวข้อ (ไม่บังคับ)<input id="an_title" maxlength="80" placeholder="เช่น ปรับปรุงระบบคืนวันเสาร์" value="'+esc(a.title||'')+'"></label>'+
+  '<label for="an_text">ข้อความ<textarea id="an_text" rows="4" maxlength="600" placeholder="เช่น ระบบจะปิดปรับปรุง 23:00–24:00 น.">'+esc(a.text||'')+'</textarea></label>'+
+  '<label for="an_level">รูปแบบ<select id="an_level"><option value="info"'+(a.level!=='warn'?' selected':'')+'>ข่าวสารทั่วไป (สีฟ้า)</option><option value="warn"'+(a.level==='warn'?' selected':'')+'>แจ้งเตือนสำคัญ (สีส้ม)</option></select></label>'+
+  '<label class="check" for="an_on" style="display:flex;gap:8px;align-items:center"><input id="an_on" type="checkbox"'+(a.on?' checked':'')+'> แสดงประกาศ</label>'+
+  (a.updated?'<span class="hint">อัปเดตล่าสุด '+esc(new Date(a.updated).toLocaleString('th-TH'))+'</span>':'')+
+  '<button class="btn primary" type="submit">บันทึกประกาศ</button></form></section>'}
 /* ---------- contact (LINE) shown on the landing page and in every shop's billing page ---------- */
 function lineUrlOf(id){id=String(id||'').trim();if(!id)return '';if(/^https?:\/\//.test(id))return id;return 'https://line.me/R/ti/p/'+encodeURIComponent(id.charAt(0)==='@'?id:'~'+id)}
 function contactPanel(){var c=S.contact||{};
@@ -490,6 +501,9 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
       closeDrawer();toast('ลบร้าน '+(j.name||slug)+' แล้ว · ข้อมูล '+(j.data||0)+' รายการ · บัญชี '+(j.accounts||0)+' · ไฟล์ '+(j.files||0));loadAll().then(function(){render()})}).catch(function(){done();toast('ลบไม่สำเร็จ ลองใหม่อีกครั้ง')});return}
   if(f.id==='mgrForm'){var sid=f.dataset.id;sb.rpc('pos_admin_set_manager',{p_sid:sid,p_email:$('#mg_email').value.trim(),p_name:$('#mg_name').value.trim()||null})
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('เปลี่ยนผู้จัดการแล้ว');loadAll().then(function(){editShop(sid)})});return}
+  if(f.id==='announceForm'){var an={title:$('#an_title').value.trim(),text:$('#an_text').value.trim(),level:$('#an_level').value,on:$('#an_on').checked,updated:new Date().toISOString()};
+    if(an.on&&!an.text&&!an.title){done();toast('ใส่ข้อความประกาศก่อน');return}
+    sb.from('pos_platform').upsert({key:'announce',data:an,updated_at:an.updated}).then(function(r){done();if(r.error){toast(err(r.error));return}S.announce=an;toast(an.on?'บันทึกและแสดงประกาศแล้ว':'บันทึกแล้ว · ซ่อนประกาศอยู่');render()});return}
   if(f.id==='contactForm'){var lid=$('#ct_line').value.trim(),url=$('#ct_url').value.trim();done();saveContact({lineId:lid,lineUrl:url||lineUrlOf(lid),note:$('#ct_note').value.trim(),phone:$('#ct_phone').value.trim(),on:$('#ct_on').checked},'บันทึกช่องทางติดต่อแล้ว');return}
   if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,product:g('product')==='retail'?'retail':'cafe',name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0)),branches:Math.max(1,Math.min(50,+g('branches')||1)),days:Math.max(0,Math.min(90,+g('days')||0)),items:Math.max(0,Math.round(+g('items')||0)),bills:Math.max(0,Math.round(+g('bills')||0))}}).map(function(p){if(p.days>0){p.price=0;p.trial=true}else delete p.days;return p}).filter(function(p){return p.name}),freeMode:$('#pf_free').checked,freeStaff:Math.max(0,Math.min(200,+$('#pf_freeStaff').value||0)),freeItems:Math.max(0,+$('#pf_freeItems').value||0),freeBills:Math.max(0,+$('#pf_freeBills').value||0),price:+$('#pf_price').value||0,priceRetail:+$('#pf_priceR').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0)),offlineDays:Math.max(1,Math.min(60,+$('#pf_offdays').value||7))};
     if(data.promptpay&&[10,13,15].indexOf(data.promptpay.length)<0){done();toast('พร้อมเพย์ต้องเป็นเบอร์ 10 หลัก หรือเลข 13/15 หลัก');return}
