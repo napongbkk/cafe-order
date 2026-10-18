@@ -52,7 +52,7 @@ page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="theme-color" content="#1f7fc0">\n<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="robots" content="noindex">\n<meta name="description" content="Coconut POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
-        + src + '\n<script src="/track.js" data-page="retail" defer></script>\n</body>\n</html>\n')
+        + src + '\n<script src="/track.js" data-page="retail" defer></script><script src="/a11y.js?v=1" defer></script>\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail'), exist_ok=True)
 open(os.path.join(ROOT, 'retail', 'index.html'), 'w', encoding='utf-8').write(page)
 print('built retail/index.html', len(page), 'bytes')
@@ -66,7 +66,7 @@ if ' logout(){' not in demo:
 demo = demo.replace(' logout(){', " logout(){location.href='/retail';return;", 1)
 BAR = ('<div style="position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:300;display:flex;gap:10px;align-items:center;'
        'padding:6px 8px 6px 14px;border-radius:999px;background:#13202c;color:#fff;font:600 13px/1.2 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 24px)">'
-       '<span>เดโม · ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น</span><a href="/retail/signup" style="background:#1A73B8;color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap">สมัครใช้งานจริง</a></div>')
+       '<span>เดโม · ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น</span><a href="/retail/signup" style="background:#105382;color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap">สมัครใช้งานจริง</a></div>')
 # The demo opens straight on the sales screen: sample data on first visit, signed in as the owner.
 AUTO = ("<script>(function(){var n=0;function go(){if(typeof A==='undefined'||typeof ST==='undefined'||!ST.ready){if(n++<100)setTimeout(go,50);return}"
         "if(!all('staff').length)A.loadSample();var o=all('staff').find(function(s){return s.role==='owner'})||all('staff')[0];"
@@ -76,7 +76,7 @@ demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="description" content="ลองใช้ Coconut POS Retail ได้ทันที ไม่ต้องสมัคร">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
-        + demo + '\n' + BAR + '\n' + AUTO + '\n<script src="/track.js" data-page="retail-demo" defer></script>\n</body>\n</html>\n')
+        + demo + '\n' + BAR + '\n' + AUTO + '\n<script src="/track.js" data-page="retail-demo" defer></script><script src="/a11y.js?v=1" defer></script>\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail', 'demo'), exist_ok=True)
 open(os.path.join(ROOT, 'retail', 'demo', 'index.html'), 'w', encoding='utf-8').write(demo)
 print('built retail/demo/index.html', len(demo), 'bytes')

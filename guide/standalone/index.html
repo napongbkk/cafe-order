@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
-:root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
+:root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#4E526C;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
   --grad:linear-gradient(120deg,#7C5CFF,#4F7BFF 50%,#22C3EE);--fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;--accent:#4F7BFF;--on-accent:#fff;--line2:#D5DAEE}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:84px}
@@ -92,8 +92,8 @@ footer a{color:rgba(255,255,255,.8)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ===== Theme: warm neutral + black + amber ===== */
-:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#5F5D59;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#1A73B8;--on-accent:#FFFFFF;--amber:#1A73B8;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
-  --grad:linear-gradient(135deg,#5EC2FF,#1A73B8);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#514F4D;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#105382;--on-accent:#FFFFFF;--amber:#105382;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
+  --grad:linear-gradient(135deg,#5EC2FF,#105382);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
 body{-webkit-font-smoothing:antialiased;font-size:15.5px}
 a{color:var(--ink)}
 h1,h2,h3{font-weight:600}
@@ -116,7 +116,7 @@ h1,h2,h3{font-weight:600}
 .toc a.on i{background:var(--amber);color:var(--amber-ink)}
 section.s{border-radius:16px}
 section.s>h2{font-size:23px}
-section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#1A73B8);color:#fff;border-radius:10px}
+section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#105382);color:#fff;border-radius:10px}
 ol.steps>li{background:var(--sunk);border-radius:12px}
 ol.steps>li::before{color:var(--ink);border-radius:8px}
 ul.ck li::before{background:var(--amber)}
@@ -126,7 +126,7 @@ ul.ck li::before{background:var(--amber)}
 .vid figcaption{background:#FFFFFF;color:var(--ink2);border-top:1px solid var(--line)}
 .tip{border-radius:12px;background:var(--amber-soft);border-color:#F3DDAA;color:#5C4208}
 .tip.info{background:var(--sunk);border-color:var(--line2);color:var(--ink2)}
-.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#19663F}
+.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#165C39}
 .card,details.q{border-radius:12px}
 table.t th{background:var(--sunk)}
 .demo{background:var(--surface);border:1px solid var(--line);border-radius:14px}
@@ -149,7 +149,7 @@ footer a{color:var(--ink)}
 
 <div class="hero"><div class="in">
   <nav class="gsw" aria-label="เลือกคู่มือ"><a href="/guide">คู่มือ Coconut POS Cafe</a><a href="/guide/retail">คู่มือ Coconut POS Retail</a><a href="/guide/standalone" aria-current="page">Stand alone</a></nav><br>
-  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#1A73B8;text-transform:uppercase">Coconut POS Stand alone</span>
+  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#105382;text-transform:uppercase">Coconut POS Stand alone</span>
   <h1>ข้อมูลอยู่ในเครื่องของร้าน ใช้ได้แม้เน็ตหลุด</h1>
   <p>ติดตั้งโปรแกรมบนเครื่องหลักของร้าน (Windows, Android หรือ iPad/iPhone) ข้อมูลขายทั้งหมดเก็บในเครื่องนั้น เครื่องอื่นในร้านที่ต่อ Wi-Fi/LAN เดียวกันเปิดผ่านเบราว์เซอร์และใช้ข้อมูลชุดเดียวกัน เข้าสู่ระบบด้วยบัญชี Coconut POS เดิม</p>
   <div class="chips">
@@ -233,6 +233,6 @@ document.addEventListener('play',function(e){document.querySelectorAll('video').
 </script>
 <script src="/i18n-en.js"></script>
 <script src="/easypos-i18n.js"></script>
-<script src="/track.js" data-page="guide-standalone" defer></script>
+<script src="/track.js" data-page="guide-standalone" defer></script><script src="/a11y.js?v=1" defer></script>
 </body>
 </html>

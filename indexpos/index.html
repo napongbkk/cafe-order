@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
 <style>
 :root{
-  --bg:#F6F7FB;--surface:#FFFFFF;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;
+  --bg:#F6F7FB;--surface:#FFFFFF;--ink:#0E1330;--ink2:#3B4266;--muted:#4E526C;--line:#E4E7F2;
   --night:#0B1024;--night2:#141A3A;
   --v:#7C5CFF;--b:#4F7BFF;--c:#22C3EE;
   --grad:linear-gradient(120deg,#7C5CFF 0%,#4F7BFF 50%,#22C3EE 100%);
@@ -171,7 +171,7 @@ section{padding:96px 0}
 .prod h3{font-size:26px;font-weight:700}
 .prod h3 small{display:block;font:500 14px/1.4 var(--fb);color:var(--muted);letter-spacing:0}
 .prod .st{margin-left:auto}
-.st.live{background:#E8FBF1;color:#047857}
+.st.live{background:#E8FBF1;color:#036046}
 .st.live i{width:7px;height:7px;border-radius:50%;background:#10B981}
 .st.dev{background:#FFF6E0;color:#A16207}
 .prod ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
@@ -186,7 +186,7 @@ section{padding:96px 0}
 .prod.cafe .btn.main{background:linear-gradient(135deg,var(--cafe),var(--cafe2));color:#fff;box-shadow:0 10px 22px -10px rgba(244,63,94,.7)}
 .prod.retail .btn.main{background:linear-gradient(135deg,var(--retail),var(--retail2));color:#fff}
 .loginbox{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;font-size:14px}
-.prod.cafe .loginbox{background:var(--cafe-soft);color:#9A3412}
+.prod.cafe .loginbox{background:var(--cafe-soft);color:#923111}
 .prod.retail .loginbox{background:var(--retail-soft);color:#065F46}
 .loginbox code{font:600 13px/1 ui-monospace,Menlo,monospace;background:rgba(255,255,255,.7);padding:4px 8px;border-radius:7px}
 
@@ -316,6 +316,7 @@ footer a:hover{color:#fff}
 @keyframes popin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .toast{animation:popin .6s ease-out 1 both}
 footer nav a,footer .wrap>span a{display:inline-flex;align-items:center;min-height:24px;padding:2px 0}
+/* WCAG AAA: white text on buttons needs 7:1 */.btn.grad{background:linear-gradient(120deg,#5B43BA 0%,#3552AB 50%,#116075 100%)}.prod.cafe .btn.main{background:linear-gradient(135deg,#8C4326,#A12A3E)}.prod.retail .btn.main{background:linear-gradient(135deg,#096446,#086161)}
 </style>
 </head>
 <body class="no-js">
@@ -576,6 +577,6 @@ fetch(SB+'/rest/v1/rpc/pos_public_billing',{method:'POST',headers:{apikey:KEY,Au
 .then(function(r){return r.json()}).then(function(b){if(b&&b.freeMode){freeMode(b);return}var l=((b&&b.packages)||[]).filter(function(p){return Number(p.price)>0});if(!l.length)return;PK=l;drawLongs()}).catch(function(){});
 })();
 </script>
-<script src="/track.js" data-page="landing" defer></script>
+<script src="/track.js" data-page="landing" defer></script><script src="/a11y.js?v=1" defer></script>
 </body>
 </html>

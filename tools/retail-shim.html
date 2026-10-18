@@ -1,11 +1,11 @@
 <!-- Coconut POS Retail runtime: Supabase login, per-shop data store, realtime, storage, staff accounts and billing.
      tools/build_retail.py splices the billing and data-store parts from tools/standalone-shim.html (shared with Coconut POS Cafe). -->
 <style>
-.auth,.lockwrap,.bill,.acctui{--sunk:var(--surface2,#f2f4f7);--warn-soft:#FFF4D6;--warn-ink:#7A4E00;--ok-soft:#E3F6EA;--ok-ink:#1D6B3A;--bad-soft:#FDE4E1;--bad-ink:#A12020}
+.auth,.lockwrap,.bill,.acctui{--sunk:var(--surface2,#f2f4f7);--warn-soft:#FFF4D6;--warn-ink:#734900;--ok-soft:#E3F6EA;--ok-ink:#195C32;--bad-soft:#FDE4E1;--bad-ink:#941D1D}
 .auth{position:fixed;inset:0;z-index:200;background:var(--bg,#eef3f8);display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow-y:auto}
 .auth .box{width:100%;max-width:420px;background:var(--surface,#fff);border:1px solid var(--line,#dde3ea);border-radius:20px;padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 24px 60px -30px rgba(15,40,70,.35)}
 .auth h1{margin:0;font-size:22px;color:var(--ink,#13202c)}
-.auth p{margin:0;color:var(--muted,#5b6875);font-size:14px}
+.auth p{margin:0;color:var(--muted,#4A545F);font-size:14px}
 .auth .msg{padding:10px 12px;border-radius:12px;background:var(--warn-soft);color:var(--warn-ink);font-size:14px}
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
 .auth .msg a{color:inherit;font-weight:700}
@@ -13,15 +13,15 @@
 .auth .links .lk{color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
 .auth .links button{border:0;background:none;color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;cursor:pointer}
 .auth .foot{display:flex;justify-content:center;gap:16px;font-size:14px}
-.auth .foot a{color:var(--accent,#1A73B8);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
-.auth .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#2a9df4,#1d6fb8);flex-shrink:0}
+.auth .foot a{color:var(--accent,#105382);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.auth .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#105382,#1d6fb8);flex-shrink:0}
 .shim-form{display:flex;flex-direction:column;gap:12px}
 .shim-form label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500;color:var(--ink,#13202c)}
 .shim-form input,.shim-form select{min-height:44px;font-size:16px}
 .sbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line,#dde3ea);background:var(--surface,#fff);color:var(--ink,#13202c);font:inherit;font-weight:600;cursor:pointer;text-decoration:none}
 .sbtn.pri{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff)}
 .sbtn.sm{min-height:36px;padding:0 12px;font-size:14px;border-radius:10px}
-.sbtn.danger{color:#A12020;border-color:#f1c4bf}
+.sbtn.danger{color:#941D1D;border-color:#f1c4bf}
 .sbtn:disabled{opacity:.55;cursor:default}
 .lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg,#eef3f8);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
 .lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -31,23 +31,23 @@
 .bill-card h3{margin:0;font-size:16px}
 .bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .bill-stat>div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
-.bill-stat small{color:var(--muted,#5b6875);font-size:12px}
+.bill-stat small{color:var(--muted,#4A545F);font-size:13px}
 .bill-stat b{font-size:18px}
 .bchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ok-soft);color:var(--ok-ink)}
-.bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted,#5b6875)}
+.bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted,#4A545F)}
 .bill-pay{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px;align-items:start}
 .bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center;border:1px solid var(--line,#dde3ea)}
 .bill-months{display:flex;gap:6px;flex-wrap:wrap}
 .bill-ct{display:grid!important;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}.bill-ct .ct-q img{width:150px;height:150px;object-fit:contain;background:#fff;border-radius:12px;border:1px solid var(--line);padding:6px}.bill-ct .ct-q:empty{display:none}.bill-ct:has(.ct-q:empty){grid-template-columns:minmax(0,1fr)}.bill-ct .ct-q.gen{background:#fff;border-radius:12px;padding:6px;width:150px;height:150px;border:1px solid var(--line)}.bill-ct h3{margin:0 0 4px}.bill-ct p{margin:0 0 8px;color:var(--muted);font-size:14px}.bill-ct .ct-id{font-size:14px;margin-bottom:4px}.bill-ct .ct-id b{color:#06A847}.bill-ct .ct-add{display:inline-flex;align-items:center;justify-content:center;margin-top:6px;min-height:42px;padding:0 18px;border-radius:12px;background:#06C755;color:#fff;font-weight:700;text-decoration:none}@media (max-width:560px){.bill-ct{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}}
-.bill-pks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}.bill-pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.bill-pk b{font-size:15px}.bill-pk .pp{font-size:18px;font-weight:800}.bill-pk small{color:var(--muted);font-size:12px;line-height:1.35}.bill-pk[aria-pressed=true]{border-color:var(--accent,#E39B2D);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#E39B2D) 22%,transparent)}.bill-pk .cur{font-size:11px;font-weight:700;color:var(--ok-ink,#166534);background:var(--ok-soft,#dcfce7);padding:1px 8px;border-radius:999px}
+.bill-pks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}.bill-pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.bill-pk b{font-size:15px}.bill-pk .pp{font-size:18px;font-weight:800}.bill-pk small{color:var(--muted);font-size:13px;line-height:1.35}.bill-pk[aria-pressed=true]{border-color:var(--accent,#E39B2D);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#E39B2D) 22%,transparent)}.bill-pk .cur{font-size:13px;font-weight:700;color:var(--ok-ink,#166534);background:var(--ok-soft,#dcfce7);padding:1px 8px;border-radius:999px}
 .bill .chip{border:1px solid var(--line,#dde3ea);background:var(--surface,#fff);border-radius:999px;padding:6px 14px;cursor:pointer;font:inherit;color:var(--ink,#13202c)}
 .bill .chip[aria-pressed=true]{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff)}
 .bill .form{display:flex;flex-direction:column;gap:10px}
 .bill .form label{display:flex;flex-direction:column;gap:5px;font-size:14px}
 .bill .btn.primary{background:var(--accent,#1f7fc0);border-color:transparent;color:var(--accent-ink,#fff);min-height:46px;font-weight:600}
-.bill .hint,.acctui .hint{font-size:13px;color:var(--muted,#5b6875)}
+.bill .hint,.acctui .hint{font-size:13px;color:var(--muted,#4A545F)}
 .bill .note,.acctui .note{padding:10px 12px;border-radius:12px;background:var(--sunk);font-size:14px}
-.bill .grp-t{display:block;font-size:13px;color:var(--muted,#5b6875);margin-bottom:4px}
+.bill .grp-t{display:block;font-size:13px;color:var(--muted,#4A545F);margin-bottom:4px}
 .bill-hist{display:flex;flex-direction:column}
 .bill-hist .r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#dde3ea);font-size:14px;flex-wrap:wrap}
 .bill-hist .r:last-child{border-bottom:0}
@@ -62,7 +62,7 @@
 .acctui .ugrp input{border:0!important;border-radius:0!important}
 .acctui .mrow{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line,#dde3ea);flex-wrap:wrap}
 .acctui .mrow .info{flex:1;min-width:160px;display:flex;flex-direction:column}
-.acctui .mrow small{color:var(--muted,#5b6875)}
+.acctui .mrow small{color:var(--muted,#4A545F)}
 .adminbar{position:fixed;left:50%;transform:translateX(-50%);bottom:10px;z-index:150;display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:#13202c;color:#fff;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .adminbar a{color:#9fd3ff}
 </style>
@@ -91,7 +91,7 @@ window.POS_STANDALONE=true;
 var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
-if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#A12020">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
+if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#941D1D">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
 var STAFF_DOMAIN='staff.cafe-pos.app';

@@ -20,7 +20,7 @@
 .bill-card h3{margin:0;font-size:16px}
 .bill-stat{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .bill-stat > div{background:var(--sunk);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
-.bill-stat small{color:var(--muted);font-size:12px}
+.bill-stat small{color:var(--muted);font-size:13px}
 .bill-stat b{font-size:18px}
 .bchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700;background:var(--ok-soft);color:var(--ok-ink)}
 .bchip.warn{background:var(--warn-soft);color:var(--warn-ink)}.bchip.bad{background:var(--bad-soft);color:var(--bad-ink)}.bchip.mute{background:var(--sunk);color:var(--muted)}
@@ -28,7 +28,7 @@
 .bill-qr{background:#fff;border-radius:12px;padding:10px;display:grid;place-items:center;min-height:200px;color:#666;font-size:13px;text-align:center}
 .bill-months{display:flex;gap:6px;flex-wrap:wrap}
 .bill-ct{display:grid!important;grid-template-columns:150px minmax(0,1fr);gap:16px;align-items:center}.bill-ct .ct-q img{width:150px;height:150px;object-fit:contain;background:#fff;border-radius:12px;border:1px solid var(--line);padding:6px}.bill-ct .ct-q:empty{display:none}.bill-ct:has(.ct-q:empty){grid-template-columns:minmax(0,1fr)}.bill-ct .ct-q.gen{background:#fff;border-radius:12px;padding:6px;width:150px;height:150px;border:1px solid var(--line)}.bill-ct h3{margin:0 0 4px}.bill-ct p{margin:0 0 8px;color:var(--muted);font-size:14px}.bill-ct .ct-id{font-size:14px;margin-bottom:4px}.bill-ct .ct-id b{color:#06A847}.bill-ct .ct-add{display:inline-flex;align-items:center;justify-content:center;margin-top:6px;min-height:42px;padding:0 18px;border-radius:12px;background:#06C755;color:#fff;font-weight:700;text-decoration:none}@media (max-width:560px){.bill-ct{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center}}
-.bill-pks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}.bill-pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.bill-pk b{font-size:15px}.bill-pk .pp{font-size:18px;font-weight:800}.bill-pk small{color:var(--muted);font-size:12px;line-height:1.35}.bill-pk[aria-pressed=true]{border-color:var(--accent,#E39B2D);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#E39B2D) 22%,transparent)}.bill-pk .cur{font-size:11px;font-weight:700;color:var(--ok-ink,#166534);background:var(--ok-soft,#dcfce7);padding:1px 8px;border-radius:999px}
+.bill-pks{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px}.bill-pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}.bill-pk b{font-size:15px}.bill-pk .pp{font-size:18px;font-weight:800}.bill-pk small{color:var(--muted);font-size:13px;line-height:1.35}.bill-pk[aria-pressed=true]{border-color:var(--accent,#E39B2D);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent,#E39B2D) 22%,transparent)}.bill-pk .cur{font-size:13px;font-weight:700;color:var(--ok-ink,#166534);background:var(--ok-soft,#dcfce7);padding:1px 8px;border-radius:999px}
 .bill-hist{display:flex;flex-direction:column}
 .bill-hist .r{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;flex-wrap:wrap}
 .bill-hist .r:last-child{border-bottom:0}
@@ -62,7 +62,7 @@ window.POS_STANDALONE=true;
 var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
-if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#A12020">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
+if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#941D1D">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
 var STAFF_DOMAIN='staff.cafe-pos.app';

@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
 <style>
-:root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
+:root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#4E526C;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
   --grad:linear-gradient(120deg,#7C5CFF,#4F7BFF 50%,#22C3EE);--fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;--accent:#4F7BFF;--on-accent:#fff;--line2:#D5DAEE}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:84px}
@@ -92,8 +92,8 @@ footer a{color:rgba(255,255,255,.8)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ===== Theme: warm neutral + black + amber ===== */
-:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#5F5D59;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#1A73B8;--on-accent:#FFFFFF;--amber:#1A73B8;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
-  --grad:linear-gradient(135deg,#5EC2FF,#1A73B8);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#514F4D;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#105382;--on-accent:#FFFFFF;--amber:#105382;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
+  --grad:linear-gradient(135deg,#5EC2FF,#105382);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
 body{-webkit-font-smoothing:antialiased;font-size:15.5px}
 a{color:var(--ink)}
 h1,h2,h3{font-weight:600}
@@ -116,7 +116,7 @@ h1,h2,h3{font-weight:600}
 .toc a.on i{background:var(--amber);color:var(--amber-ink)}
 section.s{border-radius:16px}
 section.s>h2{font-size:23px}
-section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#1A73B8);color:#fff;border-radius:10px}
+section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#105382);color:#fff;border-radius:10px}
 ol.steps>li{background:var(--sunk);border-radius:12px}
 ol.steps>li::before{color:var(--ink);border-radius:8px}
 ul.ck li::before{background:var(--amber)}
@@ -126,7 +126,7 @@ ul.ck li::before{background:var(--amber)}
 .vid figcaption{background:#FFFFFF;color:var(--ink2);border-top:1px solid var(--line)}
 .tip{border-radius:12px;background:var(--amber-soft);border-color:#F3DDAA;color:#5C4208}
 .tip.info{background:var(--sunk);border-color:var(--line2);color:var(--ink2)}
-.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#19663F}
+.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#165C39}
 .card,details.q{border-radius:12px}
 table.t th{background:var(--sunk)}
 .demo{background:var(--surface);border:1px solid var(--line);border-radius:14px}
@@ -149,7 +149,7 @@ footer a{color:var(--ink)}
 
 <div class="hero"><div class="in">
   <nav class="gsw" aria-label="เลือกคู่มือ"><a href="/guide" aria-current="page">คู่มือ Coconut POS Cafe</a><a href="/guide/retail">คู่มือ Coconut POS Retail</a><a href="/guide/standalone">Stand alone</a></nav><br>
-  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#1A73B8;text-transform:uppercase"><span lang="th">คู่มือการใช้งาน</span><span lang="en">User guide</span></span>
+  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#105382;text-transform:uppercase"><span lang="th">คู่มือการใช้งาน</span><span lang="en">User guide</span></span>
   <h1><span lang="th">คู่มือ Coconut POS Cafe แบบละเอียด</span><span lang="en">The complete Coconut POS Cafe guide</span></h1>
   <p><span lang="th">ทุกขั้นตอนตั้งแต่สมัคร ตั้งค่าร้าน ขายหน้าร้าน จนถึงปิดรอบและต่ออายุ พร้อมวิดีโอสอนทีละขั้น ดูวิดีโอแล้วลองทำตามในเดโมได้ทันที ไม่ต้องสมัคร</span><span lang="en">Every step from signing up and setting up your shop to selling, closing the shift and renewing, with step-by-step videos. Watch a video, then try it in the demo with no sign-up.</span></p>
   <div class="chips">
@@ -157,7 +157,7 @@ footer a{color:var(--ink)}
     <a href="#sell"><span lang="th">ขายหน้าร้าน</span><span lang="en">Selling</span></a>
     <a href="#mobile"><span lang="th">Mobile Order</span><span lang="en">Mobile Order</span></a>
     <a href="#staff"><span lang="th">พนักงาน</span><span lang="en">Staff</span></a>
-    <a href="#billing"><span lang="th">ค่าบริการ</span><span lang="en">Billing</span></a>
+    <a href="#billing"><span lang="th">ค่าบริการ</span><span lang="en">Billing</span></a><a href="#glossary"><span lang="th">คำศัพท์</span><span lang="en">Glossary</span></a>
     <a href="/demo"><span lang="th">▶ ลองใช้เดโม</span><span lang="en">▶ Try the demo</span></a>
   </div>
 </div></div>
@@ -363,6 +363,10 @@ footer a{color:var(--ink)}
 <details class="q"><summary><span lang="th">ติดต่อทีมงาน</span><span lang="en">Contacting us</span></summary><p><span lang="th">แจ้งปัญหาหรือสอบถามผ่านช่องทางที่ระบุในอีเมลยืนยันการเปิดร้าน หรือผ่านหน้าค่าบริการในระบบ</span><span lang="en">Use the contact details in your shop confirmation email, or the billing page in the app.</span></p></details>
 </section>
 
+<section class="s" id="glossary"><h2><i>15</i><span lang="th">คำศัพท์และตัวย่อ</span><span lang="en">Glossary and abbreviations</span></h2>
+<p class="lead"><span lang="th">ความหมายของคำและตัวย่อที่ใช้ในระบบ</span><span lang="en">What the terms and abbreviations in the system mean.</span></p>
+<table><thead><tr><th><span lang="th">คำ</span><span lang="en">Term</span></th><th><span lang="th">ความหมาย</span><span lang="en">Meaning</span></th></tr></thead><tbody><tr><td><b><abbr title="Point of Sale">POS</abbr></b></td><td><span lang="th">ระบบขายหน้าร้าน เครื่องที่ใช้คิดเงินและออกใบเสร็จ</span><span lang="en">Point of sale: the till used to ring up sales and print receipts</span></td></tr><tr><td><b><abbr title="Personal Identification Number">PIN</abbr></b></td><td><span lang="th">รหัสตัวเลข 4 หลักที่พนักงานใช้เข้าเครื่องขาย</span><span lang="en">A 4-digit number staff use to sign in to the till</span></td></tr><tr><td><b><abbr title="Quick Response code">QR</abbr></b></td><td><span lang="th">รหัสสี่เหลี่ยมที่สแกนด้วยกล้องมือถือ ใช้รับเงินพร้อมเพย์และเปิดเมนูสั่งอาหาร</span><span lang="en">A square code scanned with a phone camera, used for PromptPay and the order menu</span></td></tr><tr><td><b><abbr title="Value Added Tax">VAT</abbr></b></td><td><span lang="th">ภาษีมูลค่าเพิ่ม (ไทย 7%) ตั้งได้ว่ารวมในราคาหรือบวกเพิ่ม</span><span lang="en">Value added tax (7% in Thailand), included in or added to prices</span></td></tr><tr><td><b><abbr title="Stock Keeping Unit">SKU</abbr></b></td><td><span lang="th">รหัสสินค้าของร้าน ใช้แยกสินค้าแต่ละชนิดหรือแต่ละขนาด</span><span lang="en">Your own product code for each item or size</span></td></tr><tr><td><b><abbr title="Shift">กะ</abbr></b></td><td><span lang="th">ช่วงเวลาทำงานของแคชเชียร์ เปิดกะพร้อมเงินทอนตั้งต้น ปิดกะเพื่อนับเงินในลิ้นชัก</span><span lang="en">A cashier’s working period: open with starting change, close to count the drawer</span></td></tr><tr><td><b><abbr title="Sales round">รอบการขาย</abbr></b></td><td><span lang="th">ช่วงการขายหนึ่งวันหรือหนึ่งรอบ ใช้สรุปยอดตอนปิดร้าน</span><span lang="en">One day or period of sales, totalled when you close</span></td></tr><tr><td><b><abbr title="Grace period">ระยะผ่อนผัน</abbr></b></td><td><span lang="th">จำนวนวันหลังแพ็กเกจหมดอายุที่ยังใช้งานได้ก่อนระบบล็อก</span><span lang="en">Days you can keep using the system after your package expires, before it locks</span></td></tr><tr><td><b><abbr title="Mobile Order">Mobile Order</abbr></b></td><td><span lang="th">ลูกค้าสแกน QR ที่โต๊ะแล้วสั่งอาหารเองจากมือถือ</span><span lang="en">Guests scan the table QR and order from their own phone</span></td></tr></tbody></table>
+</section>
 </main>
 </div>
 <footer><span lang="th">© Coconut POS · <a href="/indexpos">หน้าแรก</a> · <a href="/demo">เดโม</a> · <a href="/signup">สมัครทดลองใช้ฟรี</a> · <a href="/pos">เข้าสู่ระบบ Cafe</a></span><span lang="en">© Coconut POS · <a href="/indexpos">Home</a> · <a href="/demo">Demo</a> · <a href="/signup">Free trial</a> · <a href="/pos">Cafe log in</a></span></footer>
@@ -382,6 +386,6 @@ document.addEventListener('play',function(e){document.querySelectorAll('video').
 </script>
 <script src="/i18n-en.js"></script>
 <script src="/easypos-i18n.js"></script>
-<script src="/track.js" data-page="guide" defer></script>
+<script src="/track.js" data-page="guide" defer></script><script src="/a11y.js?v=1" defer></script>
 </body>
 </html>
