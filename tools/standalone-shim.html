@@ -109,7 +109,13 @@ function check(){
           else if(a&&a.status==='rejected')showAuth('คำขอเปิดร้าน “'+esc(a.shop_name)+'” ไม่ได้รับการอนุมัติ'+(a.admin_note?' · '+esc(a.admin_note):'')+' <a href="/signup">สมัครใหม่</a>',true,true);
           else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านเพิ่มอีเมลนี้ที่ ตั้งค่า › พนักงาน · ถ้าต้องการเปิดร้านใหม่ <a href="/signup">สมัครเปิดร้าน</a>',true,true)});return}
       if(d.shop.product==='retail'&&!d.admin){location.replace('/retail');return}
-      if(d.shop.edition==='offline'&&!d.admin){showAuth('ร้าน “'+esc(d.shop.name)+'” ใช้ Coconut POS แบบ Stand alone ข้อมูลขายอยู่ในเครื่องของร้าน ให้เปิดโปรแกรม Coconut POS ในเครื่องหลักของร้าน หรือเปิดที่อยู่ของเครื่องหลักในวง Wi-Fi เดียวกัน',true,true);return}
+      if(d.shop.edition==='offline'&&!d.admin){
+        if(d.role!=='manager'){showAuth('ร้าน “'+esc(d.shop.name)+'” ใช้ Coconut POS แบบ Stand alone ข้อมูลขายอยู่ในเครื่องของร้าน ให้เปิดโปรแกรม Coconut POS ในเครื่องหลักของร้าน หรือเปิดที่อยู่ของเครื่องหลักในวง Wi-Fi เดียวกัน',true,true);return}
+        // Stand alone shop: the website is only for the monthly fee (renew / change package); selling happens on the shop's own machine.
+        SID=d.shop.id;role='manager';$('#auth').hidden=true;$('#lockScreen').hidden=false;
+        $('#lockScreen h1').textContent='ค่าบริการร้าน '+d.shop.name+' (Stand alone)';
+        $('#lockWhy').textContent='ร้านนี้ใช้โปรแกรม Coconut POS ในเครื่องของร้าน หน้านี้ใช้ชำระค่าบริการและเปลี่ยนแพ็กเกจ หลังผู้ดูแลระบบอนุมัติ เปิดโปรแกรมในร้านแล้วกด “ตรวจสอบสถานะ” ที่ ตั้งค่า › ค่าบริการรายเดือน';
+        var go2=function(){renderBilling($('#lockBilling'))};if(typeof QRCode==='undefined')window.addEventListener('load',go2);else go2();return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
       if(d.shop.locked&&!d.admin){showLock();return}
