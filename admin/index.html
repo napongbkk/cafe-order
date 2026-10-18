@@ -443,6 +443,8 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='approve'||a==='reject'){b.disabled=true;var note=($('#pn_'+d.id)||{}).value||null;
     sb.rpc('pos_pay_review',{p_id:d.id,p_approve:a==='approve',p_note:note}).then(function(r){if(r.error){b.disabled=false;toast(err(r.error));return}toast(a==='approve'?'อนุมัติแล้ว ใช้งานได้ถึง '+dTh(r.data.expiresAt):'ไม่อนุมัติแล้ว');loadAll()});return}
   if(a==='memtoggle'){S.accts=null;sb.from('pos_members').update({active:d.v==='1'}).eq('email',d.id).then(function(r){toast(r.error?err(r.error):'บันทึกแล้ว');loadMembers(d.shop);loadAll()});return}
+  if(a==='anndur'){var dd=+b.dataset.d,f=$('#an_from'),t=$('#an_to');if(!dd){t.value='';return}var st=f.value?new Date(f.value):new Date();t.value=dtLocal(new Date(st.getTime()+dd*864e5).toISOString());return}
+  if(a==='annstop'){if(!confirm('เลิกประกาศนี้? ประกาศจะหายจากหน้าเข้าสู่ระบบทันที'))return;var an=Object.assign({},S.announce||{},{on:false,updated:new Date().toISOString()});sb.from('pos_platform').upsert({key:'announce',data:an,updated_at:an.updated}).then(function(r){if(r.error){toast(err(r.error));return}S.announce=an;toast('เลิกประกาศแล้ว');render()});return}
   if(a==='ctqrdel'){var pth=(S.contact||{}).qrPath;if(pth)sb.storage.from('pos-menu').remove([pth]);saveContact({qr:'',qrPath:''},'ลบรูป QR แล้ว');return}
   if(a==='pkadd'){$('#pkRows').insertAdjacentHTML('beforeend',pkRow({}));return}
   if(a==='pkdel'){b.closest('.pkrow').remove();return}
@@ -455,14 +457,19 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
 
 /* ---------- announcement shown on the Cafe and Retail sign-in pages (left brand panel) ---------- */
 function announcePanel(){var a=S.announce||{};
-  return '<section class="panel" id="annPanel"><h2>ประกาศหน้าเข้าสู่ระบบ</h2><span class="hint">แสดงในกล่อง “ประกาศจากผู้ดูแลระบบ” ทางซ้ายของหน้าเข้าสู่ระบบ Cafe และ Retail ทุกคนเห็นได้โดยไม่ต้องเข้าสู่ระบบ ลิงก์ที่ขึ้นต้นด้วย https:// จะกดได้</span>'+
+  return '<section class="panel" id="annPanel"><h2>ประกาศหน้าเข้าสู่ระบบ</h2><span class="hint">แสดงในกล่อง “ประกาศ” ทางซ้ายของหน้าเข้าสู่ระบบ Cafe และ Retail ทุกคนเห็นได้โดยไม่ต้องเข้าสู่ระบบ ลิงก์ที่ขึ้นต้นด้วย https:// จะกดได้</span>'+
   '<form class="form" id="announceForm">'+
   '<label for="an_title">หัวข้อ (ไม่บังคับ)<input id="an_title" maxlength="80" placeholder="เช่น ปรับปรุงระบบคืนวันเสาร์" value="'+esc(a.title||'')+'"></label>'+
   '<label for="an_text">ข้อความ<textarea id="an_text" rows="4" maxlength="600" placeholder="เช่น ระบบจะปิดปรับปรุง 23:00–24:00 น.">'+esc(a.text||'')+'</textarea></label>'+
   '<label for="an_level">รูปแบบ<select id="an_level"><option value="info"'+(a.level!=='warn'?' selected':'')+'>ข่าวสารทั่วไป (สีฟ้า)</option><option value="warn"'+(a.level==='warn'?' selected':'')+'>แจ้งเตือนสำคัญ (สีส้ม)</option></select></label>'+
-  '<label class="check" for="an_on" style="display:flex;gap:8px;align-items:center"><input id="an_on" type="checkbox"'+(a.on?' checked':'')+'> แสดงประกาศ</label>'+
-  (a.updated?'<span class="hint">อัปเดตล่าสุด '+esc(new Date(a.updated).toLocaleString('th-TH'))+'</span>':'')+
-  '<button class="btn primary" type="submit">บันทึกประกาศ</button></form></section>'}
+  '<div class="two" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px"><label for="an_from">เริ่มแสดง (ไม่บังคับ)<input id="an_from" type="datetime-local" value="'+esc(dtLocal(a.from))+'"></label><label for="an_to">สิ้นสุด (ไม่บังคับ)<input id="an_to" type="datetime-local" value="'+esc(dtLocal(a.to))+'"></label></div>'+
+  '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><span class="hint" style="margin:0">แสดงนาน:</span>'+[[1,'1 วัน'],[3,'3 วัน'],[7,'7 วัน'],[30,'30 วัน'],[0,'ไม่กำหนด']].map(function(x){return '<button class="btn sm" type="button" data-act="anndur" data-d="'+x[0]+'">'+x[1]+'</button>'}).join('')+'</div>'+
+  '<span class="hint">เว้นว่างไว้ = แสดงทันทีและไม่มีวันหมดอายุ เมื่อถึงเวลาสิ้นสุด ประกาศจะหายไปเอง</span>'+
+  '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="hint" style="margin:0">สถานะ:</span>'+annStatus(a)+(a.updated?'<span class="hint" style="margin:0">· อัปเดตล่าสุด '+esc(new Date(a.updated).toLocaleString('th-TH'))+'</span>':'')+'</div>'+
+  '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" type="submit">บันทึกและแสดงประกาศ</button>'+(a.on?'<button class="btn" type="button" data-act="annstop">เลิกประกาศ</button>':'')+'</div></form></section>'}
+function dtLocal(v){if(!v)return '';var d=new Date(v);if(isNaN(d))return '';var z=function(n){return String(n).padStart(2,'0')};return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate())+'T'+z(d.getHours())+':'+z(d.getMinutes())}
+function annStatus(a){var now=Date.now(),t,c;if(!a||!a.on||!(a.text||a.title)){t='ไม่ได้แสดง';c='#5F5D59'}else if(a.from&&now<Date.parse(a.from)){t='รอเริ่มแสดง '+new Date(a.from).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'});c='#8A5200'}else if(a.to&&now>Date.parse(a.to)){t='หมดเวลาแล้ว';c='#5F5D59'}else{t='กำลังแสดง'+(a.to?' ถึง '+new Date(a.to).toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'}):'');c='#1B6B3A'}
+  return '<b style="color:'+c+';font-size:14px">'+esc(t)+'</b>'}
 /* ---------- contact (LINE) shown on the landing page and in every shop's billing page ---------- */
 function lineUrlOf(id){id=String(id||'').trim();if(!id)return '';if(/^https?:\/\//.test(id))return id;return 'https://line.me/R/ti/p/'+encodeURIComponent(id.charAt(0)==='@'?id:'~'+id)}
 function contactPanel(){var c=S.contact||{};
@@ -501,9 +508,10 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
       closeDrawer();toast('ลบร้าน '+(j.name||slug)+' แล้ว · ข้อมูล '+(j.data||0)+' รายการ · บัญชี '+(j.accounts||0)+' · ไฟล์ '+(j.files||0));loadAll().then(function(){render()})}).catch(function(){done();toast('ลบไม่สำเร็จ ลองใหม่อีกครั้ง')});return}
   if(f.id==='mgrForm'){var sid=f.dataset.id;sb.rpc('pos_admin_set_manager',{p_sid:sid,p_email:$('#mg_email').value.trim(),p_name:$('#mg_name').value.trim()||null})
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('เปลี่ยนผู้จัดการแล้ว');loadAll().then(function(){editShop(sid)})});return}
-  if(f.id==='announceForm'){var an={title:$('#an_title').value.trim(),text:$('#an_text').value.trim(),level:$('#an_level').value,on:$('#an_on').checked,updated:new Date().toISOString()};
-    if(an.on&&!an.text&&!an.title){done();toast('ใส่ข้อความประกาศก่อน');return}
-    sb.from('pos_platform').upsert({key:'announce',data:an,updated_at:an.updated}).then(function(r){done();if(r.error){toast(err(r.error));return}S.announce=an;toast(an.on?'บันทึกและแสดงประกาศแล้ว':'บันทึกแล้ว · ซ่อนประกาศอยู่');render()});return}
+  if(f.id==='announceForm'){var fv=$('#an_from').value,tv=$('#an_to').value,an={title:$('#an_title').value.trim(),text:$('#an_text').value.trim(),level:$('#an_level').value,on:true,from:fv?new Date(fv).toISOString():'',to:tv?new Date(tv).toISOString():'',updated:new Date().toISOString()};
+    if(!an.text&&!an.title){done();toast('ใส่ข้อความประกาศก่อน');return}
+    if(an.from&&an.to&&Date.parse(an.to)<=Date.parse(an.from)){done();toast('เวลาสิ้นสุดต้องหลังเวลาเริ่ม');return}
+    sb.from('pos_platform').upsert({key:'announce',data:an,updated_at:an.updated}).then(function(r){done();if(r.error){toast(err(r.error));return}S.announce=an;toast(an.from&&Date.now()<Date.parse(an.from)?'บันทึกแล้ว · จะเริ่มแสดงตามเวลาที่ตั้งไว้':'บันทึกและแสดงประกาศแล้ว');render()});return}
   if(f.id==='contactForm'){var lid=$('#ct_line').value.trim(),url=$('#ct_url').value.trim();done();saveContact({lineId:lid,lineUrl:url||lineUrlOf(lid),note:$('#ct_note').value.trim(),phone:$('#ct_phone').value.trim(),on:$('#ct_on').checked},'บันทึกช่องทางติดต่อแล้ว');return}
   if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,product:g('product')==='retail'?'retail':'cafe',name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0)),branches:Math.max(1,Math.min(50,+g('branches')||1)),days:Math.max(0,Math.min(90,+g('days')||0)),items:Math.max(0,Math.round(+g('items')||0)),bills:Math.max(0,Math.round(+g('bills')||0))}}).map(function(p){if(p.days>0){p.price=0;p.trial=true}else delete p.days;return p}).filter(function(p){return p.name}),freeMode:$('#pf_free').checked,freeStaff:Math.max(0,Math.min(200,+$('#pf_freeStaff').value||0)),freeItems:Math.max(0,+$('#pf_freeItems').value||0),freeBills:Math.max(0,+$('#pf_freeBills').value||0),price:+$('#pf_price').value||0,priceRetail:+$('#pf_priceR').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0)),offlineDays:Math.max(1,Math.min(60,+$('#pf_offdays').value||7))};
     if(data.promptpay&&[10,13,15].indexOf(data.promptpay.length)<0){done();toast('พร้อมเพย์ต้องเป็นเบอร์ 10 หลัก หรือเลข 13/15 หลัก');return}
