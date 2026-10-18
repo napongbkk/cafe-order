@@ -133,6 +133,7 @@ h1{font-weight:600;letter-spacing:-.01em}
     <button class="nav" data-go="apps">คำขอเปิดร้าน<span class="badge" id="appBadge" hidden></span></button>
     <button class="nav" data-go="shops">ร้านค้า</button>
     <button class="nav" data-go="users">บัญชีผู้ใช้</button>
+    <button class="nav" data-go="offline">Stand alone</button>
     <button class="nav" data-go="stats">สถิติผู้เข้าใช้</button>
     <button class="nav" data-go="pays">การชำระเงิน<span class="badge" id="payBadge" hidden></span></button>
     <button class="nav" data-go="settings">ตั้งค่าระบบ</button>
@@ -174,7 +175,7 @@ $('#lgOut').addEventListener('click',out);$('#logoutBtn').addEventListener('clic
 function start(){sb.auth.getSession().then(function(r){if(!r.data.session){showLogin('');return}
   sb.rpc('pos_session',{p_slug:null}).then(function(x){if(x.error||!x.data||!x.data.admin){showLogin('บัญชีนี้ไม่ใช่ผู้ดูแลระบบ');$('#lgOut').hidden=false;return}
     S.me=x.data.email;$('#meBox').textContent=S.me;$('#authView').hidden=true;$('#appView').hidden=false;
-    var h=location.hash.slice(1);if(['home','apps','shops','users','stats','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
+    var h=location.hash.slice(1);if(['home','apps','shops','users','offline','stats','pays','settings'].indexOf(h)>=0)S.view=h;loadAll()})})}
 
 /* ---------- data ---------- */
 function loadAll(){return Promise.all([
@@ -189,6 +190,20 @@ function loadAll(){return Promise.all([
 setInterval(function(){if(!document.hidden&&!$('#drawer').innerHTML)loadAll()},60000);
 
 
+
+/* ---------- Stand alone (offline) shops ---------- */
+var PLAT_TH={windows:'Windows',android:'Android',ios:'iPhone/iPad',mac:'Mac',linux:'Linux',browser:'เบราว์เซอร์'};
+function loadOffDev(){S.offDev='loading';sb.rpc('pos_admin_offline_devices').then(function(r){S.offDev=r.error?[]:(r.data||[]);if(S.view==='offline')render()})}
+function offlineView(){var list=S.shops.filter(function(s){return s.edition==='offline'}),dev=Array.isArray(S.offDev)?S.offDev:[];
+  var ago=function(t){if(!t)return '-';var d=(Date.now()-new Date(t).getTime())/864e5;return d<1?'วันนี้':Math.floor(d)+' วันก่อน'};
+  var od=+(S.plat.offlineDays||7);var stale=list.filter(function(s){return !s.last_seen||(Date.now()-new Date(s.last_seen).getTime())/864e5>od});
+  return '<div class="head"><h1>Stand alone</h1><span class="sp"></span><button class="btn" data-act="offreload">รีเฟรช</button></div>'+
+  '<p class="muted small" style="margin:0">ร้านที่ใช้โปรแกรมในเครื่อง (Windows / Android / iPhone) ข้อมูลขายอยู่ในเครื่องของร้าน ใช้บัญชี แพ็กเกจ และการชำระเงินเดียวกับระบบออนไลน์ เปลี่ยนร้านเป็นแบบนี้ได้ที่ ร้านค้า › จัดการ › รูปแบบระบบ</p>'+
+  '<div class="kpis"><div class="kpi"><small>ร้าน Stand alone</small><b>'+list.length+'</b></div><div class="kpi"><small>อุปกรณ์ทั้งหมด</small><b>'+dev.length+'</b></div><div class="kpi'+(stale.length?' warn':'')+'"><small>ไม่ได้ต่อเน็ตเกิน '+od+' วัน</small><b>'+stale.length+'</b></div></div>'+
+  '<section class="panel"><h2>ร้าน</h2>'+(list.length?'<div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th>สถานะ</th><th>หมดอายุ</th><th>อุปกรณ์</th><th>เชื่อมต่อล่าสุด</th><th class="num">สินค้า</th><th class="num">บิลเดือนนี้</th><th></th></tr></thead><tbody>'+list.map(function(s){var c=st(s);
+    return '<tr><td><b>'+esc(s.name)+'</b> '+prodChip(s)+'<div class="muted small num">'+esc(s.slug)+'</div></td><td><span class="chip '+c[1]+'">'+c[0]+'</span></td><td class="small">'+dTh(s.expires_at)+'</td><td class="num">'+(s.devices||0)+'</td><td class="small">'+(s.last_seen?dtTh(s.last_seen)+' · '+ago(s.last_seen):'ยังไม่เคย')+'</td><td class="num">'+(s.products_used==null?'-':s.products_used)+'</td><td class="num">'+(s.bills_month==null?'-':s.bills_month)+'</td><td><button class="btn sm" data-act="editshop" data-id="'+s.id+'">จัดการ</button></td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีร้านแบบ Stand alone</div>')+'</section>'+
+  '<section class="panel"><h2>อุปกรณ์ที่เชื่อมต่อ</h2>'+(S.offDev==='loading'?'<p class="muted">กำลังโหลด…</p>':dev.length?'<div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th>อุปกรณ์</th><th>ระบบ</th><th>เวอร์ชัน</th><th>ที่อยู่ในวงแลน</th><th>ผู้ใช้ล่าสุด</th><th>เชื่อมต่อล่าสุด</th></tr></thead><tbody>'+dev.map(function(d){var s=shopBy(d.shop_id);
+    return '<tr><td>'+esc(s.name||'-')+'</td><td><b>'+esc(d.name||'-')+'</b><div class="muted small">'+(d.kind==='server'?'เครื่องหลัก (เก็บข้อมูล)':'เครื่องลูก')+'</div></td><td>'+esc(PLAT_TH[d.platform]||d.platform||'-')+'</td><td class="num">'+esc(d.version||'-')+'</td><td class="num small">'+esc(d.lan||'-')+'</td><td class="small">'+esc((d.last_email||'').replace('@staff.cafe-pos.app',''))+'</td><td class="small">'+dtTh(d.last_seen)+'</td></tr>'}).join('')+'</tbody></table></div>':'<div class="empty">ยังไม่มีอุปกรณ์เชื่อมต่อ</div>')+'</section>'}
 /* ---------- visitor statistics ---------- */
 var PAGE_TH={landing:'หน้าแรก',guide:'คู่มือ Cafe','guide-retail':'คู่มือ Retail',signup:'สมัครใช้งาน',demo:'เดโม Cafe','retail-demo':'เดโม Retail',pos:'หน้าเข้าสู่ระบบ Cafe',retail:'หน้าเข้าสู่ระบบ Retail','cafe-app':'ใช้งานระบบ Cafe (ล็อกอินแล้ว)','retail-app':'ใช้งานระบบ Retail (ล็อกอินแล้ว)',order:'หน้าสั่งอาหารของลูกค้า',admin:'หน้าผู้ดูแลระบบ'};
 S.statDays=30;
@@ -220,7 +235,8 @@ function render(){
   var pa=S.apps.filter(function(a){return a.status==='pending'}).length;var ab=$('#appBadge');ab.hidden=!pa;ab.textContent=pa;
   if(S.view==='users'&&S.accts==null)loadAccts();
   if(S.view==='stats'&&!S.stats)loadStats();
-  $('#main').innerHTML=({home:homeView,apps:appsView,users:usersView,stats:statsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
+  if(S.view==='offline'&&!S.offDev)loadOffDev();
+  $('#main').innerHTML=({home:homeView,apps:appsView,users:usersView,offline:offlineView,stats:statsView,shops:shopsView,pays:paysView,settings:settingsView})[S.view]();
   if(S.view==='pays'||S.view==='apps')loadSlips();
   if(S.view==='settings')drawPpPrev();
 }
@@ -245,12 +261,13 @@ function lu(u,l){u=u||0;return l==null?u+' <span class="muted">/ ∞</span>':'<s
 function shopsView(){
   var q=S.q.trim().toLowerCase();var list=S.shops.filter(function(s){
     if(q&&(s.name+' '+s.slug+' '+(s.manager?s.manager.email:'')).toLowerCase().indexOf(q)<0)return false;
-    if(S.prod&&S.prod!=='all'&&(s.product||'cafe')!==S.prod)return false;var c=st(s)[1];if(S.filter==='ok')return c==='';if(S.filter==='warn')return c==='warn';if(S.filter==='bad')return c==='bad';return true});
+    if(S.prod&&S.prod!=='all'&&(s.product||'cafe')!==S.prod)return false;if(S.ed&&S.ed!=='all'&&(s.edition||'online')!==S.ed)return false;var c=st(s)[1];if(S.filter==='ok')return c==='';if(S.filter==='warn')return c==='warn';if(S.filter==='bad')return c==='bad';return true});
   return '<div class="head"><h1>ร้านค้า</h1><span class="sp"></span><input class="search" id="shopQ" type="search" placeholder="ค้นหาชื่อร้าน รหัส หรืออีเมล" value="'+esc(S.q)+'" aria-label="ค้นหาร้าน"><button class="btn primary" data-act="newshop">+ สร้างร้านใหม่</button></div>'+
   '<div style="display:flex;gap:10px;flex-wrap:wrap"><div class="seg" role="group" aria-label="กรองสถานะ">'+[['all','ทั้งหมด'],['ok','ใช้งานได้'],['warn','ใกล้หมดอายุ'],['bad','เลยกำหนด/ล็อก']].map(function(f){return '<button data-act="filter" data-v="'+f[0]+'" aria-pressed="'+(S.filter===f[0])+'">'+f[1]+'</button>'}).join('')+'</div>'+
-  '<div class="seg" role="group" aria-label="ประเภทร้าน">'+[['all','ทุกระบบ'],['cafe','Cafe'],['retail','Retail']].map(function(f){return '<button data-act="prodf" data-v="'+f[0]+'" aria-pressed="'+((S.prod||'all')===f[0])+'">'+f[1]+'</button>'}).join('')+'</div></div>'+
+  '<div class="seg" role="group" aria-label="ประเภทร้าน">'+[['all','ทุกระบบ'],['cafe','Cafe'],['retail','Retail']].map(function(f){return '<button data-act="prodf" data-v="'+f[0]+'" aria-pressed="'+((S.prod||'all')===f[0])+'">'+f[1]+'</button>'}).join('')+'</div>'+
+  '<div class="seg" role="group" aria-label="รูปแบบระบบ">'+[['all','ทุกแบบ'],['online','ออนไลน์'],['offline','Stand alone']].map(function(f){return '<button data-act="edf" data-v="'+f[0]+'" aria-pressed="'+((S.ed||'all')===f[0])+'">'+f[1]+'</button>'}).join('')+'</div></div>'+
   '<section class="panel"><div class="scroll"><table class="tbl"><thead><tr><th>ร้าน</th><th>ผู้จัดการ</th><th>สถานะ</th><th>หมดอายุ</th><th>ค่าบริการ</th><th>พนักงาน</th><th>ร้าน/สาขา</th><th>สินค้า</th><th>บิลเดือนนี้</th><th></th></tr></thead><tbody>'+
-  (list.length?list.map(function(s){var c=st(s);return '<tr><td><b>'+esc(s.name)+'</b> '+prodChip(s)+'<div class="muted small num">'+esc(s.slug)+'</div></td><td class="small">'+esc(s.manager?(s.manager.name||'')+' '+s.manager.email:'— ยังไม่มี —')+'</td><td><span class="chip '+c[1]+'">'+c[0]+'</span>'+(s.pending?' <span class="chip warn">สลิป '+s.pending+'</span>':'')+'</td><td class="small">'+dTh(s.expires_at)+'</td><td class="num">'+baht(s.price)+'</td><td class="num">'+s.staff_used+'/'+s.staff_limit+'</td><td class="num">'+(s.product==='retail'?(s.branches_used||0)+'/'+(s.branch_limit||1):'<span class="muted">–</span>')+'</td><td class="num">'+lu(s.products_used,s.limits&&s.limits.products)+'</td><td class="num">'+lu(s.bills_month,s.limits&&s.limits.bills)+'</td>'+
+  (list.length?list.map(function(s){var c=st(s);return '<tr><td><b>'+esc(s.name)+'</b> '+prodChip(s)+edChip(s)+'<div class="muted small num">'+esc(s.slug)+'</div></td><td class="small">'+esc(s.manager?(s.manager.name||'')+' '+s.manager.email:'— ยังไม่มี —')+'</td><td><span class="chip '+c[1]+'">'+c[0]+'</span>'+(s.pending?' <span class="chip warn">สลิป '+s.pending+'</span>':'')+'</td><td class="small">'+dTh(s.expires_at)+'</td><td class="num">'+baht(s.price)+'</td><td class="num">'+s.staff_used+'/'+s.staff_limit+'</td><td class="num">'+(s.product==='retail'?(s.branches_used||0)+'/'+(s.branch_limit||1):'<span class="muted">–</span>')+'</td><td class="num">'+lu(s.products_used,s.limits&&s.limits.products)+'</td><td class="num">'+lu(s.bills_month,s.limits&&s.limits.bills)+'</td>'+
     '<td><div class="acts"><a class="btn sm" href="'+posUrl(s)+'" target="_blank" rel="noopener">เปิด POS</a><button class="btn sm" data-act="editshop" data-id="'+s.id+'">จัดการ</button></div></td></tr>'}).join(''):'<tr><td colspan="10"><div class="empty">ไม่พบร้าน</div></td></tr>')+
   '</tbody></table></div></section>';
 }
@@ -317,7 +334,7 @@ function settingsView(){var b=S.plat;
     '<label for="pf_accountName">ชื่อบัญชี<input id="pf_accountName" value="'+esc(b.accountName||'')+'"></label>'+
     '<label for="pf_note">ข้อความถึงร้าน (แสดงในหน้าชำระเงิน)<input id="pf_note" maxlength="200" value="'+esc(b.note||'')+'"></label>'+
     '<div class="grp"><span class="small" style="font-weight:600;color:var(--muted)">แพ็กเกจในหน้าสมัคร</span><div style="overflow-x:auto"><div style="min-width:880px"><div class="hint pkhead" style="display:grid;grid-template-columns:var(--pkcols);gap:6px"><span>ระบบ</span><span>ชื่อแพ็กเกจ</span><span>เดือน</span><span>ราคา (บาท)</span><span>พนักงาน</span><span>สาขา</span><span>สินค้า</span><span>บิล/เดือน</span><span>ทดลอง (วัน)</span><span></span></div><div id="pkRows">'+(b.packages||[]).map(pkRow).join('')+'</div></div></div><div class="hint" style="display:block">สินค้า / บิลต่อเดือน: เว้นว่าง = ไม่จำกัด เมื่ออนุมัติร้านใหม่ หรืออนุมัติการต่ออายุที่ร้านเลือกแพ็กเกจนี้ ระบบตั้งราคา พนักงาน สาขา และขีดจำกัดของร้านตามแพ็กเกจให้อัตโนมัติ<br>ใส่ “ทดลอง (วัน)” มากกว่า 0 เพื่อให้เป็นแพ็กเกจทดลองใช้ฟรี (ราคาเป็น 0 อัตโนมัติ ผู้สมัครไม่ต้องแนบสลิป หลังหมดทดลองคิดตามค่าบริการรายเดือน)</div><button class="btn sm" type="button" data-act="pkadd" style="align-self:flex-start">+ เพิ่มแพ็กเกจ</button></div>'+
-    '<div class="three"><label for="pf_price">ราคาเริ่มต้นร้าน Cafe (บาท/เดือน)<input id="pf_price" type="number" min="0" value="'+esc(b.price||299)+'"></label><label for="pf_priceR">ราคาเริ่มต้นร้าน Retail (บาท/เดือน)<input id="pf_priceR" type="number" min="0" value="'+esc(b.priceRetail||349)+'"></label><label for="pf_grace">ผ่อนผันหลังหมดอายุ (วัน)<input id="pf_grace" type="number" min="0" max="60" value="'+esc(b.graceDays==null?7:b.graceDays)+'"></label></div>'+
+    '<div class="three"><label for="pf_price">ราคาเริ่มต้นร้าน Cafe (บาท/เดือน)<input id="pf_price" type="number" min="0" value="'+esc(b.price||299)+'"></label><label for="pf_priceR">ราคาเริ่มต้นร้าน Retail (บาท/เดือน)<input id="pf_priceR" type="number" min="0" value="'+esc(b.priceRetail||349)+'"></label><label for="pf_grace">ผ่อนผันหลังหมดอายุ (วัน)<input id="pf_grace" type="number" min="0" max="60" value="'+esc(b.graceDays==null?7:b.graceDays)+'"></label><label for="pf_offdays">Stand alone ใช้ได้โดยไม่ต่อเน็ต (วัน)<input id="pf_offdays" type="number" min="1" max="60" value="'+esc(b.offlineDays==null?7:b.offlineDays)+'"></label></div>'+
     '<button class="btn primary" type="submit">บันทึก</button></form></section>'+
   '<section class="panel"><h2>ผู้ดูแลระบบ</h2><div>'+S.admins.map(function(a){return '<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--line)"><span style="flex:1">'+esc(a.email)+'</span>'+(a.email.toLowerCase()===S.me?'<span class="chip mute">คุณ</span>':'<button class="btn sm danger" data-act="rmadmin" data-id="'+esc(a.email)+'">นำออก</button>')+'</div>'}).join('')+'</div>'+
     '<form class="form" id="adminForm" style="flex-direction:row;align-items:flex-end"><label for="ad_email" style="flex:1">เพิ่มอีเมลผู้ดูแลระบบ<input id="ad_email" type="email" required></label><button class="btn" type="submit">เพิ่ม</button></form>'+
@@ -329,6 +346,7 @@ function settingsView(){var b=S.plat;
 function closeDrawer(){$('#drawer').innerHTML=''}
 function drawer(title,body){$('#drawer').innerHTML='<div class="drawer" data-act="dclose"><div class="pane" role="dialog" aria-modal="true" aria-label="'+esc(title)+'"><div class="ph"><h2>'+esc(title)+'</h2><button class="btn sm" data-act="close" aria-label="ปิด">ปิด</button></div>'+body+'</div></div>';var f=$('#drawer input');if(f)f.focus()}
 function posUrl(s){return (s.product==='retail'?'/retail?shop=':'/pos?shop=')+encodeURIComponent(s.slug)}
+function edChip(s){return s.edition==='offline'?'<span class="chip" style="background:#1B1B1B;color:#fff">Stand alone</span>':''}
 function prodChip(s){return s.product==='retail'?'<span class="chip" style="background:#E3F0FB;color:#1D5F99">Retail</span>':'<span class="chip" style="background:#FDF0DC;color:#7A4E00">Cafe</span>'}
 function slugify(t){return String(t||'').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,31)}
 function newShop(){drawer('สร้างร้านใหม่','<form class="form" id="newShopForm">'+
@@ -344,7 +362,9 @@ function newShop(){drawer('สร้างร้านใหม่','<form class
   $('#ns_slug').addEventListener('input',function(){this.dataset.touched='1'});
   $('#ns_prod').addEventListener('change',function(){var r=this.value==='retail';$('#ns_brl').hidden=!r;$('#ns_hint').textContent=r?'ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+location.origin+'/retail กด “ผู้จัดการร้านเข้าครั้งแรก? ตั้งรหัสผ่าน” ด้วยอีเมลนี้ จากนั้นเพิ่มสินค้าและสร้างบัญชีพนักงานเองได้':'ระบบสร้างฐานข้อมูลของร้านให้ทันที ผู้จัดการเข้า '+location.origin+'/pos แล้วกด “สมัคร” ด้วยอีเมลนี้ จากนั้นจัดการเมนูและเพิ่มพนักงานเองได้'})}
 function editShop(id){var s=shopBy(id);if(!s.id)return;var exp=new Date(s.expires_at);var ds=exp.getFullYear()+'-'+('0'+(exp.getMonth()+1)).slice(-2)+'-'+('0'+exp.getDate()).slice(-2);
-  drawer(s.name,'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+prodChip(s)+'<a class="btn sm" href="'+posUrl(s)+'" target="_blank" rel="noopener">เปิด POS ร้านนี้</a>'+(s.product==='retail'?'':'<a class="btn sm" href="/s/'+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">หน้าสั่งอาหารลูกค้า</a>')+'</div>'+
+  drawer(s.name,'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'+prodChip(s)+edChip(s)+'<a class="btn sm" href="'+posUrl(s)+'" target="_blank" rel="noopener">เปิด POS ร้านนี้</a>'+(s.product==='retail'?'':'<a class="btn sm" href="/s/'+encodeURIComponent(s.slug)+'" target="_blank" rel="noopener">หน้าสั่งอาหารลูกค้า</a>')+'</div>'+
+  '<section class="panel"><h2>รูปแบบระบบ</h2><div class="seg" role="group" aria-label="รูปแบบระบบ">'+[['online','ออนไลน์ (ข้อมูลบนคลาวด์)'],['offline','Stand alone (ข้อมูลในเครื่องร้าน)']].map(function(x){return '<button data-act="setedition" data-id="'+s.id+'" data-v="'+x[0]+'" aria-pressed="'+((s.edition||'online')===x[0])+'">'+x[1]+'</button>'}).join('')+'</div>'+
+  '<span class="hint">'+(s.edition==='offline'?'ร้านใช้โปรแกรม Coconut POS Stand alone ข้อมูลขายเก็บในเครื่องของร้าน เข้าระบบด้วยบัญชีเดิม ต้องต่ออินเทอร์เน็ตอย่างน้อยทุก '+(S.plat.offlineDays||7)+' วัน · อุปกรณ์ '+(s.devices||0)+' เครื่อง'+(s.last_seen?' · เชื่อมต่อล่าสุด '+dtTh(s.last_seen):''):'ร้านใช้ระบบออนไลน์บนเว็บ ข้อมูลเก็บบนคลาวด์')+'</span></section>'+
   '<section class="panel"><h2>ข้อมูลและแพ็กเกจ</h2><form class="form" id="editShopForm" data-id="'+s.id+'">'+
   '<label for="es_name">ชื่อร้าน<input id="es_name" required maxlength="80" value="'+esc(s.name)+'"></label>'+
   '<div class="three"><label for="es_price">ค่าบริการ/เดือน<input id="es_price" type="number" min="0" value="'+esc(s.price)+'"></label><label for="es_staff">บัญชีพนักงาน<input id="es_staff" type="number" min="0" max="200" value="'+esc(s.staff_limit)+'"></label><label for="es_status">สถานะ<select id="es_status"><option value="active"'+(s.status==='active'?' selected':'')+'>ใช้งาน</option><option value="suspended"'+(s.status==='suspended'?' selected':'')+'>ระงับ</option></select></label></div>'+
@@ -400,6 +420,10 @@ document.addEventListener('click',function(e){var go=e.target.closest('[data-go]
   if(a==='dclose'||a==='close'){closeDrawer();return}
   if(a==='newshop'){newShop();return}
   if(a==='editshop'){editShop(d.id);return}
+  if(a==='edf'){S.ed=d.v;render();return}
+  if(a==='setedition'){var sh0=shopBy(d.id);if((sh0.edition||'online')===d.v)return;if(!confirm(d.v==='offline'?'เปลี่ยนร้านนี้เป็นแบบ Stand alone?\nร้านจะใช้โปรแกรมในเครื่องแทนเว็บ ข้อมูลบนคลาวด์ของร้านยังอยู่ แต่ระบบออนไลน์จะไม่ใช้':'เปลี่ยนร้านนี้กลับเป็นระบบออนไลน์?\nข้อมูลที่อยู่ในเครื่องของร้านจะไม่ย้ายขึ้นคลาวด์อัตโนมัติ'))return;
+    sb.rpc('pos_admin_set_edition',{p_sid:d.id,p_edition:d.v}).then(function(r){if(r.error){toast(err(r.error));return}toast(d.v==='offline'?'เปลี่ยนเป็น Stand alone แล้ว':'เปลี่ยนเป็นออนไลน์แล้ว');loadAll().then(function(){editShop(d.id)})});return}
+  if(a==='offreload'){S.offDev=null;render();return}
   if(a==='gopays'){S.view='pays';S.payTab='pending';render();return}
   if(a==='filter'){S.filter=d.v;render();return}
   if(a==='prodf'){S.prod=d.v;render();return}
@@ -467,7 +491,7 @@ document.addEventListener('submit',function(e){var f=e.target;if(!f.id)return;e.
   if(f.id==='mgrForm'){var sid=f.dataset.id;sb.rpc('pos_admin_set_manager',{p_sid:sid,p_email:$('#mg_email').value.trim(),p_name:$('#mg_name').value.trim()||null})
     .then(function(r){done();if(r.error){toast(err(r.error));return}toast('เปลี่ยนผู้จัดการแล้ว');loadAll().then(function(){editShop(sid)})});return}
   if(f.id==='contactForm'){var lid=$('#ct_line').value.trim(),url=$('#ct_url').value.trim();done();saveContact({lineId:lid,lineUrl:url||lineUrlOf(lid),note:$('#ct_note').value.trim(),phone:$('#ct_phone').value.trim(),on:$('#ct_on').checked},'บันทึกช่องทางติดต่อแล้ว');return}
-  if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,product:g('product')==='retail'?'retail':'cafe',name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0)),branches:Math.max(1,Math.min(50,+g('branches')||1)),days:Math.max(0,Math.min(90,+g('days')||0)),items:Math.max(0,Math.round(+g('items')||0)),bills:Math.max(0,Math.round(+g('bills')||0))}}).map(function(p){if(p.days>0){p.price=0;p.trial=true}else delete p.days;return p}).filter(function(p){return p.name}),freeMode:$('#pf_free').checked,freeStaff:Math.max(0,Math.min(200,+$('#pf_freeStaff').value||0)),freeItems:Math.max(0,+$('#pf_freeItems').value||0),freeBills:Math.max(0,+$('#pf_freeBills').value||0),price:+$('#pf_price').value||0,priceRetail:+$('#pf_priceR').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0))};
+  if(f.id==='platForm'){var data={promptpay:$('#pf_promptpay').value.replace(/\D/g,''),bankName:$('#pf_bankName').value.trim(),bankNo:$('#pf_bankNo').value.trim(),accountName:$('#pf_accountName').value.trim(),note:$('#pf_note').value.trim(),packages:[].slice.call(document.querySelectorAll('.pkrow')).map(function(r){var g=function(k){return r.querySelector('[data-k='+k+']').value};return {id:r.dataset.id,product:g('product')==='retail'?'retail':'cafe',name:g('name').trim(),months:Math.max(1,Math.min(24,+g('months')||1)),price:Math.max(0,+g('price')||0),staff:Math.max(0,Math.min(200,+g('staff')||0)),branches:Math.max(1,Math.min(50,+g('branches')||1)),days:Math.max(0,Math.min(90,+g('days')||0)),items:Math.max(0,Math.round(+g('items')||0)),bills:Math.max(0,Math.round(+g('bills')||0))}}).map(function(p){if(p.days>0){p.price=0;p.trial=true}else delete p.days;return p}).filter(function(p){return p.name}),freeMode:$('#pf_free').checked,freeStaff:Math.max(0,Math.min(200,+$('#pf_freeStaff').value||0)),freeItems:Math.max(0,+$('#pf_freeItems').value||0),freeBills:Math.max(0,+$('#pf_freeBills').value||0),price:+$('#pf_price').value||0,priceRetail:+$('#pf_priceR').value||0,graceDays:Math.max(0,Math.min(60,+$('#pf_grace').value||0)),offlineDays:Math.max(1,Math.min(60,+$('#pf_offdays').value||7))};
     if(data.promptpay&&[10,13,15].indexOf(data.promptpay.length)<0){done();toast('พร้อมเพย์ต้องเป็นเบอร์ 10 หลัก หรือเลข 13/15 หลัก');return}
     sb.from('pos_platform').upsert({key:'billing',data:data,updated_at:new Date().toISOString()}).then(function(r){done();toast(r.error?err(r.error):'บันทึกแล้ว');loadAll()});return}
   if(f.id==='pwForm'){var em=f.dataset.email,pw=$('#pw_new').value.trim();if(pw&&pw.length<8){done();toast('รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');return}

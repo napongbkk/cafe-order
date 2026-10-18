@@ -763,6 +763,7 @@ function check(){
           else showAuth('บัญชี '+esc(email)+' ยังไม่ได้อยู่ในร้านใด ถ้าเป็นพนักงาน ให้ผู้จัดการร้านสร้างบัญชีให้ · ถ้าต้องการเปิดร้านใหม่ <a href="/retail/signup">สมัครเปิดร้าน</a>',true,true)});return}
       if(d.shop.product!=='retail'&&d.admin){showAuth('บัญชีผู้ดูแลระบบ: ร้านที่ผูกกับบัญชีนี้เป็นร้าน Cafe · เปิดร้าน Retail จากแดชบอร์ด <a href="/admin#shops">ไปแดชบอร์ดผู้ดูแลระบบ</a> (กด “เปิด POS” ที่ร้าน Retail) หรือสร้างร้าน Retail ใหม่ที่นั่น',true,true);return}
       if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Coconut POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Coconut POS Cafe</a>',true,true);return}
+      if(d.shop.edition==='offline'&&!d.admin){showAuth('ร้าน “'+esc(d.shop.name)+'” ใช้ Coconut POS แบบ Stand alone ข้อมูลขายอยู่ในเครื่องของร้าน ให้เปิดโปรแกรม Coconut POS ในเครื่องหลักของร้าน',true,true);return}
       SID=d.shop.id;role=d.role||'staff';
       $('#auth').hidden=true;
       if(d.admin){document.body.insertAdjacentHTML('beforeend','<span class="adminbar">ผู้ดูแลระบบ · '+esc(d.shop.name)+' <a href="/admin">กลับแดชบอร์ด</a></span>')}
