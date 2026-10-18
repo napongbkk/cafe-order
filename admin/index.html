@@ -162,7 +162,7 @@ function dtTh(iso){return iso?new Date(iso).toLocaleString('th-TH',{day:'numeric
 function days(iso){return Math.ceil((new Date(iso).getTime()-Date.now())/86400000)}
 function toast(t){var el=$('#toast');el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(function(){el.hidden=true},3200)}
 function err(e){var m=String(e&&e.message||e||'');return /email_in_use/.test(m)?'อีเมลนี้อยู่ในร้านอื่นแล้ว':/duplicate key.*slug|pos_shops_slug_key/.test(m)?'รหัสร้าน (slug) นี้มีแล้ว':/slug_check|pos_shops_slug_check/.test(m)?'รหัสร้านใช้ได้เฉพาะ a-z 0-9 และ - (2–31 ตัว)':/staff_limit/.test(m)?'จำนวนพนักงานเกินโควตา':/one_manager/.test(m)?'ร้านมีผู้จัดการได้ 1 คน':/bad_email/.test(m)?'อีเมลไม่ถูกต้อง':/not_pending/.test(m)?'รายการนี้ตรวจแล้ว':m}
-function st(s){if(s.status==='suspended')return ['ระงับ','bad'];var d=days(s.expires_at);if(s.locked)return ['ล็อก · หมดอายุ','bad'];if(d<0)return ['เลยกำหนด '+(-d)+' วัน','bad'];if(d<=7)return ['เหลือ '+d+' วัน','warn'];return ['ใช้งานได้','']}
+function st(s){if(s.status==='suspended')return ['ระงับ','bad'];if(s.limits&&s.limits.plan_free){var L=s.limits,full=(L.products!=null&&(s.products_used||0)>=L.products)||(L.bills!=null&&(s.bills_month||0)>=L.bills);return [(days(s.expires_at)<-1&&+s.price>0?'ฟรี · แพ็กเกจหมดอายุ':'ฟรี')+(full?' · ใช้ครบ':''),full?'warn':'']}var d=days(s.expires_at);if(s.locked)return ['ล็อก · หมดอายุ','bad'];if(d<0)return ['เลยกำหนด '+(-d)+' วัน','bad'];if(d<=7)return ['เหลือ '+d+' วัน','warn'];return ['ใช้งานได้','']}
 function shopBy(id){return S.shops.find(function(s){return s.id===id})||{}}
 
 /* ---------- auth ---------- */

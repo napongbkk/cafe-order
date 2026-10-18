@@ -733,10 +733,10 @@ const chains=new Map();
 function chain(p,fn){const n=(chains.get(p)||Promise.resolve()).then(fn).catch(e=>{toast(e&&e.code==='quota_exceeded'?'พื้นที่เก็บข้อมูลเต็ม ลบข้อมูลเก่าก่อน':'บันทึกไม่สำเร็จ ('+(e&&e.code||'error')+')','bad')});chains.set(p,n);return n}
 /* website plans: the admin sets how many products and bills a month a shop may have (free plan: 50 / 500) */
 function planLimits(){const s=window.POS_SESSION&&window.POS_SESSION.shop;if(!s||s.product==='cafe')return null;const free=s.planFree!=null?!!s.planFree:!!(s.trial||s.free);
-  return {products:s.productLimit!==undefined?s.productLimit:(free?50:null),bills:s.billLimit!==undefined?s.billLimit:(free?500:null)}}
+  return {products:s.productLimit!==undefined?s.productLimit:(free?50:null),bills:s.billLimit!==undefined?s.billLimit:(free?200:null),free}}
 function monthBills(){const m=new Date();m.setDate(1);m.setHours(0,0,0,0);return all('sales').filter(x=>(x.ts||0)>=+m).length}
 function limitHit(kind){const L=planLimits();if(!L||L[kind]==null)return false;const used=kind==='products'?S.products.size:monthBills();if(used<L[kind])return false;
-  toast(kind==='products'?`แพ็กเกจนี้มีสินค้าได้ ${L.products} รายการ · ติดต่อผู้ดูแลระบบหรืออัปเกรดแพ็กเกจ`:`บิลเดือนนี้ครบ ${L.bills} บิลตามแพ็กเกจแล้ว · ติดต่อผู้ดูแลระบบหรืออัปเกรดแพ็กเกจ`,'bad');return true}
+  toast(kind==='products'?`${L.free?'แพ็กเกจฟรี':'แพ็กเกจนี้'}มีสินค้าได้ ${L.products} รายการ ครบแล้ว · อัปเกรดแพ็กเกจที่ ตั้งค่า › ค่าบริการรายเดือน`:`${L.free?'แพ็กเกจฟรี':'แพ็กเกจนี้'}ออกบิลได้ ${L.bills} บิล/เดือน เดือนนี้ครบแล้ว · อัปเกรดแพ็กเกจที่ ตั้งค่า › ค่าบริการรายเดือน`,'bad');return true}
 function put(col,obj){if(col==='products'&&!S.products.has(obj.id)&&limitHit('products'))return obj;S[col].set(obj.id,obj);if(ST.db){const p=col+'/'+obj.id,data=JSON.parse(JSON.stringify(obj));chain(p,()=>ST.db.doc(p).set(data))}else saveLocal();scheduleRender();return obj}
 function del(col,id){S[col].delete(id);if(ST.db){const p=col+'/'+id;chain(p,()=>ST.db.doc(p).delete())}else saveLocal();scheduleRender()}
 const all=c=>[...S[c].values()];

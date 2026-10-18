@@ -71,6 +71,7 @@
   .ahero .ah-art,.ahero .ah-foot{display:none}
   .ahero .ah-ann{margin-top:6px}
 }
+.bill-bar{display:block;height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}.bill-bar i{display:block;height:100%;background:var(--accent,#1A73B8);border-radius:inherit}.bill-bar.near i{background:#B26B00}.bill-bar.full i{background:#B3261E}
 </style>
 <div class="auth split" id="auth" hidden><aside class="ahero" aria-label="Coconut Group">
   <img class="ah-logo" src="/coconut-logo-white.png" alt="Coconut. Group" width="155" height="44">
@@ -186,7 +187,8 @@ function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(
   var sub=target.length===13?t('02',target):target.length===15?t('03',target):t('01',('0000000000000'+target.replace(/^0/,'66')).slice(-13));
   var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764');if(amount)p+=t('54',Number(amount).toFixed(2));p+='6304';return p+crc16(p)}
 window.POS_FREE_MSG=function(k){var x=(window.POS_SESSION&&window.POS_SESSION.shop)||{};
-  return k==='items'?'ร้านนี้มีสินค้า/เมนูได้สูงสุด '+(x.productLimit!=null?x.productLimit:'')+' รายการ · ลบรายการที่ไม่ใช้ หรือติดต่อผู้ดูแลระบบเพื่อเพิ่ม':'บิลเดือนนี้ครบ '+(x.billLimit!=null?x.billLimit:'')+' บิลตามที่ผู้ดูแลระบบกำหนดแล้ว · ติดต่อผู้ดูแลระบบเพื่อเพิ่ม'};
+  var up=x.planFree?' · อัปเกรดเป็นแพ็กเกจรายเดือนได้ที่หน้า ค่าบริการ':' · อัปเกรดแพ็กเกจที่หน้า ค่าบริการ หรือติดต่อผู้ดูแลระบบ';
+  return k==='items'?(x.planFree?'แพ็กเกจฟรีมีสินค้า/เมนูได้ ':'แพ็กเกจนี้มีสินค้า/เมนูได้ ')+(x.productLimit!=null?x.productLimit:'')+' รายการ ครบแล้ว'+up:(x.planFree?'แพ็กเกจฟรีออกบิลได้ ':'แพ็กเกจนี้ออกบิลได้ ')+(x.billLimit!=null?x.billLimit:'')+' บิล/เดือน เดือนนี้ครบแล้ว'+up};
 var CONTACT=null;
 function contactHtml(c){var e=function(v){return esc(v||'')};
   return '<div class="bill-card bill-ct"><div class="ct-q">'+(c.qr?'<img src="'+e(c.qr)+'" alt="QR code LINE">':'')+'</div><div class="ct-t"><h3>ติดต่อผู้ดูแลระบบ</h3><p>'+e(c.note||'สอบถาม แจ้งปัญหา ต่ออายุ หรือเพิ่มแพ็กเกจ ทักทาง LINE ได้เลย')+'</p>'+
@@ -199,6 +201,7 @@ function dTh(iso){if(!iso)return '-';return new Date(iso).toLocaleDateString('th
 function daysLeft(iso){return Math.ceil((new Date(iso).getTime()-Date.now())/86400000)}
 function billState(sh){if(!sh)return {cls:'mute',t:'-'};if(sh.status==='suspended')return {cls:'bad',t:'ถูกระงับโดยผู้ดูแลระบบ'};
   if(sh.free)return {cls:'',t:'ใช้งานฟรี'};
+  if(sh.planFree){var full=(sh.productLimit!=null&&(sh.productsUsed||0)>=sh.productLimit)||(sh.billLimit!=null&&(sh.billsMonth||0)>=sh.billLimit);return {cls:full?'warn':'',t:full?'แพ็กเกจฟรี · ใช้ครบแล้ว':'แพ็กเกจฟรี'}}
   var d=daysLeft(sh.expiresAt);if(sh.locked)return {cls:'bad',t:'หมดอายุ · ถูกล็อก'};
   if(d<0)return {cls:'bad',t:'เลยกำหนด · ผ่อนผันถึง '+dTh(sh.graceUntil)};if(d<=7)return {cls:'warn',t:'ใกล้หมดอายุ · เหลือ '+d+' วัน'};return {cls:'',t:'ใช้งานได้ · เหลือ '+d+' วัน'}}
 window.POS_BILLSTATE=function(){return billState(SESS&&SESS.shop)};
@@ -216,14 +219,19 @@ function renderBilling0(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl
   if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Coconut POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';appendContact(el);return}
   var nf=function(v){return v?Number(v).toLocaleString('th-TH'):'ไม่จำกัด'};
   var pks=(bl.packages||[]).filter(function(p){return (p.product||'cafe')===(sh.product||'cafe')&&+p.price>0});
-  var curPk=pks.filter(function(p){return (+p.months||1)===1&&+p.price===+sh.price&&(sh.productLimit==null||+p.items===+sh.productLimit)})[0];
+  var curPk=sh.planFree?null:pks.filter(function(p){return (+p.months||1)===1&&+p.price===+sh.price&&(sh.productLimit==null||+p.items===+sh.productLimit)})[0];
   var pk=pks.filter(function(p){return p.id===el._pk})[0]||curPk||pks[0]||null;var multi=pk&&(+pk.months||1)>1;
   var amt=pk?(multi?+pk.price:+pk.price*months):(+sh.price||0)*months;
+  var pf=!!sh.planFree,bar=function(u,l){if(l==null)return '';var pc=Math.min(100,Math.round((u||0)*100/Math.max(l,1)));return '<span class="bill-bar'+(pc>=100?' full':pc>=80?' near':'')+'" role="img" aria-label="ใช้ไป '+pc+'%"><i style="width:'+pc+'%"></i></span>'};
   el.innerHTML='<div class="bill">'+
+    (pf?'<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
+      '<p style="margin:0">ใช้งานฟรีได้ตลอด ไม่มีค่าใช้จ่าย ภายในจำนวนที่กำหนด หากต้องการเพิ่ม เลือกแพ็กเกจรายเดือนด้านล่าง</p>'+
+      '<div class="bill-stat"><div><small>สินค้า/เมนู</small><b>'+(sh.productsUsed||0)+' / '+lim(sh.productLimit)+'</b>'+bar(sh.productsUsed,sh.productLimit)+'</div><div><small>บิลเดือนนี้</small><b>'+(sh.billsMonth||0)+' / '+lim(sh.billLimit)+'</b>'+bar(sh.billsMonth,sh.billLimit)+'</div><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div></div>'+
+      '<span class="hint">นับบิลใหม่ทุกวันที่ 1 ของเดือน เมื่อครบจำนวนจะเพิ่มสินค้าหรือออกบิลใหม่ไม่ได้จนกว่าจะอัปเกรด หรือขึ้นเดือนใหม่ ข้อมูลเดิมยังอยู่ครบ</span></div>':
     '<div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip '+st.cls+'">'+esc(st.t)+'</span></div>'+
     '<div class="bill-stat"><div><small>ใช้งานได้ถึง</small><b>'+dTh(sh.expiresAt)+'</b></div><div><small>ค่าบริการ</small><b>'+baht(sh.price)+' / เดือน</b></div><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div><div><small>ผ่อนผันถึง</small><b>'+dTh(sh.graceUntil)+'</b></div>'+limStat+'</div>'+
-    '<span class="hint">ชำระก่อนวันหมดอายุเพื่อใช้งานต่อเนื่อง หลังหมดอายุใช้งานต่อได้อีก '+(bl.graceDays||7)+' วัน จากนั้นระบบจะล็อกการขายจนกว่าผู้ดูแลระบบจะอนุมัติการชำระเงิน ข้อมูลร้านไม่หาย</span></div>'+
-    (isMgr?'<div class="bill-card"><h3>ชำระค่าบริการ</h3><div class="bill-pay"><div class="bill-qr" id="billQr">'+(bl.promptpay?'':'ผู้ดูแลระบบยังไม่ได้ตั้ง QR รับเงิน')+'</div><div class="form" style="gap:10px">'+
+    '<span class="hint">ชำระก่อนวันหมดอายุเพื่อใช้แพ็กเกจต่อเนื่อง หลังหมดอายุใช้ต่อได้อีก '+(bl.graceDays||7)+' วัน จากนั้นร้านจะกลับไปใช้แพ็กเกจฟรี (จำกัดจำนวนสินค้าและบิล) ข้อมูลร้านไม่หาย</span></div>')+
+    (isMgr?'<div class="bill-card"><h3>'+(pf?'อัปเกรดแพ็กเกจ':'ชำระค่าบริการ')+'</h3><div class="bill-pay"><div class="bill-qr" id="billQr">'+(bl.promptpay?'':'ผู้ดูแลระบบยังไม่ได้ตั้ง QR รับเงิน')+'</div><div class="form" style="gap:10px">'+
       (pks.length?'<div><span class="grp-t">แพ็กเกจ</span><div class="bill-pks">'+pks.map(function(p){var mo=+p.months||1;return '<button type="button" class="bill-pk" data-bp="'+esc(p.id)+'" aria-pressed="'+(pk&&p.id===pk.id)+'"><b>'+esc(p.name||'')+(curPk&&p.id===curPk.id?' <span class="cur">แพ็กเกจปัจจุบัน</span>':'')+'</b><span class="pp">'+baht(p.price)+'<small> / '+(mo>1?mo+' เดือน':'เดือน')+'</small></span><small>สินค้า '+nf(p.items)+' · บิล '+nf(p.bills)+'/เดือน<br>พนักงาน '+(p.staff||0)+' บัญชี'+((sh.product==='retail')?' · ร้าน/สาขา '+(p.branches||1):'')+'</small></button>'}).join('')+'</div><span class="hint">เลือกแพ็กเกจอื่นเพื่ออัปเกรดหรือลดแพ็กเกจ มีผลเมื่อผู้ดูแลระบบอนุมัติการชำระเงิน</span></div>':'')+
       (multi?'':'<div><span class="grp-t">จำนวนเดือน</span><div class="bill-months">'+[1,3,6,12].map(function(m){return '<button type="button" class="chip" data-bm="'+m+'" aria-pressed="'+(m===months)+'">'+m+' เดือน</button>'}).join('')+'</div></div>')+
       '<div style="font-size:15px">ยอดที่ต้องโอน <b class="num" style="font-size:24px">'+baht(amt)+'</b></div>'+

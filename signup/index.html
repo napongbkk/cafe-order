@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F3F7FB">
-<title>สมัคร Coconut POS Cafe · ทดลองใช้ฟรี 30 วัน</title>
+<title>สมัคร Coconut POS Cafe · ใช้งานฟรี</title>
 <meta name="description" content="สมัครใช้ระบบ POS คาเฟ่ พร้อมหน้าสั่งอาหารผ่านมือถือสำหรับลูกค้า">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,7 +85,7 @@ a{color:var(--ink)}
 </head>
 <body>
 <main class="wrap">
-  <div class="brand"><i id="brandIco" style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Coconut POS Cafe"><defs><linearGradient id="cfG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5EC2FF"/><stop offset="1" stop-color="#1F7FD1"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#cfG)"/><path d="M0 18A18 18 0 0 1 18 0h28a18 18 0 0 1 18 18v6C44 30 22 18 0 28z" fill="#fff" opacity=".14"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 21c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 21c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 26h26v8.5A10.5 10.5 0 0 1 32.5 45h-5A10.5 10.5 0 0 1 17 34.5z" fill="#fff"/><path d="M43 29.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/></svg></i><div><img src="/coconut-logo-dark.png" alt="coconut" style="height:22px;width:auto;display:block;margin:0 0 4px"><h1 id="brandT">สมัคร Coconut POS Cafe</h1><p><span id="subPrice">ทดลองใช้ฟรี 30 วัน · จากนั้น 299 บาท/เดือน · </span><a href="/indexpos" style="color:inherit">กลับหน้าแรก</a></p></div><span data-eplang style="margin-left:auto"></span></div>
+  <div class="brand"><i id="brandIco" style="background:none;width:52px;height:52px;overflow:hidden;border-radius:15px"><svg viewBox="0 0 64 64" width="100%" height="100%" role="img" aria-label="Coconut POS Cafe"><defs><linearGradient id="cfG" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5EC2FF"/><stop offset="1" stop-color="#1F7FD1"/></linearGradient></defs><rect width="64" height="64" rx="18" fill="url(#cfG)"/><path d="M0 18A18 18 0 0 1 18 0h28a18 18 0 0 1 18 18v6C44 30 22 18 0 28z" fill="#fff" opacity=".14"/><g fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" opacity=".9"><path d="M26 21c-2.2-2.6 2.2-4.6 0-7.4"/><path d="M33.5 21c-2.2-2.6 2.2-4.6 0-7.4"/></g><path d="M17 26h26v8.5A10.5 10.5 0 0 1 32.5 45h-5A10.5 10.5 0 0 1 17 34.5z" fill="#fff"/><path d="M43 29.5h2.5a4.75 4.75 0 0 1 0 9.5H42.4" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="13" y="48" width="34" height="3.5" rx="1.75" fill="#fff" opacity=".85"/></svg></i><div><img src="/coconut-logo-dark.png" alt="coconut" style="height:22px;width:auto;display:block;margin:0 0 4px"><h1 id="brandT">สมัคร Coconut POS Cafe</h1><p><span id="subPrice">ใช้งานฟรี สินค้า 50 รายการ · 200 บิล/เดือน · </span><a href="/indexpos" style="color:inherit">กลับหน้าแรก</a></p></div><span data-eplang style="margin-left:auto"></span></div>
   <div class="steps" aria-label="ขั้นตอน"><span id="st1" aria-current="step">1 ข้อมูลร้าน</span><span id="st2">2 ชำระเงิน (ถ้ามี)</span><span id="st3">3 รออนุมัติ</span></div>
   <div class="msg bad" id="msg" role="alert" hidden></div>
 
@@ -160,13 +160,13 @@ function remember(a){try{localStorage.setItem('posApply',JSON.stringify({id:a.id
 
 /* packages */
 function isFree(p){return p&&Number(p.price)===0}
-function goText(){return S.bill.freeMode?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':isFree(curPk())?'ส่งคำขอทดลองใช้ฟรี':'ถัดไป · ชำระเงิน'}
+function goText(){return S.bill.freeMode?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':isFree(curPk())?'ส่งคำขอเปิดร้าน (ใช้ฟรี)':'ถัดไป · ชำระเงิน'}
 function prodOf(p){return p&&p.product==='retail'?'retail':'cafe'}
 function pkList(){return (S.bill.packages||[]).filter(function(p){return prodOf(p)===S.prod})}
 function curPk(){return pkList().find(function(p){return p.id===S.pkg})}
 function nfx(v){return v?Number(v).toLocaleString('th-TH'):'ไม่จำกัด'}
 function renderPk(){var l=pkList();$('#pkList').innerHTML=l.length?l.map(function(p){var per=p.months>1?' · เฉลี่ย '+baht(Math.round(p.price/p.months))+'/เดือน':'';var free=isFree(p);
-  return '<button type="button" class="pkc'+(free?' free':'')+'" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+(free?'ฟรี':baht(p.price))+'</span><small>'+(p.days?p.days+' วัน · ไม่ต้องชำระเงิน':Number(p.months)>1?p.months+' เดือน'+per:'ต่อเดือน')+'</small><small>'+(p.staff>0?'พนักงานได้ '+p.staff+' บัญชี':'ไม่รวมบัญชีพนักงาน')+'</small>'+(p.product==='retail'?'<small>ร้าน/สาขา/คลัง '+(p.branches||1)+' แห่ง</small>':'')+(p.free?'':'<small>สินค้า '+nfx(p.items)+' รายการ · '+nfx(p.bills)+' บิล/เดือน</small>')+'</button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>';
+  return '<button type="button" class="pkc'+(free?' free':'')+'" role="radio" data-pk="'+esc(p.id)+'" aria-pressed="'+(S.pkg===p.id)+'" aria-checked="'+(S.pkg===p.id)+'"><b>'+esc(p.name)+'</b><span class="p">'+(free?'ฟรี':baht(p.price))+'</span><small>'+(free&&!p.days?'ใช้ได้ตลอด · ไม่มีค่าใช้จ่าย':p.days?p.days+' วัน · ไม่ต้องชำระเงิน':Number(p.months)>1?p.months+' เดือน'+per:'ต่อเดือน')+'</small><small>'+(p.staff>0?'พนักงานได้ '+p.staff+' บัญชี':'ไม่รวมบัญชีพนักงาน')+'</small>'+(p.product==='retail'?'<small>ร้าน/สาขา/คลัง '+(p.branches||1)+' แห่ง</small>':'')+('<small>สินค้า '+nfx(p.items)+' รายการ · '+nfx(p.bills)+' บิล/เดือน</small>')+'</button>'}).join(''):'<div class="hint">ยังไม่มีแพ็กเกจ ติดต่อผู้ดูแลระบบ</div>';
   var b=$('#goBtn');if(b&&!b.disabled)b.textContent=goText()}
 var CAFE_ICO=null;
 function setProd(p){S.prod=p==='retail'?'retail':'cafe';var P=PROD[S.prod];
@@ -175,7 +175,7 @@ function setProd(p){S.prod=p==='retail'?'retail':'cafe';var P=PROD[S.prod];
   [].forEach.call(document.querySelectorAll('#prodSel [data-prod]'),function(b){b.setAttribute('aria-checked',String(b.dataset.prod===S.prod))});
   $('#loginBtn').href=P.login;$('#loginLink').href=P.login;
   if(!S.bill.freeMode){var l=pkList(),mo=l.find(function(x){return Number(x.months)===1&&Number(x.price)>0}),tr=l.find(isFree);
-    $('#subPrice').textContent=(tr?'ทดลองใช้ฟรี '+(tr.days||30)+' วัน · ':'')+(mo?'จากนั้น '+Number(mo.price).toLocaleString('en-US')+' บาท/เดือน · ':'')}
+    $('#subPrice').textContent=(tr?'ใช้งานฟรี สินค้า '+nfx(tr.items)+' รายการ · '+nfx(tr.bills)+' บิล/เดือน · ':'')+(mo?'อัปเกรดเริ่ม '+Number(mo.price).toLocaleString('en-US')+' บาท/เดือน · ':'')}
   var l2=pkList();if(!curPk())S.pkg=l2.length?(l2.find(isFree)||l2[0]).id:null;renderPk();
   try{var q=new URLSearchParams(location.search);if(S.prod==='retail')q.set('product','retail');else q.delete('product');var pa=location.pathname.indexOf('/retail')===0&&S.prod!=='retail'?'/signup':location.pathname;history.replaceState(null,'',pa+(q.toString()?'?'+q:''))}catch(e){}}
 $('#prodSel').addEventListener('click',function(e){var b=e.target.closest('[data-prod]');if(b)setProd(b.dataset.prod)});
@@ -206,7 +206,7 @@ $('#formView').addEventListener('submit',function(e){e.preventDefault();msg('');
       if(s.error||!s.data.session){done({error:'x'});msg('อีเมลนี้มีบัญชีอยู่แล้ว ใส่รหัสผ่านเดิมของบัญชีนี้ หรือใช้อีเมลอื่น');return}
       fn(Object.assign({action:'apply'},v),s.data.session.access_token).then(function(r2){sb.auth.signOut();done(r2)})})
   }).catch(function(){btn.disabled=false;btn.textContent=goText();msg('เชื่อมต่อไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต')})});
-function showTrialDone(name){step(3);if(S.bill.freeMode){$('#doneTitle').textContent='ส่งคำขอเปิดร้านแล้ว';$('#doneText').textContent='ได้รับคำขอเปิดร้าน '+(name||'')+' แล้ว ใช้งานฟรี ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ '+PROD[S.prod].name+' ด้วยอีเมลและรหัสผ่านที่ตั้งไว้';return}$('#doneTitle').textContent='ส่งคำขอทดลองใช้ฟรีแล้ว';$('#doneText').textContent='ได้รับคำขอทดลองใช้ฟรี 30 วันของร้าน '+(name||'')+' แล้ว ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ '+PROD[S.prod].name+' ด้วยอีเมลและรหัสผ่านที่ตั้งไว้'}
+function showTrialDone(name){step(3);if(S.bill.freeMode){$('#doneTitle').textContent='ส่งคำขอเปิดร้านแล้ว';$('#doneText').textContent='ได้รับคำขอเปิดร้าน '+(name||'')+' แล้ว ใช้งานฟรี ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ '+PROD[S.prod].name+' ด้วยอีเมลและรหัสผ่านที่ตั้งไว้';return}$('#doneTitle').textContent='ส่งคำขอเปิดร้านแล้ว';$('#doneText').textContent='ได้รับคำขอเปิดร้าน '+(name||'')+' แล้ว ใช้งานฟรี (สินค้า 50 รายการ · 200 บิล/เดือน) ไม่ต้องชำระเงิน เมื่อทีมงานยืนยันเปิดร้าน (แจ้งทางอีเมล) เข้าสู่ระบบ '+PROD[S.prod].name+' ด้วยอีเมลและรหัสผ่านที่ตั้งไว้'}
 
 /* step 2 */
 function showPay(){var a=S.app,b=S.bill;step(2);msg('');
