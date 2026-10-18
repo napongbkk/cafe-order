@@ -1,0 +1,50 @@
+# XcodeGen project for Coconut POS Stand alone (iPhone/iPad). CI copies offline/www into ./www first.
+name: CoconutPOS
+options:
+  bundleIdPrefix: com.coconutpos
+  deploymentTarget:
+    iOS: "15.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
+targets:
+  CoconutPOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+      - path: www
+        type: folder
+        buildPhase: resources
+      - path: Assets.xcassets
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.coconutpos.standalone
+        PRODUCT_NAME: Coconut POS
+        TARGETED_DEVICE_FAMILY: "1,2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        GENERATE_INFOPLIST_FILE: NO
+        INFOPLIST_FILE: Info.plist
+        CODE_SIGN_STYLE: Automatic
+    info:
+      path: Info.plist
+      properties:
+        CFBundleDisplayName: Coconut POS
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIRequiresFullScreen: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        UISupportedInterfaceOrientations~ipad: [UIInterfaceOrientationPortrait, UIInterfaceOrientationPortraitUpsideDown, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+        NSLocalNetworkUsageDescription: Coconut POS ให้เครื่องอื่นในร้านที่อยู่ใน Wi-Fi เดียวกันเชื่อมต่อเพื่อใช้ข้อมูลขายร่วมกัน
+        NSCameraUsageDescription: ใช้กล้องถ่ายรูปเมนูและสแกนบาร์โค้ด
+        NSPhotoLibraryUsageDescription: เลือกรูปเมนูจากคลังรูปภาพ
+        ITSAppUsesNonExemptEncryption: false
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoadsInWebContent: true
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true

@@ -92,3 +92,49 @@ jobs:
           cd /tmp/l && git init -q && git checkout -q -b ci-logs-android && git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "android build log"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs-android
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build (simulator + device, unsigned) and run in the simulator
+        run: |
+          set -o pipefail
+          {
+            python3 tools/build_pos.py
+            rm -rf offline/ios/www && cp -R offline/www offline/ios/www
+            brew install xcodegen >/dev/null
+            cd offline/ios && xcodegen generate
+            xcodebuild -project CoconutPOS.xcodeproj -scheme CoconutPOS -configuration Release -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+            xcodebuild -project CoconutPOS.xcodeproj -scheme CoconutPOS -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath build CODE_SIGNING_ALLOWED=NO build
+          } 2>&1 | tee build-ios.log | grep -E "error|warning: |BUILD|Generated" || true
+          test -d "offline/ios/build/Build/Products/Release-iphoneos/Coconut POS.app"
+      - name: Simulator smoke test
+        run: |
+          set +e
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys;d=json.load(sys.stdin)['devices'];print(next(x['udid'] for k,v in d.items() if 'iOS' in k for x in v if 'iPhone' in x['name']))")
+          xcrun simctl boot "$UDID"; xcrun simctl bootstatus "$UDID" -b >/dev/null
+          xcrun simctl install "$UDID" "offline/ios/build/Build/Products/Release-iphonesimulator/Coconut POS.app"
+          xcrun simctl launch "$UDID" com.coconutpos.standalone
+          for i in $(seq 1 30); do sleep 2; curl -s http://localhost:8080/api/info > smoke-ios.json && break; done
+          { echo "--- /api/info"; cat smoke-ios.json; echo; echo "--- index bytes: $(curl -s http://localhost:8080/ | wc -c)";
+            curl -s -X PUT http://localhost:8080/api/doc/menu/t1 -H 'Content-Type: application/json' -d '{"data":{"name":"test","createdAt":1,"ok":true}}';
+            curl -s -X PATCH http://localhost:8080/api/doc/menu/t1 -H 'Content-Type: application/json' -d '{"patch":{"x":{"y":1}}}';
+            curl -s "http://localhost:8080/api/col/menu?w=%5B%5B%22createdAt%22%2C%22%3E%3D%22%2C1%5D%2C%5B%22ok%22%2C%22%3D%3D%22%2Ctrue%5D%5D"; echo; } >> build-ios.log
+          xcrun simctl io "$UDID" screenshot ios-sim.png
+          grep -q coconut-pos-offline smoke-ios.json
+      - name: Publish unsigned device build
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          cd offline/ios/build/Build/Products/Release-iphoneos && mkdir -p Payload && cp -R "Coconut POS.app" Payload/ && zip -qr "$GITHUB_WORKSPACE/CoconutPOS-iOS-unsigned.ipa" Payload && cd "$GITHUB_WORKSPACE"
+          gh release view standalone-latest >/dev/null 2>&1 || gh release create standalone-latest --prerelease --title "Coconut POS Stand alone (latest build)" --notes "Built automatically from main."
+          gh release upload standalone-latest CoconutPOS-iOS-unsigned.ipa --clobber
+      - name: Save log
+        if: always()
+        run: |
+          mkdir -p /tmp/l && cp build-ios.log /tmp/l/ 2>/dev/null || echo "no log" > /tmp/l/build-ios.log
+          cp ios-sim.png /tmp/l/ 2>/dev/null || true
+          echo "result=${{ job.status }} sha=${{ github.sha }} at=$(date -u +%FT%TZ)" > /tmp/l/status-ios.txt
+          cd /tmp/l && git init -q && git checkout -q -b ci-logs-ios && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "ios build log"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs-ios
