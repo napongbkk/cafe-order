@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Coconut POS Stand alone · ติดตั้งและใช้งานหลายเครื่อง</title>
+<meta name="description" content="Coconut POS Stand alone: เก็บข้อมูลขายในเครื่องของร้าน ใช้หลายเครื่องใน Wi-Fi เดียวกัน รองรับ Windows Android iPhone/iPad">
+<meta name="theme-color" content="#0B1024">
+<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+:root{--bg:#F6F7FB;--surface:#fff;--ink:#0E1330;--ink2:#3B4266;--muted:#6B7194;--line:#E4E7F2;--b:#4F7BFF;--v:#7C5CFF;--c:#22C3EE;--cafe:#FF7A45;--cafe2:#F43F5E;
+  --grad:linear-gradient(120deg,#7C5CFF,#4F7BFF 50%,#22C3EE);--fh:'Prompt','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'IBM Plex Sans Thai',system-ui,sans-serif;--accent:#4F7BFF;--on-accent:#fff;--line2:#D5DAEE}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.75 var(--fb)}
+a{color:var(--b)}
+h1,h2,h3{font-family:var(--fh);line-height:1.25;margin:0;letter-spacing:-.01em}
+html:not(.en) [lang=en]{display:none!important}
+html.en [lang=th]{display:none!important}
+.top{position:sticky;top:0;z-index:20;background:rgba(11,16,36,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#fff}
+.top .in{max-width:1240px;margin:0 auto;padding:0 16px;height:64px;display:flex;align-items:center;gap:14px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font:700 19px/1 var(--fh)}
+.logo img{width:34px;height:34px}.logo img.wm{width:auto;height:28px}.logo .postag{font:700 12px/1 var(--fh);letter-spacing:.08em;color:#fff;background:#1B1B1B;padding:5px 7px;border-radius:7px;-webkit-text-fill-color:#fff}
+.logo span{background:linear-gradient(120deg,#A99BFF,#6FE3FF);-webkit-background-clip:text;background-clip:text;color:transparent}
+.top .sp{flex:1}
+.top a.t{color:rgba(255,255,255,.8);text-decoration:none;font:500 15px/1 var(--fh);padding:9px 10px;border-radius:10px}
+.top a.t:hover{background:rgba(255,255,255,.08);color:#fff}
+.top .btn{background:var(--grad);color:#fff;text-decoration:none;font:600 14px/1 var(--fh);padding:11px 14px;border-radius:12px}
+.top .eplang{border-color:rgba(255,255,255,.25);background:transparent;color:#fff}
+.hero{background:radial-gradient(circle at 15% 0%,rgba(124,92,255,.55),transparent 55%),radial-gradient(circle at 90% 100%,rgba(34,195,238,.4),transparent 55%),#0B1024;color:#fff;padding:56px 16px 64px}
+.hero .in{max-width:1240px;margin:0 auto}
+.hero h1{font-size:clamp(30px,4vw,46px);margin:10px 0 12px}
+.hero p{max-width:720px;color:rgba(255,255,255,.78);margin:0 0 22px;font-size:17px}
+.hero .chips{display:flex;gap:10px;flex-wrap:wrap}
+.hero .chips a{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;text-decoration:none;padding:10px 14px;border-radius:12px;font:500 15px/1 var(--fh)}
+.hero .chips a:hover{background:rgba(255,255,255,.14)}
+.wrap{max-width:1240px;margin:0 auto;padding:32px 16px 80px;display:grid;grid-template-columns:260px minmax(0,1fr);gap:36px;align-items:start}
+.toc{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:14px}
+.toc b{display:block;font:600 13px/1 var(--fh);color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:4px 8px 10px}
+.toc a{display:flex;gap:10px;align-items:center;text-decoration:none;color:var(--ink2);padding:8px 10px;border-radius:10px;font-size:15px;line-height:1.35}
+.toc a:hover{background:var(--bg)}
+.toc a.on{background:#EEF2FF;color:var(--b);font-weight:600}
+.toc a i{font-style:normal;flex-shrink:0;width:24px;height:24px;border-radius:7px;background:var(--bg);display:grid;place-items:center;font:600 12px/1 var(--fh);color:var(--muted)}
+.toc a.on i{background:var(--grad);color:#fff}
+main{min-width:0}
+section.s{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:30px;margin-bottom:22px}
+section.s>h2{font-size:26px;display:flex;align-items:center;gap:12px;margin-bottom:6px}
+section.s>h2 i{font-style:normal;width:38px;height:38px;border-radius:12px;background:var(--grad);color:#fff;display:grid;place-items:center;font:700 17px/1 var(--fh);flex-shrink:0}
+.lead{color:var(--muted);margin:0 0 18px}
+h3{font-size:18px;margin:22px 0 8px}
+ol.steps{counter-reset:k;list-style:none;padding:0;margin:0 0 6px;display:grid;gap:10px}
+ol.steps>li{counter-increment:k;position:relative;padding:12px 14px 12px 52px;background:var(--bg);border-radius:14px}
+ol.steps>li::before{content:counter(k);position:absolute;left:12px;top:12px;width:28px;height:28px;border-radius:9px;background:#fff;border:1px solid var(--line);display:grid;place-items:center;font:700 14px/1 var(--fh);color:var(--b)}
+ul.ck{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+ul.ck li{position:relative;padding-left:26px}
+ul.ck li::before{content:"";position:absolute;left:4px;top:.55em;width:10px;height:10px;border-radius:3px;background:var(--grad)}
+.path{display:inline-block;font:600 13px/1.4 var(--fh);background:#EEF2FF;color:#3346B3;padding:2px 8px;border-radius:7px;white-space:nowrap}
+kbd{font:600 13px/1 ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:2px 6px}
+.vid{margin:6px 0 18px;border-radius:18px;overflow:hidden;background:#0B1024;box-shadow:0 18px 40px -20px rgba(14,19,48,.5);position:relative}
+.vid video{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#0B1024}
+.vid.phone{max-width:360px}
+.vid.phone video{aspect-ratio:390/780}
+.vid figcaption{display:flex;gap:10px;align-items:center;padding:10px 14px;color:rgba(255,255,255,.85);font-size:14px;background:#141A3A}
+.vid figcaption b{font-family:var(--fh)}
+.vid figcaption span{margin-left:auto;opacity:.7}
+.tip{display:flex;gap:12px;padding:14px 16px;border-radius:14px;background:#FFF7ED;border:1px solid #FED7AA;color:#7C2D12;margin:14px 0;font-size:15px}
+.tip.info{background:#EFF6FF;border-color:#BFDBFE;color:#1E3A8A}
+.tip.ok{background:#ECFDF5;border-color:#A7F3D0;color:#065F46}
+.tip b{font-family:var(--fh)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.card{border:1px solid var(--line);border-radius:16px;padding:16px}
+.card h4{margin:0 0 6px;font:600 16px/1.3 var(--fh)}
+.card p{margin:0;color:var(--muted);font-size:15px}
+table.t{width:100%;border-collapse:collapse;font-size:15px;margin:8px 0}
+table.t th,table.t td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t th{font:600 14px/1.3 var(--fh);color:var(--muted);background:var(--bg)}
+details.q{border:1px solid var(--line);border-radius:14px;padding:0 16px;margin-bottom:10px}
+details.q summary{cursor:pointer;padding:14px 0;font:600 16px/1.4 var(--fh);list-style:none}
+details.q summary::-webkit-details-marker{display:none}
+details.q p{margin:0 0 14px;color:var(--ink2)}
+.demo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:18px;border-radius:18px;background:linear-gradient(120deg,rgba(124,92,255,.1),rgba(34,195,238,.1));border:1px solid #DCE3FF;margin-bottom:22px}
+.demo b{font:600 18px/1.3 var(--fh)}
+.demo p{margin:2px 0 0;color:var(--muted);font-size:15px}
+.demo a{margin-left:auto;background:var(--grad);color:#fff;text-decoration:none;padding:12px 18px;border-radius:12px;font:600 15px/1 var(--fh)}
+footer{background:#0B1024;color:rgba(255,255,255,.6);padding:28px 16px;font-size:14px;text-align:center}
+footer a{color:rgba(255,255,255,.8)}
+@media (max-width:960px){.wrap{grid-template-columns:1fr}.toc{position:static;max-height:none}.toc nav{display:grid;grid-template-columns:1fr 1fr}}
+@media (max-width:640px){.path{white-space:normal}table.t{display:block;overflow-x:auto}.top .in{gap:8px}.top .btn{padding:10px 10px;font-size:13px}section.s{padding:20px;border-radius:18px}.grid2{grid-template-columns:1fr}.top a.t{display:none}.toc nav{grid-template-columns:1fr}section.s>h2{font-size:22px}.demo a{margin-left:0}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* ===== Theme: warm neutral + black + amber ===== */
+:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#7C7A76;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#2E9BE6;--on-accent:#FFFFFF;--amber:#2E9BE6;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
+  --grad:linear-gradient(135deg,#5EC2FF,#2E9BE6);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+body{-webkit-font-smoothing:antialiased;font-size:15.5px}
+a{color:var(--ink)}
+h1,h2,h3{font-weight:600}
+.top{background:rgba(255,255,255,.88);color:var(--ink);border-bottom:1px solid var(--line)}
+.logo{color:var(--ink)}
+.logo span{background:none;-webkit-background-clip:initial;background-clip:initial;color:var(--ink)}
+.top a.t{color:var(--muted)}
+.top a.t:hover{background:var(--sunk);color:var(--ink)}
+.top .btn{background:var(--amber);color:var(--amber-ink);border-radius:10px}
+.top .eplang{border-color:var(--line2);background:var(--surface);color:var(--ink)}
+.hero{background:var(--surface);color:var(--ink);border-bottom:1px solid var(--line)}
+.hero > .in > span:first-child{color:var(--muted) !important}
+.hero p{color:var(--muted)}
+.hero .chips a{background:var(--sunk);border:1px solid var(--line);color:var(--ink);border-radius:10px}
+.hero .chips a:hover{background:var(--surface);border-color:var(--line2)}
+.toc{border-radius:14px}
+.toc a{color:var(--ink2)}
+.toc a.on{background:var(--sunk);color:var(--ink)}
+.toc a i{background:var(--sunk);border-radius:6px}
+.toc a.on i{background:var(--amber);color:var(--amber-ink)}
+section.s{border-radius:16px}
+section.s>h2{font-size:23px}
+section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#2E9BE6);color:#fff;border-radius:10px}
+ol.steps>li{background:var(--sunk);border-radius:12px}
+ol.steps>li::before{color:var(--ink);border-radius:8px}
+ul.ck li::before{background:var(--amber)}
+.path{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.vid{border-radius:14px;background:#2A2522;box-shadow:0 14px 34px -20px rgba(27,27,27,.45)}
+.vid video{background:#1B1B1B}
+.vid figcaption{background:#FFFFFF;color:var(--ink2);border-top:1px solid var(--line)}
+.tip{border-radius:12px;background:var(--amber-soft);border-color:#F3DDAA;color:#5C4208}
+.tip.info{background:var(--sunk);border-color:var(--line2);color:var(--ink2)}
+.tip.ok{background:#E7F5EC;border-color:#BFE3CD;color:#19663F}
+.card,details.q{border-radius:12px}
+table.t th{background:var(--sunk)}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.demo a{background:var(--amber);color:var(--amber-ink);border-radius:10px}
+footer{background:var(--surface);color:var(--muted);border-top:1px solid var(--line)}
+footer a{color:var(--ink)}
+.gsw{display:inline-flex;gap:4px;padding:4px;border-radius:12px;background:var(--sunk,#EDF2F7);border:1px solid var(--line);margin-bottom:14px}.gsw a{padding:8px 14px;border-radius:9px;text-decoration:none;color:var(--muted);font:600 14px/1 var(--fh)}.gsw a[aria-current="page"]{background:var(--surface,#fff);color:var(--ink);box-shadow:0 1px 2px rgba(27,27,27,.08)}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <a class="logo" href="/indexpos"><img class="wm" src="/coconut-logo-dark.png" alt="coconut"><span class="postag">POS</span></a>
+  <a class="t" href="/indexpos"><span lang="th">หน้าแรก</span><span lang="en">Home</span></a>
+  <a class="t" href="/demo"><span lang="th">ลองเดโม</span><span lang="en">Try the demo</span></a>
+  <a class="t" href="/guide/retail"><span lang="th">คู่มือ Retail</span><span lang="en">Retail guide</span></a>
+  <span class="sp"></span>
+  <span data-eplang></span>
+  <a class="btn" href="/pos"><span lang="th">เข้าสู่ระบบ Cafe</span><span lang="en">Cafe log in</span></a>
+</div></header>
+
+<div class="hero"><div class="in">
+  <nav class="gsw" aria-label="เลือกคู่มือ"><a href="/guide">คู่มือ Coconut POS Cafe</a><a href="/guide/retail">คู่มือ Coconut POS Retail</a><a href="/guide/standalone" aria-current="page">Stand alone</a></nav><br>
+  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#2E9BE6;text-transform:uppercase">Coconut POS Stand alone</span>
+  <h1>ข้อมูลอยู่ในเครื่องของร้าน ใช้ได้แม้เน็ตหลุด</h1>
+  <p>ติดตั้งโปรแกรมบนเครื่องหลักของร้าน (Windows, Android หรือ iPad/iPhone) ข้อมูลขายทั้งหมดเก็บในเครื่องนั้น เครื่องอื่นในร้านที่ต่อ Wi-Fi/LAN เดียวกันเปิดผ่านเบราว์เซอร์และใช้ข้อมูลชุดเดียวกัน เข้าสู่ระบบด้วยบัญชี Coconut POS เดิม</p>
+  <div class="chips">
+    <a href="#download">ดาวน์โหลด</a><a href="#setup">ติดตั้งและเปิดใช้งาน</a><a href="#lan">ใช้หลายเครื่อง</a><a href="#internet">อินเทอร์เน็ตและ 7 วัน</a><a href="#backup">สำรองข้อมูล</a>
+  </div>
+</div></div>
+
+<div class="wrap">
+<aside class="toc" aria-label="สารบัญ"><b>สารบัญ</b><nav id="toc"></nav></aside>
+<main data-noi18n>
+<section class="s" id="download"><h2><i>1</i>ดาวน์โหลด</h2>
+<p class="lead">เลือกตามเครื่องที่จะใช้เป็น <b>เครื่องหลัก</b> (เครื่องที่เก็บข้อมูล) ติดตั้งแค่เครื่องเดียว เครื่องอื่นไม่ต้องติดตั้ง</p>
+<table class="t"><thead><tr><th>เครื่องหลัก</th><th>ไฟล์</th><th>หมายเหตุ</th></tr></thead><tbody>
+<tr><td>คอมพิวเตอร์ Windows 10/11</td><td><a href="https://github.com/napongbkk/cafe-order/releases/download/standalone-latest/CoconutPOS-Setup.exe">ดาวน์โหลดตัวติดตั้ง Windows</a></td><td>แนะนำ: พิมพ์ใบเสร็จออกเครื่องพิมพ์ค่าเริ่มต้นทันทีโดยไม่ขึ้นหน้าต่างพิมพ์ และเปิดอัตโนมัติเมื่อเปิดเครื่อง</td></tr>
+<tr><td>แท็บเล็ต/มือถือ Android 7 ขึ้นไป</td><td><a href="https://github.com/napongbkk/cafe-order/releases/download/standalone-latest/CoconutPOS-Android-test.apk">ดาวน์โหลด APK</a></td><td>ระหว่างรอเผยแพร่บน Google Play ติดตั้งจากไฟล์นี้ได้ (อนุญาต “ติดตั้งแอปที่ไม่รู้จัก”)</td></tr>
+<tr><td>iPad / iPhone (iOS 15 ขึ้นไป)</td><td>App Store (เร็ว ๆ นี้)</td><td>ต้องเปิดแอปค้างไว้หน้าจอ ระบบปิดหน้าจออัตโนมัติให้แล้ว</td></tr>
+</tbody></table>
+<div class="tip info"><span>ℹ️</span><span>ร้านต้องได้รับการเปิดใช้แบบ <b>Stand alone</b> จากผู้ดูแลระบบก่อน ติดต่อผ่าน LINE ที่หน้าแรก หรือแจ้งตอนสมัคร</span></div>
+</section>
+
+<section class="s" id="setup"><h2><i>2</i>ติดตั้งและเปิดใช้งานครั้งแรก</h2>
+<ol class="steps">
+<li>ติดตั้งโปรแกรมบนเครื่องหลัก Windows: เปิดไฟล์ติดตั้ง กด “ถัดไป” จนเสร็จ (ตัวติดตั้งจะตั้งค่า Windows Firewall ให้เครื่องอื่นในร้านเชื่อมต่อได้)</li>
+<li>เปิดโปรแกรม <b>Coconut POS</b> ต่ออินเทอร์เน็ตไว้</li>
+<li>เข้าสู่ระบบด้วย <b>อีเมลและรหัสผ่านของผู้จัดการร้าน</b> (บัญชีเดียวกับที่สมัครไว้) ระบบจะตรวจสอบกับระบบออนไลน์แล้วผูกเครื่องนี้กับร้าน</li>
+<li>เริ่มตั้งค่าร้าน เมนู โต๊ะ เครื่องพิมพ์ ได้เหมือนระบบออนไลน์ทุกอย่าง (ดู <a href="/guide">คู่มือ Cafe</a>)</li>
+</ol>
+<div class="tip"><span>💡</span><span>เครื่องหลัก 1 เครื่องเก็บข้อมูลได้ 1 ร้าน ถ้าต้องการย้ายเครื่อง ให้สำรองข้อมูลแล้วนำเข้าที่เครื่องใหม่</span></div>
+</section>
+
+<section class="s" id="lan"><h2><i>3</i>ใช้หลายเครื่องในร้าน</h2>
+<ol class="steps">
+<li>ให้ทุกเครื่องต่อ <b>Wi-Fi หรือสาย LAN วงเดียวกัน</b> กับเครื่องหลัก</li>
+<li>บนเครื่องหลัก กดป้าย <b>Stand alone</b> ที่แถบบน จะเห็นที่อยู่ เช่น <kbd>http://192.168.1.10:8080</kbd> และ QR code</li>
+<li>เครื่องอื่น (มือถือ แท็บเล็ต คอมพิวเตอร์ จอครัว) เปิดเบราว์เซอร์ไปที่อยู่นั้น หรือสแกน QR แล้วเข้าสู่ระบบ</li>
+<li>ทุกเครื่องเห็นเมนู บิล โต๊ะ และจอครัวชุดเดียวกันทันที</li>
+</ol>
+<div class="tip warn"><span>⚠️</span><span>เครื่องหลักต้องเปิดโปรแกรมไว้ตลอดเวลาขาย ถ้าปิด เครื่องอื่นจะขึ้น “ติดต่อเครื่องหลักไม่ได้” และกลับมาใช้ได้เองเมื่อเปิดใหม่ แนะนำตั้ง IP ของเครื่องหลักให้คงที่ในเราเตอร์ เพื่อให้ที่อยู่ไม่เปลี่ยน</span></div>
+</section>
+
+<section class="s" id="internet"><h2><i>4</i>อินเทอร์เน็ตและกติกา 7 วัน</h2>
+<ul class="ck">
+<li>เข้าสู่ระบบครั้งแรกของแต่ละบัญชีต้องต่ออินเทอร์เน็ต</li>
+<li>หลังจากนั้นขายได้ตามปกติแม้อินเทอร์เน็ตหลุด เข้าสู่ระบบด้วยรหัสผ่านเดิมได้</li>
+<li>ต้องต่ออินเทอร์เน็ต <b>อย่างน้อยทุก 7 วัน</b> (ผู้ดูแลระบบกำหนดได้) เพื่อตรวจสอบสถานะร้าน ถ้าเกินกำหนด ระบบจะล็อกจนกว่าจะต่ออินเทอร์เน็ต</li>
+<li>บัญชีพนักงาน แพ็กเกจ และค่าบริการ ใช้ร่วมกับระบบออนไลน์ ต่ออายุได้ที่ <a href="/pos">coconutpos.vercel.app/pos</a> ด้วยบัญชีผู้จัดการ แล้วกด “ตรวจสอบสถานะ” ในโปรแกรม</li>
+<li>Mobile Order (ลูกค้าสแกน QR สั่งเอง) ใช้ไม่ได้ในแบบ Stand alone เพราะต้องใช้อินเทอร์เน็ต</li>
+</ul>
+</section>
+
+<section class="s" id="backup"><h2><i>5</i>สำรองข้อมูล</h2>
+<ul class="ck">
+<li>ระบบสำรองข้อมูลอัตโนมัติวันละครั้งในเครื่องหลัก เก็บย้อนหลัง 14 วัน</li>
+<li>Windows: เมนู <b>Coconut POS › เปิดโฟลเดอร์ข้อมูลและไฟล์สำรอง</b> (อยู่ใน Documents\CoconutPOS)</li>
+<li>iPad/iPhone: เปิดแอป Files › On My iPad › Coconut POS</li>
+<li>ดาวน์โหลดไฟล์สำรองเก็บไว้ที่อื่นได้ที่ ตั้งค่า › สำรองข้อมูล แนะนำทำทุกสัปดาห์</li>
+</ul>
+</section>
+
+<section class="s" id="faq"><h2><i>6</i>คำถามที่พบบ่อย</h2>
+<h3>เครื่องอื่นเปิดที่อยู่ไม่ได้</h3><p>ตรวจว่าอยู่ Wi-Fi เดียวกัน (บาง Wi-Fi แขกแยกเครื่องออกจากกัน) และบน Windows อนุญาตโปรแกรมใน Firewall ถ้าถูกถาม</p>
+<h3>ขึ้นว่า “เครื่องนี้เก็บข้อมูลของร้านอื่นอยู่แล้ว”</h3><p>เครื่องหลักผูกกับร้านแรกที่เปิดใช้งาน ใช้บัญชีของร้านนั้นเข้าสู่ระบบ</p>
+<h3>ขึ้นว่า “ร้านนี้ใช้ระบบออนไลน์”</h3><p>ร้านยังไม่ได้เปลี่ยนเป็นแบบ Stand alone ติดต่อผู้ดูแลระบบ</p>
+</section>
+</main>
+</div>
+<footer><span lang="th">© Coconut POS · <a href="/indexpos">หน้าแรก</a> · <a href="/demo">เดโม</a> · <a href="/signup">สมัครทดลองใช้ฟรี</a> · <a href="/pos">เข้าสู่ระบบ Cafe</a></span><span lang="en">© Coconut POS · <a href="/indexpos">Home</a> · <a href="/demo">Demo</a> · <a href="/signup">Free trial</a> · <a href="/pos">Cafe log in</a></span></footer>
+
+<script>
+(function(){
+var toc=document.getElementById('toc');
+document.querySelectorAll('section.s').forEach(function(s,i){var h=s.querySelector('h2');var th=h.querySelector('[lang=th]'),en=h.querySelector('[lang=en]');
+  var a=document.createElement('a');a.href='#'+s.id;a.innerHTML='<i>'+(i+1)+'</i><span lang="th"></span><span lang="en"></span>';
+  a.children[1].textContent=th?th.textContent:h.textContent.replace(/^\d+/,'');a.children[2].textContent=en?en.textContent:h.textContent.replace(/^\d+/,'');toc.appendChild(a)});
+var links=[].slice.call(toc.querySelectorAll('a'));
+if('IntersectionObserver' in window){var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(l){l.classList.toggle('on',l.getAttribute('href')==='#'+e.target.id)})}})},{rootMargin:'-40% 0px -55% 0px'});
+  document.querySelectorAll('section.s').forEach(function(s){io.observe(s)})}
+// Only one video plays at a time.
+document.addEventListener('play',function(e){document.querySelectorAll('video').forEach(function(v){if(v!==e.target)v.pause()})},true);
+})();
+</script>
+<script src="/i18n-en.js"></script>
+<script src="/easypos-i18n.js"></script>
+<script src="/track.js" data-page="guide-standalone" defer></script>
+</body>
+</html>
