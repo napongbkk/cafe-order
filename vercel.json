@@ -109,5 +109,12 @@
       "source": "/s/:slug/",
       "destination": "/order"
     }
+  ],
+  "redirects": [
+    {
+      "source": "/guide/standalone",
+      "destination": "/guide",
+      "permanent": false
+    }
   ]
 }
