@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+}
+
+def keystore = System.getenv('ANDROID_KEYSTORE_FILE')
+
+android {
+    namespace 'com.coconutpos.standalone'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.coconutpos.standalone'
+        minSdk 24
+        targetSdk 35
+        versionCode (System.getenv('APP_BUILD_NUMBER') ? System.getenv('APP_BUILD_NUMBER').toInteger() : 1)
+        versionName '1.0.0'
+    }
+
+    signingConfigs {
+        release {
+            if (keystore) {
+                storeFile file(keystore)
+                storePassword System.getenv('ANDROID_KEYSTORE_PASSWORD')
+                keyAlias System.getenv('ANDROID_KEY_ALIAS')
+                keyPassword System.getenv('ANDROID_KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            if (keystore) signingConfig signingConfigs.release
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main { assets.srcDirs = ['src/main/assets', "$buildDir/generated/www-assets"] }
+    }
+}
+
+// The POS web app (offline/www, built by tools/build_pos.py) goes into the APK as assets/www.
+tasks.register('copyWww', Copy) {
+    from "${rootDir}/../www"
+    into "$buildDir/generated/www-assets/www"
+}
+preBuild.dependsOn 'copyWww'

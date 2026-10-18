@@ -50,3 +50,45 @@ jobs:
           cd /tmp/l && git init -q && git checkout -q -b ci-logs-windows && git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "windows build log"
           git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs-windows
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: '8.10.2' }
+      - name: Signing key (only when the secrets are set)
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS" ]; then echo "$KS" | base64 -d > "$RUNNER_TEMP/upload.jks"; echo "ANDROID_KEYSTORE_FILE=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"; fi
+      - name: Build APK and App Bundle
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          APP_BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          set -o pipefail
+          ( python3 tools/build_pos.py && cd offline/android && gradle --no-daemon assembleDebug bundleRelease ) 2>&1 | tee build-android.log
+          mkdir -p out
+          cp offline/android/app/build/outputs/apk/debug/app-debug.apk out/CoconutPOS-Android-test.apk
+          cp offline/android/app/build/outputs/bundle/release/app-release.aab out/CoconutPOS-Android-PlayStore.aab
+      - name: Publish
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh release view standalone-latest >/dev/null 2>&1 || gh release create standalone-latest --prerelease --title "Coconut POS Stand alone (latest build)" --notes "Built automatically from main."
+          gh release upload standalone-latest out/* --clobber
+      - name: Save log
+        if: always()
+        run: |
+          mkdir -p /tmp/l && cp build-android.log /tmp/l/ 2>/dev/null || echo "no log" > /tmp/l/build-android.log
+          echo "result=${{ job.status }} sha=${{ github.sha }} at=$(date -u +%FT%TZ) signed=${{ secrets.ANDROID_KEYSTORE_B64 != '' }}" > /tmp/l/status-android.txt
+          ls -la out >> /tmp/l/status-android.txt 2>&1 || true
+          cd /tmp/l && git init -q && git checkout -q -b ci-logs-android && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "android build log"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs-android
