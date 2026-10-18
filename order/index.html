@@ -186,6 +186,7 @@ h2.cat{font-weight:600;font-size:16px}
 .logo{background:linear-gradient(135deg,#5EC2FF,#1F7FD1);color:#fff}
 .hero{flex-wrap:wrap}.hero > div:nth-child(2){flex:1 1 140px;min-width:0}.hero h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hero .where{margin-left:0}.hero [data-eplang]{margin-left:auto !important}
 .chip[aria-pressed="true"]{border-color:#A8D8FA;background:var(--amber-soft)}
+.item .pic .defpic{width:100%;height:100%;display:block}
 </style>
 </head>
 <body>
@@ -199,6 +200,31 @@ h2.cat{font-weight:600;font-size:16px}
 <div id="sheet"></div>
 <div class="toast" id="toast" role="status" hidden></div>
 
+<script>
+/* ===== Default menu pictures (no photo yet): a drawn picture picked from the item's name ===== */
+const DEFPIC_TINT={latte:['#C8936A','#F3E2CF'],matcha:['#7FA35B','#EEF4E4'],thai:['#E8843A','#FBE9D8'],cocoa:['#7A4E36','#F1E3D8'],tea:['#C9852F','#FBF0DC'],soda:['#5BB7D9','#E3F4FA'],pink:['#E38AA6','#FCE7EE'],coffee:['#5C3A28','#EFE3D6']};
+function defPicKind(m,drink){const t=((m.name||'')+' '+(m.en||'')).toLowerCase();const has=(...w)=>w.some(x=>t.includes(x));
+  if(has('ครัวซอง','croissant'))return ['croissant'];
+  if(has('คุกกี้','cookie','บิสกิต','biscuit'))return ['cookie'];
+  if(has('เค้ก','cake','ชีส','cheese','บราวนี่','brownie','ทาร์ต','tart','พาย','pie'))return ['cake'];
+  if(has('ขนมปัง','bread','โทสต์','toast','แซนด์','sandwich','เบเกิล','bagel','มัฟฟิน','muffin','วาฟเฟิล','waffle'))return ['bread'];
+  if(has('ข้าว','rice','ก๋วยเตี๋ยว','noodle','บะหมี่','ผัด','สปาเก','pasta','ราเมน','ramen','ต้ม','soup','แกง','curry'))return ['bowl'];
+  const iced=has('เย็น','iced','ice ','ปั่น','frappe','smoothie','โซดา','soda','น้ำผลไม้','juice','ชาไทย','thai tea','มัทฉะ','matcha','ชาเขียว','green tea','โกโก้','cocoa','ช็อก','choco','นม','milk','ชา','tea','มะนาว','lemon','สตรอ','straw','เลมอน');
+  const tint=has('มัทฉะ','matcha','ชาเขียว','green tea')?'matcha':has('ชาไทย','thai tea','ชานม')?'thai':has('โกโก้','cocoa','ช็อก','choco')?'cocoa':has('โซดา','soda','มะนาว','lemon','เลมอน','น้ำ ')?'soda':has('สตรอ','straw','พิงค์','pink')?'pink':has('ชา','tea')?'tea':'latte';
+  if(has('ร้อน','hot','เอสเพรสโซ่','espresso')||(!iced&&has('กาแฟ','coffee','ลาเต้','latte','อเมริกาโน','americano','คาปู','cappu','มอคค่า','mocha','แฟลตไวท์','flat white')))return ['hot',tint==='latte'?'coffee':tint];
+  if(iced||drink)return ['iced',tint];
+  return ['dish']}
+function defPic(m,drink){const [k,tn]=defPicKind(m,drink);const [c,bg]=DEFPIC_TINT[tn]||DEFPIC_TINT.latte;const w='<svg class="defpic" viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true">';
+  if(k==='hot')return w+`<rect width="160" height="120" fill="${bg}"/><circle cx="128" cy="22" r="34" fill="#fff" opacity=".35"/><path d="M70 30c-6-7 6-9 0-17M82 30c-6-7 6-9 0-17M94 30c-6-7 6-9 0-17" stroke="#fff" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".85"/><ellipse cx="82" cy="98" rx="50" ry="10" fill="#000" opacity=".08"/><ellipse cx="82" cy="94" rx="48" ry="11" fill="#fff"/><ellipse cx="82" cy="93" rx="34" ry="6" fill="#EDE7E1"/><path d="M50 46h64v20c0 17-14 28-32 28S50 83 50 66z" fill="#fff"/><path d="M114 52c14 0 14 20 0 20" stroke="#fff" stroke-width="6" fill="none"/><ellipse cx="82" cy="46" rx="32" ry="8" fill="${c}"/><path d="M82 51c-7-5-9-9-5-11 3-1 5 1 5 3 0-2 2-4 5-3 4 2 2 6-5 11z" fill="#F7E6D2"/><path d="M50 60c6 3 58 3 64 0" stroke="#000" opacity=".06" stroke-width="4"/></svg>`;
+  if(k==='iced')return w+`<rect width="160" height="120" fill="${bg}"/><circle cx="30" cy="24" r="26" fill="#fff" opacity=".4"/><ellipse cx="80" cy="108" rx="34" ry="6" fill="#000" opacity=".08"/><path d="M98 6l-8 34" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M98 6l-8 34" stroke="${c}" stroke-width="7" stroke-linecap="round" stroke-dasharray="5 6" opacity=".55"/><path d="M56 30h48l-6 74a6 6 0 0 1-6 5H68a6 6 0 0 1-6-5z" fill="#fff" opacity=".55"/><path d="M60 50h40l-4 52a5 5 0 0 1-5 4H69a5 5 0 0 1-5-4z" fill="${c}"/><path d="M60 50h40l-1 12H61z" fill="#fff" opacity=".45"/><rect x="66" y="40" width="13" height="13" rx="3" fill="#fff" opacity=".85" transform="rotate(-10 72 46)"/><rect x="81" y="43" width="12" height="12" rx="3" fill="#fff" opacity=".75" transform="rotate(12 87 49)"/><path d="M64 34l4 66" stroke="#fff" stroke-width="3" opacity=".7" stroke-linecap="round"/><path d="M56 30h48" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>`;
+  if(k==='croissant')return w+`<rect width="160" height="120" fill="#FBEBD3"/><circle cx="132" cy="20" r="30" fill="#fff" opacity=".4"/><ellipse cx="80" cy="96" rx="52" ry="8" fill="#000" opacity=".07"/><path d="M28 80c4-16 18-24 26-22l-4 26c-10 3-20 2-22-4z" fill="#D88A3A"/><path d="M132 80c-4-16-18-24-26-22l4 26c10 3 20 2 22-4z" fill="#D88A3A"/><path d="M50 58c6-10 16-14 22-12l-2 40c-10 2-20-2-24-8z" fill="#E7A452"/><path d="M110 58c-6-10-16-14-22-12l2 40c10 2 20-2 24-8z" fill="#E7A452"/><path d="M68 46c8-6 16-6 24 0l2 44c-9 4-19 4-28 0z" fill="#F0B862"/><path d="M74 54c4-2 8-2 12 0M56 64c3-2 6-2 9 0M95 64c3-2 6-2 9 0" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".5"/></svg>`;
+  if(k==='cookie')return w+`<rect width="160" height="120" fill="#F6E6D4"/><circle cx="28" cy="22" r="26" fill="#fff" opacity=".4"/><ellipse cx="84" cy="98" rx="46" ry="7" fill="#000" opacity=".07"/><circle cx="102" cy="64" r="30" fill="#B97A45"/><circle cx="72" cy="62" r="34" fill="#D69B5E"/><circle cx="72" cy="62" r="34" fill="none" stroke="#C0854B" stroke-width="3"/><g fill="#5A3A22"><circle cx="60" cy="50" r="5"/><circle cx="82" cy="46" r="4"/><circle cx="88" cy="68" r="5"/><circle cx="64" cy="76" r="4"/><circle cx="52" cy="64" r="3"/><circle cx="76" cy="62" r="3"/><circle cx="112" cy="56" r="4"/><circle cx="116" cy="74" r="3"/></g></svg>`;
+  if(k==='cake')return w+`<rect width="160" height="120" fill="#FCE7EE"/><circle cx="130" cy="22" r="30" fill="#fff" opacity=".45"/><ellipse cx="80" cy="100" rx="50" ry="8" fill="#000" opacity=".07"/><ellipse cx="80" cy="96" rx="48" ry="9" fill="#fff"/><path d="M40 60l72-22v52H40z" fill="#F7D9A8"/><path d="M40 60l72-22v10L40 70z" fill="#fff"/><path d="M40 76h72v6H40z" fill="#E98AA8"/><path d="M112 38l12 6v46l-12 2z" fill="#EFC98C"/><circle cx="100" cy="34" r="7" fill="#E2445C"/><path d="M100 27c2-4 6-5 8-4" stroke="#4F8A3A" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>`;
+  if(k==='bread')return w+`<rect width="160" height="120" fill="#F8EBD6"/><circle cx="30" cy="22" r="26" fill="#fff" opacity=".4"/><ellipse cx="80" cy="98" rx="50" ry="7" fill="#000" opacity=".07"/><path d="M38 92V58c0-14 10-22 20-22 2-6 10-10 22-10s20 4 22 10c10 0 20 8 20 22v34z" fill="#D9984F"/><path d="M46 92V60c0-10 8-16 16-16h36c8 0 16 6 16 16v32z" fill="#F6DDB2"/><path d="M60 64c4 6 4 14 0 20M80 62c4 6 4 16 0 22M100 64c4 6 4 14 0 20" stroke="#E5C08A" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+  if(k==='bowl')return w+`<rect width="160" height="120" fill="#EAF3E6"/><circle cx="130" cy="22" r="30" fill="#fff" opacity=".45"/><path d="M98 14l30 46M108 12l24 48" stroke="#8A5A3C" stroke-width="4" stroke-linecap="round"/><ellipse cx="80" cy="100" rx="52" ry="8" fill="#000" opacity=".07"/><path d="M30 56h100c0 26-22 42-50 42S30 82 30 56z" fill="#fff"/><path d="M30 56h100c0 4-1 8-2 11H32c-1-3-2-7-2-11z" fill="#000" opacity=".05"/><ellipse cx="80" cy="56" rx="50" ry="10" fill="#FFF8EC"/><g fill="#F0A64A"><circle cx="62" cy="52" r="6"/><circle cx="96" cy="54" r="5"/></g><g fill="#6FA552"><ellipse cx="78" cy="50" rx="7" ry="3"/><ellipse cx="108" cy="52" rx="5" ry="2.5"/></g><path d="M36 74c14 8 74 8 88 0" stroke="#3E7CB1" stroke-width="3" opacity=".35" fill="none"/></svg>`;
+  return w+`<rect width="160" height="120" fill="#EEF2F6"/><circle cx="30" cy="22" r="26" fill="#fff" opacity=".6"/><ellipse cx="80" cy="98" rx="56" ry="8" fill="#000" opacity=".07"/><ellipse cx="80" cy="92" rx="56" ry="10" fill="#fff"/><path d="M38 90c0-26 18-42 42-42s42 16 42 42z" fill="#C7D3DF"/><path d="M48 84c2-18 14-28 30-30" stroke="#fff" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/><circle cx="80" cy="44" r="6" fill="#A9B8C7"/></svg>`}
+
+</script>
 <script>
 (function(){
 'use strict';
@@ -288,7 +314,7 @@ function renderMenu(){
     if(!items.length)return;
     var L=look(),grid=L.layout==='grid';
     html+='<h2 class="cat">'+esc(c.name)+'</h2><div class="items'+(grid?' grid':'')+'">'+items.map(function(x){var ci=catIdx(x.catId);var has=optsOf(x).length;var iu=L.showImg!==false?safeUrl(x.img):'';
-      return '<button class="item" data-act="item" data-id="'+esc(x.id)+'"'+(x.soldOut?' disabled':'')+'><span class="pic" style="background:var(--t-'+ci+');color:var(--i-'+ci+')">'+(iu?'<img src="'+esc(iu)+'" alt="" loading="lazy">':ic(has?'cup':'bread'))+'</span><span class="info"><b>'+esc(x.name)+(x.best?'<span class="tag">ขายดี</span>':'')+(x.soldOut?'<span class="tag out">หมด</span>':'')+'</b>'+(x.en?'<small>'+esc(x.en)+'</small>':'')+'</span><span class="pr">'+baht(x.price)+(has?'+':'')+'</span></button>'}).join('')+'</div>';
+      return '<button class="item" data-act="item" data-id="'+esc(x.id)+'"'+(x.soldOut?' disabled':'')+'><span class="pic" style="background:var(--t-'+ci+');color:var(--i-'+ci+')">'+(iu?'<img src="'+esc(iu)+'" alt="" loading="lazy">':defPic(x,has))+'</span><span class="info"><b>'+esc(x.name)+(x.best?'<span class="tag">ขายดี</span>':'')+(x.soldOut?'<span class="tag out">หมด</span>':'')+'</b>'+(x.en?'<small>'+esc(x.en)+'</small>':'')+'</span><span class="pr">'+baht(x.price)+(has?'+':'')+'</span></button>'}).join('')+'</div>';
   });
   m.innerHTML=(html||'<div class="empty"><b>ยังไม่มีเมนู</b></div>')+myOrdersHtml();
 }
