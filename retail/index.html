@@ -644,8 +644,9 @@ tr.click:hover td{background:var(--accent-soft)}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .auth .links .lk{color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
 .auth .links button{border:0;background:none;color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;cursor:pointer}
-.auth .foot{display:flex;justify-content:center;gap:16px;font-size:14px}
-.auth .foot a{color:var(--accent,#105382);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
+.auth .foot{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;font-size:14px}
+.auth .foot a{color:var(--accent,#105382);display:inline-flex;align-items:center;min-height:44px;padding:0 4px;white-space:nowrap}
+@media (max-width:440px){.auth .foot{gap:0 8px;font-size:13px}.auth .foot a{padding:0 1px}}
 .auth .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#105382,#1d6fb8);flex-shrink:0}
 .shim-form{display:flex;flex-direction:column;gap:12px}
 .shim-form label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500;color:var(--ink,#13202c)}
@@ -708,7 +709,7 @@ tr.click:hover td{background:var(--accent-soft)}
   <button class="sbtn" type="button" id="authOut" hidden>ออกจากระบบ</button>
   <a class="sbtn" href="/retail/signup" style="color:var(--accent,#1f7fc0)">สมัครเปิดร้านใหม่</a>
   <p style="text-align:center;font-size:13px">พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ผู้จัดการร้านสร้างให้</p>
-  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos">ร้านคาเฟ่? Coconut POS Cafe</a></div>
+  <div class="foot"><a href="/retail/demo">ลองเดโม</a><a href="/indexpos">หน้าแรก</a><a href="/guide/retail">คู่มือ</a><a href="/pos" aria-label="ร้านคาเฟ่? ไปที่ Coconut POS Cafe">Coconut POS Cafe</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="sbtn" type="button" id="lockOut">ออกจากระบบ</button></div>
