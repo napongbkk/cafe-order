@@ -173,7 +173,7 @@ $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var ra
   var job=sb.auth.signInWithPassword({email:e,password:p});
   job.then(function(r){$('#authBtn').disabled=false;
     if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':r.error.message);return}
-    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);
+    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);try{localStorage.removeItem('pos.view')}catch(x){}window.__goHome=true;
     check()})});
 function fn(body,tok){return fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify(body)})}
 function syncCred(tok,p){try{fn({action:'remember',password:p},tok).catch(function(){})}catch(e){}}
@@ -193,7 +193,7 @@ function check(){
       if(d.shop.product!=='retail'&&!d.admin){showAuth('บัญชีนี้เป็นร้าน Coconut POS Cafe <a href="/pos">ไปหน้าเข้าสู่ระบบ Coconut POS Cafe</a>',true,true);return}
       if(d.shop.edition==='offline'&&!d.admin){showAuth('ร้าน “'+esc(d.shop.name)+'” ใช้ Coconut POS แบบ Stand alone ข้อมูลขายอยู่ในเครื่องของร้าน ให้เปิดโปรแกรม Coconut POS ในเครื่องหลักของร้าน',true,true);return}
       SID=d.shop.id;role=d.role||'staff';
-      $('#auth').hidden=true;
+      $('#auth').hidden=true;if(window.__goHome){window.__goHome=false;setTimeout(function(){window.POS_HOME&&window.POS_HOME()},400)}
       if(d.admin){document.body.insertAdjacentHTML('beforeend','<span class="adminbar">ผู้ดูแลระบบ · '+esc(d.shop.name)+' <a href="/admin">กลับแดชบอร์ด</a></span>')}
       if(d.shop.locked&&!d.admin){showLock();return}
       startRealtime();resolveReady();setInterval(refreshSession,10*60*1000)})

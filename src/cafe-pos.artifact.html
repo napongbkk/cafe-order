@@ -904,7 +904,7 @@ const S={mobNew:[],view:'sell',mode:'loading',db:null,canEdit:true,downloads:nul
   mtab:'menu',stab:'devices',rounds:null,confirm:null,done:null,busy:false};
 let PR={paper:'80',auto:false,bar:false,kprint:{},kmode:'send',kmodel:'',model:'',copies:1,drawer:{on:false,conn:'rj11',pin:'2',when:'cash',t1:50,t2:500,needPin:true},pmodel:'pr01w',conn:'file',font:22,density:150,cut:true,feed:4,baud:9600};
 try{const p=JSON.parse(localStorage.getItem('pos.print')||'null');if(p){const dr=Object.assign({},PR.drawer,p.drawer||{});PR=Object.assign(PR,p);PR.drawer=dr;if(p.bar&&!p.kprint){PR.kprint={'*':true}}PR.kprint=PR.kprint||{}}}catch(e){}
-try{let v=localStorage.getItem('pos.view');if(v==='bar')v='kds';if(v&&NAV.some(n=>n[0]===v))S.view=v}catch(e){}
+try{let v=localStorage.getItem('pos.view');if(v==='bar')v='kds';if(v&&['kds','display'].includes(v)&&NAV.some(n=>n[0]===v))S.view=v}catch(e){}
 try{S.kst=localStorage.getItem('pos.kds')||'all'}catch(e){S.kst='all'}
 S.ktab='active';S.sound=false;
 function savePR(){try{localStorage.setItem('pos.print',JSON.stringify(PR))}catch(e){}}
@@ -2330,6 +2330,7 @@ function render(force){
   }
   renderOverlay();
 }
+window.POS_HOME=()=>{try{if(typeof S!=='undefined'&&S.view!=='sell'){S.ov=null;go('sell')}}catch(e){}};
 function go(view){if(view!=='display')S.dprev=null;S.view=view;S.sheet=false;S.confirm=null;S.docState=null;try{localStorage.setItem('pos.view',view)}catch(e){}
   if(view==='history'&&S.hist.date!==dayKey(Date.now())&&S.hist.list==null)loadHistDate();
   if(view==='round')loadRounds();

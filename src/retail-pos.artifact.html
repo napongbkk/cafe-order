@@ -2000,6 +2000,7 @@ function viewCdview(){const k=ST.cdv||'live',cfg=CD(),st=cdStatus();const name=S
 const VIEWS={pos:viewPOS,sales:viewSales,stock:viewStock,members:viewMembers,service:viewService,docs:viewDocs,branch:viewBranch,report:viewReport,shift:viewShift,settings:viewSettings,cdview:viewCdview};
 
 /* ---------- actions ---------- */
+window.POS_HOME=()=>{try{if(!isCustomer()&&ST.route!=='pos'){ST.route='pos';render()}}catch(e){}};
 const A={
  closeModal,go(el){ST.route=el.dataset.r;render();$('main')&&($('main').scrollTop=0)},tab(el){ST.tab[el.dataset.g]=el.dataset.t;render()},
  logout(){if(HOSTED()&&window.POS_SB){window.POS_SB.auth.signOut().then(()=>location.reload());return}ST.user=null;loc.set('simbat-user',null);pinBuf='';render()},

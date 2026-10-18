@@ -147,7 +147,7 @@ $('#authForm').addEventListener('submit',function(ev){ev.preventDefault();var ra
   job.then(function(r){$('#authBtn').disabled=false;
     if(r.error){msg(/Invalid login/i.test(r.error.message)?'ชื่อผู้ใช้/อีเมล หรือรหัสผ่านไม่ถูกต้อง':/confirm/i.test(r.error.message)?'ยังไม่ได้ยืนยันอีเมล เปิดลิงก์ในอีเมลที่ได้รับก่อน':r.error.message);return}
     if(signup&&!r.data.session){msg('สมัครแล้ว เปิดลิงก์ยืนยันในอีเมล แล้วกลับมาเข้าสู่ระบบ',true);setMode(false);return}
-    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);
+    if(r.data&&r.data.session)syncCred(r.data.session.access_token,p);try{localStorage.removeItem('pos.view')}catch(x){}window.__goHome=true;
     check()})});
 function syncCred(tok,p){try{fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+tok,'Content-Type':'application/json'},body:JSON.stringify({action:'remember',password:p})}).catch(function(){})}catch(e){}}
 sb.auth.onAuthStateChange(function(ev){if(ev==='SIGNED_OUT')location.reload();if(ev==='PASSWORD_RECOVERY'){var np=prompt('ตั้งรหัสผ่านใหม่ (อย่างน้อย 6 ตัวอักษร)');if(np&&np.length>=6)sb.auth.updateUser({password:np}).then(function(r){alert(r.error?'ตั้งรหัสผ่านไม่สำเร็จ':'ตั้งรหัสผ่านใหม่แล้ว')})}});
@@ -171,7 +171,7 @@ function check(){
         $('#lockWhy').textContent='ร้านนี้ใช้โปรแกรม Coconut POS ในเครื่องของร้าน หน้านี้ใช้ชำระค่าบริการและเปลี่ยนแพ็กเกจ หลังผู้ดูแลระบบอนุมัติ เปิดโปรแกรมในร้านแล้วกด “ตรวจสอบสถานะ” ที่ ตั้งค่า › ค่าบริการรายเดือน';
         var go2=function(){renderBilling($('#lockBilling'))};if(typeof QRCode==='undefined')window.addEventListener('load',go2);else go2();return}
       SID=d.shop.id;role=d.role||'staff';
-      $('#auth').hidden=true;
+      $('#auth').hidden=true;if(window.__goHome){window.__goHome=false;setTimeout(function(){window.POS_HOME&&window.POS_HOME()},400)}
       if(d.shop.locked&&!d.admin){showLock();return}
       startRealtime();resolveReady();setInterval(refreshSession,10*60*1000)})
     .catch(function(e){showAuth('เชื่อมต่อระบบไม่สำเร็จ ลองรีเฟรชอีกครั้ง',true)})});
