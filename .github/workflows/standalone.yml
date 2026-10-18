@@ -24,6 +24,18 @@ jobs:
         run: |
           set -o pipefail
           ( python tools/build_pos.py && cd offline/desktop && npm install --no-audit --no-fund && npm run dist:win ) 2>&1 | tee build-windows.log
+      - name: Smoke test (start the app, ask its server)
+        run: |
+          set +e
+          "offline/desktop/dist/win-unpacked/Coconut POS.exe" > smoke-app.log 2>&1 &
+          for i in $(seq 1 40); do sleep 2; curl -s http://localhost:8080/api/info > smoke-info.json && break; done
+          echo "--- /api/info" >> build-windows.log; cat smoke-info.json >> build-windows.log; echo >> build-windows.log
+          echo "--- index.html bytes: $(curl -s http://localhost:8080/ | wc -c)" >> build-windows.log
+          echo "--- vendor/qrcode.js status: $(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/vendor/qrcode.js)" >> build-windows.log
+          curl -s -X PUT http://localhost:8080/api/doc/menu/t1 -H 'Content-Type: application/json' -d '{"data":{"name":"test","createdAt":1}}' >> build-windows.log
+          curl -s "http://localhost:8080/api/col/menu?w=%5B%5B%22createdAt%22%2C%22%3E%3D%22%2C1%5D%5D" >> build-windows.log; echo >> build-windows.log
+          taskkill //IM "Coconut POS.exe" //F >/dev/null 2>&1
+          grep -q coconut-pos-offline smoke-info.json
       - name: Publish installer
         env: { GH_TOKEN: '${{ github.token }}' }
         run: |
