@@ -92,8 +92,8 @@ footer a{color:rgba(255,255,255,.8)}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 
 /* ===== Theme: warm neutral + black + amber ===== */
-:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#7C7A76;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#2E9BE6;--on-accent:#FFFFFF;--amber:#2E9BE6;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
-  --grad:linear-gradient(135deg,#5EC2FF,#2E9BE6);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
+:root{--bg:#F3F7FB;--surface:#fff;--ink:#1B1B1B;--ink2:#3F3D3A;--muted:#5F5D59;--line:#E3EAF1;--line2:#D6E0EA;--b:#1B1B1B;--accent:#1A73B8;--on-accent:#FFFFFF;--amber:#1A73B8;--amber-ink:#FFFFFF;--amber-soft:#E3F2FD;--sunk:#EDF2F7;
+  --grad:linear-gradient(135deg,#5EC2FF,#1A73B8);--fh:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;--fb:'Inter','IBM Plex Sans Thai',system-ui,sans-serif}
 body{-webkit-font-smoothing:antialiased;font-size:15.5px}
 a{color:var(--ink)}
 h1,h2,h3{font-weight:600}
@@ -116,7 +116,7 @@ h1,h2,h3{font-weight:600}
 .toc a.on i{background:var(--amber);color:var(--amber-ink)}
 section.s{border-radius:16px}
 section.s>h2{font-size:23px}
-section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#2E9BE6);color:#fff;border-radius:10px}
+section.s>h2 i{background:linear-gradient(135deg,#5EC2FF,#1A73B8);color:#fff;border-radius:10px}
 ol.steps>li{background:var(--sunk);border-radius:12px}
 ol.steps>li::before{color:var(--ink);border-radius:8px}
 ul.ck li::before{background:var(--amber)}
@@ -149,7 +149,7 @@ footer a{color:var(--ink)}
 
 <div class="hero"><div class="in">
   <nav class="gsw" aria-label="เลือกคู่มือ"><a href="/guide" aria-current="page">คู่มือ Coconut POS Cafe</a><a href="/guide/retail">คู่มือ Coconut POS Retail</a><a href="/guide/standalone">Stand alone</a></nav><br>
-  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#2E9BE6;text-transform:uppercase"><span lang="th">คู่มือการใช้งาน</span><span lang="en">User guide</span></span>
+  <span style="font:600 13px/1 var(--fh);letter-spacing:.06em;color:#1A73B8;text-transform:uppercase"><span lang="th">คู่มือการใช้งาน</span><span lang="en">User guide</span></span>
   <h1><span lang="th">คู่มือ Coconut POS Cafe แบบละเอียด</span><span lang="en">The complete Coconut POS Cafe guide</span></h1>
   <p><span lang="th">ทุกขั้นตอนตั้งแต่สมัคร ตั้งค่าร้าน ขายหน้าร้าน จนถึงปิดรอบและต่ออายุ พร้อมวิดีโอสอนทีละขั้น ดูวิดีโอแล้วลองทำตามในเดโมได้ทันที ไม่ต้องสมัคร</span><span lang="en">Every step from signing up and setting up your shop to selling, closing the shift and renewing, with step-by-step videos. Watch a video, then try it in the demo with no sign-up.</span></p>
   <div class="chips">
@@ -200,8 +200,8 @@ footer a{color:var(--ink)}
 <!-- 2 -->
 <section class="s" id="sell"><h2><i>2</i><span lang="th">ขายหน้าร้านและรับชำระเงิน</span><span lang="en">Selling and taking payment</span></h2>
 <p class="lead"><span lang="th">งานหลักของแคชเชียร์ ทำได้ในไม่กี่แตะ</span><span lang="en">The cashier’s main job, done in a few taps.</span></p>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/01-sell.jpg"><source src="/guide/videos/01-sell.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: ขายหน้าร้านและรับชำระ</span><span lang="en">Video: selling and payment</span></b></figcaption></figure>
-<ol class="steps">
+<figure class="vid"><video aria-describedby="vsteps-1" controls preload="none" playsinline poster="/guide/videos/01-sell.jpg"><source src="/guide/videos/01-sell.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: ขายหน้าร้านและรับชำระ</span><span lang="en">Video: selling and payment</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
+<ol class="steps" id="vsteps-1">
 <li><span lang="th">ที่ <b>หน้าขาย</b> แตะเมนู ถ้าเมนูมีตัวเลือก (ร้อน/เย็น ขนาด ความหวาน) จะมีหน้าต่างให้เลือก ใส่หมายเหตุและจำนวน แล้วกด “เพิ่มลงบิล”</span><span lang="en">On <b>Sell</b>, tap an item. If it has options (hot/iced, size, sweetness) pick them, add a note and quantity, then tap “Add to bill”.</span></li>
 <li><span lang="th">ค้นหาเมนูด้วยช่องค้นหา หรือกรองตามหมวดหมู่ด้านบน</span><span lang="en">Use the search box or the category chips to find items.</span></li>
 <li><span lang="th">เลือกประเภทออเดอร์ <b>ทานที่ร้าน / กลับบ้าน / เดลิเวอรี</b> แตะรายการในบิลเพื่อแก้จำนวน ส่วนลดรายการ หรือลบ</span><span lang="en">Choose <b>Dine in / Takeaway / Delivery</b>. Tap a line in the bill to change quantity, discount or remove it.</span></li>
@@ -216,9 +216,9 @@ footer a{color:var(--ink)}
 
 <!-- 3 -->
 <section class="s" id="tables"><h2><i>3</i><span lang="th">โต๊ะและผังร้าน</span><span lang="en">Tables and floor plan</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/02-tables.jpg"><source src="/guide/videos/02-tables.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: เปิดโต๊ะ สั่งอาหาร ชำระภายหลัง</span><span lang="en">Video: open a table, order, pay later</span></b></figcaption></figure>
+<figure class="vid"><video aria-describedby="vsteps-2" controls preload="none" playsinline poster="/guide/videos/02-tables.jpg"><source src="/guide/videos/02-tables.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: เปิดโต๊ะ สั่งอาหาร ชำระภายหลัง</span><span lang="en">Video: open a table, order, pay later</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
 <h3><span lang="th">จัดผังร้านครั้งแรก</span><span lang="en">Draw your floor plan</span></h3>
-<ol class="steps">
+<ol class="steps" id="vsteps-2">
 <li><span lang="th">ไปที่ <span class="path">โต๊ะ</span> กด “จัดผังร้าน”</span><span lang="en">Go to <span class="path">Tables</span> and tap “Edit floor plan”.</span></li>
 <li><span lang="th">เพิ่มโต๊ะกลม เหลี่ยม ยาว หรือของตกแต่ง (เคาน์เตอร์ ประตู ต้นไม้) ลากวางตำแหน่ง ตั้งชื่อและจำนวนที่นั่ง</span><span lang="en">Add round, square or long tables and decor (counter, door, plants), drag them into place, set names and seats.</span></li>
 <li><span lang="th">แยกโซนได้ เช่น ในร้าน / ระเบียง / ชั้น 2</span><span lang="en">Split into zones such as Indoor / Terrace / Upstairs.</span></li>
@@ -256,8 +256,8 @@ footer a{color:var(--ink)}
 
 <!-- 5 -->
 <section class="s" id="kitchen"><h2><i>5</i><span lang="th">จอครัวและคิว</span><span lang="en">Kitchen screen and queue</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/03-kitchen.jpg"><source src="/guide/videos/03-kitchen.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: จอครัว</span><span lang="en">Video: kitchen screen</span></b></figcaption></figure>
-<ol class="steps">
+<figure class="vid"><video aria-describedby="vsteps-3" controls preload="none" playsinline poster="/guide/videos/03-kitchen.jpg"><source src="/guide/videos/03-kitchen.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: จอครัว</span><span lang="en">Video: kitchen screen</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
+<ol class="steps" id="vsteps-3">
 <li><span lang="th">เปิดเมนู <span class="path">จอครัว</span> บนแท็บเล็ตในครัวหรือบาร์ (เข้าสู่ระบบบัญชีเดียวกันหรือบัญชีพนักงาน) กด “เต็มจอ” ได้</span><span lang="en">Open <span class="path">Kitchen screen</span> on a tablet in the kitchen or bar (same account or a staff account). Tap “Full screen”.</span></li>
 <li><span lang="th">ออเดอร์ใหม่ขึ้นทันทีพร้อมเสียง กด <b>เริ่มทำ</b> › <b>ทำเสร็จ · เรียกคิว</b> › <b>ส่งมอบแล้ว</b></span><span lang="en">New orders appear instantly with a sound. Tap <b>Start</b> › <b>Done · call queue</b> › <b>Handed over</b>.</span></li>
 <li><span lang="th">แยกสถานี เช่น บาร์เครื่องดื่ม / ครัวขนม ได้ที่ <span class="path">ตั้งค่า › สถานีครัว/บาร์</span> โดยผูกกับหมวดหมู่เมนู</span><span lang="en">Split stations (drinks bar, pastry kitchen) in <span class="path">Settings › Stations</span> by menu category.</span></li>
@@ -267,19 +267,19 @@ footer a{color:var(--ink)}
 
 <!-- 6 -->
 <section class="s" id="menu"><h2><i>6</i><span lang="th">เมนู หมวดหมู่ ตัวเลือก และโปรโมชัน</span><span lang="en">Menu, categories, options and promotions</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/04-menu.jpg"><source src="/guide/videos/04-menu.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: เพิ่มเมนู</span><span lang="en">Video: adding a menu item</span></b></figcaption></figure>
+<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/04-menu.jpg"><source src="/guide/videos/04-menu.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: เพิ่มเมนู</span><span lang="en">Video: adding a menu item</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
 <div class="grid2">
-<div class="card"><h4><span lang="th">เมนู</span><span lang="en">Menu items</span></h4><p><span lang="th">ชื่อไทย/อังกฤษ ราคา ราคาเดลิเวอรี หมวดหมู่ (สร้างใหม่ในหน้าเดียวกันได้) รูป ตัวเลือก ป้ายขายดี และปิดเมนูเมื่อของหมด</span><span lang="en">Thai/English name, price, delivery price, category (create one inline), photo, option sets, best-seller badge, and sold-out toggle.</span></p></div>
-<div class="card"><h4><span lang="th">หมวดหมู่</span><span lang="en">Categories</span></h4><p><span lang="th">เรียงลำดับการแสดงผลบนหน้าขายและแอปลูกค้า เปลี่ยนชื่อ หรือลบ</span><span lang="en">Order how they appear on Sell and in the customer app, rename or delete.</span></p></div>
-<div class="card"><h4><span lang="th">ตัวเลือก</span><span lang="en">Options</span></h4><p><span lang="th">ชุดตัวเลือก เช่น อุณหภูมิ ขนาด ความหวาน ท็อปปิ้ง กำหนดว่าบังคับเลือกไหม เลือกได้กี่อย่าง และบวกราคา</span><span lang="en">Option sets like temperature, size, sweetness, toppings: required or not, how many, and extra price.</span></p></div>
-<div class="card"><h4><span lang="th">โปรโมชัน</span><span lang="en">Promotions</span></h4><p><span lang="th">ส่วนลด % หรือบาท ทั้งบิลหรือรายเมนู เปิด/ปิดได้ แคชเชียร์เลือกใช้ที่ปุ่ม “โปรโมชัน” ใต้บิล</span><span lang="en">% or baht discounts on the whole bill or items, switch on/off; cashiers apply them with the “Promotion” button.</span></p></div>
+<div class="card"><h4 aria-level="3"><span lang="th">เมนู</span><span lang="en">Menu items</span></h4><p><span lang="th">ชื่อไทย/อังกฤษ ราคา ราคาเดลิเวอรี หมวดหมู่ (สร้างใหม่ในหน้าเดียวกันได้) รูป ตัวเลือก ป้ายขายดี และปิดเมนูเมื่อของหมด</span><span lang="en">Thai/English name, price, delivery price, category (create one inline), photo, option sets, best-seller badge, and sold-out toggle.</span></p></div>
+<div class="card"><h4 aria-level="3"><span lang="th">หมวดหมู่</span><span lang="en">Categories</span></h4><p><span lang="th">เรียงลำดับการแสดงผลบนหน้าขายและแอปลูกค้า เปลี่ยนชื่อ หรือลบ</span><span lang="en">Order how they appear on Sell and in the customer app, rename or delete.</span></p></div>
+<div class="card"><h4 aria-level="3"><span lang="th">ตัวเลือก</span><span lang="en">Options</span></h4><p><span lang="th">ชุดตัวเลือก เช่น อุณหภูมิ ขนาด ความหวาน ท็อปปิ้ง กำหนดว่าบังคับเลือกไหม เลือกได้กี่อย่าง และบวกราคา</span><span lang="en">Option sets like temperature, size, sweetness, toppings: required or not, how many, and extra price.</span></p></div>
+<div class="card"><h4 aria-level="3"><span lang="th">โปรโมชัน</span><span lang="en">Promotions</span></h4><p><span lang="th">ส่วนลด % หรือบาท ทั้งบิลหรือรายเมนู เปิด/ปิดได้ แคชเชียร์เลือกใช้ที่ปุ่ม “โปรโมชัน” ใต้บิล</span><span lang="en">% or baht discounts on the whole bill or items, switch on/off; cashiers apply them with the “Promotion” button.</span></p></div>
 </div>
 <div class="tip info"><span>ℹ️</span><span><span lang="th">เมนู ตั้งค่า และรายงาน แก้ได้เฉพาะ <b>ผู้จัดการร้าน</b></span><span lang="en">Only the <b>shop manager</b> can change the menu, settings and see reports.</span></span></div>
 </section>
 
 <!-- 7 -->
 <section class="s" id="members"><h2><i>7</i><span lang="th">สมาชิกสะสมแต้ม</span><span lang="en">Loyalty members</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/05-members.jpg"><source src="/guide/videos/05-members.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: สมาชิกและแต้ม</span><span lang="en">Video: members and points</span></b></figcaption></figure>
+<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/05-members.jpg"><source src="/guide/videos/05-members.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: สมาชิกและแต้ม</span><span lang="en">Video: members and points</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
 <ul class="ck">
 <li><span lang="th">ใส่เบอร์โทรในบิล (ปุ่ม “สมาชิก”) เมื่อชำระเงิน ลูกค้าได้แต้มอัตโนมัติ เบอร์ใหม่จะสมัครเป็นสมาชิกให้เอง</span><span lang="en">Add a phone number to the bill (“Members” button); points are added on payment, and new numbers become members automatically.</span></li>
 <li><span lang="th">ลูกค้าที่สั่งผ่าน Mobile Order แล้วใส่เบอร์ ก็ได้แต้มเช่นกัน</span><span lang="en">Mobile Order customers who enter a phone number earn points too.</span></li>
@@ -290,8 +290,8 @@ footer a{color:var(--ink)}
 
 <!-- 8 -->
 <section class="s" id="round"><h2><i>8</i><span lang="th">รอบการขาย ลิ้นชักเงิน และรายงาน</span><span lang="en">Sales shifts, cash drawer and reports</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/06-round.jpg"><source src="/guide/videos/06-round.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: รอบการขายและรายงาน</span><span lang="en">Video: shifts and reports</span></b></figcaption></figure>
-<ol class="steps">
+<figure class="vid"><video aria-describedby="vsteps-6" controls preload="none" playsinline poster="/guide/videos/06-round.jpg"><source src="/guide/videos/06-round.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: รอบการขายและรายงาน</span><span lang="en">Video: shifts and reports</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
+<ol class="steps" id="vsteps-6">
 <li><span lang="th">เปิดใช้ที่ <span class="path">ตั้งค่า › รอบการขาย</span> และตั้งเงินทอนเริ่มต้น</span><span lang="en">Turn it on in <span class="path">Settings › Sales shift</span> and set the starting cash.</span></li>
 <li><span lang="th">เริ่มวัน: ระบบให้ยืนยันเงินทอนในลิ้นชักก่อนขาย</span><span lang="en">Start of day: confirm the cash in the drawer before selling.</span></li>
 <li><span lang="th">ระหว่างวัน: บันทึก “นำเงินเข้า/ออก” เช่น จ่ายค่าน้ำแข็ง</span><span lang="en">During the day: record cash in/out, e.g. paying for ice.</span></li>
@@ -302,7 +302,7 @@ footer a{color:var(--ink)}
 
 <!-- 9 -->
 <section class="s" id="display"><h2><i>9</i><span lang="th">จอลูกค้าและโฆษณา</span><span lang="en">Customer display and ads</span></h2>
-<figure class="vid"><video controls preload="none" playsinline poster="/guide/videos/07-display.jpg"><source src="/guide/videos/07-display.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: จอลูกค้า</span><span lang="en">Video: customer display</span></b></figcaption></figure>
+<figure class="vid"><video aria-describedby="vsteps-7" controls preload="none" playsinline poster="/guide/videos/07-display.jpg"><source src="/guide/videos/07-display.mp4" type="video/mp4"></video><figcaption>▶ <b><span lang="th">วิดีโอ: จอลูกค้า</span><span lang="en">Video: customer display</span></b><span class="vnote"> · <span lang="th">วิดีโอไม่มีเสียง ขั้นตอนแบบข้อความอยู่ด้านล่าง</span><span lang="en">silent video; the same steps are written below</span></span></figcaption></figure>
 <ul class="ck">
 <li><span lang="th">เปิดเมนู <span class="path">จอลูกค้า</span> บนจอที่สองหรือแท็บเล็ตที่หันให้ลูกค้า (เข้าสู่ระบบบัญชีร้าน)</span><span lang="en">Open <span class="path">Customer display</span> on a second screen or tablet facing customers (logged in to the shop).</span></li>
 <li><span lang="th">ขณะขาย แสดงรายการ ยอดรวม QR พร้อมเพย์ หรือเงินทอน ตามเครื่องแคชเชียร์แบบเรียลไทม์</span><span lang="en">While selling it mirrors the items, total, PromptPay QR or change in real time.</span></li>
@@ -312,7 +312,7 @@ footer a{color:var(--ink)}
 
 <!-- 10 -->
 <section class="s" id="staff"><h2><i>10</i><span lang="th">บัญชีพนักงาน</span><span lang="en">Staff accounts</span></h2>
-<ol class="steps">
+<ol class="steps" id="vsteps-7">
 <li><span lang="th">ผู้จัดการไปที่ <span class="path">ตั้งค่า › พนักงาน</span></span><span lang="en">The manager opens <span class="path">Settings › Staff</span>.</span></li>
 <li><span lang="th">ชื่อผู้ใช้ขึ้นต้นด้วย <b>รหัสร้าน 3 ตัวอักษร</b> ของร้านคุณเสมอ (เช่น HHD แก้ไม่ได้) พิมพ์ส่วนต่อท้าย เช่น <kbd>user1</kbd> จะได้ <kbd>HHDuser1</kbd></span><span lang="en">Usernames always start with your <b>3-letter shop code</b> (e.g. HHD, fixed). Type the rest, e.g. <kbd>user1</kbd>, to get <kbd>HHDuser1</kbd>.</span></li>
 <li><span lang="th">ใส่ชื่อพนักงานและรหัสผ่านอย่างน้อย 6 ตัว กด “เพิ่มพนักงาน” พนักงานเข้าใช้ได้ทันที ไม่ต้องมีอีเมล</span><span lang="en">Enter the staff name and a password (6+ characters) and tap “Add staff”. They can log in right away, no email needed.</span></li>

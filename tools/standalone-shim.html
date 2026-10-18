@@ -10,6 +10,7 @@
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
 .auth .msg a{color:inherit;font-weight:700}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.authfoot a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
 .auth .links button{border:0;background:none;color:var(--accent);font-weight:600;padding:8px 0;min-height:44px}
 .lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
 .lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -47,7 +48,7 @@
   <div class="links"><button type="button" id="authMode">ยังไม่มีบัญชี? สมัคร</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
   <button class="btn" type="button" id="authOut" hidden>ออกจากระบบ</button>
   <a class="btn" href="/signup" style="display:grid;place-items:center;text-decoration:none;color:var(--accent)">สมัครเปิดร้านใหม่</a>
-  <div style="display:flex;justify-content:center;gap:16px;font-size:14px"><a href="/guide" style="color:var(--accent)">คู่มือการใช้งาน</a><a href="/demo" style="color:var(--accent)">ลองเดโม</a><a href="/indexpos" style="color:var(--accent)">หน้าแรก</a></div>
+  <div class="authfoot" style="display:flex;justify-content:center;gap:16px;font-size:14px"><a href="/guide" style="color:var(--accent)">คู่มือการใช้งาน</a><a href="/demo" style="color:var(--accent)">ลองเดโม</a><a href="/indexpos" style="color:var(--accent)">หน้าแรก</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="btn" type="button" id="lockOut">ออกจากระบบ</button></div>
@@ -257,4 +258,15 @@ window.claude={use:function(name){return readyP.then(function(){
   if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
 check();
 })();
+</script>
+
+<script>
+/* While the sign-in, lock or network screen is up, the app behind it is out of the keyboard and screen-reader order. */
+(function(){var IDS=['auth','lockScreen','lanOv'];
+function sync(){var cover=IDS.some(function(id){var e=document.getElementById(id);return e&&!e.hidden});
+  var app=document.querySelector('.app')||document.getElementById('app');if(!app)return;var ov=document.getElementById('overlay');var dlg=!!(ov&&ov.firstElementChild);
+  var off=cover||dlg;app.inert=off;if(off)app.setAttribute('aria-hidden','true');else app.removeAttribute('aria-hidden');if(ov)ov.inert=cover;
+  IDS.forEach(function(id){var e=document.getElementById(id);if(e&&!e.hidden&&id!=='lanOv'){e.setAttribute('role','dialog');e.setAttribute('aria-modal','true')}})}
+function arm(){var mo=new MutationObserver(sync);IDS.forEach(function(id){var e=document.getElementById(id);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});sync()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arm);else arm()})();
 </script>

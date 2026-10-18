@@ -17,22 +17,22 @@
 <style>
 /* Layout: restaurant-POS shell. Dark left rail of sections; working area right. Sell = menu grid + bill panel. */
 :root{
-  --bg:#F3F7FB; --surface:#FFFFFF; --sunk:#EDF2F7; --ink:#1B1B1B; --muted:#7C7A76; --line:#E3EAF1; --line2:#D6E0EA;
-  --accent:#2E9BE6; --accent-hover:#1F86CF; --on-accent:#FFFFFF; --accent-fill:#2E9BE6; --accent-soft:#E3F2FD; --accent-soft-ink:#145C94;
-  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#E3F2FD;
-  --dark:#E3F2FD; --on-dark:#145C94; --rail:#FFFFFF; --rail-ink:#7C7A76; --rail-on:#EDF2F7; --rail-on-ink:#1B1B1B;
+  --bg:#F3F7FB; --surface:#FFFFFF; --sunk:#EDF2F7; --ink:#1B1B1B; --muted:#5F5D59; --line:#E3EAF1; --line2:#D6E0EA; --field:#7A8794;
+  --accent:#1A73B8; --accent-hover:#155E96; --on-accent:#FFFFFF; --accent-fill:#1A73B8; --accent-soft:#E3F2FD; --accent-soft-ink:#145C94;
+  --amber:#1A73B8; --amber-hover:#155E96; --amber-ink:#FFFFFF; --amber-soft:#E3F2FD;
+  --dark:#E3F2FD; --on-dark:#145C94; --rail:#FFFFFF; --rail-ink:#5F5D59; --rail-on:#EDF2F7; --rail-on-ink:#1B1B1B;
   --ok:#2E9D62; --ok-soft:#E7F5EC; --ok-ink:#19663F;
   --warn:#F4B740; --warn-soft:#FDF3DC; --warn-ink:#7A5200; --bad:#EF5B5B; --bad-soft:#FDECEC; --bad-ink:#B42323;
-  --ch-store:#2E9BE6; --ch-take:#B9B6B0; --ch-deli:#F4B740;
+  --ch-store:#1A73B8; --ch-take:#B9B6B0; --ch-deli:#F4B740;
   --t-0:#F2F1EF; --i-0:#8C6A4C; --t-1:#F2F1EF; --i-1:#6F7A52; --t-2:#F2F1EF; --i-2:#A0743A; --t-3:#F2F1EF; --i-3:#7A6070; --t-4:#F2F1EF; --i-4:#9A5A4A; --t-5:#F2F1EF; --i-5:#4F6E6E;
   --scrim:rgba(27,27,27,.38); --shadow:0 1px 2px rgba(27,27,27,.08),0 4px 14px rgba(27,27,27,.05);
   --f-body:'Inter','IBM Plex Sans Thai','Noto Sans Thai','Leelawadee UI',Tahoma,sans-serif;
   --f-num:'Inter','IBM Plex Sans Thai',system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
+  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A; --field:#7E8A97;
   --accent:#5EB6F0; --accent-hover:#7CC5F5; --on-accent:#06213A; --accent-fill:#5EB6F0; --accent-soft:#132C40; --accent-soft-ink:#A8D8FA;
-  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#132C40;
+  --amber:#1A73B8; --amber-hover:#155E96; --amber-ink:#FFFFFF; --amber-soft:#132C40;
   --dark:#132C40; --on-dark:#A8D8FA; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
   --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
@@ -40,9 +40,9 @@
   --t-0:#262626; --i-0:#D2B08F; --t-1:#262626; --i-1:#B9C496; --t-2:#262626; --i-2:#E3B47A; --t-3:#262626; --i-3:#C9A9BC; --t-4:#262626; --i-4:#E09C8C; --t-5:#262626; --i-5:#9CC4C4;
   --scrim:rgba(0,0,0,.6); --shadow:0 1px 3px rgba(0,0,0,.5); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A;
+  --bg:#141414; --surface:#1E1E1E; --sunk:#262626; --ink:#F2F1EE; --muted:#A3A09A; --line:#2C2C2C; --line2:#3A3A3A; --field:#7E8A97;
   --accent:#5EB6F0; --accent-hover:#7CC5F5; --on-accent:#06213A; --accent-fill:#5EB6F0; --accent-soft:#132C40; --accent-soft-ink:#A8D8FA;
-  --amber:#2E9BE6; --amber-hover:#1F86CF; --amber-ink:#FFFFFF; --amber-soft:#132C40;
+  --amber:#1A73B8; --amber-hover:#155E96; --amber-ink:#FFFFFF; --amber-soft:#132C40;
   --dark:#132C40; --on-dark:#A8D8FA; --rail:#1A1A1A; --rail-ink:#A3A09A; --rail-on:#2A2A2A; --rail-on-ink:#FFFFFF;
   --ok:#5CCB8E; --ok-soft:#173326; --ok-ink:#9BE3BC;
   --warn:#F4B740; --warn-soft:#3A2F17; --warn-ink:#F5D97A; --bad:#FF7B7B; --bad-soft:#3B1F1F; --bad-ink:#FFB5B5;
@@ -86,6 +86,10 @@ h1,h2,h3{text-wrap:balance}
 .pillx.warn i{background:var(--warn)}
 .clock{font-family:var(--f-num);font-weight:600;font-size:17px}
 #view{flex:1;min-height:0;display:flex;flex-direction:column}
+#view:focus{outline:none}
+.skip{position:fixed;left:8px;top:-60px;z-index:1000;background:var(--surface);color:var(--ink);padding:10px 14px;border-radius:10px;box-shadow:var(--shadow);font-weight:600;text-decoration:none}
+.skip:focus{top:8px}
+.dialog:focus:not(:focus-visible){outline:none}
 .pad-view{flex:1;min-height:0;overflow-y:auto;padding-block:16px;padding-left:16px;padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:14px}
 
 /* common controls */
@@ -117,7 +121,7 @@ h1,h2,h3{text-wrap:balance}
 .pill.bad{background:var(--bad-soft);color:var(--bad-ink)}
 .form{display:flex;flex-direction:column;gap:12px}
 .form label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
-.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{height:44px;padding:0 12px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px;font-weight:400;width:100%}
+.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{height:44px;padding:0 12px;border:1px solid var(--field);border-radius:10px;background:var(--surface);color:var(--ink);font-size:15px;font-weight:400;width:100%}
 .form .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .form .three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .check{flex-direction:row !important;align-items:center;gap:10px !important;color:var(--ink) !important;font-weight:500 !important;font-size:15px !important;min-height:44px}
@@ -137,8 +141,9 @@ td.r,th.r{text-align:right}
 .menu-pane > :not(.grid){flex-shrink:0}
 .app{overflow:hidden}
 .menu-pane{min-width:0;min-height:0;display:flex;flex-direction:column;gap:12px;padding:16px}
-.search{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;background:var(--surface);border:1px solid var(--line2);border-radius:12px;color:var(--muted)}
-.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:var(--ink);font-size:15px}
+.search{display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;background:var(--surface);border:1px solid var(--field);border-radius:12px;color:var(--muted)}
+.search input{flex:1;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--ink);font-size:15px}
+.search:focus-within{outline:3px solid var(--accent);outline-offset:2px}
 .grid{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:grid;grid-auto-rows:max-content;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:12px;align-content:start;padding-bottom:8px}
 .item{display:flex;flex-direction:column;text-align:left;padding:0;border:1px solid var(--line);border-radius:16px;background:var(--surface);overflow:hidden}
 .item:hover:not(:disabled){border-color:var(--accent-fill)}
@@ -533,14 +538,14 @@ body{font-size:14.5px;-webkit-font-smoothing:antialiased;letter-spacing:-.005em}
 .chip[aria-selected="true"] small,.chip[aria-pressed="true"] small{background:var(--amber);color:var(--amber-ink)}
 .panel{border-radius:14px;border-color:var(--line);box-shadow:0 1px 2px rgba(27,27,27,.03)}
 .form label{font-weight:500}
-.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{border-radius:10px;border-color:var(--line2);height:42px}
+.form input:not([type=checkbox]):not([type=radio]),.form select,.form textarea{border-radius:10px;border-color:var(--field);height:42px}
 .form input:focus,.form select:focus,.form textarea:focus,.search:focus-within{border-color:#BDB9B2;outline:0;box-shadow:0 0 0 3px var(--ring)}
 .check input{accent-color:var(--amber)}
 .note{background:var(--amber-soft);color:var(--warn-ink);border-radius:10px}
 .seg{background:var(--sunk);border-radius:11px}
 .seg button{border-radius:8px;font-weight:500}
 .seg button[aria-checked="true"],.seg button[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(27,27,27,.08)}
-.search{height:42px;border-radius:10px;border-color:var(--line2);background:var(--surface)}
+.search{height:42px;border-radius:10px;border-color:var(--field);background:var(--surface)}
 /* sell */
 .menu-pane{gap:12px}
 .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
@@ -788,6 +793,7 @@ html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
 </style>
 
 <div class="app">
+  <a class="skip" href="#view">ข้ามไปที่เนื้อหาหลัก</a>
   <nav class="rail" id="rail" aria-label="เมนูหลัก"></nav>
   <div class="main">
     <header class="top">
@@ -801,7 +807,7 @@ html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
       <span class="clock" id="clock">--:--</span>
     </header>
     <div id="abar" class="abar" role="alert" hidden></div>
-    <div id="view"></div>
+    <main id="view" tabindex="-1"></main>
   </div>
 </div>
 <div id="overlay"></div>
@@ -820,6 +826,7 @@ html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
 .auth .msg.ok{background:var(--ok-soft);color:var(--ok-ink)}
 .auth .msg a{color:inherit;font-weight:700}
 .auth .links{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.authfoot a{display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
 .auth .links button{border:0;background:none;color:var(--accent);font-weight:600;padding:8px 0;min-height:44px}
 .lockwrap{position:fixed;inset:0;z-index:190;background:var(--bg);overflow-y:auto;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
 .lockwrap .inner{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
@@ -857,7 +864,7 @@ html[data-ui-menu="list"] .item .meta{flex:1;padding:0 6px 0 0}
   <div class="links"><button type="button" id="authMode">ยังไม่มีบัญชี? สมัคร</button><button type="button" id="authReset">ลืมรหัสผ่าน</button></div>
   <button class="btn" type="button" id="authOut" hidden>ออกจากระบบ</button>
   <a class="btn" href="/signup" style="display:grid;place-items:center;text-decoration:none;color:var(--accent)">สมัครเปิดร้านใหม่</a>
-  <div style="display:flex;justify-content:center;gap:16px;font-size:14px"><a href="/guide" style="color:var(--accent)">คู่มือการใช้งาน</a><a href="/demo" style="color:var(--accent)">ลองเดโม</a><a href="/indexpos" style="color:var(--accent)">หน้าแรก</a></div>
+  <div class="authfoot" style="display:flex;justify-content:center;gap:16px;font-size:14px"><a href="/guide" style="color:var(--accent)">คู่มือการใช้งาน</a><a href="/demo" style="color:var(--accent)">ลองเดโม</a><a href="/indexpos" style="color:var(--accent)">หน้าแรก</a></div>
 </form></div>
 <div class="lockwrap" id="lockScreen" hidden><div class="inner">
   <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><div><h1 style="margin:0;font-size:22px">ร้านถูกล็อกชั่วคราว</h1><p class="muted" style="margin:4px 0 0" id="lockWhy"></p></div><span style="flex:1"></span><button class="btn" type="button" id="lockOut">ออกจากระบบ</button></div>
@@ -1067,6 +1074,17 @@ window.claude={use:function(name){return readyP.then(function(){
   if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
 check();
 })();
+</script>
+
+<script>
+/* While the sign-in, lock or network screen is up, the app behind it is out of the keyboard and screen-reader order. */
+(function(){var IDS=['auth','lockScreen','lanOv'];
+function sync(){var cover=IDS.some(function(id){var e=document.getElementById(id);return e&&!e.hidden});
+  var app=document.querySelector('.app')||document.getElementById('app');if(!app)return;var ov=document.getElementById('overlay');var dlg=!!(ov&&ov.firstElementChild);
+  var off=cover||dlg;app.inert=off;if(off)app.setAttribute('aria-hidden','true');else app.removeAttribute('aria-hidden');if(ov)ov.inert=cover;
+  IDS.forEach(function(id){var e=document.getElementById(id);if(e&&!e.hidden&&id!=='lanOv'){e.setAttribute('role','dialog');e.setAttribute('aria-modal','true')}})}
+function arm(){var mo=new MutationObserver(sync);IDS.forEach(function(id){var e=document.getElementById(id);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});sync()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arm);else arm()})();
 </script>
 
 <script>window.POS_KIOSK_HREF=function(){var u=location.origin+(location.pathname.indexOf('/demo')===0?'/demo':'/pos');
@@ -2432,10 +2450,24 @@ function ovHtml(){
     return wrap(head('ทดสอบ QR · '+esc(q.name))+`<div class="qrbox"><div class="qrwrap"><div id="testQr"></div></div><div class="num" style="font-size:22px;font-weight:600">${baht(1)}</div><div class="hint">สแกนด้วยแอปธนาคาร ตรวจว่าชื่อผู้รับถูกต้อง (ยอดทดสอบ 1 บาท ไม่ต้องโอนจริงก็ได้)</div></div>`,'narrow')}
   return '';
 }
+// Dialogs: focus moves into the dialog, Tab stays inside it, the screen behind is inert, and focus returns on close.
+let ovOpen=false,ovOpener=null;
+function focusKey(e){if(!e||e===document.body)return null;return e.id?'#'+CSS.escape(e.id):e.dataset&&e.dataset.act?`[data-act="${CSS.escape(e.dataset.act)}"]`+(e.dataset.v!=null?`[data-v="${CSS.escape(e.dataset.v)}"]`:'')+(e.dataset.id!=null?`[data-id="${CSS.escape(e.dataset.id)}"]`:''):null}
+function ovFocusables(el){return [...el.querySelectorAll('a[href],button:not([disabled]),input:not([type=hidden]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null||x===document.activeElement)}
+document.addEventListener('keydown',e=>{if(e.key!=='Tab'||!ovOpen)return;const el=$('#overlay');const f=ovFocusables(el);if(!f.length){e.preventDefault();return}
+  const a=document.activeElement,i=f.indexOf(a);if(e.shiftKey&&(i<=0)){e.preventDefault();f[f.length-1].focus()}else if(!e.shiftKey&&(i===-1||i===f.length-1)){e.preventDefault();f[0].focus()}},true);
 function renderOverlay(force){
   const el=$('#overlay');const ae=document.activeElement;
   if(!force&&S.ov&&ae&&el.contains(ae)&&['INPUT','SELECT','TEXTAREA'].includes(ae.tagName))return;
+  const keep=el.contains(ae)?focusKey(ae):null;
   el.innerHTML=ovHtml();
+  const open=!!el.firstElementChild,app=document.querySelector('.app');
+  if(open&&!ovOpen)ovOpener=ae&&!el.contains(ae)?ae:null;
+  if(app){app.inert=open;if(open)app.setAttribute('aria-hidden','true');else app.removeAttribute('aria-hidden')}
+  if(open){const d=el.querySelector('[role=dialog]');if(d&&!d.hasAttribute('tabindex'))d.setAttribute('tabindex','-1');
+    const back=keep&&el.querySelector(keep);if(back)back.focus();else if(!el.contains(document.activeElement)&&d)d.focus({preventScroll:true})}
+  else if(ovOpen&&ovOpener&&document.contains(ovOpener)){try{ovOpener.focus({preventScroll:true})}catch(e){}ovOpener=null}
+  ovOpen=open;
   if(S.ov&&S.ov.k==='pay'&&S.ov.tab==='qr'){const q=qrList().find(x=>x.id===S.ov.qrId)||defQr();if(q)drawQr(document.getElementById('payQr'),calc(S.bill.items,S.bill.promo).total,220,q.pp)}
   if(S.ov&&S.ov.k==='qrtest'){const q=qrList().find(x=>x.id===S.ov.id);if(q)drawQr(document.getElementById('testQr'),1,220,q.pp)}
   const f=el.querySelector('#doneBtn')||el.querySelector('.dialog input:not([type=checkbox])');if(f&&S.ov&&S.ov.focus!==false){f.focus();S.ov.focus=false}
@@ -2658,7 +2690,7 @@ const UI_DEF={pal:'sky',mode:'auto',size:'m',font:'modern',radius:'normal',densi
 // main, hover, text on main, soft background, soft text, logo light, logo dark
 const UI_PALS={coconut:['ส้มมะพร้าว (Coconut)','#FF6B1A','#E85A0C','#FFFFFF','#FFEBDD','#B23F00','#FF9A5C','#FF6B1A'],
   caramel:['คาราเมล','#F6BE55','#F0AE34','#2B1F05','#FDF3DC','#7A5200','#FFC56B','#F08A2C'],
-  sky:['ฟ้าสดใส','#2E9BE6','#1F86CF','#FFFFFF','#E3F2FD','#145C94','#5EC2FF','#1F7FD1'],
+  sky:['ฟ้าสดใส','#1A73B8','#155E96','#FFFFFF','#E3F2FD','#145C94','#5EC2FF','#1F7FD1'],
   forest:['เขียวป่า','#1E8A5A','#187449','#FFFFFF','#E3F4EA','#145C3B','#4CC38A','#16784C'],
   navy:['น้ำเงินทะเล','#2459B8','#1C489A','#FFFFFF','#E5ECFA','#1A3F82','#5B8DEF','#1E4FA8'],
   teal:['ฟ้าอมเขียว','#128C8C','#0E7474','#FFFFFF','#DFF3F2','#0B5C5C','#3CC7C0','#0F7F7F'],

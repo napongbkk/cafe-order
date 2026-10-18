@@ -13,7 +13,7 @@
 .auth .links .lk{color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
 .auth .links button{border:0;background:none;color:var(--accent,#1f7fc0);font-weight:600;padding:8px 0;min-height:44px;cursor:pointer}
 .auth .foot{display:flex;justify-content:center;gap:16px;font-size:14px}
-.auth .foot a{color:var(--accent,#1f7fc0)}
+.auth .foot a{color:var(--accent,#1A73B8);display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
 .auth .mk{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#2a9df4,#1d6fb8);flex-shrink:0}
 .shim-form{display:flex;flex-direction:column;gap:12px}
 .shim-form label{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500;color:var(--ink,#13202c)}
@@ -196,4 +196,15 @@ window.claude={use:function(name){return readyP.then(function(){
   if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;if(name==='downloads')return downloads;return null})}};
 check();
 })();
+</script>
+
+<script>
+/* While the sign-in, lock or network screen is up, the app behind it is out of the keyboard and screen-reader order. */
+(function(){var IDS=['auth','lockScreen','lanOv'];
+function sync(){var cover=IDS.some(function(id){var e=document.getElementById(id);return e&&!e.hidden});
+  var app=document.querySelector('.app')||document.getElementById('app');if(!app)return;var ov=document.getElementById('overlay');var dlg=!!(ov&&ov.firstElementChild);
+  var off=cover||dlg;app.inert=off;if(off)app.setAttribute('aria-hidden','true');else app.removeAttribute('aria-hidden');if(ov)ov.inert=cover;
+  IDS.forEach(function(id){var e=document.getElementById(id);if(e&&!e.hidden&&id!=='lanOv'){e.setAttribute('role','dialog');e.setAttribute('aria-modal','true')}})}
+function arm(){var mo=new MutationObserver(sync);IDS.forEach(function(id){var e=document.getElementById(id);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});sync()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',arm);else arm()})();
 </script>
