@@ -83,10 +83,24 @@ jobs:
         run: |
           gh release view standalone-latest >/dev/null 2>&1 || gh release create standalone-latest --prerelease --title "Coconut POS Stand alone (latest build)" --notes "Built automatically from main."
           gh release upload standalone-latest out/* --clobber
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules && sudo udevadm trigger --name-match=kvm
+      - name: Emulator smoke test
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: bash offline/android/ci-smoke.sh
       - name: Save log
         if: always()
         run: |
           mkdir -p /tmp/l && cp build-android.log /tmp/l/ 2>/dev/null || echo "no log" > /tmp/l/build-android.log
+          cp android-emu.png /tmp/l/ 2>/dev/null || true
           echo "result=${{ job.status }} sha=${{ github.sha }} at=$(date -u +%FT%TZ) signed=${{ secrets.ANDROID_KEYSTORE_B64 != '' }}" > /tmp/l/status-android.txt
           ls -la out >> /tmp/l/status-android.txt 2>&1 || true
           cd /tmp/l && git init -q && git checkout -q -b ci-logs-android && git add -A
