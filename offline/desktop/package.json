@@ -1,0 +1,44 @@
+{
+  "name": "coconut-pos-standalone",
+  "productName": "Coconut POS",
+  "version": "1.0.0",
+  "description": "Coconut POS Cafe Stand alone: the shop's data on its own computer, shared with every device on the same Wi-Fi/LAN",
+  "author": "Coconut POS",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "prepare-app": "node scripts/prepare.js",
+    "start": "npm run prepare-app && electron .",
+    "dist:win": "npm run prepare-app && electron-builder --win nsis --x64 --publish never"
+  },
+  "devDependencies": {
+    "electron": "37.2.6",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "com.coconutpos.standalone",
+    "productName": "Coconut POS",
+    "copyright": "Coconut POS",
+    "directories": { "output": "dist", "buildResources": "build" },
+    "files": ["main.js", "preload.js", "print-preload.js", "app/**/*", "package.json"],
+    "asar": true,
+    "asarUnpack": ["app/www/**/*"],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "build/icon.ico",
+      "artifactName": "CoconutPOS-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Coconut POS",
+      "include": "build/installer.nsh",
+      "language": "1054",
+      "multiLanguageInstaller": false
+    }
+  }
+}

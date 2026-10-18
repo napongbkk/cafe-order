@@ -1,0 +1,40 @@
+# Builds Coconut POS Stand alone installers and publishes them to the "standalone-latest" release.
+name: Stand alone builds
+on:
+  push:
+    branches: [main]
+    paths: ['offline/**', 'tools/offline-shim.html', 'tools/build_pos.py', 'src/cafe-pos.artifact.html', '.github/workflows/standalone.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: standalone-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Build web app and installer
+        run: |
+          set -o pipefail
+          ( python tools/build_pos.py && cd offline/desktop && npm install --no-audit --no-fund && npm run dist:win ) 2>&1 | tee build-windows.log
+      - name: Publish installer
+        env: { GH_TOKEN: '${{ github.token }}' }
+        run: |
+          gh release view standalone-latest >/dev/null 2>&1 || gh release create standalone-latest --prerelease --title "Coconut POS Stand alone (latest build)" --notes "Built automatically from main."
+          gh release upload standalone-latest offline/desktop/dist/*.exe --clobber
+      - name: Save log
+        if: always()
+        run: |
+          mkdir -p /tmp/l && cp build-windows.log /tmp/l/ 2>/dev/null || echo "no log" > /tmp/l/build-windows.log
+          echo "result=${{ job.status }} sha=${{ github.sha }} at=$(date -u +%FT%TZ)" > /tmp/l/status-windows.txt
+          ls -la offline/desktop/dist >> /tmp/l/status-windows.txt 2>&1 || true
+          cd /tmp/l && git init -q && git checkout -q -b ci-logs-windows && git add -A
+          git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "windows build log"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-logs-windows

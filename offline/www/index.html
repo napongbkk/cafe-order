@@ -1066,7 +1066,7 @@ var EXT={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'g
 var assets={upload:function(blob){var ty=String(blob.type||'image/jpeg');if(!EXT[ty])return Promise.reject({code:'invalid_argument',message:'ไฟล์ชนิดนี้ใช้ไม่ได้'});
     return api('POST','/api/asset',blob,ty).then(function(r){return {id:r.id,url:window.POS_IMG(r.id),sizeBytes:blob.size,contentType:ty}},function(e){throw E(e)})},
   delete:function(id){return api('DELETE','/api/asset/'+P(id)).then(function(){},function(){})},list:function(){return Promise.resolve({assets:[],usage:{}})}};
-window.POS_PRINT=function(html){var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
+window.POS_PRINT=function(html){if(HOST&&HOST.print){HOST.print(html);return true}var f=document.createElement('iframe');f.setAttribute('aria-hidden','true');f.style.cssText='position:fixed;width:0;height:0;border:0;right:0;bottom:0';document.body.appendChild(f);f.srcdoc=html;setTimeout(function(){f.remove()},120000);return true};
 window.claude={use:function(name){return readyP.then(function(){if(name==='db')return db;if(name==='user')return user;if(name==='assets')return isMgr()?assets:null;return null})}};
 boot();
 })();
