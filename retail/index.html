@@ -43,7 +43,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.25}
 h2{font-size:1.25rem} h3{font-size:1.02rem}
 .num,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
-.adpause{position:absolute;top:12px;right:12px;z-index:30;width:52px;height:52px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.72);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0} .a11y-err{margin:0 0 12px;padding:10px 12px;border-radius:8px;border:2px solid #8A1C14;background:#FDECEA;color:#5C0F0A;font-weight:600} .muted{color:var(--muted)} .small{font-size:.82rem}
+.adpause{position:absolute;top:12px;right:12px;z-index:30;width:52px;height:52px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.72);color:#fff;display:grid;place-items:center;cursor:pointer;padding:0} .a11y-err{margin:0 0 12px;padding:10px 12px;border-radius:8px;border:2px solid #8A1C14;background:#FDECEA;color:#5C0F0A;font-weight:600} .av svg{width:58%;height:58%;flex:none} .muted{color:var(--muted)} .small{font-size:.82rem}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* shell */
@@ -1185,6 +1185,7 @@ const ICON={
  scan:'<path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 8v8M11 8v8M13.5 8v8M16 8v8"/>',
  cam:'<path d="M3 8h3.5l2-3h7l2 3H21v12H3z"/><circle cx="12" cy="13.5" r="3.8"/>',
  ui:'<circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.3"/><circle cx="12" cy="7.5" r="1.3"/><circle cx="15.5" cy="10" r="1.3"/><path d="M12 21c-1.5 0-2-1-2-2s1-1.6 2.3-1.6H15a3 3 0 003-3"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
  settings:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/>'};
 const ROUTES=[['pos','ขายหน้าร้าน','pos'],['sales','บิลขาย','sales'],['stock','สินค้า/สต็อก','stock'],['members','สมาชิก','members'],['service','งานบริการ','service'],['docs','เอกสารขาย','docs'],['branch','ร้านค้า/สาขา','branch'],['report','รายงาน','report'],['shift','กะ/ลิ้นชัก','shift'],['cdview','จอลูกค้า','pos'],['settings','ตั้งค่า','*']];
 const ico=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`;
@@ -1214,7 +1215,7 @@ function render(){
     <button class="btn tbtn" data-act="newBill" title="เริ่มบิลใหม่">${ico('bill')}<span>บิลใหม่</span></button>
     <button class="tbicon" data-act="notif" aria-label="การแจ้งเตือน ${alerts} รายการ">${ico('bell')}${alerts?`<i>${alerts}</i>`:''}</button>
     <img class="devlogo" src="/coconut-logo-dark.png" alt="พัฒนาโดย Coconut Group" title="พัฒนาโดย Coconut Group" width="84" height="24">
-    <button class="userchip" data-act="userMenu"><span class="av">${h(Array.from(u.name.replace(/^คุณ/,''))[0]||'?')}</span><span class="un"><b>${h(u.name)}</b><small class="${sh?'':'warnx'}">${ROLES[roleOf(u)]} · ${sh?'กะเปิด '+fmtT(sh.openAt):'ยังไม่เปิดกะ'}</small></span>${ico('chev')}</button>
+    <button class="userchip" data-act="userMenu"><span class="av">${ico('user')}</span><span class="un"><b>${h(u.name)}</b><small class="${sh?'':'warnx'}">${ROLES[roleOf(u)]} · ${sh?'กะเปิด '+fmtT(sh.openAt):'ยังไม่เปิดกะ'}</small></span>${ico('chev')}</button>
    </header><main id="main">${VIEWS[ST.route]()}</main></div></div>`;
   if(fid){const el=document.getElementById(fid);if(el&&!$('#modal').contains(el)){el.focus();try{if(sel!=null)el.setSelectionRange(sel,sel)}catch(e){}}}
   if(ST.route==='pos'&&!fid&&$('#modal').hidden&&window.innerWidth>820){const s=$('#scan');if(s)s.focus()}
@@ -1355,7 +1356,7 @@ function viewPOS(){const c=calc(ST.cart),m=get('members',ST.cart.memberId),shopP
   <div class="pgrid" id="pgrid">${gridHTML()}</div></div>
  </section>
  <aside class="cart" aria-label="บิลปัจจุบัน"><div class="cart-h"><div class="row nowrap"><span class="pico">${ico('cart')}</span><b class="ctitle">บิลปัจจุบัน</b><span class="spacer"></span><select data-ch="level" aria-label="ระดับราคา" class="lvl">${Object.entries(LEVELS).map(([k,v])=>`<option value="${k}" ${ST.cart.level===k?'selected':''}>${v}</option>`).join('')}</select><button class="ib danger" data-act="clearCart" title="ล้างบิล" aria-label="ล้างบิล">${ico('trash')}</button></div>
-   ${m?`<div class="memrow"><span class="av sm">${h(Array.from(m.name.replace(/^คุณ/,''))[0]||'?')}</span><div style="min-width:0;flex:1"><b>${h(m.name)}</b><small>แต้ม ${num(m.points)}${m.debt?` · <span style="color:var(--bad)">ค้าง ฿${money(m.debt)}</span>`:''}</small></div><button class="btn sm ghost" data-act="pickMember">เปลี่ยน</button></div>`:`<button class="btn sm memadd" data-act="pickMember">+ เลือกสมาชิก / ลูกค้า</button>`}</div>
+   ${m?`<div class="memrow"><span class="av sm">${ico('user')}</span><div style="min-width:0;flex:1"><b>${h(m.name)}</b><small>แต้ม ${num(m.points)}${m.debt?` · <span style="color:var(--bad)">ค้าง ฿${money(m.debt)}</span>`:''}</small></div><button class="btn sm ghost" data-act="pickMember">เปลี่ยน</button></div>`:`<button class="btn sm memadd" data-act="pickMember">+ เลือกสมาชิก / ลูกค้า</button>`}</div>
   <div class="lines">${c.lines.length?c.lines.map(l=>{const st=get('staff',l.staffId);const p=get('products',l.pid);const im=imgSrc(p);const sub=[l.unit,(p&&p.cat)||l.cat,l.disc?'ลด '+money(l.disc):'',l.note,st?'ผู้ให้บริการ '+st.name:'',l.serials?'SN '+l.serials.join(', '):''].filter(Boolean).join(' · ');
     return `<div class="ln2"><span class="th">${im?`<img src="${h(im)}" alt="">`:h(Array.from(l.name)[0]||'')}</span><div class="nm2"><b>${h(l.name)}</b><small>฿${money(l.price)}${sub?' · '+h(sub):''}</small></div><b class="pr2">฿${money(l.total)}</b>
     <div class="lnb"><span class="step"><button data-act="qty" data-k="${l.key}" data-d="-1" aria-label="ลด">−</button><input data-ch="qty" data-k="${l.key}" value="${num(l.qty)}" inputmode="decimal" aria-label="จำนวน"><button data-act="qty" data-k="${l.key}" data-d="1" aria-label="เพิ่ม">+</button></span><span class="spacer"></span><button class="ib" data-act="lineEdit" data-k="${l.key}" title="แก้ไข" aria-label="แก้ไข">${ico('edit')}</button><button class="ib" data-act="lineDel" data-k="${l.key}" title="ลบ" aria-label="ลบ">${ico('x')}</button></div></div>`}).join(''):`<div class="empty">สแกนสินค้าหรือแตะการ์ดสินค้าเพื่อเริ่มบิล</div>`}</div>
@@ -2000,7 +2001,7 @@ function notifList(){const L=[];const sh=openShift();if(!sh)L.push({alert:true,c
   L.push({cls:ST.mode==='db'?'ok':'',t:ST.mode==='db'?'ข้อมูลกลาง · ทุกเครื่องเห็นตรงกัน':'ข้อมูลเก็บในเครื่องนี้เท่านั้น',d:''});return L}
 function notifOpen(){const L=notifList();modal('การแจ้งเตือนและสถานะ',`<div class="nlist">${L.map((x,i)=>`<button type="button" class="nitem ${x.cls}" data-ni="${i}" ${x.act?'':'disabled'}><span class="dot"></span><span style="min-width:0;flex:1"><b>${h(x.t)}</b>${x.d?`<small>${h(x.d)}</small>`:''}</span>${x.act?ico('chev'):''}</button>`).join('')}</div>`,
   {onMount(){document.querySelectorAll('[data-ni]').forEach(b=>b.onclick=()=>{const x=L[+b.dataset.ni];if(!x||!x.act)return;closeModal();A[x.act]({dataset:{r:x.r}})})}})}
-function userMenu(){const u=me(),sh=openShift();modal(u.name,`<div class="memrow" style="padding:0"><span class="av">${h(Array.from(u.name.replace(/^คุณ/,''))[0]||'?')}</span><div style="flex:1"><b>${h(u.name)}</b><small>${ROLES[roleOf(u)]} · ${h(bName(curBranch()))}</small></div><span class="chip ${sh?'ok':'warn'}">${sh?'กะเปิด '+fmtT(sh.openAt):'ยังไม่เปิดกะ'}</span></div>
+function userMenu(){const u=me(),sh=openShift();modal(u.name,`<div class="memrow" style="padding:0"><span class="av">${ico('user')}</span><div style="flex:1"><b>${h(u.name)}</b><small>${ROLES[roleOf(u)]} · ${h(bName(curBranch()))}</small></div><span class="chip ${sh?'ok':'warn'}">${sh?'กะเปิด '+fmtT(sh.openAt):'ยังไม่เปิดกะ'}</span></div>
   <div class="nlist"><button type="button" class="nitem" data-um="shift"><span style="flex:1"><b>กะและลิ้นชักเงิน</b><small>${sh?'ปิดกะ / นำเงินเข้าออก':'เปิดกะ'}</small></span>${ico('chev')}</button><button type="button" class="nitem" data-um="ui"><span style="flex:1"><b>รูปแบบหน้าตา</b><small>สี ฟอนต์ ขนาด เลย์เอาต์</small></span>${ico('chev')}</button><button type="button" class="nitem bad" data-um="out"><span style="flex:1"><b>ออกจากระบบ</b><small>สลับพนักงาน</small></span>${ico('logout')}</button></div>`,
   {onMount(){document.querySelectorAll('[data-um]').forEach(b=>b.onclick=()=>{const k=b.dataset.um;closeModal();if(k==='shift'){ST.route='shift';render()}else if(k==='ui')uiOpen();else A.logout()})}})}
 
