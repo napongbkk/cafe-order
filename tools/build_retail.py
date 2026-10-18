@@ -52,7 +52,7 @@ page = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="theme-color" content="#1f7fc0">\n<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="robots" content="noindex">\n<meta name="description" content="Coconut POS Retail ระบบขายหน้าร้านสำหรับร้านค้า ร้านของชำ">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
-        + src + '\n<script src="/track.js" data-page="retail" defer></script><script src="/a11y.js?v=1" defer></script>\n</body>\n</html>\n')
+        + src + '\n<script src="/track.js" data-page="retail" defer></script><script src="/a11y.js?v=2" defer></script>\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail'), exist_ok=True)
 open(os.path.join(ROOT, 'retail', 'index.html'), 'w', encoding='utf-8').write(page)
 print('built retail/index.html', len(page), 'bytes')
@@ -76,7 +76,7 @@ demo = ('<!doctype html>\n<html lang="th">\n<head>\n<meta charset="utf-8">\n'
         '<link rel="icon" href="/easypos.svg?v=2" type="image/svg+xml">\n'
         '<meta name="description" content="ลองใช้ Coconut POS Retail ได้ทันที ไม่ต้องสมัคร">\n'
         '<style>[hidden]{display:none!important}html,body{height:100%;margin:0}img{max-width:100%}</style>\n</head>\n<body>\n'
-        + demo + '\n' + BAR + '\n' + AUTO + '\n<script src="/track.js" data-page="retail-demo" defer></script><script src="/a11y.js?v=1" defer></script>\n</body>\n</html>\n')
+        + demo + '\n' + BAR + '\n' + AUTO + '\n<script src="/track.js" data-page="retail-demo" defer></script><script src="/a11y.js?v=2" defer></script>\n</body>\n</html>\n')
 os.makedirs(os.path.join(ROOT, 'retail', 'demo'), exist_ok=True)
 open(os.path.join(ROOT, 'retail', 'demo', 'index.html'), 'w', encoding='utf-8').write(demo)
 print('built retail/demo/index.html', len(demo), 'bytes')

@@ -30,6 +30,10 @@
     /* 2.4.7 / 2.4.13: a two-colour ring that shows on light and dark backgrounds */
     ':focus-visible{outline:3px solid #111!important;outline-offset:2px!important;box-shadow:0 0 0 6px #fff!important}',
     'input:focus-visible,select:focus-visible,textarea:focus-visible{outline-offset:0!important}',
+    /* search bars draw one ring around the whole bar; the input inside must not add a second one */
+    '.gsearch input:focus,.gsearch input:focus-visible,.search input:focus,.search input:focus-visible{outline:none!important;box-shadow:none!important}',
+    '.gsearch:focus-within{box-shadow:0 0 0 3px var(--accent)!important}',
+    '.search:focus-within{outline:3px solid var(--accent)!important;outline-offset:2px!important}',
     '[data-theme=dark] :focus-visible,.a11y-dark :focus-visible{outline-color:#fff!important;box-shadow:0 0 0 6px #111!important}',
     /* 2.5.5: 44 x 44 px targets (inline text links are exempt) */
     'button,[role=button],select,input[type=button],input[type=submit],input[type=reset],a.btn,.btn,.chip,label.chip{min-height:44px!important}',
