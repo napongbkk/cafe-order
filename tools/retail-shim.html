@@ -140,6 +140,7 @@ window.POS_STANDALONE=true;
 var SB_URL='https://roggqmvmgfxsxynulpvk.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJvZ2dxbXZtZ2Z4c3h5bnVscHZrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2ODg4MDgsImV4cCI6MjEwNjI2NDgwOH0.AUWbGcVDNTud5BlYMlTXRh-vP-1SVqfcbe1ukiC-4ec';
 var $=function(s){return document.querySelector(s)};
+window.CP_SB_REST=[SB_URL,SB_KEY];
 if(!window.supabase||!window.supabase.createClient){document.body.insertAdjacentHTML('afterbegin','<div style="padding:16px;background:#FDECEC;color:#941D1D">โหลดระบบไม่สำเร็จ ตรวจสอบอินเทอร์เน็ตแล้วรีเฟรช</div>');return}
 var sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 window.POS_SB=sb;window.POS_SB_KEY=SB_KEY;
@@ -268,5 +269,5 @@ function show(a){var box=document.getElementById('ahAnn');if(!box)return;
   var d=a.updated?new Date(a.updated):null;document.getElementById('ahAnnD').textContent=d&&!isNaN(d)?'อัปเดต '+d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}):'';
   box.hidden=false}
 try{show(JSON.parse(localStorage.getItem(K)||'null'))}catch(e){}
-function load(){try{var c=window.sb||null;if(!c||!c.from)return;c.from('pos_platform').select('data').eq('key','announce').maybeSingle().then(function(r){if(r.error)return;var a=(r.data&&r.data.data)||{on:false};try{localStorage.setItem(K,JSON.stringify(a))}catch(e){}show(a)},function(){})}catch(e){}}
+function load(){try{var c=window.CP_SB_REST;if(!c||!window.fetch)return;fetch(c[0]+'/rest/v1/pos_platform?select=data&key=eq.announce',{headers:{apikey:c[1],Authorization:'Bearer '+c[1]}}).then(function(r){return r.ok?r.json():null}).then(function(rows){if(!rows)return;var a=(rows[0]&&rows[0].data)||{on:false};try{localStorage.setItem(K,JSON.stringify(a))}catch(e){}show(a)},function(){})}catch(e){}}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',load);else load();})();</script>
