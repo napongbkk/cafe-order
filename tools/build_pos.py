@@ -125,9 +125,9 @@ R("    case 'apptoggle':", "    case 'logout':if(window.POS_SB)window.POS_SB.aut
 
 # Staff management (shop manager) and monthly billing in Settings.
 R("const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],",
-  "const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),")
+  "const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing',((window.POS_SESSION||{}).shop||{}).free?'การใช้งาน':'ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),")
 R("  else if(tab==='app'){",
-  r"""  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
+  r"""  else if(tab==='billing'){body=`<h2>${((window.POS_SESSION||{}).shop||{}).free?'การใช้งาน':'ค่าบริการรายเดือน'}</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
   else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
     body=`<h2>พนักงาน</h2><span class="hint">สร้างบัญชีพนักงานด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล · พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ตั้งให้ · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่เข้าเมนูและโปรโมชั่น ตั้งค่า และรายงานไม่ได้</span>
     <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0}</div>

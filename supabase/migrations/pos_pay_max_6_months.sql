@@ -1,4 +1,5 @@
 -- Renewals: at most 6 months per payment, charged at the monthly price x months (no discount).
+-- No new payments while the admin has payments closed (billing.freeMode).
 create or replace function public.pos_pay_submit(p_sid uuid, p_months integer, p_slip text, p_note text, p_pkg text)
  returns uuid language plpgsql security definer set search_path to 'public', 'pg_temp'
 as $function$
@@ -6,6 +7,7 @@ declare pid uuid; pk jsonb; prod text; m int; amt numeric;
 begin
   if not (public.pos_is_admin() or (p_sid = public.pos_my_shop() and public.pos_my_role() = 'manager')) then
     raise exception 'forbidden' using errcode = '42501'; end if;
+  if public.pos_free_mode() then raise exception 'payments_closed' using errcode = 'P0001'; end if;
   if p_slip is null or p_slip not like p_sid::text || '/%' then raise exception 'bad_slip' using errcode = 'P0001'; end if;
   if (select count(*) from public.pos_payments where shop_id = p_sid and status = 'pending') >= 5 then raise exception 'too_many_pending' using errcode = 'P0001'; end if;
   select coalesce(product, 'cafe') into prod from public.pos_shops where id = p_sid;

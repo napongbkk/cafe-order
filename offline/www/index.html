@@ -2205,7 +2205,7 @@ function setNav(tabs,tab){const lbl=Object.fromEntries(tabs),used=new Set();
   return h}
 function settingsView(){
   const sh=shop();const tab=S.stab;const ro=!S.canEdit;const dis=ro?' disabled':'';
-  const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing','ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['backup','ข้อมูลและสำรองไฟล์'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
+  const tabs=[['ui','ปรับแต่งรูปแบบระบบ'],['devices','อุปกรณ์และการรับเงิน'],...(window.POS_STANDALONE&&window.POS_ACCOUNT&&window.POS_ACCOUNT().role==='manager'?[['billing',((window.POS_SESSION||{}).shop||{}).free?'การใช้งาน':'ค่าบริการรายเดือน'],['staff','พนักงาน']]:[]),['printer','เครื่องพิมพ์ใบเสร็จ'],['kprinter','เครื่องพิมพ์ครัว'],['stations','สถานีครัว/บาร์'],['drawer','ลิ้นชักเก็บเงิน'],['banks','บัญชีรับโอนเงิน'],['qrs','QR รับชำระเงิน'],['shop','ข้อมูลร้าน'],['backup','ข้อมูลและสำรองไฟล์'],['payment','การชำระเงิน'],['round','รอบการขาย'],['receipt','รูปแบบใบเสร็จ'],['queue','จัดการคิว'],['tables','จัดการโต๊ะ'],['display','จอลูกค้า · โฆษณา']];
   let body='';
   const save=`<button class="btn primary" type="submit"${dis}>บันทึก</button>`;
   if(tab==='shop')body=`<h2>ข้อมูลร้าน</h2>
@@ -2250,7 +2250,7 @@ function settingsView(){
       <label for="s_lookLayout">รูปแบบเมนู<select id="s_lookLayout"${dis}><option value="list"${L.layout==='list'?' selected':''}>รายการ (แถวละ 1 เมนู)</option><option value="grid"${L.layout==='grid'?' selected':''}>การ์ด (แถวละ 2 เมนู)</option></select></label>
       <label class="check" for="s_lookShowImg"><input id="s_lookShowImg" type="checkbox"${L.showImg?' checked':''}${dis}> แสดงรูปเมนู (ใช้รูปที่อัปโหลดใน เมนูและโปรโมชั่น)</label>
       ${save}</form><div><span class="grp-t" style="margin-bottom:8px">ตัวอย่างบนมือถือ</span><div id="lookPreview">${lookPreview(L)}</div></div></div>`}
-  else if(tab==='billing'){body=`<h2>ค่าบริการรายเดือน</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
+  else if(tab==='billing'){body=`<h2>${((window.POS_SESSION||{}).shop||{}).free?'การใช้งาน':'ค่าบริการรายเดือน'}</h2><div id="billingBox"><div class="muted">กำลังโหลด…</div></div>`;setTimeout(()=>{if(window.POS_BILLING)window.POS_BILLING.render($('#billingBox'))},0)}
   else if(tab==='staff'){const sh=(window.POS_SESSION||{}).shop||{};
     body=`<h2>พนักงาน</h2><span class="hint">สร้างบัญชีพนักงานด้วยชื่อผู้ใช้และรหัสผ่าน ไม่ต้องใช้อีเมล · พนักงานเข้าสู่ระบบด้วยชื่อผู้ใช้ที่ตั้งให้ · พนักงานใช้หน้าขาย Mobile Order โต๊ะ จอครัว ประวัติใบเสร็จ และรอบการขายได้ แต่เข้าเมนูและโปรโมชั่น ตั้งค่า และรายงานไม่ได้</span>
     <div class="note" id="staffQuota">บัญชีพนักงาน ${sh.staffUsed||0} / ${sh.staffLimit||0}</div>

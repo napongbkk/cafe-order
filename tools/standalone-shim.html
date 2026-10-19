@@ -187,8 +187,8 @@ function ppPayload(id,amount){function t(tag,v){return tag+('0'+v.length).slice(
   var sub=target.length===13?t('02',target):target.length===15?t('03',target):t('01',('0000000000000'+target.replace(/^0/,'66')).slice(-13));
   var p=t('00','01')+t('01',amount?'12':'11')+t('29',t('00','A000000677010111')+sub)+t('58','TH')+t('53','764');if(amount)p+=t('54',Number(amount).toFixed(2));p+='6304';return p+crc16(p)}
 window.POS_FREE_MSG=function(k){var x=(window.POS_SESSION&&window.POS_SESSION.shop)||{};
-  var up=x.planFree?' · อัปเกรดเป็นแพ็กเกจรายเดือนได้ที่หน้า ค่าบริการ':' · อัปเกรดแพ็กเกจที่หน้า ค่าบริการ หรือติดต่อผู้ดูแลระบบ';
-  return k==='items'?(x.planFree?'แพ็กเกจฟรีมีสินค้า/เมนูได้ ':'แพ็กเกจนี้มีสินค้า/เมนูได้ ')+(x.productLimit!=null?x.productLimit:'')+' รายการ ครบแล้ว'+up:(x.planFree?'แพ็กเกจฟรีออกบิลได้ ':'แพ็กเกจนี้ออกบิลได้ ')+(x.billLimit!=null?x.billLimit:'')+' บิล/เดือน เดือนนี้ครบแล้ว'+up};
+  var up=x.free?' · ติดต่อผู้ดูแลระบบเพื่อเพิ่มจำนวน':x.planFree?' · อัปเกรดเป็นแพ็กเกจรายเดือนได้ที่หน้า ค่าบริการ':' · อัปเกรดแพ็กเกจที่หน้า ค่าบริการ หรือติดต่อผู้ดูแลระบบ';
+  return k==='items'?(x.free?'ร้านนี้มีสินค้า/เมนูได้ ':x.planFree?'แพ็กเกจฟรีมีสินค้า/เมนูได้ ':'แพ็กเกจนี้มีสินค้า/เมนูได้ ')+(x.productLimit!=null?x.productLimit:'')+' รายการ ครบแล้ว'+up:(x.free?'ร้านนี้ออกบิลได้ ':x.planFree?'แพ็กเกจฟรีออกบิลได้ ':'แพ็กเกจนี้ออกบิลได้ ')+(x.billLimit!=null?x.billLimit:'')+' บิล/เดือน เดือนนี้ครบแล้ว'+up};
 var CONTACT=null;
 function contactHtml(c){var e=function(v){return esc(v||'')};
   return '<div class="bill-card bill-ct"><div class="ct-q">'+(c.qr?'<img src="'+e(c.qr)+'" alt="QR code LINE">':'')+'</div><div class="ct-t"><h3>ติดต่อผู้ดูแลระบบ</h3><p>'+e(c.note||'สอบถาม แจ้งปัญหา ต่ออายุ หรือเพิ่มแพ็กเกจ ทักทาง LINE ได้เลย')+'</p>'+
@@ -216,7 +216,7 @@ function lineCard(el){var bl=(SESS&&SESS.billing)||{},u=lineUrl(bl.line);if(!el|
 function renderBilling(el){renderBilling0(el)}
 function renderBilling0(el){if(!el||!SESS||!SESS.shop)return;var sh=SESS.shop,bl=SESS.billing||{},st=billState(sh),isMgr=role==='manager';var months=Math.min(6,el._m||1);
   var lim=function(n){return n==null?'ไม่จำกัด':n};var limStat=(sh.productLimit!=null||sh.billLimit!=null)?'<div><small>สินค้า</small><b>'+(sh.productsUsed||0)+' / '+lim(sh.productLimit)+'</b></div><div><small>บิลเดือนนี้</small><b>'+(sh.billsMonth||0)+' / '+lim(sh.billLimit)+'</b></div>':'';
-  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Coconut POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';appendContact(el);return}
+  if(sh.free){el.innerHTML='<div class="bill"><div class="bill-card"><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h3>'+esc(sh.name)+'</h3><span class="bchip">ใช้งานฟรี</span></div><p style="margin:0">ขณะนี้ Coconut POS เปิดให้ใช้งานฟรี ไม่ต้องชำระค่าบริการ · ผู้ดูแลระบบปิดการชำระเงินรายเดือนไว้ หากต้องการเพิ่มจำนวนสินค้าหรือบิล ติดต่อผู้ดูแลระบบ</p><div class="bill-stat"><div><small>บัญชีพนักงาน</small><b>'+(sh.staffUsed||0)+' / '+(sh.staffLimit||0)+'</b></div>'+limStat+'</div></div></div>';appendContact(el);return}
   var nf=function(v){return v?Number(v).toLocaleString('th-TH'):'ไม่จำกัด'};
   var pks=(bl.packages||[]).filter(function(p){return (p.product||'cafe')===(sh.product||'cafe')&&+p.price>0});
   var curPk=sh.planFree?null:pks.filter(function(p){return (+p.months||1)===1&&+p.price===+sh.price&&(sh.productLimit==null||+p.items===+sh.productLimit)})[0];
@@ -259,7 +259,7 @@ function submitPay(el,months,pkg){var f=el.querySelector('#billSlip').files[0],m
     return sb.storage.from('pos-slips').upload(path,blob,{contentType:'image/jpeg',upsert:false}).then(function(r){if(r.error)throw r.error;
       var args={p_sid:SID,p_months:months,p_slip:path,p_note:el.querySelector('#billNote').value||null};if(pkg)args.p_pkg=pkg;return sb.rpc('pos_pay_submit',args)})})
   .then(function(r){if(r.error)throw r.error;payNotify(r.data);m.textContent='';el._m=1;el._pk=null;renderBilling(el);var t=el.querySelector('#billMsg');if(t)t.textContent='ส่งแจ้งชำระแล้ว รอผู้ดูแลระบบตรวจสอบ'})
-  .catch(function(e){b.disabled=false;m.textContent=/bad_months/.test(e.message||'')?'ต่ออายุได้ครั้งละไม่เกิน 6 เดือน':/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
+  .catch(function(e){b.disabled=false;m.textContent=/payments_closed/.test(e.message||'')?'ผู้ดูแลระบบปิดการชำระเงินไว้':/bad_months/.test(e.message||'')?'ต่ออายุได้ครั้งละไม่เกิน 6 เดือน':/too_many_pending/.test(e.message||'')?'มีรายการรอตรวจสอบหลายรายการแล้ว รอผู้ดูแลระบบตรวจสอบก่อน':'ส่งไม่สำเร็จ: '+(e.message||'')})}
 function payNotify(id){if(!id)return;sb.auth.getSession().then(function(x){var t=x.data.session&&x.data.session.access_token;if(!t)return;
   fetch(SB_URL+'/functions/v1/pos-signup',{method:'POST',headers:{'apikey':SB_KEY,'Authorization':'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({action:'pay_notify',id:typeof id==='object'?id.id:id})}).catch(function(){})})}
 window.POS_BILLING={render:renderBilling};
