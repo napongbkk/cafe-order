@@ -64,9 +64,10 @@ demo = demo.replace('ร้านคุณสิมบัติ', 'ร้าน�
 if ' logout(){' not in demo:
     sys.exit('build_retail: demo logout patch point not found')
 demo = demo.replace(' logout(){', " logout(){location.href='/retail';return;", 1)
-BAR = ('<div style="position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:300;display:flex;gap:10px;align-items:center;'
+BAR = ('<style>@media (max-width:820px){.demobar{bottom:calc(150px + env(safe-area-inset-bottom,0px))!important;padding:4px 4px 4px 12px!important;font-size:13px!important}.demobar .dt{display:none}}</style>'
+       '<div class="demobar" style="position:fixed;left:50%;bottom:10px;transform:translateX(-50%);z-index:300;display:flex;gap:10px;align-items:center;'
        'padding:6px 8px 6px 14px;border-radius:999px;background:#13202c;color:#fff;font:600 13px/1.2 system-ui,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);max-width:calc(100vw - 24px)">'
-       '<span>เดโม · ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น</span><a href="/retail/signup" style="background:#105382;color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap">สมัครใช้งานจริง</a></div>')
+       '<span>เดโม<span class="dt"> · ข้อมูลเก็บในเบราว์เซอร์นี้เท่านั้น</span></span><a href="/retail/signup" style="background:#105382;color:#fff;text-decoration:none;padding:6px 12px;border-radius:999px;white-space:nowrap">สมัครใช้งานจริง</a></div>')
 # The demo opens straight on the sales screen: sample data on first visit, signed in as the owner.
 AUTO = ("<script>(function(){var n=0;function go(){if(typeof A==='undefined'||typeof ST==='undefined'||!ST.ready){if(n++<100)setTimeout(go,50);return}"
         "if(!all('staff').length)A.loadSample();var o=all('staff').find(function(s){return s.role==='owner'})||all('staff')[0];"
