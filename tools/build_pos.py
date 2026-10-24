@@ -234,6 +234,7 @@ off = _re.sub(r'<link rel="(?:preconnect|stylesheet)" href="https://fonts\.[^"]+
 O("if(window.POS_STANDALONE){bridgeT=null;", "if(window.POS_STANDALONE){bridgeT=null;if(window.POS_OFFLINE)return;")
 O("let PR={bridge:!!window.POS_STANDALONE,", "let PR={bridge:!!window.POS_STANDALONE&&!window.POS_OFFLINE,")
 O("['app','แอปลูกค้า (QR สั่ง)'],['look','ปรับแต่งรูปแบบ Mobile Order'],", "")
+O(",['report','ส่งรายงานทางอีเมล']", "")
 O("['open','Mobile Order','phone'],", "")
 O("    case 'logout':if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;",
   "    case 'logout':if(window.POS_LOGOUT){window.POS_LOGOUT();break}if(window.POS_SB)window.POS_SB.auth.signOut().then(()=>location.reload());break;")
