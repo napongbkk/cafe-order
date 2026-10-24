@@ -187,6 +187,7 @@ h2.cat{font-weight:600;font-size:16px}
 .hero{flex-wrap:wrap}.hero > div:nth-child(2){flex:1 1 140px;min-width:0}.hero h1{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.hero .where{margin-left:0}.hero [data-eplang]{margin-left:auto !important}
 .chip[aria-pressed="true"]{border-color:#A8D8FA;background:var(--amber-soft)}
 .item .pic .defpic{width:100%;height:100%;display:block}
+.mdesc{margin:6px 0 0;font-size:14px;line-height:1.5;color:var(--muted,#5F5D59);white-space:pre-line}
 </style>
 </head>
 <body>
@@ -356,7 +357,7 @@ function renderSheet(){
       sel.forEach(function(cid){var c=(g.choices||[]).find(function(x){return x.id===cid});if(c)price+=+c.price||0});
       return '<div class="grp"><div class="grp-t">'+esc(g.name)+(g.required?' <span class="req">จำเป็น</span>':'')+((g.max||1)>1?' <span class="hint">เลือกได้ไม่เกิน '+g.max+'</span>':'')+'</div><div class="opts">'+
         (g.choices||[]).map(function(c){return '<button class="opt" data-act="choice" data-g="'+esc(g.id)+'" data-c="'+esc(c.id)+'" aria-pressed="'+(sel.indexOf(c.id)>=0)+'"'+(c.soldOut?' disabled':'')+'>'+esc(c.name)+(c.soldOut?' <small>หมด</small>':c.price?' <small>+'+c.price+'</small>':'')+'</button>'}).join('')+'</div></div>'}).join('');
-    el.innerHTML='<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT"><div class="sh-head"><div><h2 id="sT">'+esc(m.name)+'</h2><div class="hint">'+esc(m.en||'')+' · '+baht(m.price)+'</div></div><button class="x" data-act="close" aria-label="ปิด">'+ic('x')+'</button></div>'+gh+
+    el.innerHTML='<div class="scrim" data-act="close"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sT"><div class="sh-head"><div><h2 id="sT">'+esc(m.name)+'</h2><div class="hint">'+esc(m.en||'')+' · '+baht(m.price)+'</div>'+(m.desc?'<p class="mdesc">'+esc(m.desc)+'</p>':'')+'</div><button class="x" data-act="close" aria-label="ปิด">'+ic('x')+'</button></div>'+gh+
       '<label class="field" for="note">หมายเหตุ<input id="note" maxlength="60" placeholder="เช่น น้ำแข็งน้อย" value="'+esc(v.note||'')+'"></label>'+
       '<div class="row"><div class="stepper"><button data-act="qty" data-d="-1" aria-label="ลดจำนวน">−</button><span>'+v.qty+'</span><button data-act="qty" data-d="1" aria-label="เพิ่มจำนวน">+</button></div><button class="big" data-act="add"'+(ok?'':' disabled')+'>'+(ok?'ใส่ตะกร้า':'เลือกตัวเลือกให้ครบ')+' · <span class="num">'+baht(price*v.qty)+'</span></button></div></div></div>';
   }else if(v.k==='cart'){

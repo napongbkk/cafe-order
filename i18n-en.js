@@ -2530,4 +2530,18 @@ window.EP_DICT={
 "เช่าเวลา": "Time rental",
 /* Coconut POS Retail */
 "มี {n} หน่วย": "{n} units",
+"รายละเอียดเมนู (ไม่บังคับ)": "Menu description (optional)",
+"ส่วนผสม · ตัดสต็อกวัตถุดิบอัตโนมัติเมื่อขาย": "Ingredients · stock is deducted automatically on sale",
+"เพิ่มส่วนผสม": "Add ingredient",
+"ปริมาณ/ที่": "Qty/serving",
+"ขายผ่าน Mobile Order (ลูกค้าสั่งเองด้วย QR)": "Sell on Mobile Order (customers order by QR)",
+"วัตถุดิบไม่พอ": "Not enough stock",
+"ทำได้อีก {n}": "{n} left to make",
+"ขาย (ตามสูตร)": "Sale (recipe)",
+"คืนจากบิลยกเลิก": "Returned from voided bill",
+"ใส่ปริมาณวัตถุดิบที่ใช้ต่อ 1 ที่ เมื่อชำระเงิน ระบบตัดสต็อกให้อัตโนมัติ และคืนสต็อกเมื่อทำลายบิล": "Enter the amount used per serving. Stock is deducted when paid and returned when a bill is voided.",
+"ยังไม่มีวัตถุดิบ เพิ่มที่เมนู “สต็อกวัตถุดิบ” ก่อน แล้วกลับมาผูกสูตรเมนูได้": "No ingredients yet. Add them under “Stock” first, then link them here.",
+"7 วัน": "7 days",
+"เดือนนี้": "This month",
+"เดือนก่อน": "Last month",
 };
