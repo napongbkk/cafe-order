@@ -1,0 +1,6 @@
+result=success sha=4e1f55910f3dcaf9b92626b862cdd45e4481b35c at=2026-10-24T02:26:18Z signed=false
+total 636
+drwxr-xr-x  2 runner runner   4096 Oct 24 02:24 .
+drwxr-xr-x 17 runner runner   4096 Oct 24 02:26 ..
+-rw-r--r--  1 runner runner 284930 Oct 24 02:24 CoconutPOS-Android-PlayStore.aab
+-rw-r--r--  1 runner runner 355450 Oct 24 02:24 CoconutPOS-Android-test.apk

@@ -1,0 +1,143 @@
+built pos/index.html 432838 bytes
+built demo/index.html 372614 bytes
+built offline/www/index.html 413873 bytes
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.10.2/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:copyWww
+> Task :app:preBuild
+> Task :app:preDebugBuild
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:javaPreCompileDebug
+> Task :app:checkDebugAarMetadata
+> Task :app:generateDebugResValues
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:mergeDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:mergeDebugShaders
+> Task :app:processDebugManifestForPackage
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets
+> Task :app:desugarDebugFileDependencies
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:compressDebugAssets
+> Task :app:checkDebugDuplicateClasses
+> Task :app:mergeDebugJniLibFolders
+> Task :app:mergeExtDexDebug
+> Task :app:mergeDebugJavaResource
+> Task :app:mergeDebugNativeLibs NO-SOURCE
+> Task :app:mergeLibDexDebug
+> Task :app:stripDebugDebugSymbols NO-SOURCE
+> Task :app:processDebugResources
+> Task :app:validateSigningDebug
+
+> Task :app:compileDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics
+> Task :app:writeDebugAppMetadata
+> Task :app:writeDebugSigningConfigVersions
+> Task :app:preReleaseBuild
+> Task :app:generateReleaseResValues
+> Task :app:mapReleaseSourceSetPaths
+> Task :app:generateReleaseResources
+> Task :app:createReleaseCompatibleScreenManifests
+> Task :app:extractDeepLinksRelease
+> Task :app:processReleaseMainManifest
+> Task :app:processReleaseManifest
+> Task :app:processApplicationManifestReleaseForBundle
+> Task :app:mergeReleaseResources
+> Task :app:checkReleaseAarMetadata
+> Task :app:packageReleaseResources
+> Task :app:mergeProjectDexDebug
+> Task :app:parseReleaseLocalResources
+> Task :app:extractReleaseVersionControlInfo
+> Task :app:checkReleaseDuplicateClasses
+> Task :app:processReleaseManifestForPackage
+> Task :app:javaPreCompileRelease
+> Task :app:desugarReleaseFileDependencies
+> Task :app:mergeReleaseStartupProfile
+> Task :app:mergeExtDexRelease
+> Task :app:mergeReleaseShaders
+> Task :app:compileReleaseShaders NO-SOURCE
+> Task :app:generateReleaseAssets UP-TO-DATE
+> Task :app:mergeReleaseAssets
+> Task :app:processReleaseJavaRes NO-SOURCE
+> Task :app:mergeReleaseJavaResource
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect
+> Task :app:assembleDebug
+> Task :app:mergeReleaseJniLibFolders
+> Task :app:mergeReleaseNativeLibs NO-SOURCE
+> Task :app:stripReleaseDebugSymbols NO-SOURCE
+> Task :app:writeReleaseAppMetadata
+> Task :app:mergeReleaseArtProfile
+> Task :app:processReleaseResources
+> Task :app:collectReleaseDependencies
+> Task :app:bundleReleaseResources
+
+> Task :app:compileReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :app:dexBuilderRelease
+> Task :app:mergeReleaseGlobalSynthetics
+> Task :app:configureReleaseDependencies
+> Task :app:extractReleaseNativeSymbolTables NO-SOURCE
+> Task :app:parseReleaseIntegrityConfig
+> Task :app:mergeDexRelease
+> Task :app:buildReleasePreBundle
+> Task :app:compileReleaseArtProfile
+> Task :app:packageReleaseBundle
+> Task :app:signReleaseBundle
+> Task :app:produceReleaseBundleIdeListingFile
+> Task :app:createReleaseBundleListingFileRedirect
+> Task :app:bundleRelease
+gradle/actions: Writing build results to /home/runner/work/_temp/.gradle-actions/build-results/__run_2-1792808631942.json
+
+BUILD SUCCESSFUL in 20s
+73 actionable tasks: 73 executed
+--- /api/info
+{"app":"coconut-pos-offline","version":"1.0.0","deviceId":"srv9d882c15b1e1bdb462","name":"Google sdk_gphone64_x86_64","platform":"android","port":8080,"lan":["10.0.2.15","10.0.2.16"],"seq":0,"started":1792808768609,"storage":"file"}
+--- index bytes: 475793
+--- host script injected: 2
+{"ok":true,"seq":1}{"ok":true,"data":{"name":"test","createdAt":1,"ok":true,"x":{"y":1}},"seq":2}{"seq":2,"docs":[{"id":"t1","data":{"name":"test","createdAt":1,"ok":true,"x":{"y":1}}}]}
+--- logcat (app)
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{a2e03e6 com.google.android.odad/10121} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{4abed27 com.android.settings.auto_generated_rro_product__/10028} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{2a00bd4 com.android.internal.systemui.navbar.gestural/10051} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{bb7d17d com.google.android.apps.youtube.music/10156} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{2c67872 com.android.bluetoothmidiservice/10107} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{16034c3 com.android.storagemanager.auto_generated_rro_product__/10026} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{7dc1140 com.google.android.cellbroadcastreceiver/10183} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{d750879 com.android.phone.auto_generated_rro_product__/10061} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{9ffa9be android.auto_generated_rro_product__/10069} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{e875a1f com.android.internal.systemui.navbar.gestural_narrow_back/10052} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{11016c com.google.android.inputmethod.latin/10142} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{b34b335 android.auto_generated_rro_vendor__/10075} BLOCKED
+10-24 02:26:09.072   521  2092 I AppsFilter: interaction: PackageSetting{ae44b8e com.coconutpos.standalone/10192} -> PackageSetting{408a3ca com.google.android.apps.restore/10120} BLOCKED
+10-24 02:26:09.108   521   538 W ziparchive: Unable to open '/data/app/~~S2oMnHI2QsznYzDIiP4RBw==/com.coconutpos.standalone-FJBdRUhCi7wamOhF4giMXQ==/base.dm': No such file or directory
+10-24 02:26:09.161   521   538 I ActivityTaskManager: Displayed com.coconutpos.standalone/.MainActivity for user 0: +2s682ms
+10-24 02:26:09.466  1045  1045 D CarrierSvcBindHelper: onPackageAdded: com.coconutpos.standalone
+10-24 02:26:09.491  1045  1367 D ImsResolver: maybeAddedImsService, packageName: com.coconutpos.standalone
+10-24 02:26:09.550  2965  3234 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.coconutpos.standalone/app_webview/variations_seed_new"
+10-24 02:26:09.550  2965  3234 I cr_VariationsUtils: Failed reading seed file "/data/user/0/com.coconutpos.standalone/app_webview/variations_seed"
+10-24 02:26:10.340   521   550 I ActivityManager: Start proc 3267:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0/u0ai9000 for  {com.coconutpos.standalone/org.chromium.content.app.SandboxedProcessService0:0}
+10-24 02:26:10.384  1045  1045 D CarrierSvcBindHelper: onPackageModified: com.coconutpos.standalone
+10-24 02:26:10.462   521  2408 D ConnectivityService: requestNetwork for uid/pid:10192/2965 activeRequest: null callbackRequest: 84 [NetworkRequest [ REQUEST id=85, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.coconutpos.standalone UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647
+10-24 02:26:10.463   521   758 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=85, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.coconutpos.standalone UnderlyingNetworks: Null] ]
+10-24 02:26:10.463   521   758 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=85, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.coconutpos.standalone UnderlyingNetworks: Null] ]
+10-24 02:26:10.463   521   758 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=85, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.coconutpos.standalone UnderlyingNetworks: Null] ]
+10-24 02:26:10.463   521   758 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=85, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10192 RequestorUid: 10192 RequestorPkg: com.coconutpos.standalone UnderlyingNetworks: Null] ]
+10-24 02:26:10.515  1045  1367 D ImsResolver: maybeAddedImsService, packageName: com.coconutpos.standalone
+10-24 02:26:11.018   521  2415 I ImeTracker: com.coconutpos.standalone:7f04298b: onRequestHide at ORIGIN_SERVER_HIDE_INPUT reason HIDE_UNSPECIFIED_WINDOW
+10-24 02:26:11.018   521  2415 I ImeTracker: com.coconutpos.standalone:7f04298b: onCancelled at PHASE_SERVER_SHOULD_HIDE
+10-24 02:26:11.028  1564  1564 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():1877 onStartInput(EditorInfo{inputType=0x0(NULL) imeOptions=0x0 privateImeOptions=null actionName=UNSPECIFIED actionLabel=null actionId=0 initialSelStart=-1 initialSelEnd=-1 initialCapsMode=0x0 hintText=null label=null packageName=com.coconutpos.standalone fieldId=0 fieldName=null extras=null}, false)
