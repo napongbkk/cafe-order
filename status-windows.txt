@@ -1,0 +1,8 @@
+result=success sha=4e1f55910f3dcaf9b92626b862cdd45e4481b35c at=2026-10-24T02:25:11Z
+total 86100
+drwxr-xr-x 1 runneradmin 197121        0 Oct 24 02:24 .
+drwxr-xr-x 1 runneradmin 197121        0 Oct 24 02:24 ..
+-rwxr-xr-x 1 runneradmin 197121 88052286 Oct 24 02:24 CoconutPOS-Setup.exe
+-rw-r--r-- 1 runneradmin 197121    91081 Oct 24 02:24 CoconutPOS-Setup.exe.blockmap
+-rw-r--r-- 1 runneradmin 197121     6410 Oct 24 02:24 builder-debug.yml
+drwxr-xr-x 1 runneradmin 197121        0 Oct 24 02:24 win-unpacked
